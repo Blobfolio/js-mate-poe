@@ -189,9 +189,6 @@ src_dir   := base_dir + "/src"
 	just _header "Starting Up"
 	just _info "Checking runtime dependencies."
 
-	# WGET.
-	[ $( command -v wget ) ] || just _install-os "wget"
-
 	# Brotli.
 	[ $( command -v brotli ) ] || just _install-os "brotli"
 
