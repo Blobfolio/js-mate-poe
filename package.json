@@ -1,0 +1,17 @@
+{
+  "name": "js-mate-poe",
+  "version": "1.0.0",
+  "description": "A Javascript recreation of the beloved 16-bit screen mate Poe program.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Blobfolio/js-mate-poe.git"
+  },
+  "author": "Blobfolio, LLC <hello@blobfolio.com>",
+  "license": "WTFPL",
+  "devDependencies": {
+    "csso": "^3.5.1",
+    "eslint": "^6.3.0",
+    "eslint-plugin-jsdoc": "^15.9.1",
+    "google-closure-compiler": "^20190819.0.0"
+  }
+}
