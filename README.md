@@ -18,11 +18,11 @@ A compact, dependency-free Javascript implementation of the beloved 16-bit Scree
 &nbsp;
 ## Features
 
-There have been dozens of ports of Screen Mate Poe over the past 23 years, including several browser-based implements such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — *ancient* in web years! — and either rely on bloated frameworks like jQuery or use outdated animation tecniques like `setTimeout()`.
+There have been dozens of ports of Screen Mate Poe over the past 23 years, including several browser-based implements such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — *ancient* in web years! — and either rely on bloated frameworks like jQuery or use outdated animation techniques like `setTimeout()`.
 
-JS Mate Poe is a web-first, self-contained implementation written in vanilla Javascript. Everything it needs — graphics, sounds, styles — are embedded in the main script, making installation a breeze. It takes advantage of all of the latest and greatest [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript) goodies, including `requestAnimationFrame()` to maximize playback framerate while reducing computational overhead.
+JS Mate Poe is a web-first, self-contained implementation written in vanilla Javascript. Everything it needs — graphics, sounds, styles — are embedded in the [main script](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/js-mate-poe.min.js), making installation a breeze. It takes advantage of all of the latest and greatest [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript) goodies, including `requestAnimationFrame()` to maximize playback framerate while keeping resource requirements to a minimum.
 
-The JS Mate Poe script has also been heavily optimized using Google Closure Compiler. Its impact on your page's load time will be minimal.
+The JS Mate Poe script has also been heavily optimized using [Google Closure Compiler](https://developers.google.com/closure/compiler/). Its impact on your page's load time will be minimal, particularly if your server uses Gzip and/or Brotli encodings.
 
 | Encoding | Size |
 | -------- | ---- |
@@ -62,7 +62,7 @@ window.addEventListener('load', () => Poe.start(), { once: true });
 &nbsp;
 ## Methods
 
-To minimize namespace pollution, all of the public endpoints are made available through the global `window.Poe` object.
+All of the public endpoints are made available through the global `window.Poe` object.
 
 
 &nbsp;
@@ -117,8 +117,7 @@ Some of the animation sequences make noise. Audio playback is enabled by default
 // Audio is enabled by default.
 Poe.start();
 
-// Turn it off by calling this method with no arguments,
-// or by passing an explicit false.
+// Turn it off by calling this method with no arguments, or by passing an explicit false.
 Poe.setAudio();      // Audio off.
 Poe.setAudio(false); // Audio off.
 
