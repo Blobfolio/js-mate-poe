@@ -10,8 +10,9 @@ A compact, dependency-free Javascript implementation of the beloved 16-bit Scree
 1. [Features](#features)
 2. [Installation](#installation)
 3. [Methods](#methods)
-4. [License](#license)
-5. [Credits](#credits)
+4. [Building](#building)
+5. [License](#license)
+6. [Credits](#credits)
 
 
 
@@ -123,6 +124,38 @@ Poe.setAudio(false); // Audio off.
 
 // Or turn it back on by passing true.
 Poe.setAudio(true);  // Audio on.
+```
+
+
+
+&nbsp;
+## Building
+
+The JS Mate Poe code can be edited and/or compiled by Linux/Mac users meeting the following system requirements:
+
+| Dependency | Description |
+| ---------- | ----------- |
+| [Brotli](https://github.com/google/brotli) | Static encoding. |
+| [Gzip](https://www.gzip.org/) | Static encoding. |
+| [Just](https://github.com/casey/just) | Task runner. |
+| [NPM](https://www.npmjs.com/) | Dependency management. |
+| [Watchexec](https://github.com/watchexec/watchexec) | Source file monitoring. |
+
+The Just tasks will automatically attempt to install/configure any missing dependencies. If you do not have Watchexec installed, you'll need [Cargo](https://doc.rust-lang.org/stable/cargo/getting-started/installation.html), so it can be built.
+
+If you meet the requirements, hop into the terminal and type:
+```bash
+# Clone the repository.
+git clone https://github.com/Blobfolio/js-mate-poe.git
+
+# Go to it!
+cd js-mate-poe
+
+# Watch for changes...
+just watch
+
+# Or build without changing anything...
+just build
 ```
 
 
