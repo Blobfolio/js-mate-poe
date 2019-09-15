@@ -201,7 +201,7 @@ src_dir   := base_dir + "/src"
 	# Make sure we have NPM.
 	[ $( command -v npm ) ] || just _die "NPM is required."
 
-	# The lightest Node check.
+	# The lightest possible Node check.
 	[ -d "{{ base_dir }}/node_modules" ] || npm i
 
 
