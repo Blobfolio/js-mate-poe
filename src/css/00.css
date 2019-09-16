@@ -16,6 +16,8 @@
 	display: block !important;
 	width: ${WIDTH}px !important;
 	height: ${HEIGHT}px !important;
+	max-width: none !important;
+	max-height: none !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	outline: none;
