@@ -4,7 +4,6 @@
 
 import { ANIMATIONS, DEFAULT_CHOICES, DRAGGING_ANIMATION, FALLING_ANIMATION, OFFSCREEN_CHOICES, STARTUP_CHOICES } from './animations.mjs';
 import { DEBUG_CSS } from './css.mjs';
-import { LOGO, NAME, VERSION } from './helpers.mjs';
 import { RawMateAnimation } from './types.mjs';
 
 
@@ -465,11 +464,5 @@ const makeChain = function(links, name) {
 // ---------------------------------------------------------------------
 // Do It Now
 // ---------------------------------------------------------------------
-
-/* eslint-disable */
-// Print a fun little starter.
-console.log(`%c${LOGO}`, 'color: #b2bec3; font-family: monospace; font-weight: bold;');
-console.log(`%c${NAME}: %c${VERSION}`, 'color: #ff1493; font-weight: bold;', 'color: #00abc0; font-weight: bold;');
-/* eslint-enable */
 
 build();

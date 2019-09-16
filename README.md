@@ -100,6 +100,22 @@ Poe.start();
 
 
 &nbsp;
+### Poe.audio()
+
+Test whether or not Poe audio playback is enabled. This is `true` by default, but the ability can be toggled using [Poe.setAudio()](#poesetaudio).
+
+**Example:**
+```
+// Audio is enabled by default.
+console.log(Poe.audio()); // true
+
+// But if you turn it off...
+Poe.setAudio(false);
+console.log(Poe.audio()); // false
+```
+
+
+&nbsp;
 ### Poe.setAudio()
 
 Some of the animation sequences make noise. Audio playback is enabled by default because it is adorable, but if you want a quieter experience, you can use this method to explicitly control this behavior.
@@ -124,6 +140,30 @@ Poe.setAudio(false); // Audio off.
 
 // Or turn it back on by passing true.
 Poe.setAudio(true);  // Audio on.
+```
+
+
+&nbsp;
+### Poe.printAscii()
+
+Print an ASCII art version of Poe to the browser's debug console. It is doubtful many people will notice, but the important thing is that *you* know it's there.
+
+**Example:**
+
+```js
+Poe.printAscii(); // A picture prints.
+```
+
+
+&nbsp;
+### Poe.printVersion()
+
+Print the program name and version to the browser's debug console.
+
+**Example:**
+
+```js
+Poe.printVersion(); // "JS Mate Poe: 1.0.1"
 ```
 
 

@@ -3,7 +3,7 @@
  */
 
 import { CSS } from './css.mjs';
-import { bindEvent, clearEvents, logInfo } from './helpers.mjs';
+import { bindEvent, clearEvents, logInfo, LOGO, NAME, VERSION } from './helpers.mjs';
 import { Mate } from './mate.mjs';
 import { TILE_SIZE } from './image.mjs';
 
@@ -162,6 +162,32 @@ const Poe = class {
 
 
 	// -----------------------------------------------------------------
+	// Console
+	// -----------------------------------------------------------------
+
+	/**
+	 * Console: ASCII Art
+	 *
+	 * @return {void} Nothing.
+	 */
+	static printAscii() {
+		/* eslint-disable-next-line */
+		console.log(`%c${LOGO}`, 'color: #b2bec3; font-family: monospace; font-weight: bold;');
+	}
+
+	/**
+	 * Console: Version
+	 *
+	 * @return {void} Nothing.
+	 */
+	static printVersion() {
+		/* eslint-disable-next-line */
+		console.log(`%c${NAME}: %c${VERSION}`, 'color: #ff1493; font-weight: bold;', 'color: #00abc0; font-weight: bold;');
+	}
+
+
+
+	// -----------------------------------------------------------------
 	// Callbacks
 	// -----------------------------------------------------------------
 
@@ -210,6 +236,8 @@ const Poe = class {
 // Exports to prevent mangling.
 window['Poe'] = Poe;
 window['Poe']['audio'] = Poe.audio;
+window['Poe']['printAscii'] = Poe.printAscii;
+window['Poe']['printVersion'] = Poe.printVersion;
 window['Poe']['setAnimation'] = Poe.setAnimation;
 window['Poe']['setAudio'] = Poe.setAudio;
 window['Poe']['start'] = Poe.start;
