@@ -817,17 +817,13 @@ export const Mate = class {
 				0 - TILE_SIZE
 			);
 
-		// Bathtub.
+		// Bath Dive.
 		// Black Sheep.
-		// Stargazing.
-		case 21:
-		case 28:
-		case 54:
+		// Chase a Martian!
+		// Stargaze.
+		default:
 			return this.setAnimation(id);
 		}
-
-		// This will never execute.
-		return false;
 	}
 
 	/**
