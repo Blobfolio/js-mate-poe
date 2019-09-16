@@ -2369,8 +2369,8 @@ export const ANIMATIONS = {
 		repeat: 0,
 		repeatFrom: 0,
 		frames: [
-			14,
 			13,
+			12,
 			3,
 			9,
 			10,
