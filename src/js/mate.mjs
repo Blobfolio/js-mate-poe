@@ -297,6 +297,7 @@ export const Mate = class {
 	 */
 	setAnimation(id, x, y) {
 		if (0 >= id) {
+			console.error(`Invalid animation ID: ${id}`);
 			this.destroy();
 			return false;
 		}
@@ -308,6 +309,7 @@ export const Mate = class {
 			// Pull the animation details, if any.
 			this.animation = animation(id);
 			if (null === this.animation) {
+				console.error(`Invalid animation ID: ${id}`);
 				this.destroy();
 				return false;
 			}
