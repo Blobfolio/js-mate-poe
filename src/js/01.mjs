@@ -29,7 +29,9 @@ import { RawMateAnimation } from './types.mjs';
 	edge: Array<number>,
 	mate: Array<number>,
 	repeat: boolean,
-	frames: Array<Element>
+	frames: Array<Element>,
+	speed: string,
+	duration: string
  * }}
  */
 var DemoAnimation;
@@ -126,6 +128,8 @@ const _animations = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS))
 		mate: [],
 		repeat: 0 !== v.repeat,
 		frames: [],
+		speed: '',
+		duration: '',
 	};
 
 	// Can we trigger this animation?
@@ -203,7 +207,7 @@ const _animations = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS))
 
 	// Get the frames settled.
 	const framesLength = v.frames.length;
-	const repeat = v.repeat ? v.repeatFrom : 9999;
+	let repeat = v.repeat ? v.repeatFrom : 9999;
 	for (let i = 0; i < framesLength; ++i) {
 		let frame = document.createElement('DIV');
 		frame.title = `Frame #${v.frames[i]}`;
@@ -213,6 +217,69 @@ const _animations = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS))
 		}
 
 		tmp.frames.push(frame);
+	}
+
+	// Speed and duration.
+	repeat = ('function' === typeof v.repeat ? v.repeat() : v.repeat);
+
+	// Let's transform start and end properties here.
+	let start = ('function' === typeof v.start ? v.start() : v.start);
+	if ('number' === typeof start) {
+		start = {
+			x: 0,
+			y: 0,
+			speed: start,
+		};
+	}
+
+	let end = ('function' === typeof v.end ? v.end() : v.end);
+	if ('number' === typeof end) {
+		end = {
+			x: 0,
+			y: 0,
+			speed: end,
+		};
+	}
+
+	/** @type {number} */
+	let stepsLength = framesLength + (framesLength - v.repeatFrom) * repeat;
+
+	/** @type {number} */
+	const speedDiff = Math.floor(end.speed - start.speed);
+
+	/** @type {number} */
+	let duration = 0;
+
+	// If the speed is constant we can do this a little easier.
+	if (! speedDiff) {
+		tmp.speed = `${start.speed}ms`;
+		duration = start.speed * stepsLength;
+	}
+	// Otherwise we have to crunch a bit.
+	else {
+		tmp.speed = `${start.speed}ms – ${end.speed}ms`;
+		for (let j = 0; j < stepsLength; ++j) {
+			/** @type {number} */
+			const progress = j / stepsLength;
+			duration += Math.floor(start.speed + speedDiff * progress);
+		}
+	}
+
+	// The duration might be variable.
+	if ('function' === typeof v.repeat && repeat !== v.repeat()) {
+		tmp.duration = '(varies)';
+	}
+	// Otherwise format the duration pretty-like.
+	else {
+		duration = Math.floor(duration);
+
+		if (1000 > duration) {
+			tmp.duration = `${duration}ms`;
+		}
+		else {
+			duration = Math.floor(duration / 100) / 10;
+			tmp.duration = `${duration}s`;
+		}
 	}
 
 	out.push(tmp);
@@ -345,6 +412,9 @@ const build = function() {
 		cell = document.createElement('DIV');
 		cell.className = 'poe-demo-chains';
 
+		cell.appendChild(makeChainStat('Speed', animation.speed));
+		cell.appendChild(makeChainStat('Time', animation.duration));
+
 		if (animation.next.length) {
 			cell.appendChild(makeChain(animation.next, 'Next'));
 		}
@@ -455,6 +525,32 @@ const makeChain = function(links, name) {
 		link.innerText = links[i];
 		cell.appendChild(link);
 	}
+
+	return cell;
+};
+
+/**
+ * Make Chain Stat
+ *
+ * @param {string} name Name.
+ * @param {string} value Value.
+ * @return {Element} Element.
+ */
+const makeChainStat = function(name, value) {
+	/** @type {Element} */
+	let cell = document.createElement('DIV');
+	cell.className = 'poe-demo-chain';
+
+	/** @type {Element} */
+	let label = document.createElement('SPAN');
+	label.className = 'poe-demo-chain-name';
+	label.innerText = `${name}:`;
+	cell.appendChild(label);
+
+	let detail = document.createElement('SPAN');
+	detail.className = 'poe-demo-chain-value';
+	detail.innerText = value;
+	cell.appendChild(detail);
 
 	return cell;
 };

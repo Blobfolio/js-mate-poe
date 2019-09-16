@@ -96,7 +96,11 @@ td.poe-demo-col.for-name {
 
 .poe-demo-chain-name {
 	display: block;
-	width: 50px;
+	width: 55px;
+}
+
+.poe-demo-chain-value {
+	letter-spacing: 0;
 }
 
 .poe-demo-chain-link {
