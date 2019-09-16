@@ -35,7 +35,7 @@ The JS Mate Poe script has also been heavily optimized using [Google Closure Com
 
 JS Mate Poe *does not* support alternate characters or sprites; it's Poe or bust. Also intentionally omitted are interactions with individual page elements such as `<div>` or `<h1>`; edge detection is instead bound to the main window.
 
-To see JS Mate Poe in action — and for a full list of animation sequences — check out the [demo](https://storage.blobfolio.com/poe/).
+To see JS Mate Poe in action — and for a full list of animation sequences — look at [`dist/demo.html`](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/demo.html).
 
 
 
