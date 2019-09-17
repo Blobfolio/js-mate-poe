@@ -2,11 +2,11 @@
  * @file The sprite object!
  */
 
-import { DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, OFFSCREEN_CHOICES, STARTUP_CHOICES, animation, verifyAnimationId } from './animations.mjs';
-import { audioFile } from './audio.mjs';
-import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './helpers.mjs';
-import { IMAGE, TILE_SIZE } from './image.mjs';
-import { MateAnimation, MateAnimationPossibility, MateAnimationSetup, MateAnimationStep } from './types.mjs';
+import { DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, OFFSCREEN_CHOICES, STARTUP_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
+import { audioFile } from './_audio.mjs';
+import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './_helpers.mjs';
+import { IMAGE, TILE_SIZE } from './_image.mjs';
+import { MateAnimation, MateAnimationPossibility, MateAnimationSetup, MateAnimationStep } from './_types.mjs';
 
 
 

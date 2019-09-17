@@ -2,7 +2,7 @@
  * @file Miscellaneous helper functions.
  */
 
-import { MateAnimationPossibility, MateEvent } from './types.mjs';
+import { MateAnimationPossibility, MateEvent } from './_types.mjs';
 
 
 

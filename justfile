@@ -47,8 +47,8 @@ src_dir   := base_dir + "/src"
 @_watch_js:
 	just _eslint
 
-	just _google-closure-compiler "{{ src_dir }}/js/00.mjs" "{{ dist_dir }}/js-mate-poe.min.js"
-	just _google-closure-compiler "{{ src_dir }}/js/01.mjs" "{{ dist_dir }}/demo.min.js"
+	just _google-closure-compiler "{{ src_dir }}/js/js-mate-poe.mjs" "{{ dist_dir }}/js-mate-poe.min.js"
+	just _google-closure-compiler "{{ src_dir }}/js/demo.mjs" "{{ dist_dir }}/demo.min.js"
 
 	just _brotli "{{ dist_dir }}" "js"
 	just _gzip "{{ dist_dir }}" "js"
@@ -75,11 +75,11 @@ src_dir   := base_dir + "/src"
 	just _header "Rebuilding CSS module."
 
 	# Make sure we have compressed files to use.
-	[ -f "{{ src_dir }}/css/00.css.tmp" ] || just _die "Missing minified CSS."
-	[ -f "{{ src_dir }}/css/01.css.tmp" ] || just _die "Missing minified CSS."
+	[ -f "{{ src_dir }}/css/js-mate-poe.css.tmp" ] || just _die "Missing minified CSS."
+	[ -f "{{ src_dir }}/css/demo.css.tmp" ] || just _die "Missing minified CSS."
 
 	# Start it.
-	cp -a "{{ src_dir }}/skel/css.mjs" "{{ src_dir }}/skel/css.tmp"
+	cp -a "{{ src_dir }}/skel/_css.mjs" "{{ src_dir }}/skel/css.tmp"
 
 	# The main CSS.
 	echo '/**' >> "{{ src_dir }}/skel/css.tmp"
@@ -87,8 +87,8 @@ src_dir   := base_dir + "/src"
 	echo ' *' >> "{{ src_dir }}/skel/css.tmp"
 	echo ' * @const {string}' >> "{{ src_dir }}/skel/css.tmp"
 	echo ' */' >> "{{ src_dir }}/skel/css.tmp"
-	echo "export const CSS = \`$( cat "{{ src_dir }}/css/00.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
-	rm "{{ src_dir }}/css/00.css.tmp"
+	echo "export const CSS = \`$( cat "{{ src_dir }}/css/js-mate-poe.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
+	rm "{{ src_dir }}/css/js-mate-poe.css.tmp"
 
 	echo '' >> "{{ src_dir }}/skel/css.tmp"
 
@@ -98,11 +98,11 @@ src_dir   := base_dir + "/src"
 	echo ' *' >> "{{ src_dir }}/skel/css.tmp"
 	echo ' * @const {string}' >> "{{ src_dir }}/skel/css.tmp"
 	echo ' */' >> "{{ src_dir }}/skel/css.tmp"
-	echo "export const DEBUG_CSS = \`$( cat "{{ src_dir }}/css/01.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
-	rm "{{ src_dir }}/css/01.css.tmp"
+	echo "export const DEBUG_CSS = \`$( cat "{{ src_dir }}/css/demo.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
+	rm "{{ src_dir }}/css/demo.css.tmp"
 
 	# Move the file to its normal place!
-	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/css.mjs"
+	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/_css.mjs"
 
 
 ##          ##

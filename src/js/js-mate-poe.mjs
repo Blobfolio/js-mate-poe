@@ -2,10 +2,10 @@
  * @file Entry point.
  */
 
-import { CSS } from './css.mjs';
-import { bindEvent, clearEvents, logInfo, LOGO, NAME, VERSION } from './helpers.mjs';
-import { Mate } from './mate.mjs';
-import { TILE_SIZE } from './image.mjs';
+import { CSS } from './_css.mjs';
+import { bindEvent, clearEvents, logInfo, LOGO, NAME, VERSION } from './_helpers.mjs';
+import { Mate } from './_mate.mjs';
+import { TILE_SIZE } from './_image.mjs';
 
 
 

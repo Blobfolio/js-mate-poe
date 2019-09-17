@@ -2,9 +2,9 @@
  * @file Animations
  */
 
-import { screenHeight, screenWidth } from './helpers.mjs';
-import { TILE_SIZE } from './image.mjs';
-import { MateAnimationPossibility, MateAnimation, RawMateAnimation } from './types.mjs';
+import { screenHeight, screenWidth } from './_helpers.mjs';
+import { TILE_SIZE } from './_image.mjs';
+import { MateAnimationPossibility, MateAnimation, RawMateAnimation } from './_types.mjs';
 
 
 

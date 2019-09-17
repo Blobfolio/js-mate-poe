@@ -2,9 +2,9 @@
  * @file Animation debug table.
  */
 
-import { ANIMATIONS, DEFAULT_CHOICES, DRAGGING_ANIMATION, FALLING_ANIMATION, OFFSCREEN_CHOICES, STARTUP_CHOICES } from './animations.mjs';
-import { DEBUG_CSS } from './css.mjs';
-import { RawMateAnimation } from './types.mjs';
+import { ANIMATIONS, DEFAULT_CHOICES, DRAGGING_ANIMATION, FALLING_ANIMATION, OFFSCREEN_CHOICES, STARTUP_CHOICES } from './_animations.mjs';
+import { DEBUG_CSS } from './_css.mjs';
+import { RawMateAnimation } from './_types.mjs';
 
 
 
