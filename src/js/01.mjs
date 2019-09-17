@@ -539,7 +539,7 @@ const makeChain = function(links, name) {
 const makeChainStat = function(name, value) {
 	/** @type {Element} */
 	let cell = document.createElement('DIV');
-	cell.className = 'poe-demo-chain';
+	cell.className = `poe-demo-chain for-${name.toLowerCase()}`;
 
 	/** @type {Element} */
 	let label = document.createElement('SPAN');

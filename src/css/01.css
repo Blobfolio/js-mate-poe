@@ -46,6 +46,9 @@ body {
 	text-align: left;
 }
 
+.poe-demo-col:first-child { padding-left: 0; }
+.poe-demo-col:last-child { padding-right: 0; }
+
 th.poe-demo-col,
 .poe-demo-row.for-frames > .poe-demo-col { border-bottom: 1px solid salmon; }
 
@@ -93,6 +96,11 @@ td.poe-demo-col.for-name {
 }
 
 .poe-demo-chain + .poe-demo-chain { margin-top: .5em; }
+
+.poe-demo-chain.for-time {
+	padding-bottom: .5em;
+	border-bottom: 1px dashed salmon;
+}
 
 .poe-demo-chain-name {
 	display: block;
