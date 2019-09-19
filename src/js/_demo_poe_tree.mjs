@@ -3,24 +3,25 @@
  */
 
 /* eslint-disable quote-props */
+import { VueComponent, VueProp } from './_types.mjs';
 
 
 
 /**
  * Component: Poe Animation
  *
- * @const
+ * @const {VueComponent}
  */
 export const poeTree = {
 	/** @type {Object} */
 	'props': {
-		/** @type {Object} */
+		/** @type {VueProp} */
 		'trunk': {
 			'type': String,
 			'required': true,
 		},
 
-		/** @type {Object} */
+		/** @type {VueProp} */
 		'values': {
 			'type': Array,
 			'required': true,

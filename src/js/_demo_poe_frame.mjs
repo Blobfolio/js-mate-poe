@@ -4,13 +4,14 @@
 
 /* eslint-disable quote-props */
 import { TILES_X, TILES_Y } from './_image.mjs';
+import { VueComponent, VueProp } from './_types.mjs';
 
 
 
 /**
  * Component: Poe Frame
  *
- * @const
+ * @const {VueComponent}
  */
 export const poeFrame = {
 	/** @type {boolean} */
@@ -18,12 +19,14 @@ export const poeFrame = {
 
 	/** @type {Object} */
 	'props': {
+		/** @type {VueProp} */
 		'frame': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
 
+		/** @type {VueProp} */
 		'repeat': {
 			'type': Boolean,
 			'required': false,

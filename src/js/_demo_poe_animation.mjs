@@ -4,14 +4,14 @@
 
 /* eslint-disable quote-props */
 import { DRAGGING_ANIMATION, FALLING_ANIMATION } from './_animations.mjs';
-import { MateAnimationStep } from './_types.mjs';
+import { MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
 
 
 
 /**
  * Component: Poe Animation
  *
- * @const
+ * @const {VueComponent}
  */
 export const poeAnimation = {
 	/**
@@ -25,108 +25,151 @@ export const poeAnimation = {
 		};
 	},
 
-	/** @type {Object} */
+	/** @type {Object<string, VueProp>} */
 	'props': {
+		/** @type {VueProp} */
 		'id': {
 			'type': Number,
 			'required': true,
 		},
+
+		/** @type {VueProp} */
 		'name': {
 			'type': String,
 			'required': true,
 		},
+
+		/** @type {VueProp} */
 		'primary': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'playable': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'variableDuration': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'startFrom': {
 			'type': [Object, null],
 			'required': false,
 			'default': null,
 		},
+
+		/** @type {VueProp} */
 		'start': {
 			'type': Object,
 			'required': true,
 		},
+
+		/** @type {VueProp} */
 		'end': {
 			'type': Object,
 			'required': true,
 		},
+
+		/** @type {VueProp} */
 		'repeat': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'repeatFrom': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'frames': {
 			'type': Array,
 			'required': true,
 		},
+
+		/** @type {VueProp} */
 		'audio': {
 			'type': [Object, null],
 			'required': false,
 			'default': null,
 		},
+
+		/** @type {VueProp} */
 		'allowExit': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'autoFlip': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'defaultChoice': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'forceGravity': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'offscreenChoice': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'ignoreEdges': {
 			'type': Boolean,
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {VueProp} */
 		'startupChoice': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'childId': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
+
+		/** @type {VueProp} */
 		'edge': {
 			'type': [Array, null],
 			'required': false,
 			'default': null,
 		},
+
+		/** @type {VueProp} */
 		'next': {
 			'type': [Array, null],
 			'required': false,

@@ -3,13 +3,14 @@
  */
 
 /* eslint-disable quote-props */
+import { VueComponent, VueProp } from './_types.mjs';
 
 
 
 /**
  * Component: Poe Icon
  *
- * @const
+ * @const {VueComponent}
  */
 export const poeIcon = {
 	/** @type {boolean} */
@@ -17,6 +18,7 @@ export const poeIcon = {
 
 	/** @type {Object} */
 	'props': {
+		/** @type {VueProp} */
 		'icon': {
 			'type': String,
 			'required': true,
