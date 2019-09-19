@@ -1,0 +1,68 @@
+/**
+ * CSS: JS Mate Poe
+ */
+
+// Import the base.
+@import "_base";
+
+
+
+// The main sprite.
+.poe {
+	box-sizing: border-box;
+	position: fixed;
+	top: 0;
+	left: 0;
+
+	display: block;
+	width: $tile_size;
+	height: $tile_size;
+
+	cursor: grab;
+	z-index: 99999;
+	overflow: hidden;
+
+	// The sprite image.
+	& > img {
+		box-sizing: border-box;
+
+		display: block !important;
+		width: $width !important;
+		height: $height !important;
+		max-width: none !important;
+		max-height: none !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		border: 0 !important;
+
+		outline: none !important;
+		pointer-events: none !important;
+	}
+
+	// Animation: Dragging.
+	&.is-dragging { cursor: grabbing; }
+
+	// Child sprite.
+	&.is-child {
+		opacity: 0;
+		transition: opacity .5s ease;
+		pointer-events: none;
+	}
+
+	// Children fade in.
+	&.fade-in { opacity: 1; }
+}
+
+// There are a lot of frames!
+@for $frame from 1 through $tiles - 1 {
+	$x: (0 - $tile_size) * ($frame % $tiles_x);
+	$y: (0 - $tile_size) * floor($frame / $tiles_x);
+
+	@if $x != 0 and $y != 0 {
+		.poe-f#{$frame} { transform: translate($x, $y); }
+	} @else if $x != 0 {
+		.poe-f#{$frame} { transform: translateX($x); }
+	} @else if $y != 0 {
+		.poe-f#{$frame} { transform: translateY($y); }
+	}
+}

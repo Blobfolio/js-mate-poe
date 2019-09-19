@@ -2,7 +2,8 @@
  * @file CSS.
  */
 
-import { HEIGHT, IMAGE, TILE_SIZE, WIDTH } from './_image.mjs';
-
-
-
+/**
+ * JS Mate Poe
+ *
+ * @const {string}
+ */

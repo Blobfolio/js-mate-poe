@@ -1,0 +1,21 @@
+/**
+ * CSS: Variables
+ */
+
+// The number of tiles in the sprite file.
+$tiles: 176;
+
+// The number of tiles per row.
+$tiles_x: 16;
+
+// The number of tile rows.
+$tiles_y: 11;
+
+// The size of a tile (they're square).
+$tile_size: 40px;
+
+// The sprite image width.
+$width: 640px;
+
+// The sprite image height.
+$height: 440px;
