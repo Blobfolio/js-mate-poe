@@ -974,7 +974,10 @@ export const ANIMATIONS = {
 			},
 			36,
 		],
-		next: 7,
+		next: [
+			7,
+			46,
+		],
 	},
 	/** @type {RawMateAnimation} */
 	26: {
@@ -1683,7 +1686,11 @@ export const ANIMATIONS = {
 		id: 46,
 		name: 'Jump and Slide',
 		startFrom: null,
-		start: 50,
+		start: {
+			x: -4,
+			y: 0,
+			speed: 50,
+		},
 		end: 200,
 		repeat: 0,
 		repeatFrom: 0,
@@ -2593,6 +2600,10 @@ export const STARTUP_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (A
 export const CHILD_ANIMATIONS = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS)).reduce((out, v) => {
 	if (0 < v.childId) {
 		out.add(v.childId);
+	}
+
+	if (-1 !== v.name.indexOf('(Child)')) {
+		out.add(v.id);
 	}
 
 	return out;

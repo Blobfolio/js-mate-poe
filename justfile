@@ -10,8 +10,9 @@
 ##
 
 base_dir  := `realpath $PWD`
-dist_dir  := base_dir + "/dist"
 src_dir   := base_dir + "/src"
+dist_dir  := base_dir + "/dist"
+demo_dir  := dist_dir + "/demo"
 
 
 
@@ -23,6 +24,7 @@ src_dir   := base_dir + "/src"
 @build: _check_dependencies
 	just _header "Building JS Mate Poe!"
 
+	just _pull_js_chain
 	just _watch_css
 	just _watch_js
 
@@ -34,13 +36,19 @@ src_dir   := base_dir + "/src"
 @watch: _check_dependencies
 	just _header "Watching for Changes"
 
-	watchexec --postpone --no-shell --watch "{{ src_dir }}/css" --debounce 1000 --exts css -- just _watch_css & \
+	watchexec --postpone --no-shell --watch "{{ src_dir }}/scss" --debounce 1000 --exts scss -- just _watch_css & \
 	watchexec --postpone --no-shell --watch "{{ src_dir }}/js" --debounce 1000 --exts mjs -- just _watch_js
 
 
 # CSS build task(s).
 @_watch_css:
+	just _sassc "{{ src_dir }}/scss/js-mate-poe.scss" "{{ src_dir }}/css/js-mate-poe.css"
+	just _sassc "{{ src_dir }}/scss/demo.scss" "{{ demo_dir }}/assets/demo.css"
+
 	just _css_to_js
+
+	just _brotli "{{ dist_dir }}" "css"
+	just _gzip "{{ dist_dir }}" "css"
 
 
 # JS build task(s).
@@ -48,7 +56,7 @@ src_dir   := base_dir + "/src"
 	just _eslint
 
 	just _google-closure-compiler "{{ src_dir }}/js/js-mate-poe.mjs" "{{ dist_dir }}/js-mate-poe.min.js"
-	just _google-closure-compiler "{{ src_dir }}/js/demo.mjs" "{{ dist_dir }}/demo.min.js"
+	just _google-closure-compiler "{{ src_dir }}/js/demo.mjs" "{{ demo_dir }}/assets/demo.min.js"
 
 	just _brotli "{{ dist_dir }}" "js"
 	just _gzip "{{ dist_dir }}" "js"
@@ -61,45 +69,31 @@ src_dir   := base_dir + "/src"
 # CSS #
 ##   ##
 
-# CSSO.
-@_csso:
-	just _header "Minifying CSS."
+# SASSC.
+@_sassc IN OUT:
+	just _header "Compiling $( basename "{{ IN }}" )."
+	sassc --style=compressed "{{ IN }}" "{{ OUT }}"
+	just _csso "{{ OUT }}" "{{ OUT }}"
 
-	find "{{ src_dir }}/css" -name "*.css" -type f -print0 | \
-		sort -z | \
-		xargs -0 -I {} npx csso -i "{}" -o "{}.tmp"
+
+# CSSO.
+@_csso IN OUT:
+	just _header "Minifying CSS."
+	csso -i "{{ IN }}" -o "{{ OUT }}"
 
 
 # Build a JS module from the CSS.
-@_css_to_js: _csso
+@_css_to_js:
 	just _header "Rebuilding CSS module."
 
 	# Make sure we have compressed files to use.
-	[ -f "{{ src_dir }}/css/js-mate-poe.css.tmp" ] || just _die "Missing minified CSS."
-	[ -f "{{ src_dir }}/css/demo.css.tmp" ] || just _die "Missing minified CSS."
+	[ -f "{{ src_dir }}/css/js-mate-poe.css" ] || just _die "Missing js-mate-poe.css."
 
 	# Start it.
 	cp -a "{{ src_dir }}/skel/_css.mjs" "{{ src_dir }}/skel/css.tmp"
 
 	# The main CSS.
-	echo '/**' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' * Main CSS' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' *' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' * @const {string}' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' */' >> "{{ src_dir }}/skel/css.tmp"
-	echo "export const CSS = \`$( cat "{{ src_dir }}/css/js-mate-poe.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
-	rm "{{ src_dir }}/css/js-mate-poe.css.tmp"
-
-	echo '' >> "{{ src_dir }}/skel/css.tmp"
-
-	# The debug CSS.
-	echo '/**' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' * Debug CSS' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' *' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' * @const {string}' >> "{{ src_dir }}/skel/css.tmp"
-	echo ' */' >> "{{ src_dir }}/skel/css.tmp"
-	echo "export const DEBUG_CSS = \`$( cat "{{ src_dir }}/css/demo.css.tmp" )\`;" >> "{{ src_dir }}/skel/css.tmp"
-	rm "{{ src_dir }}/css/demo.css.tmp"
+	echo "export const CSS = '$( cat "{{ src_dir }}/css/js-mate-poe.css" )';" >> "{{ src_dir }}/skel/css.tmp"
 
 	# Move the file to its normal place!
 	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/_css.mjs"
@@ -120,6 +114,7 @@ src_dir   := base_dir + "/src"
 	just _header "Fixing Javascript."
 	npx eslint --color --fix "{{ src_dir }}/js"/*.mjs || true
 
+
 # Closure Compiler.
 @_google-closure-compiler IN OUT:
 	just _header "Compiling $( basename "{{ IN }}" )."
@@ -130,6 +125,7 @@ src_dir   := base_dir + "/src"
 		--language_out STABLE \
 		--js "{{ src_dir }}/js"/*.mjs \
 		--js_output_file "{{ OUT }}" \
+		--jscomp_off globalThis \
 		--jscomp_off unknownDefines \
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
@@ -146,6 +142,15 @@ src_dir   := base_dir + "/src"
 	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
 
 
+# Pull JS Chain.
+@_pull_js_chain:
+	just _header "Pulling third-party dependencies."
+
+	# Vue JS.
+	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
+	wget -q -O "{{ demo_dir }}/assets/vue.min.js" "https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.min.js"
+
+
 
 ##     ##
 # OTHER #
@@ -159,7 +164,7 @@ src_dir   := base_dir + "/src"
 	[ ! -z "{{ EXT }}" ] || just _die "An extension is required."
 
 	# Remove existing Brotli files.
-	find "{{ DIR }}" -name "*.br" -type f -delete
+	find "{{ DIR }}" -iname "*.{{ EXT }}.br" -type f -delete
 
 	# Encode!
 	find "{{ DIR }}" -iname "*.{{ EXT }}" -type f -print0 | xargs -0 brotli -q 11
@@ -173,7 +178,7 @@ src_dir   := base_dir + "/src"
 	[ ! -z "{{ EXT }}" ] || just _die "An extension is required."
 
 	# Remove existing Gzip files.
-	find "{{ DIR }}" -name "*.gz" -type f -delete
+	find "{{ DIR }}" -iname "*.{{ EXT }}.gz" -type f -delete
 
 	# Encode!
 	find "{{ DIR }}" -iname "*.{{ EXT }}" -type f -print0 | xargs -0 gzip -k -9
@@ -189,17 +194,23 @@ src_dir   := base_dir + "/src"
 	just _header "Starting Up"
 	just _info "Checking runtime dependencies."
 
+	# Make sure we have NPM.
+	[ $( command -v npm ) ] || just _die "NPM is required."
+
+	# Make sure we have wget.
+	[ $( command -v wget ) ] || just _die "Wget is required."
+
 	# Brotli.
 	[ $( command -v brotli ) ] || just _install-os "brotli"
 
 	# Gzip.
 	[ $( command -v gzip ) ] || just _install-os "gzip"
 
+	# SassC.
+	[ $( command -v sassc ) ] || just _install-os "sassc"
+
 	# Watchexec.
 	[ $( command -v watchexec ) ] || just _install-cargo "watchexec"
-
-	# Make sure we have NPM.
-	[ $( command -v npm ) ] || just _die "NPM is required."
 
 	# The lightest possible Node check.
 	[ -d "{{ base_dir }}/node_modules" ] || npm i

@@ -27,15 +27,15 @@ The JS Mate Poe script has also been heavily optimized using [Google Closure Com
 
 | Encoding | Size |
 | -------- | ---- |
-| None | 92,051 Bytes |
-| Gzip | 54,054 Bytes |
-| Brotli | 50,943 Bytes |
+| None | 92,243 Bytes |
+| Gzip | 54,136 Bytes |
+| Brotli | 51,021 Bytes |
 
 [Version 1.0.1](https://github.com/Blobfolio/js-mate-poe/releases) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
 
 JS Mate Poe *does not* support alternate characters or sprites; it's Poe or bust. Also intentionally omitted are interactions with individual page elements such as `<div>` or `<h1>`; edge detection is instead bound to the main window.
 
-To see JS Mate Poe in action — and for a full list of animation sequences — look at [`dist/demo.html`](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/demo.html).
+To see JS Mate Poe in action — and for a full list of animation sequences — look at [`dist/demo/`](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/demo/).
 
 
 
@@ -173,15 +173,16 @@ Poe.printVersion(); // "JS Mate Poe: 1.0.1"
 
 The JS Mate Poe code can be edited and/or compiled by Linux/Mac users meeting the following system requirements:
 
-| Dependency | Description |
-| ---------- | ----------- |
-| [Brotli](https://github.com/google/brotli) | Static encoding. |
-| [Gzip](https://www.gzip.org/) | Static encoding. |
-| [Just](https://github.com/casey/just) | Task runner. |
-| [NPM](https://www.npmjs.com/) | Dependency management. |
-| [Watchexec](https://github.com/watchexec/watchexec) | Source file monitoring. |
+| Dependency | Description | Auto |
+| ---------- | ----------- | ---- |
+| [Brotli](https://github.com/google/brotli) | Static encoding. | * |
+| [Gzip](https://www.gzip.org/) | Static encoding. | * |
+| [Just](https://github.com/casey/just) | Task runner. | |
+| [NPM](https://www.npmjs.com/) | Dependency management. | |
+| [SassC](https://github.com/sass/sassc) | SCSS processing. | * |
+| [Watchexec](https://github.com/watchexec/watchexec) | Source file monitoring. | * |
 
-The Just tasks will automatically attempt to install/configure any missing dependencies. If you do not have Watchexec installed, you'll need [Cargo](https://doc.rust-lang.org/stable/cargo/getting-started/installation.html), so it can be built.
+The Just build tasks will attempt to automatically install any missing dependencies (other than NPM and Just itself). If you do not already have Watchexec installed, you'll also need [Cargo](https://doc.rust-lang.org/stable/cargo/getting-started/installation.html), so Just can build it.
 
 If you meet the requirements, hop into the terminal and type:
 ```bash
