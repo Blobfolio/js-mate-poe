@@ -9,9 +9,12 @@
   "author": "Blobfolio, LLC <hello@blobfolio.com>",
   "license": "WTFPL",
   "devDependencies": {
+    "chai": "^4.2.0",
     "csso": "^3.5.1",
     "eslint": "^6.3.0",
     "eslint-plugin-jsdoc": "^15.9.1",
-    "google-closure-compiler": "^20190819.0.0"
+    "esm": "^3.2.25",
+    "google-closure-compiler": "^20190819.0.0",
+    "mocha": "^6.2.0"
   }
 }

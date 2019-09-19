@@ -13,6 +13,7 @@ base_dir  := `realpath $PWD`
 src_dir   := base_dir + "/src"
 dist_dir  := base_dir + "/dist"
 demo_dir  := dist_dir + "/demo"
+test_dir  := base_dir + "/test"
 
 
 
@@ -28,8 +29,16 @@ demo_dir  := dist_dir + "/demo"
 	just _watch_css
 	just _watch_js
 
+	just test
+
 	# Done!
 	just _success "JS Mate Poe has been built: {{ dist_dir }}"
+
+
+@test: _check_dependencies
+	just _header "Unit tests!"
+	npx mocha --require esm
+	just _notify "Unit tests are looking good!"
 
 
 # Watch for changes to JS files.
@@ -37,7 +46,8 @@ demo_dir  := dist_dir + "/demo"
 	just _header "Watching for Changes"
 
 	watchexec --postpone --no-shell --watch "{{ src_dir }}/scss" --debounce 1000 --exts scss -- just _watch_css & \
-	watchexec --postpone --no-shell --watch "{{ src_dir }}/js" --debounce 1000 --exts mjs -- just _watch_js
+	watchexec --postpone --no-shell --watch "{{ src_dir }}/js" --debounce 1000 --exts mjs -- just _watch_js & \
+	watchexec --postpone --no-shell --watch "{{ test_dir }}" --debounce 1000 --exts js -- just _watch_js
 
 
 # CSS build task(s).
@@ -106,13 +116,13 @@ demo_dir  := dist_dir + "/demo"
 # Eslint.
 @_eslint:
 	just _header "Linting Javascript."
-	npx eslint --color "{{ src_dir }}/js"/*.mjs
+	npx eslint --color "{{ src_dir }}/js"/*.mjs "{{ test_dir }}"/*.js
 
 
 # Eslint Fix.
 @_eslint-fix:
 	just _header "Fixing Javascript."
-	npx eslint --color --fix "{{ src_dir }}/js"/*.mjs || true
+	npx eslint --color --fix "{{ src_dir }}/js"/*.mjs "{{ test_dir }}"/*.js || true
 
 
 # Closure Compiler.
