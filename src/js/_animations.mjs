@@ -388,7 +388,7 @@ export const ANIMATIONS = {
 	/** @type {RawMateAnimation} */
 	10: {
 		id: 10,
-		name: 'Hard Fall',
+		name: 'Splat!',
 		startFrom: null,
 		start: 200,
 		end: 500,
