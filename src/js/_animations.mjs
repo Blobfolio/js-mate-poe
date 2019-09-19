@@ -974,7 +974,10 @@ export const ANIMATIONS = {
 			},
 			36,
 		],
-		next: 7,
+		next: [
+			7,
+			46,
+		],
 	},
 	/** @type {RawMateAnimation} */
 	26: {
