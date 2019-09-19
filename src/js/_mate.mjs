@@ -302,37 +302,38 @@ export const Mate = class {
 			return false;
 		}
 
-		// Changing animation.
-		if (null === this.animation || id !== this.animation.id) {
+		// Disable exit possibility if we're changing animations or the animation doesn't allow exiting.
+		if (
+			null === this.animation ||
+			id !== this.animation.id ||
+			! this.animation.allowExit
+		) {
 			this.allowExit = false;
-
-			// Pull the animation details, if any.
-			this.animation = animation(id);
-			if (null === this.animation) {
-				console.error(`Invalid animation ID: ${id}`);
-				this.destroy();
-				return false;
-			}
-
-			// We might need to force the child's destruction.
-			if (
-				(FALLING_ANIMATION === id) ||
-				(
-					null !== this.mate &&
-					this.animation.childId
-				)
-			) {
-				this.destroyMate();
-			}
-
-			// Should we allow the mate to walk off-screen?
-			if (this.animation.allowExit) {
-				// Give it a one-in-five chance.
-				this.allowExit = 5 === Math.floor(Math.random() * 5);
-			}
 		}
-		else if (! this.animation.allowExit) {
-			this.allowExit = false;
+
+		// Pull the animation details, if any.
+		this.animation = animation(id);
+		if (null === this.animation) {
+			console.error(`Invalid animation ID: ${id}`);
+			this.destroy();
+			return false;
+		}
+
+		// We might need to force the child's destruction.
+		if (
+			(FALLING_ANIMATION === id) ||
+			(
+				null !== this.mate &&
+				this.animation.childId
+			)
+		) {
+			this.destroyMate();
+		}
+
+		// Should we allow the mate to walk off-screen?
+		if (this.animation.allowExit && ! this.allowExit) {
+			// Give it a one-in-five chance.
+			this.allowExit = 4 === Math.floor(Math.random() * 5);
 		}
 
 		// If this animation has a fixed starting place, go ahead and set it.
