@@ -2595,6 +2595,10 @@ export const CHILD_ANIMATIONS = Object.values(/** @type {!RawMateAnimation} */ (
 		out.add(v.childId);
 	}
 
+	if (-1 !== v.name.indexOf('(Child)')) {
+		out.add(v.id);
+	}
+
 	return out;
 }, new Set());
 
