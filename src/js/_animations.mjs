@@ -1683,7 +1683,11 @@ export const ANIMATIONS = {
 		id: 46,
 		name: 'Jump and Slide',
 		startFrom: null,
-		start: 50,
+		start: {
+			x: -4,
+			y: 0,
+			speed: 50,
+		},
 		end: 200,
 		repeat: 0,
 		repeatFrom: 0,
