@@ -8,6 +8,7 @@ import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
+import { poeSprite } from './_demo_poe_sprite.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
 import { MateAnimationAudio, MateAnimationPosition, MateAnimationPossibility, MateAnimationState } from './_types.mjs';
 
@@ -78,6 +79,7 @@ const standardizeMateAnimationPossibility = function(v) {
 window['Vue']['component']('poe-animation', poeAnimation);
 window['Vue']['component']('poe-frame', poeFrame);
 window['Vue']['component']('poe-icon', poeIcon);
+window['Vue']['component']('poe-sprite', poeSprite);
 window['Vue']['component']('poe-tree', poeTree);
 
 // Get Vue going!

@@ -77,17 +77,7 @@
 		>
 			<h2 class="section-title">Sprite</h2>
 
-			<div class="sprite">
-				<div
-					v-for="f in 176"
-					class="sprite-frame"
-					:data-frame="'#' + (f - 1)"
-				>
-					<poe-frame
-						:frame="f - 1"
-					></poe-frame>
-				</div>
-			</div>
+			<poe-sprite></poe-sprite>
 		</div>
 	</div>
 
@@ -113,6 +103,9 @@
 		aria-hidden="true"
 		class="hide-safe"
 	>
+		<!-- Arrow. -->
+		<symbol viewBox="0 0 447.561 512.172" id="i-arrow"><path fill="currentColor" d="M446.742 283.925c-1.664-3.989-5.547-6.592-9.856-6.592H320V10.667C320 4.779 315.22 0 309.334 0H138.667C132.779 0 128 4.779 128 10.667v266.667H10.667a10.702 10.702 0 00-9.856 6.571c-1.643 3.989-.747 8.576 2.304 11.627l212.8 213.504a10.675 10.675 0 007.552 3.136c2.837 0 5.547-1.131 7.552-3.115l213.419-213.504a10.645 10.645 0 002.304-11.628z"/></symbol>
+
 		<!-- Audio. -->
 		<symbol viewBox="0 0 69.145 53.98" id="i-audio"><path fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="5" d="M35.889 2.5L18.735 17.337H2.5V36.43h15.989l17.4 15.05V2.5z"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="5" d="M44.5 16.33a19.5 19.5 0 010 21.4m7.1-28.5a30 30 0 010 35.6m6.5-42.1a38.8 38.8 0 010 48.6"/></symbol>
 

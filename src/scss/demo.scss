@@ -352,17 +352,27 @@ body {
 	align-items: flex-start;
 	justify-content: flex-start;
 	flex-wrap: wrap;
-	width: calc(100% - 100px);
-	margin: 30px auto 0;
+	width: calc(100% - 340px);
+	margin: 0 40px 0 0;
+
+	// A wrapper for the whole thing.
+	&-wrapper {
+		display: flex;
+		align-items: flex-start;
+		justify-content: flex-start;
+		width: 100%;
+		margin-top: 30px;
+	} // .sprite-wrapper
 
 	// An individual frame.
 	&-frame {
 		position: relative;
-		width: calc(#{$tile_size} + 20px);
-		height: calc(#{$tile_size} + 20px);
-		padding: 10px;
+		width: calc(#{$tile_size} + 10px);
+		height: calc(#{$tile_size} + 10px);
+		padding: 5px;
 
 		background-color: lightgrey;
+		cursor: cell;
 
 		&:after {
 			content: attr(data-frame);
@@ -389,10 +399,150 @@ body {
 
 			opacity: 0;
 			transition: opacity .3s ease;
+
+			pointer-events: none;
 		}
 
 		&:hover:after { opacity: 1; }
 	} // Sprite frame.
+}
+
+.playground {
+	width: 300px;
+
+	// Settings.
+	&-settings {
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
+		flex-wrap: wrap;
+		padding: 10px;
+		background-color: lightgrey;
+	} // .playground-settings
+
+	// Setting.
+	&-setting {
+		display: block;
+		width: calc(33.3333% - 20px / 3);
+		margin: 0;
+		padding: 0;
+		border: 0;
+
+		&.for-presets {
+			width: 100%;
+			margin: 0 0 10px 0;
+		}
+
+		&.for-repeat,
+		&.for-repeat-from { margin-left: 10px; }
+
+		& > label {
+			display: block;
+			margin-bottom: 5px;
+			cursor: pointer;
+
+			&.is-required:after {
+				content: '*';
+				color: red;
+			}
+		}
+
+		& > input,
+		& > select {
+			display: block;
+			width: 100%;
+			height: 30px;
+
+			background-color: white;
+			color: black;
+			font-family: inherit;
+			font-size: 0.875rem;
+			text-indent: 5px;
+
+			border: 1px solid darkgrey;
+			transition: border .3s ease;
+
+			&:hover,
+			&:active,
+			&:focus { border-color: black; }
+		}
+
+		// Hide Firefox's weird outline.
+		select:-moz-focusring {
+			color: transparent;
+			text-shadow: 0 0 0 #000;
+		}
+
+		&.is-disabled {
+			opacity: .5;
+			pointer-events: none;
+		}
+	} // .playground-setting
+
+	// Movie!
+	&-movie {
+		position: relative;
+		display: block;
+		width: 300px;
+		height: $tile_size + 20px;
+		padding: 20px 0;
+		background-color: darkgrey;
+
+		&-frame {
+			position: absolute;
+			top: 10px;
+			left: calc(50% - #{$tile_size} / 2);
+			pointer-events: none;
+		} // .playground-movie-frame
+	} // .playground-movie
+
+	// Playground frames.
+	&-frames {
+		margin-top: 10px;
+		border-collapse: collapse;
+		border: 0;
+
+		&-col {
+			padding: 10px;
+			vertical-align: middle;
+
+			&:first-child { padding-left: 0; }
+			&:last-child { padding-right: 0; }
+		} // .playground-frames-col
+
+		&-order {
+			display: flex;
+			justify-content: flex-start;
+			flex-direction: column;
+
+			width: 13.10773px;
+			height: 40px;
+
+			& > .icon {
+				width: 13.10773px;
+				height: 15px;
+				color: salmon;
+				cursor: pointer;
+				transition: color .3s ease;
+
+				&.down { margin-top: 25px; }
+
+				&.up {
+					transform: rotate(180deg);
+					color: lightsteelblue;
+
+					+ .down { margin-top: 10px; }
+				}
+
+				&:hover { color: black; }
+			}
+		} // .playground-frames-order
+	} // .playground-frames
+
+	// Frame.
+	&-frame {
+		cursor: not-allowed;
+	} // .playground-frame
 }
 
 
