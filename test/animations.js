@@ -5,7 +5,7 @@
 /* global describe */
 /* global it */
 /* global require */
-import { ANIMATIONS, DRAGGING_ANIMATION } from '../src/js/_animations.mjs';
+import { ANIMATIONS, DRAGGING_ANIMATION, MAX_ANIMATION } from '../src/js/_animations.mjs';
 import { audioFile } from '../src/js/_audio.mjs';
 import { TILES_X, TILES_Y } from '../src/js/_image.mjs';
 import { MateAnimationPossibility } from '../src/js/_types.mjs';
@@ -69,10 +69,7 @@ const testChoices = function(label, choices) {
 
 		// Test each path.
 		for (let j = 0; j < length; ++j) {
-			it(
-				`${label} ID #${clean[j]} is valid`,
-				() => assert.isTrue(keys.has(clean[j]))
-			);
+			testId(label, clean[j]);
 
 			// Note that we can get here.
 			reachable.add(clean[j]);
@@ -84,6 +81,23 @@ const testChoices = function(label, choices) {
 			() => assert.isNull(choices)
 		);
 	}
+};
+
+/**
+ * Test ID
+ *
+ * @param {string} label Label.
+ * @param {number} v Value.
+ * @return {void} Nothing.
+ */
+const testId = function(label, v) {
+	// Verify the ID, although it should be there.
+	it(
+		`${label} ID #${v} is valid`,
+		() => assert.isNumber(v) &&
+			assert.isAbove(v, 0) &&
+			assert.isAtMost(v, MAX_ANIMATION)
+	);
 };
 
 /**
@@ -121,23 +135,6 @@ const testState = function(label, v) {
 /** @type {Set} */
 let reachable = new Set([DRAGGING_ANIMATION]);
 
-// All animation keys.
-/** @type {Set} */
-const keys = Object.keys(ANIMATIONS).reduce((out, v) => {
-	out.add(parseInt(v, 10) || 0);
-	return out;
-}, new Set());
-
-/** @type {number} */
-const keysLength = keys.size;
-
-// All animations.
-/** @type {Array} */
-const values = Object.values(ANIMATIONS);
-
-/** @type {number} */
-const valuesLength = values.length;
-
 /** @type {number} */
 const minFrame = 0;
 
@@ -148,116 +145,110 @@ const maxFrame = TILES_X * TILES_Y - 1;
 
 // Test it in a loop!
 describe('Animation Pathways', () => {
-	it(
-		'Animation key count matches value count',
-		() => assert.strictEqual(keysLength, valuesLength)
-	);
-
 	// Run through the animations to validate pathways, etc.
-	for (let i = 0; i < valuesLength; ++i) {
-		describe(values[i].name, () => {
-			// There should be a name.
-			it(
-				'Name is specified',
-				() => assert.isString(values[i].name)
-			);
+	for (let i = 0; i < MAX_ANIMATION; ++i) {
+		// The tests are organized by name, so let's check that first.
+		if ('string' !== typeof ANIMATIONS[i].name) {
+			assert.fail('Missing animation name');
+			continue;
+		}
 
-			// Verify the ID, although it should be there.
+		// Look at everything!
+		describe(ANIMATIONS[i].name, () => {
+			testId('Main', ANIMATIONS[i].id);
 			it(
-				`ID #${values[i].id} is valid`,
-				() => assert.isTrue(keys.has(values[i].id))
+				'ID is in correct position.',
+				() => assert.strictEqual(i + 1, ANIMATIONS[i].id)
 			);
 
 			// If this is a default, startup, or offscreen animation, it is directly reachable.
 			if (
-				0 < values[i].defaultChoice ||
-				0 < values[i].offscreenChoice ||
-				0 < values[i].startupChoice
+				0 < ANIMATIONS[i].defaultChoice ||
+				0 < ANIMATIONS[i].offscreenChoice ||
+				0 < ANIMATIONS[i].startupChoice
 			) {
-				reachable.add(values[i].id);
+				reachable.add(ANIMATIONS[i].id);
 			}
 
 			// Verify the child ID.
-			if (0 < values[i].childId) {
-				it(
-					`Child ID #${values[i].childId} is valid`,
-					() => assert.isTrue(keys.has(values[i].childId))
-				);
+			if (0 < ANIMATIONS[i].childId) {
+				testId('Child', ANIMATIONS[i].childId);
 
 				// Children are implicitly reachable.
-				reachable.add(values[i].childId);
+				reachable.add(ANIMATIONS[i].childId);
 			}
 
-			testChoices('Next', values[i].next);
-			testChoices('Edge', values[i].edge);
+			testChoices('Next', ANIMATIONS[i].next);
+			testChoices('Edge', ANIMATIONS[i].edge);
 
 			// Check the frames.
 			/** @type {number} */
-			const framesLength = values[i].frames.length;
+			const framesLength = ANIMATIONS[i].frames.length;
 
 			for (let j = 0; j < framesLength; ++j) {
 				it(
-					`Frame #${values[i].frames[j]} is valid`,
-					() => assert.isAtLeast(values[i].frames[j], minFrame) &&
-						assert.isAtMost(values[i].frames[j], maxFrame)
+					`Frame #${ANIMATIONS[i].frames[j]} is valid`,
+					() => assert.isNumber(ANIMATIONS[i].frames[j]) &&
+						assert.isAtLeast(ANIMATIONS[i].frames[j], minFrame) &&
+						assert.isAtMost(ANIMATIONS[i].frames[j], maxFrame)
 				);
 			}
 
 			// Check the audio.
-			if (null !== values[i].audio) {
+			if (null !== ANIMATIONS[i].audio) {
 				it(
 					'Audio is specified',
-					() => assert.isString(values[i].audio.file)
+					() => assert.isString(ANIMATIONS[i].audio.file)
 				);
 
 				it(
-					`Audio ${values[i].audio.file} is valid`,
-					() => assert.isString(audioFile(values[i].audio.file)) &&
-						assert.isOk(audioFile(values[i].audio.file))
+					`Audio ${ANIMATIONS[i].audio.file} is valid`,
+					() => assert.isString(audioFile(ANIMATIONS[i].audio.file)) &&
+						assert.isOk(audioFile(ANIMATIONS[i].audio.file))
 				);
 			}
 			else {
 				it(
 					'Audio is not specified',
-					() => assert.isNull(values[i].audio)
+					() => assert.isNull(ANIMATIONS[i].audio)
 				);
 			}
 
 			// Dynamic callbacks almost always rely on window size, which Node doesn't understand. From here on, we'll only test non-callback values.
 			if (
-				null !== values[i].startFrom &&
-				'function' !== typeof values[i].startFrom
+				null !== ANIMATIONS[i].startFrom &&
+				'function' !== typeof ANIMATIONS[i].startFrom
 			) {
 				it(
 					'StartFrom is specified',
-					() => assert.isObject(values[i].startFrom) &&
-						assert.isNumber(values[i].startFrom.x) &&
-						assert.isNumber(values[i].startFrom.y)
+					() => assert.isObject(ANIMATIONS[i].startFrom) &&
+						assert.isNumber(ANIMATIONS[i].startFrom.x) &&
+						assert.isNumber(ANIMATIONS[i].startFrom.y)
 				);
 			}
 
-			testState('Start', values[i].start);
-			testState('End', values[i].end);
+			testState('Start', ANIMATIONS[i].start);
+			testState('End', ANIMATIONS[i].end);
 
 			// Repeat and repeatFrom can be looked at together.
-			if ('function' !== typeof values[i].repeat) {
+			if ('function' !== typeof ANIMATIONS[i].repeat) {
 				it(
 					'Repeat is specified',
-					() => assert.isNumber(values[i].repeat) &&
-						assert.isAtLeast(values[i].repeat, 0)
+					() => assert.isNumber(ANIMATIONS[i].repeat) &&
+						assert.isAtLeast(ANIMATIONS[i].repeat, 0)
 				);
 
-				if (values[i].repeat) {
+				if (ANIMATIONS[i].repeat) {
 					it(
 						'RepeatFrom is specified',
-						() => assert.isNumber(values[i].repeatFrom) &&
-							assert.isAtLeast(values[i].repeatFrom, 0)
+						() => assert.isNumber(ANIMATIONS[i].repeatFrom) &&
+							assert.isAtLeast(ANIMATIONS[i].repeatFrom, 0)
 					);
 				}
 				else {
 					it(
 						'Repeat is specified',
-						() => assert.strictEqual(0, values[i].repeatFrom)
+						() => assert.strictEqual(0, ANIMATIONS[i].repeatFrom)
 					);
 				}
 			}
@@ -265,47 +256,47 @@ describe('Animation Pathways', () => {
 			else {
 				it(
 					'RepeatFrom is specified',
-					() => assert.isNumber(values[i].repeatFrom) &&
-						assert.isAtLeast(values[i].repeatFrom, 0)
+					() => assert.isNumber(ANIMATIONS[i].repeatFrom) &&
+						assert.isAtLeast(ANIMATIONS[i].repeatFrom, 0)
 				);
 			}
 
 			it(
 				'AllowExit is specified',
-				() => assert.isBoolean(values[i].allowExit)
+				() => assert.isBoolean(ANIMATIONS[i].allowExit)
 			);
 
 			it(
 				'AutoFlip is specified',
-				() => assert.isBoolean(values[i].autoFlip)
+				() => assert.isBoolean(ANIMATIONS[i].autoFlip)
 			);
 
 			it(
 				'DefautChoice is specified',
-				() => assert.isNumber(values[i].defaultChoice) &&
-					assert.isAtLeast(values[i].defaultChoice, 0)
+				() => assert.isNumber(ANIMATIONS[i].defaultChoice) &&
+					assert.isAtLeast(ANIMATIONS[i].defaultChoice, 0)
 			);
 
 			it(
 				'ForceGravity is specified',
-				() => assert.isBoolean(values[i].forceGravity)
+				() => assert.isBoolean(ANIMATIONS[i].forceGravity)
 			);
 
 			it(
 				'OffscreenChoice is specified',
-				() => assert.isNumber(values[i].offscreenChoice) &&
-					assert.isAtLeast(values[i].offscreenChoice, 0)
+				() => assert.isNumber(ANIMATIONS[i].offscreenChoice) &&
+					assert.isAtLeast(ANIMATIONS[i].offscreenChoice, 0)
 			);
 
 			it(
 				'IgnoreEdges is specified',
-				() => assert.isBoolean(values[i].ignoreEdges)
+				() => assert.isBoolean(ANIMATIONS[i].ignoreEdges)
 			);
 
 			it(
 				'StartupChoice is specified',
-				() => assert.isNumber(values[i].startupChoice) &&
-					assert.isAtLeast(values[i].startupChoice, 0)
+				() => assert.isNumber(ANIMATIONS[i].startupChoice) &&
+					assert.isAtLeast(ANIMATIONS[i].startupChoice, 0)
 			);
 		});
 	}
@@ -313,10 +304,10 @@ describe('Animation Pathways', () => {
 
 // Make sure we don't have any orphaned animations.
 describe('Animation Reachability', () => {
-	for (let i = 0; i < valuesLength; ++i) {
+	for (let i = 0; i < MAX_ANIMATION; ++i) {
 		it(
-			`Animation #${values[i].id} is reachable.`,
-			() => assert.isTrue(reachable.has(values[i].id))
+			`Animation #${i + 1} is reachable.`,
+			() => assert.isTrue(reachable.has(i + 1))
 		);
 	}
 });

@@ -9,7 +9,7 @@ import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
-import { MateAnimationPossibility, MateAnimationState, RawMateAnimation } from './_types.mjs';
+import { MateAnimationPossibility, MateAnimationState } from './_types.mjs';
 
 
 
@@ -109,7 +109,7 @@ new window['Vue']({
 		'name': NAME,
 		'version': VERSION,
 
-		'animations': Object.values(/** @type {!Object<!RawMateAnimation>} */ (ANIMATIONS)).reduce((out, v) => {
+		'animations': ANIMATIONS.reduce((out, v) => {
 			// Let's transform start and end properties for consistency.
 			const start = standardizeMateAnimationState(v.start);
 			const end = standardizeMateAnimationState(v.end);
