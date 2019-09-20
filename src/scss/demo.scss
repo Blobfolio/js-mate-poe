@@ -523,6 +523,8 @@ body {
 
 			&:first-child { padding-left: 0; }
 			&:last-child { padding-right: 0; }
+
+			.infinity { color: green; }
 		} // .playground-frames-col
 
 		&-order {

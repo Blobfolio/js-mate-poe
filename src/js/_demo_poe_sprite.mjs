@@ -516,6 +516,9 @@ export const poeSprite = {
 						<tr v-for="(f, index) in frames">
 							<td class="playground-frames-col for-id accent">
 								#{{ f }}
+								<template v-if="repeat && index >= repeatFrom">
+									<br><span class="infinity">∞</span>
+								</template>
 							</td>
 							<td class="playground-frames-col for-frame">
 								<poe-frame
@@ -541,9 +544,6 @@ export const poeSprite = {
 										v-on:click.prevent="lowerFrame(index)"
 									></poe-icon>
 								</div>
-							</td>
-							<td class="playground-frames-col for-repeat accent">
-								<template v-if="repeat && index >= repeatFrom">∞</template>
 							</td>
 						</tr>
 					</tbody>
