@@ -312,13 +312,8 @@ export const poeSprite = {
 				_timeout = null;
 			}
 
-			const length = this['playlist'].length;
-
-			if (! length) {
+			if (! this['playlist'].length) {
 				this['tick'] = -1;
-			}
-			else if (1 === length) {
-				this['tick'] = 0;
 			}
 			else {
 				this['tick'] = 0;
