@@ -3,13 +3,13 @@
  */
 
 /* eslint-disable quote-props */
-import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION } from './_animations.mjs';
+import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
-import { MateAnimationPossibility, MateAnimationState } from './_types.mjs';
+import { MateAnimationAudio, MateAnimationPosition, MateAnimationPossibility, MateAnimationState } from './_types.mjs';
 
 
 
@@ -19,25 +19,6 @@ import { MateAnimationPossibility, MateAnimationState } from './_types.mjs';
 
 /** @type {boolean} */
 let mounted = false;
-
-/**
- * Standardize MateAnimationState
- *
- * @param {(number|MateAnimationState|Function)} v Value.
- * @return {MateAnimationState} Value.
- */
-const standardizeMateAnimationState = function(v) {
-	let out = ('function' === typeof v ? v() : v);
-	if ('number' === typeof out) {
-		out = {
-			x: 0,
-			y: 0,
-			speed: out,
-		};
-	}
-
-	return /** @type {!MateAnimationState} */ (out);
-};
 
 /**
  * Standardize MateAnimationPossibility
@@ -110,10 +91,6 @@ new window['Vue']({
 		'version': VERSION,
 
 		'animations': ANIMATIONS.reduce((out, v) => {
-			// Let's transform start and end properties for consistency.
-			const start = standardizeMateAnimationState(v.start);
-			const end = standardizeMateAnimationState(v.end);
-
 			// Same for next and edge.
 			const next = standardizeMateAnimationPossibility(v.next);
 			const edge = standardizeMateAnimationPossibility(v.edge);
@@ -151,19 +128,19 @@ new window['Vue']({
 				'playable': playable,
 				/** @type {boolean} */
 				'variableDuration': ('function' === typeof v.repeat),
-				/** @type {?Object} */
-				'startFrom': ('function' === typeof v.startFrom ? v.startFrom() : v.startFrom),
-				/** @type {Object} */
-				'start': start,
-				/** @type {Object} */
-				'end': end,
+				/** @type {?MateAnimationPosition} */
+				'startFrom': standardizeMateAnimationPosition(v.startFrom),
+				/** @type {MateAnimationState} */
+				'start': standardizeMateAnimationState(v.start),
+				/** @type {MateAnimationState} */
+				'end': standardizeMateAnimationState(v.end),
 				/** @type {number} */
 				'repeat': ('function' === typeof v.repeat ? v.repeat() : v.repeat),
 				/** @type {number} */
 				'repeatFrom': v.repeatFrom,
 				/** @type {Array<number>} */
 				'frames': v.frames,
-				/** @type {?Object} */
+				/** @type {?MateAnimationAudio} */
 				'audio': v.audio,
 				/** @type {boolean} */
 				'allowExit': v.allowExit,

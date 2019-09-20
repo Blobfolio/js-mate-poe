@@ -4,7 +4,7 @@
 
 import { screenHeight, screenWidth } from './_helpers.mjs';
 import { TILE_SIZE } from './_image.mjs';
-import { MateAnimationPossibility, MateAnimation, RawMateAnimation } from './_types.mjs';
+import { MateAnimationPosition, MateAnimationPossibility, MateAnimationState, MateAnimation, RawMateAnimation } from './_types.mjs';
 
 
 
@@ -2397,62 +2397,6 @@ export const ANIMATIONS = [
 export const MAX_ANIMATION = ANIMATIONS.length;
 
 /**
- * A Single Animation
- *
- * @param {number} id Animation ID.
- * @return {?MateAnimation} Animation.
- */
-export const animation = function(id) {
-	if (! verifyAnimationId(id)) {
-		return null;
-	}
-
-	/** @type {RawMateAnimation} */
-	const value = ANIMATIONS[id - 1];
-
-	// Let's transform start and end properties here.
-	let start = ('function' === typeof value.start ? value.start() : value.start);
-	if ('number' === typeof start) {
-		start = {
-			x: 0,
-			y: 0,
-			speed: start,
-		};
-	}
-
-	let end = ('function' === typeof value.end ? value.end() : value.end);
-	if ('number' === typeof end) {
-		end = {
-			x: 0,
-			y: 0,
-			speed: end,
-		};
-	}
-
-	return /** @type {MateAnimation} */ ({
-		id: value.id,
-		name: value.name,
-		startFrom: ('function' === typeof value.startFrom ? value.startFrom() : value.startFrom),
-		start: start,
-		end: end,
-		repeat: ('function' === typeof value.repeat ? value.repeat() : value.repeat),
-		repeatFrom: value.repeatFrom,
-		frames: value.frames,
-		audio: value.audio,
-		allowExit: value.allowExit,
-		autoFlip: value.autoFlip,
-		defaultChoice: value.defaultChoice,
-		forceGravity: value.forceGravity,
-		offscreenChoice: value.offscreenChoice,
-		ignoreEdges: value.ignoreEdges,
-		startupChoice: value.startupChoice,
-		childId: value.childId,
-		edge: value.edge,
-		next: value.next,
-	});
-};
-
-/**
  * Dragging Animation
  *
  * @const {number}
@@ -2548,6 +2492,111 @@ export const CHILD_ANIMATIONS = ANIMATIONS.reduce((out, v) => {
 
 	return out;
 }, new Set());
+
+
+
+// ---------------------------------------------------------------------
+// Misc Helpers
+// ---------------------------------------------------------------------
+
+/**
+ * A Single Animation
+ *
+ * @param {number} id Animation ID.
+ * @return {?MateAnimation} Animation.
+ */
+export const animation = function(id) {
+	if (! verifyAnimationId(id)) {
+		return null;
+	}
+
+	/** @type {RawMateAnimation} */
+	const value = ANIMATIONS[id - 1];
+
+	return /** @type {MateAnimation} */ ({
+		id: value.id,
+		name: value.name,
+		startFrom: standardizeMateAnimationPosition(value.startFrom),
+		start: standardizeMateAnimationState(value.start),
+		end: standardizeMateAnimationState(value.end),
+		repeat: ('function' === typeof value.repeat ? value.repeat() : value.repeat),
+		repeatFrom: value.repeatFrom,
+		frames: value.frames,
+		audio: value.audio,
+		allowExit: value.allowExit,
+		autoFlip: value.autoFlip,
+		defaultChoice: value.defaultChoice,
+		forceGravity: value.forceGravity,
+		offscreenChoice: value.offscreenChoice,
+		ignoreEdges: value.ignoreEdges,
+		startupChoice: value.startupChoice,
+		childId: value.childId,
+		edge: value.edge,
+		next: value.next,
+	});
+};
+
+/**
+ * Standardize MateAnimationPosition
+ *
+ * @param {(null|Function|MateAnimationPosition)} position Position.
+ * @return {?MateAnimationPosition} Possition.
+ */
+export const standardizeMateAnimationPosition = function(position) {
+	if (null === position) {
+		return null;
+	}
+
+	if ('function' === typeof position) {
+		position = position();
+	}
+
+	if (
+		('object' !== typeof position) ||
+		(null === position) ||
+		('number' !== typeof position.x) ||
+		('number' !== typeof position.y)
+	) {
+		return null;
+	}
+
+	return /** @type {!MateAnimationPosition} */ (position);
+};
+
+/**
+ * Standardize MateAnimationState
+ *
+ * @param {(number|Function|!MateAnimationState)} state State.
+ * @return {MateAnimationState} State.
+ */
+export const standardizeMateAnimationState = function(state) {
+	if ('function' === typeof state) {
+		state = state();
+	}
+
+	if ('number' === typeof state) {
+		state = {
+			x: 0,
+			y: 0,
+			speed: state,
+		};
+	}
+	else if (
+		('object' !== typeof state) ||
+		(null === state) ||
+		('number' !== typeof state.x) ||
+		('number' !== typeof state.y) ||
+		('number' !== typeof state.speed)
+	) {
+		state = {
+			x: 0,
+			y: 0,
+			speed: 100,
+		};
+	}
+
+	return /** @type {!MateAnimationState} */ (state);
+};
 
 /**
  * Verify Animation ID
