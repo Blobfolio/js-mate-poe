@@ -78,7 +78,19 @@ export const screenHeight = function() {
  * @return {number} Width.
  */
 export const screenWidth = function() {
-	return parseInt(window.innerWidth, 10) || 0;
+	/** @type {number} */
+	const windowWidth = parseInt(window.innerWidth, 10) || 0;
+
+	/** @type {number} */
+	const docWidth = parseInt(document.documentElement.offsetWidth, 10) || 0;
+
+	// If the document width is a little bit smaller than the window width, there's probably a scrollbar.
+	if (docWidth < windowWidth && docWidth + 25 >= windowWidth) {
+		return docWidth;
+	}
+	else {
+		return windowWidth;
+	}
 };
 
 
