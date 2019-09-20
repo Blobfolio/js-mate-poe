@@ -118,8 +118,8 @@ export const poeSprite = {
 				[]
 			)
 				.sort((a, b) => {
-					const a_key = a.name.toLowerCase();
-					const b_key = b.name.toLowerCase();
+					const a_key = a['name'].toLowerCase();
+					const b_key = b['name'].toLowerCase();
 
 					if (a_key < b_key) {
 						return -1;

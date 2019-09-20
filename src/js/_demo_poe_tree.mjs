@@ -63,17 +63,17 @@ export const poeTree = {
 
 			// Sort by probability.
 			out.sort((a, b) => {
-				if (a.weight < b.weight) {
+				if (a['weight'] < b['weight']) {
 					return 1;
 				}
-				else if (a.weight > b.weight) {
+				else if (a['weight'] > b['weight']) {
 					return -1;
 				}
 				else {
-					if (a.name < b.name) {
+					if (a['name'] < b['name']) {
 						return -1;
 					}
-					else if (a.name > b.name) {
+					else if (a['name'] > b['name']) {
 						return 1;
 					}
 					return 0;
