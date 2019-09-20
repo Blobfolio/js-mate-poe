@@ -610,6 +610,11 @@ export const Mate = class {
 
 		// Should we be animating?
 		if ((null === this.el) || ! stepsLength) {
+			// If a child, make sure we kill it!
+			if (this.child) {
+				this.destroy();
+			}
+
 			return;
 		}
 
@@ -801,6 +806,12 @@ export const Mate = class {
 	 * @return {boolean} True/false.
 	 */
 	start() {
+		// This cannot be called on a child.
+		if (this.child) {
+			this.destroy();
+			return false;
+		}
+
 		// Prevent circular restarts.
 		this.allowExit = false;
 		this.setFlip(false);
