@@ -194,7 +194,7 @@ export const logInfo = function(msg) {
 /**
  * Ranked Choice
  *
- * @param {(number|Array<MateAnimationPossibility>)} v Choices.
+ * @param {(number|Array<(number|MateAnimationPossibility)>)} v Choices.
  * @return {number} Entry.
  */
 export const rankedChoice = function(v) {
@@ -226,6 +226,7 @@ export const rankedChoice = function(v) {
 	// Build a weighted array.
 	/** @type {Array<number>} */
 	let out = [];
+
 	for (let i = 0; i < length; ++i) {
 		if ('number' === typeof v[i]) {
 			out.push(v[i]);

@@ -82,13 +82,13 @@ export const Mate = class {
 				bindEvent(
 					this.el,
 					'mousedown',
-					(e) => this.onDragStart(e),
+					(/** @type {Event} */ e) => this.onDragStart(e),
 					{ passive: true }
 				);
 				bindEvent(
 					this.el,
 					'dblclick',
-					(e) => {
+					(/** @type {Event} */ e) => {
 						e.preventDefault();
 						const event = new CustomEvent('poeDestroy');
 						window.dispatchEvent(event);

@@ -2415,85 +2415,125 @@ export const FALLING_ANIMATION = 5;
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const DEFAULT_CHOICES = ANIMATIONS.reduce((out, v) => {
-	if (1 === v.defaultChoice) {
-		out.push(v.id);
-	}
-	else if (v.defaultChoice) {
-		/** @type {MateAnimationPossibility} */
-		const weight = {
-			weight: v.defaultChoice,
-			id: v.id,
-		};
+export const DEFAULT_CHOICES = ANIMATIONS.reduce(
+	/**
+	 * Collect Animations
+	 *
+	 * @param {Array<(number|MateAnimationPossibility)>} out Collection.
+	 * @param {RawMateAnimation} v Animation.
+	 * @return {Array<(number|MateAnimationPossibility)>} Collection.
+	 */
+	(out, v) => {
+		if (1 === v.defaultChoice) {
+			out.push(v.id);
+		}
+		else if (v.defaultChoice) {
+			/** @type {MateAnimationPossibility} */
+			const weight = {
+				weight: v.defaultChoice,
+				id: v.id,
+			};
 
-		out.push(weight);
-	}
+			out.push(weight);
+		}
 
-	return out;
-}, []);
+		return out;
+	},
+	[]
+);
 
 /**
  * Animations that begin from offscreen.
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const OFFSCREEN_CHOICES = ANIMATIONS.reduce((out, v) => {
-	if (1 === v.offscreenChoice) {
-		out.push(v.id);
-	}
-	else if (v.offscreenChoice) {
-		/** @type {MateAnimationPossibility} */
-		const weight = {
-			weight: v.offscreenChoice,
-			id: v.id,
-		};
+export const OFFSCREEN_CHOICES = ANIMATIONS.reduce(
+	/**
+	 * Collect Animations
+	 *
+	 * @param {Array<(number|MateAnimationPossibility)>} out Collection.
+	 * @param {RawMateAnimation} v Animation.
+	 * @return {Array<(number|MateAnimationPossibility)>} Collection.
+	 */
+	(out, v) => {
+		if (1 === v.offscreenChoice) {
+			out.push(v.id);
+		}
+		else if (v.offscreenChoice) {
+			/** @type {MateAnimationPossibility} */
+			const weight = {
+				weight: v.offscreenChoice,
+				id: v.id,
+			};
 
-		out.push(weight);
-	}
+			out.push(weight);
+		}
 
-	return out;
-}, []);
+		return out;
+	},
+	[]
+);
 
 /**
  * Animations to kick things off with.
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const STARTUP_CHOICES = ANIMATIONS.reduce((out, v) => {
-	if (1 === v.startupChoice) {
-		out.push(v.id);
-	}
-	else if (v.startupChoice) {
-		/** @type {MateAnimationPossibility} */
-		const weight = {
-			weight: v.startupChoice,
-			id: v.id,
-		};
+export const STARTUP_CHOICES = ANIMATIONS.reduce(
+	/**
+	 * Collect Animations
+	 *
+	 * @param {Array<(number|MateAnimationPossibility)>} out Collection.
+	 * @param {RawMateAnimation} v Animation.
+	 * @return {Array<(number|MateAnimationPossibility)>} Collection.
+	 */
+	(out, v) => {
+		if (1 === v.startupChoice) {
+			out.push(v.id);
+		}
+		else if (v.startupChoice) {
+			/** @type {MateAnimationPossibility} */
+			const weight = {
+				weight: v.startupChoice,
+				id: v.id,
+			};
 
-		out.push(weight);
-	}
+			out.push(weight);
+		}
 
-	return out;
-}, []);
+		return out;
+	},
+	[]
+);
 
 /**
  * Child animations.
  *
- * @const Set<number>
+ * @const {Set<number>}
  */
-export const CHILD_ANIMATIONS = ANIMATIONS.reduce((out, v) => {
-	// Direct children are always children.
-	if (0 < v.childId) {
-		out.add(v.childId);
-	}
+export const CHILD_ANIMATIONS = ANIMATIONS.reduce(
+	/**
+	 * Collect Animations
+	 *
+	 * @param {Set<number>} out Collection.
+	 * @param {RawMateAnimation} v Animation.
+	 * @return {Set<number>} Collection.
+	 */
+	(out, v) => {
+		// Direct children are always children.
+		if (0 < v.childId) {
+			out.add(v.childId);
+		}
 
-	// Most children have the string "(Child)" in their name. This is less resource-intensive to look for than recursing through all the possible next/edge animations of direct children.
-	if (-1 !== v.name.indexOf('(Child)')) {
-		out.add(v.id);
-	}
+		// Most children have the string "(Child)" in their name. This is less resource-intensive to look for than recursing through all the possible next/edge animations of direct children.
+		if (-1 !== v.name.indexOf('(Child)')) {
+			out.add(v.id);
+		}
 
-	return out;
-}, new Set());
+		return out;
+	},
+	new Set()
+);
 
 
 

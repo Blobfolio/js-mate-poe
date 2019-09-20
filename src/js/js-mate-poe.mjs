@@ -61,7 +61,7 @@ const Poe = class {
 		bindEvent(
 			document.documentElement,
 			'mousemove',
-			(e) => Poe.onDrag(e),
+			(/** @type {Event} */ e) => Poe.onDrag(e),
 			{ passive: true }
 		);
 		bindEvent(
