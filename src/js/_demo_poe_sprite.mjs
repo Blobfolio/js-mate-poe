@@ -505,6 +505,9 @@ export const poeSprite = {
 									></poe-icon>
 								</div>
 							</td>
+							<td class="playground-frames-col for-repeat accent">
+								<template v-if="repeat && index >= repeatFrom">∞</template>
+							</td>
 						</tr>
 					</tbody>
 				</table>
