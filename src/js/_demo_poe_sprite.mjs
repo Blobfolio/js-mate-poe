@@ -56,7 +56,7 @@ const speedMin = 10;
  *
  * @const {number}
  */
-const speedMax = 999;
+const speedMax = 9999;
 
 /**
  * Timeout
