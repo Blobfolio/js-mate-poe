@@ -457,7 +457,7 @@ export const poeSprite = {
 						<label for="playground-repeat-from" class="accent">From</label>
 						<input
 							id="playground-repeat-from"
-							:max="frames.length - 1"
+							:max="frames.length ? frames.length - 1 : 0"
 							min="${repeatMin}"
 							step="1"
 							type="number"
