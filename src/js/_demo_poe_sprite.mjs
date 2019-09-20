@@ -167,6 +167,15 @@ export const poeSprite = {
 			if ('undefined' !== typeof this['frames'][index]) {
 				this['frames'].splice(index, 1);
 			}
+
+			const length = this['frames'].length;
+			if (! length) {
+				this['repeatFrom'] = 0;
+				this['repeat'] = 0;
+			}
+			else if (length <= this['repeatFrom']) {
+				this['repeatFrom'] = length - 1;
+			}
 		},
 
 		/**
