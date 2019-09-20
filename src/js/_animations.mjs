@@ -2482,10 +2482,12 @@ export const STARTUP_CHOICES = ANIMATIONS.reduce((out, v) => {
  * @const Set<number>
  */
 export const CHILD_ANIMATIONS = ANIMATIONS.reduce((out, v) => {
+	// Direct children are always children.
 	if (0 < v.childId) {
 		out.add(v.childId);
 	}
 
+	// Most children have the string "(Child)" in their name. This is less resource-intensive to look for than recursing through all the possible next/edge animations of direct children.
 	if (-1 !== v.name.indexOf('(Child)')) {
 		out.add(v.id);
 	}
@@ -2543,10 +2545,12 @@ export const animation = function(id) {
  * @return {?MateAnimationPosition} Possition.
  */
 export const standardizeMateAnimationPosition = function(position) {
+	// Most animations lack this attribute, in which case null it is.
 	if (null === position) {
 		return null;
 	}
 
+	// Resolve the callback.
 	if ('function' === typeof position) {
 		position = position();
 	}
@@ -2570,10 +2574,12 @@ export const standardizeMateAnimationPosition = function(position) {
  * @return {MateAnimationState} State.
  */
 export const standardizeMateAnimationState = function(state) {
+	// Resolve the callback.
 	if ('function' === typeof state) {
 		state = state();
 	}
 
+	// A number by itself indicates the speed (without x/y movement).
 	if ('number' === typeof state) {
 		state = {
 			x: 0,
@@ -2581,6 +2587,7 @@ export const standardizeMateAnimationState = function(state) {
 			speed: state,
 		};
 	}
+	// Otherwise make sure it has the right bits.
 	else if (
 		('object' !== typeof state) ||
 		(null === state) ||
@@ -2588,6 +2595,7 @@ export const standardizeMateAnimationState = function(state) {
 		('number' !== typeof state.y) ||
 		('number' !== typeof state.speed)
 	) {
+		// We have to return something, so here's a good default.
 		state = {
 			x: 0,
 			y: 0,
