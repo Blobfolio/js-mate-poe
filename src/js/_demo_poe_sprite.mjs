@@ -232,15 +232,13 @@ export const poeSprite = {
 				tick = 0;
 			}
 
-			this['tick'] = tick;
 
 			// Bump the frame as needed.
 			window['Vue']['nextTick'](() => {
+				this['tick'] = tick;
 				_timeout = setTimeout(() => {
 					_timeout = null;
-					window.requestAnimationFrame(() => {
-						this['tickCycle']();
-					});
+					this['tickCycle']();
 				}, this['speed']);
 			});
 		},
@@ -357,8 +355,8 @@ export const poeSprite = {
 				this['tick'] = -1;
 			}
 			else {
-				this['tick'] = 0;
 				window['Vue']['nextTick'](() => {
+					this['tick'] = 0;
 					this['tickCycle']();
 				});
 			}
