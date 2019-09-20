@@ -15,11 +15,10 @@ import { MateAnimationPossibility, MateAnimation, RawMateAnimation } from './_ty
 /**
  * All Animations
  *
- * @const {Object<!RawMateAnimation>}
+ * @const {Array<!RawMateAnimation>}
  */
-export const ANIMATIONS = {
-	/** @type {RawMateAnimation} */
-	1: {
+export const ANIMATIONS = [
+	{
 		id: 1,
 		name: 'Walk',
 		startFrom: null,
@@ -100,8 +99,7 @@ export const ANIMATIONS = {
 			},
 		],
 	},
-	/** @type {RawMateAnimation} */
-	2: {
+	{
 		id: 2,
 		name: 'Rotate',
 		startFrom: null,
@@ -126,8 +124,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 3,
 	},
-	/** @type {RawMateAnimation} */
-	3: {
+	{
 		id: 3,
 		name: 'Rotate (End)',
 		startFrom: null,
@@ -158,8 +155,7 @@ export const ANIMATIONS = {
 			26,
 		],
 	},
-	/** @type {RawMateAnimation} */
-	4: {
+	{
 		id: 4,
 		name: 'Drag',
 		startFrom: null,
@@ -187,8 +183,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 4,
 	},
-	/** @type {RawMateAnimation} */
-	5: {
+	{
 		id: 5,
 		name: 'Fall',
 		startFrom: null,
@@ -219,8 +214,7 @@ export const ANIMATIONS = {
 		edge: 9,
 		next: 6,
 	},
-	/** @type {RawMateAnimation} */
-	6: {
+	{
 		id: 6,
 		name: 'Grasping Fall',
 		startFrom: null,
@@ -260,8 +254,7 @@ export const ANIMATIONS = {
 		],
 		next: 6,
 	},
-	/** @type {RawMateAnimation} */
-	7: {
+	{
 		id: 7,
 		name: 'Run',
 		startFrom: null,
@@ -307,8 +300,7 @@ export const ANIMATIONS = {
 			},
 		],
 	},
-	/** @type {RawMateAnimation} */
-	8: {
+	{
 		id: 8,
 		name: 'Boing!',
 		startFrom: null,
@@ -359,8 +351,7 @@ export const ANIMATIONS = {
 			},
 		],
 	},
-	/** @type {RawMateAnimation} */
-	9: {
+	{
 		id: 9,
 		name: 'Bounce',
 		startFrom: null,
@@ -385,8 +376,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 65,
 	},
-	/** @type {RawMateAnimation} */
-	10: {
+	{
 		id: 10,
 		name: 'Splat!',
 		startFrom: null,
@@ -413,8 +403,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	11: {
+	{
 		id: 11,
 		name: 'Urinate',
 		startFrom: null,
@@ -443,8 +432,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 12,
 	},
-	/** @type {RawMateAnimation} */
-	12: {
+	{
 		id: 12,
 		name: 'Urinate (End)',
 		startFrom: null,
@@ -473,8 +461,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	13: {
+	{
 		id: 13,
 		name: 'Play Dead',
 		startFrom: null,
@@ -508,8 +495,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	14: {
+	{
 		id: 14,
 		name: 'Scream!',
 		startFrom: null,
@@ -533,8 +519,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 7,
 	},
-	/** @type {RawMateAnimation} */
-	15: {
+	{
 		id: 15,
 		name: 'Sleep',
 		startFrom: null,
@@ -570,8 +555,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 16,
 	},
-	/** @type {RawMateAnimation} */
-	16: {
+	{
 		id: 16,
 		name: 'Sleep (Wake)',
 		startFrom: null,
@@ -607,8 +591,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	17: {
+	{
 		id: 17,
 		name: 'Doze',
 		startFrom: null,
@@ -638,8 +621,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 18,
 	},
-	/** @type {RawMateAnimation} */
-	18: {
+	{
 		id: 18,
 		name: 'Doze (Wake)',
 		startFrom: null,
@@ -664,8 +646,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 7,
 	},
-	/** @type {RawMateAnimation} */
-	19: {
+	{
 		id: 19,
 		name: 'Bored Sleep',
 		startFrom: null,
@@ -696,8 +677,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 20,
 	},
-	/** @type {RawMateAnimation} */
-	20: {
+	{
 		id: 20,
 		name: 'Bored Sleep (Wake)',
 		startFrom: null,
@@ -728,8 +708,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	21: {
+	{
 		id: 21,
 		name: 'Bath Dive',
 		startFrom: () => ({
@@ -763,8 +742,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 22,
 	},
-	/** @type {RawMateAnimation} */
-	22: {
+	{
 		id: 22,
 		name: 'Bath Dive (Burning Up)',
 		startFrom: null,
@@ -842,8 +820,7 @@ export const ANIMATIONS = {
 		edge: 47,
 		next: 47,
 	},
-	/** @type {RawMateAnimation} */
-	23: {
+	{
 		id: 23,
 		name: 'Bath Dive Tub (Child)',
 		startFrom: () => ({
@@ -869,8 +846,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 24,
 	},
-	/** @type {RawMateAnimation} */
-	24: {
+	{
 		id: 24,
 		name: 'Bath Splash (Child)',
 		startFrom: null,
@@ -924,8 +900,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	25: {
+	{
 		id: 25,
 		name: 'Jump',
 		startFrom: null,
@@ -979,8 +954,7 @@ export const ANIMATIONS = {
 			46,
 		],
 	},
-	/** @type {RawMateAnimation} */
-	26: {
+	{
 		id: 26,
 		name: 'Eat',
 		startFrom: null,
@@ -1014,8 +988,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	27: {
+	{
 		id: 27,
 		name: 'Flower (Child)',
 		startFrom: null,
@@ -1084,8 +1057,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	28: {
+	{
 		id: 28,
 		name: 'Black Sheep Frolic',
 		startFrom: () => ({
@@ -1121,8 +1093,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 29,
 	},
-	/** @type {RawMateAnimation} */
-	29: {
+	{
 		id: 29,
 		name: 'Black Sheep Approach',
 		startFrom: null,
@@ -1150,8 +1121,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 30,
 	},
-	/** @type {RawMateAnimation} */
-	30: {
+	{
 		id: 30,
 		name: 'Black Sheep Romance',
 		startFrom: null,
@@ -1190,8 +1160,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	31: {
+	{
 		id: 31,
 		name: 'Black Sheep Frolic (Child)',
 		startFrom: () => ({
@@ -1227,8 +1196,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 32,
 	},
-	/** @type {RawMateAnimation} */
-	32: {
+	{
 		id: 32,
 		name: 'Black Sheep Approach (Child)',
 		startFrom: null,
@@ -1256,8 +1224,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 33,
 	},
-	/** @type {RawMateAnimation} */
-	33: {
+	{
 		id: 33,
 		name: 'Black Sheep Romance (Child)',
 		startFrom: null,
@@ -1280,8 +1247,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 34,
 	},
-	/** @type {RawMateAnimation} */
-	34: {
+	{
 		id: 34,
 		name: 'Black Sheep Final (Child)',
 		startFrom: null,
@@ -1304,8 +1270,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	35: {
+	{
 		id: 35,
 		name: 'Begin Run',
 		startFrom: null,
@@ -1343,8 +1308,7 @@ export const ANIMATIONS = {
 		edge: 8,
 		next: 7,
 	},
-	/** @type {RawMateAnimation} */
-	36: {
+	{
 		id: 36,
 		name: 'Run (End)',
 		startFrom: null,
@@ -1384,8 +1348,7 @@ export const ANIMATIONS = {
 		edge: 8,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	37: {
+	{
 		id: 37,
 		name: 'Climb Wall',
 		startFrom: null,
@@ -1419,8 +1382,7 @@ export const ANIMATIONS = {
 		edge: 38,
 		next: 37,
 	},
-	/** @type {RawMateAnimation} */
-	38: {
+	{
 		id: 38,
 		name: 'Move Upside Down',
 		startFrom: null,
@@ -1449,8 +1411,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 39,
 	},
-	/** @type {RawMateAnimation} */
-	39: {
+	{
 		id: 39,
 		name: 'Walk Upside Down',
 		startFrom: null,
@@ -1482,8 +1443,7 @@ export const ANIMATIONS = {
 		edge: 40,
 		next: 39,
 	},
-	/** @type {RawMateAnimation} */
-	40: {
+	{
 		id: 40,
 		name: 'Upside Down Pause',
 		startFrom: null,
@@ -1507,8 +1467,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 41,
 	},
-	/** @type {RawMateAnimation} */
-	41: {
+	{
 		id: 41,
 		name: 'Climb Down',
 		startFrom: null,
@@ -1540,8 +1499,7 @@ export const ANIMATIONS = {
 		edge: 42,
 		next: 41,
 	},
-	/** @type {RawMateAnimation} */
-	42: {
+	{
 		id: 42,
 		name: 'Climb Over',
 		startFrom: null,
@@ -1569,8 +1527,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	43: {
+	{
 		id: 43,
 		name: 'Beg',
 		startFrom: null,
@@ -1607,8 +1564,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	44: {
+	{
 		id: 44,
 		name: 'Bleat',
 		startFrom: null,
@@ -1640,8 +1596,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	45: {
+	{
 		id: 45,
 		name: 'Handstand',
 		startFrom: null,
@@ -1681,8 +1636,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	46: {
+	{
 		id: 46,
 		name: 'Jump and Slide',
 		startFrom: null,
@@ -1719,8 +1673,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	47: {
+	{
 		id: 47,
 		name: 'Bath Cool Down',
 		startFrom: null,
@@ -1750,8 +1703,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 48,
 	},
-	/** @type {RawMateAnimation} */
-	48: {
+	{
 		id: 48,
 		name: 'Leave Bath',
 		startFrom: null,
@@ -1779,8 +1731,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 3,
 	},
-	/** @type {RawMateAnimation} */
-	49: {
+	{
 		id: 49,
 		name: 'Roll (Start)',
 		startFrom: null,
@@ -1805,8 +1756,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 50,
 	},
-	/** @type {RawMateAnimation} */
-	50: {
+	{
 		id: 50,
 		name: 'Roll',
 		startFrom: null,
@@ -1849,8 +1799,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 51,
 	},
-	/** @type {RawMateAnimation} */
-	51: {
+	{
 		id: 51,
 		name: 'Roll (End)',
 		startFrom: null,
@@ -1875,8 +1824,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	52: {
+	{
 		id: 52,
 		name: 'Sneeze',
 		startFrom: null,
@@ -1909,8 +1857,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	53: {
+	{
 		id: 53,
 		name: 'Scratch',
 		startFrom: null,
@@ -1934,8 +1881,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	54: {
+	{
 		id: 54,
 		name: 'Stargaze',
 		startFrom: () => ({
@@ -1970,8 +1916,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 55,
 	},
-	/** @type {RawMateAnimation} */
-	55: {
+	{
 		id: 55,
 		name: 'Stargaze Look',
 		startFrom: null,
@@ -1999,8 +1944,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 14,
 	},
-	/** @type {RawMateAnimation} */
-	56: {
+	{
 		id: 56,
 		name: 'Stargaze Look (Child)',
 		startFrom: () => ({
@@ -2037,8 +1981,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	57: {
+	{
 		id: 57,
 		name: 'Abduction',
 		startFrom: null,
@@ -2066,8 +2009,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 59,
 	},
-	/** @type {RawMateAnimation} */
-	58: {
+	{
 		id: 58,
 		name: 'Abduction (Child)',
 		startFrom: null,
@@ -2101,8 +2043,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 60,
 	},
-	/** @type {RawMateAnimation} */
-	59: {
+	{
 		id: 59,
 		name: 'Abduction (Vanishing)',
 		startFrom: null,
@@ -2172,8 +2113,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 63,
 	},
-	/** @type {RawMateAnimation} */
-	60: {
+	{
 		id: 60,
 		name: 'Abduction Beaming (Child)',
 		startFrom: null,
@@ -2199,8 +2139,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 62,
 	},
-	/** @type {RawMateAnimation} */
-	61: {
+	{
 		id: 61,
 		name: 'Abduction Beam (Child)',
 		startFrom: null,
@@ -2230,8 +2169,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	62: {
+	{
 		id: 62,
 		name: 'Abduction Getaway (Child)',
 		startFrom: null,
@@ -2265,8 +2203,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	63: {
+	{
 		id: 63,
 		name: 'Chasing a Martian!',
 		startFrom: () => ({
@@ -2302,8 +2239,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 44,
 	},
-	/** @type {RawMateAnimation} */
-	64: {
+	{
 		id: 64,
 		name: 'Chasing a Martian! (Child)',
 		startFrom: () => ({
@@ -2339,8 +2275,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: null,
 	},
-	/** @type {RawMateAnimation} */
-	65: {
+	{
 		id: 65,
 		name: 'Bounce (Up)',
 		startFrom: null,
@@ -2375,8 +2310,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 66,
 	},
-	/** @type {RawMateAnimation} */
-	66: {
+	{
 		id: 66,
 		name: 'Bounce (End)',
 		startFrom: null,
@@ -2414,8 +2348,7 @@ export const ANIMATIONS = {
 		edge: null,
 		next: 1,
 	},
-	/** @type {RawMateAnimation} */
-	67: {
+	{
 		id: 67,
 		name: 'Spin',
 		startFrom: null,
@@ -2454,7 +2387,14 @@ export const ANIMATIONS = {
 			52,
 		],
 	},
-};
+];
+
+/**
+ * Max Animation ID
+ *
+ * @const {number}
+ */
+export const MAX_ANIMATION = ANIMATIONS.length;
 
 /**
  * A Single Animation
@@ -2463,12 +2403,12 @@ export const ANIMATIONS = {
  * @return {?MateAnimation} Animation.
  */
 export const animation = function(id) {
-	if (('number' !== typeof id) || (undefined === ANIMATIONS[id])) {
+	if (! verifyAnimationId(id)) {
 		return null;
 	}
 
 	/** @type {RawMateAnimation} */
-	const value = ANIMATIONS[id];
+	const value = ANIMATIONS[id - 1];
 
 	// Let's transform start and end properties here.
 	let start = ('function' === typeof value.start ? value.start() : value.start);
@@ -2531,7 +2471,7 @@ export const FALLING_ANIMATION = 5;
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const DEFAULT_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS)).reduce((out, v) => {
+export const DEFAULT_CHOICES = ANIMATIONS.reduce((out, v) => {
 	if (1 === v.defaultChoice) {
 		out.push(v.id);
 	}
@@ -2553,7 +2493,7 @@ export const DEFAULT_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (A
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const OFFSCREEN_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS)).reduce((out, v) => {
+export const OFFSCREEN_CHOICES = ANIMATIONS.reduce((out, v) => {
 	if (1 === v.offscreenChoice) {
 		out.push(v.id);
 	}
@@ -2575,7 +2515,7 @@ export const OFFSCREEN_CHOICES = Object.values(/** @type {!RawMateAnimation} */ 
  *
  * @const {Array<(number|MateAnimationPossibility)>}
  */
-export const STARTUP_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS)).reduce((out, v) => {
+export const STARTUP_CHOICES = ANIMATIONS.reduce((out, v) => {
 	if (1 === v.startupChoice) {
 		out.push(v.id);
 	}
@@ -2597,7 +2537,7 @@ export const STARTUP_CHOICES = Object.values(/** @type {!RawMateAnimation} */ (A
  *
  * @const Set<number>
  */
-export const CHILD_ANIMATIONS = Object.values(/** @type {!RawMateAnimation} */ (ANIMATIONS)).reduce((out, v) => {
+export const CHILD_ANIMATIONS = ANIMATIONS.reduce((out, v) => {
 	if (0 < v.childId) {
 		out.add(v.childId);
 	}
@@ -2617,5 +2557,5 @@ export const CHILD_ANIMATIONS = Object.values(/** @type {!RawMateAnimation} */ (
  */
 export const verifyAnimationId = function(id) {
 	id = parseInt(id, 10) || -1;
-	return 0 < id && undefined !== ANIMATIONS[id];
+	return 0 < id && MAX_ANIMATION >= id;
 };
