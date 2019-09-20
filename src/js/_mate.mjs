@@ -42,6 +42,9 @@ export const Mate = class {
 		/** @type {number} */
 		this.y = -100;
 
+		/** @type {boolean} */
+		this.queued = false;
+
 		/** @type {number} */
 		this.frame = 0;
 
@@ -179,6 +182,7 @@ export const Mate = class {
 		this.allowExit = false;
 		this.x = -100;
 		this.y = -100;
+		this.queued = false;
 		this.frame = 0;
 		this.steps = [];
 		this.flipped = false;
@@ -428,7 +432,7 @@ export const Mate = class {
 		}
 
 		// Do it!
-		window.requestAnimationFrame((n) => this.paint(n));
+		this.queuePaint();
 		return true;
 	}
 
@@ -605,6 +609,8 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 */
 	paint(now) {
+		this.queued = false;
+
 		/** @type {number} */
 		let stepsLength = this.steps.length;
 
@@ -633,7 +639,7 @@ export const Mate = class {
 
 		// We might be a bit early.
 		if (null === step) {
-			window.requestAnimationFrame((n) => this.paint(n));
+			this.queuePaint();
 			return;
 		}
 
@@ -791,8 +797,22 @@ export const Mate = class {
 		}
 
 		// Do it all over again!
-		window.requestAnimationFrame((n) => this.paint(n));
+		this.queuePaint();
 		return;
+	}
+
+	/**
+	 * Queue Painting
+	 *
+	 * Prevent multiple callbacks being bound to the same animationFrame.
+	 *
+	 * @return {void} Nothing.
+	 */
+	queuePaint() {
+		if (! this.queued) {
+			this.queued = true;
+			window.requestAnimationFrame((/** @type {number} */ n) => this.paint(n));
+		}
 	}
 
 
