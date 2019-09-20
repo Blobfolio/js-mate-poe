@@ -418,6 +418,19 @@ body {
 		flex-wrap: wrap;
 		padding: 10px;
 		background-color: lightgrey;
+
+		&-errors {
+			display: block;
+			width: 100%;
+			margin-top: 10px;
+			color: red;
+			text-transform: none;
+
+			& > p {
+				margin: 5px 0 0 0;
+				&:first-child { margin-top: 0; }
+			}
+		} // .playground-settings-errors
 	} // .playground-settings
 
 	// Setting.
@@ -465,6 +478,8 @@ body {
 			&:hover,
 			&:active,
 			&:focus { border-color: black; }
+
+			&:invalid { border-color: red; }
 		}
 
 		// Hide Firefox's weird outline.

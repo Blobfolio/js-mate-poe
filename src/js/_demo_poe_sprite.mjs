@@ -249,6 +249,46 @@ export const poeSprite = {
 	/** @type {Object} */
 	'computed': {
 		/**
+		 * Settings Errors
+		 *
+		 * @return {(boolean|Array<string>)} Errors or false.
+		 */
+		'errors': function() {
+			/** @type {Array<string>} */
+			let out = [];
+
+			// Speed.
+			if (speedMin > this['speed']) {
+				out.push(`Speed must be at least ${speedMin}ms.`);
+			}
+			else if (speedMax < this['speed']) {
+				out.push(`Speed cannot exceed ${speedMax}ms.`);
+			}
+
+			// Repeat.
+			if (repeatMin > this['repeat']) {
+				out.push(`Repeat must be at least ${repeatMin}.`);
+
+				// Check repeat from only if we're repeating.
+
+				/** @type {number} */
+				const fromMax = this['frames'].length ? this['frames'].length - 1 : 0;
+
+				if (repeatMin > this['repeatFrom']) {
+					out.push(`Repeat From must be at least ${repeatMin}.`);
+				}
+				else if (fromMax < this['repeatFrom']) {
+					out.push(`Repeat From cannot exceed ${fromMax}.`);
+				}
+			}
+			else if (repeatMax < this['repeat']) {
+				out.push(`Repeat cannot exceed ${repeatMax}.`);
+			}
+
+			return out.length ? out : false;
+		},
+
+		/**
 		 * Playlist
 		 *
 		 * @return {(boolean|Array<number>)} Frames.
@@ -456,6 +496,13 @@ export const poeSprite = {
 							v-model.number="repeatFrom"
 						/>
 					</fieldset>
+
+					<div
+						v-if="false !== errors"
+						class="playground-settings-errors accent"
+					>
+						<p v-for="error in errors">{{ error }}</p>
+					</div>
 				</div>
 
 				<div class="playground-movie" v-if="false !== playlist && 0 <= tick">
