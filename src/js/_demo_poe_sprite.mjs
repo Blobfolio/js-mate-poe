@@ -208,14 +208,6 @@ export const poeSprite = {
 			) {
 				[this['frames'][index], this['frames'][index + 1]] = [this['frames'][index + 1], this['frames'][index]];
 			}
-			else {
-				console.warn(
-					index,
-					0 <= index,
-					this['frames'].length - 1 > index,
-					'undefined' !== typeof this['frames'][index]
-				);
-			}
 		},
 
 		/**
