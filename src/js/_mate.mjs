@@ -811,7 +811,7 @@ export const Mate = class {
 	queuePaint() {
 		if (! this.queued) {
 			this.queued = true;
-			window.requestAnimationFrame((/** @type {number} */ n) => this.paint(n));
+			requestAnimationFrame((/** @type {number} */ n) => this.paint(n));
 		}
 	}
 

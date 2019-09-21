@@ -198,7 +198,7 @@ const Poe = class {
 	 */
 	static onResize() {
 		if (null !== _mate) {
-			window.requestAnimationFrame(() => _mate.onResize());
+			requestAnimationFrame(() => _mate.onResize());
 		}
 	}
 
