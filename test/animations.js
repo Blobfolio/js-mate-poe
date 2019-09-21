@@ -163,9 +163,9 @@ describe('Animation Pathways', () => {
 
 			// If this is a default, startup, or offscreen animation, it is directly reachable.
 			if (
-				0 < ANIMATIONS[i].defaultChoice ||
-				0 < ANIMATIONS[i].offscreenChoice ||
-				0 < ANIMATIONS[i].startupChoice
+				0 < ANIMATIONS[i].useDefault ||
+				0 < ANIMATIONS[i].useEntrance ||
+				0 < ANIMATIONS[i].useFirst
 			) {
 				reachable.add(ANIMATIONS[i].id);
 			}
@@ -262,41 +262,26 @@ describe('Animation Pathways', () => {
 			}
 
 			it(
-				'AllowExit is specified',
-				() => assert.isBoolean(ANIMATIONS[i].allowExit)
-			);
-
-			it(
-				'AutoFlip is specified',
-				() => assert.isBoolean(ANIMATIONS[i].autoFlip)
+				'Flags are specified',
+				() => assert.isNumber(ANIMATIONS[i].flags)
 			);
 
 			it(
 				'DefautChoice is specified',
-				() => assert.isNumber(ANIMATIONS[i].defaultChoice) &&
-					assert.isAtLeast(ANIMATIONS[i].defaultChoice, 0)
-			);
-
-			it(
-				'ForceGravity is specified',
-				() => assert.isBoolean(ANIMATIONS[i].forceGravity)
+				() => assert.isNumber(ANIMATIONS[i].useDefault) &&
+					assert.isAtLeast(ANIMATIONS[i].useDefault, 0)
 			);
 
 			it(
 				'OffscreenChoice is specified',
-				() => assert.isNumber(ANIMATIONS[i].offscreenChoice) &&
-					assert.isAtLeast(ANIMATIONS[i].offscreenChoice, 0)
-			);
-
-			it(
-				'IgnoreEdges is specified',
-				() => assert.isBoolean(ANIMATIONS[i].ignoreEdges)
+				() => assert.isNumber(ANIMATIONS[i].useEntrance) &&
+					assert.isAtLeast(ANIMATIONS[i].useEntrance, 0)
 			);
 
 			it(
 				'StartupChoice is specified',
-				() => assert.isNumber(ANIMATIONS[i].startupChoice) &&
-					assert.isAtLeast(ANIMATIONS[i].startupChoice, 0)
+				() => assert.isNumber(ANIMATIONS[i].useFirst) &&
+					assert.isAtLeast(ANIMATIONS[i].useFirst, 0)
 			);
 		});
 	}
