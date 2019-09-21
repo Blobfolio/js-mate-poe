@@ -2,6 +2,7 @@
  * @file Component: Poe Sprite
  */
 
+/* global Vue */
 /* eslint-disable quote-props */
 import { ANIMATIONS, standardizeMateAnimationState } from './_animations.mjs';
 import { TILES_X, TILES_Y } from './_image.mjs';
@@ -234,7 +235,7 @@ export const poeSprite = {
 
 
 			// Bump the frame as needed.
-			window['Vue']['nextTick'](() => {
+			Vue.nextTick(() => {
 				this['tick'] = tick;
 				_timeout = setTimeout(() => {
 					_timeout = null;
@@ -355,7 +356,7 @@ export const poeSprite = {
 				this['tick'] = -1;
 			}
 			else {
-				window['Vue']['nextTick'](() => {
+				Vue.nextTick(() => {
 					this['tick'] = 0;
 					this['tickCycle']();
 				});

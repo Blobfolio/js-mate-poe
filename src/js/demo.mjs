@@ -2,6 +2,7 @@
  * @file The Demo!
  */
 
+/* global Vue */
 /* eslint-disable quote-props */
 import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
@@ -76,11 +77,11 @@ const standardizeMateAnimationPossibility = function(v) {
 // ---------------------------------------------------------------------
 
 // Register components.
-window['Vue']['component']('poe-animation', poeAnimation);
-window['Vue']['component']('poe-frame', poeFrame);
-window['Vue']['component']('poe-icon', poeIcon);
-window['Vue']['component']('poe-sprite', poeSprite);
-window['Vue']['component']('poe-tree', poeTree);
+Vue.component('poe-animation', poeAnimation);
+Vue.component('poe-frame', poeFrame);
+Vue.component('poe-icon', poeIcon);
+Vue.component('poe-sprite', poeSprite);
+Vue.component('poe-tree', poeTree);
 
 // Get Vue going!
 new Vue(/** @type {!VueApp} */ ({

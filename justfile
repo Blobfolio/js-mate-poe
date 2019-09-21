@@ -133,6 +133,7 @@ test_dir  := base_dir + "/test"
 		--env BROWSER \
 		--language_in STABLE \
 		--language_out STABLE \
+		--externs "{{ src_dir }}/js/_externs.js" \
 		--js "{{ src_dir }}/js"/*.mjs \
 		--js_output_file "{{ OUT }}" \
 		--jscomp_off globalThis \
