@@ -53,7 +53,7 @@
 	&.fade-in { opacity: 1; }
 }
 
-// There are a lot of frames!
+// There are a lot of frames! (We're skipping the first frame (0) as it matches the default position.)
 @for $frame from 1 through $tiles - 1 {
 	$x: (0 - $tile_size) * ($frame % $tiles_x);
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
