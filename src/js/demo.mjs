@@ -4,7 +4,7 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
+import { ANIMATIONS, FLAGS, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
@@ -98,37 +98,11 @@ new Vue(/** @type {!VueApp} */ ({
 			const next = standardizeMateAnimationPossibility(v.next);
 			const edge = standardizeMateAnimationPossibility(v.edge);
 
-			/** @type {boolean} */
-			const primary = (0 < v.useDefault) ||
-				(
-					0 < v.useFirst &&
-					5 !== v.id &&
-					6 !== v.id
-				);
-
-			/** @type {boolean} */
-			const playable = ! CHILD_ANIMATIONS.has(v.id) &&
-				DRAGGING_ANIMATION !== v.id &&
-				// Falling.
-				5 !== v.id &&
-				6 !== v.id &&
-				// Border crawling.
-				37 !== v.id &&
-				38 !== v.id &&
-				39 !== v.id &&
-				40 !== v.id &&
-				41 !== v.id &&
-				42 !== v.id;
-
 			out.push({
 				/** @type {number} */
 				'id': v.id,
 				/** @type {string} */
 				'name': v.name,
-				/** @type {boolean} */
-				'primary': primary,
-				/** @type {boolean} */
-				'playable': playable,
 				/** @type {boolean} */
 				'variableDuration': ('function' === typeof v.repeat),
 				/** @type {?MateAnimationPosition} */
@@ -163,8 +137,8 @@ new Vue(/** @type {!VueApp} */ ({
 
 			return out;
 		}, []).sort((a, b) => {
-			let a_key = `${a['primary'] ? '0_' : '1_'}${a['playable'] ? '0_' : '1_'}${a['name']}`;
-			let b_key = `${b['primary'] ? '0_' : '1_'}${b['playable'] ? '0_' : '1_'}${b['name']}`;
+			let a_key = `${(FLAGS.demoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
+			let b_key = `${(FLAGS.demoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
 
 			return (a_key < b_key) ? -1 : 1;
 		}),

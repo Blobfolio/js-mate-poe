@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable quote-props */
-import { DRAGGING_ANIMATION, FALLING_ANIMATION } from './_animations.mjs';
+import { DRAGGING_ANIMATION, FALLING_ANIMATION, FLAGS } from './_animations.mjs';
 import { MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
 
 
@@ -37,20 +37,6 @@ export const poeAnimation = {
 		'name': {
 			'type': String,
 			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'primary': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
-		},
-
-		/** @type {VueProp} */
-		'playable': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
 		},
 
 		/** @type {VueProp} */
@@ -233,6 +219,15 @@ export const poeAnimation = {
 		},
 
 		/**
+		 * Is Playable?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'isPlayable': function() {
+			return !! (FLAGS.demoPlay & this['flags']);
+		},
+
+		/**
 		 * Duration
 		 *
 		 * @return {string} Duration.
@@ -337,7 +332,7 @@ export const poeAnimation = {
 				<!-- Main attributes. -->
 				<div class="animation-legend">
 					<poe-icon
-						v-if="playable"
+						v-if="isPlayable"
 						class="animation-legend-icon play-toggle"
 						icon="play"
 						title="Play Animation"
