@@ -99,9 +99,9 @@ new Vue(/** @type {!VueApp} */ ({
 			const edge = standardizeMateAnimationPossibility(v.edge);
 
 			/** @type {boolean} */
-			const primary = (0 < v.defaultChoice) ||
+			const primary = (0 < v.useDefault) ||
 				(
-					0 < v.startupChoice &&
+					0 < v.useFirst &&
 					5 !== v.id &&
 					6 !== v.id
 				);
@@ -146,11 +146,11 @@ new Vue(/** @type {!VueApp} */ ({
 				/** @type {?MateAnimationAudio} */
 				'audio': v.audio,
 				/** @type {number} */
-				'defaultChoice': v.defaultChoice,
+				'useDefault': v.useDefault,
 				/** @type {number} */
-				'offscreenChoice': v.offscreenChoice,
+				'useEntrance': v.useEntrance,
 				/** @type {number} */
-				'startupChoice': v.startupChoice,
+				'useFirst': v.useFirst,
 				/** @type {number} */
 				'flags': v.flags,
 				/** @type {number} */

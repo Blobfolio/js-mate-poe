@@ -107,21 +107,21 @@ export const poeAnimation = {
 		},
 
 		/** @type {VueProp} */
-		'defaultChoice': {
+		'useDefault': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
 
 		/** @type {VueProp} */
-		'offscreenChoice': {
+		'useEntrance': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
 
 		/** @type {VueProp} */
-		'startupChoice': {
+		'useFirst': {
 			'type': Number,
 			'required': false,
 			'default': 0,
@@ -227,9 +227,9 @@ export const poeAnimation = {
 				return true;
 			}
 
-			return ! this['defaultChoice'] &&
-				! this['startupChoice'] &&
-				! this['offscreenChoice'];
+			return ! this['useDefault'] &&
+				! this['useFirst'] &&
+				! this['useEntrance'];
 		},
 
 		/**
@@ -359,21 +359,21 @@ export const poeAnimation = {
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < startupChoice"
+						v-if="0 < useFirst"
 						class="animation-legend-icon"
 						icon="startup"
 						title="Startup Choice"
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < defaultChoice"
+						v-if="0 < useDefault"
 						class="animation-legend-icon"
 						icon="default"
 						title="Default Choice"
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < offscreenChoice"
+						v-if="0 < useEntrance"
 						class="animation-legend-icon"
 						icon="offscreen"
 						title="Offscreen Choice"

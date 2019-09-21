@@ -2,7 +2,7 @@
  * @file The sprite object!
  */
 
-import { FLAGS, DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, OFFSCREEN_CHOICES, STARTUP_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
+import { FLAGS, DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, ENTRANCE_CHOICES, FIRST_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
 import { audioFile } from './_audio.mjs';
 import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './_helpers.mjs';
 import { IMAGE, TILE_SIZE } from './_image.mjs';
@@ -837,7 +837,7 @@ export const Mate = class {
 		this.setFlip(false);
 
 		/** @type {number} */
-		const id = rankedChoice(STARTUP_CHOICES);
+		const id = rankedChoice(FIRST_CHOICES);
 
 		// Choose something!
 		switch (id) {
@@ -883,7 +883,7 @@ export const Mate = class {
 			! Array.isArray(choices) ||
 			! choices.length
 		) {
-			choices = this.isVisible() ? DEFAULT_CHOICES : OFFSCREEN_CHOICES;
+			choices = this.isVisible() ? DEFAULT_CHOICES : ENTRANCE_CHOICES;
 		}
 
 		// Pick something random!
