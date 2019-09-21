@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable quote-props */
-import { DRAGGING_ANIMATION, FALLING_ANIMATION, FLAGS } from './_animations.mjs';
+import { DRAGGING_ANIMATION, FALLING_ANIMATION } from './_animations.mjs';
 import { MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
 
 

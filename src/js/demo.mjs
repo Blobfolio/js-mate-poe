@@ -4,7 +4,7 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, FLAGS, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
+import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
