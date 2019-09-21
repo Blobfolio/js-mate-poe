@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable quote-props */
-import { DRAGGING_ANIMATION, FALLING_ANIMATION } from './_animations.mjs';
+import { DRAGGING_ANIMATION, FALLING_ANIMATION, FLAGS } from './_animations.mjs';
 import { MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
 
 
@@ -107,31 +107,10 @@ export const poeAnimation = {
 		},
 
 		/** @type {VueProp} */
-		'allowExit': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
-		},
-
-		/** @type {VueProp} */
-		'autoFlip': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
-		},
-
-		/** @type {VueProp} */
 		'defaultChoice': {
 			'type': Number,
 			'required': false,
 			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'forceGravity': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
 		},
 
 		/** @type {VueProp} */
@@ -142,14 +121,14 @@ export const poeAnimation = {
 		},
 
 		/** @type {VueProp} */
-		'ignoreEdges': {
-			'type': Boolean,
+		'startupChoice': {
+			'type': Number,
 			'required': false,
-			'default': false,
+			'default': 0,
 		},
 
 		/** @type {VueProp} */
-		'startupChoice': {
+		'flags': {
 			'type': Number,
 			'required': false,
 			'default': 0,

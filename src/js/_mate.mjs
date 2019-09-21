@@ -2,7 +2,7 @@
  * @file The sprite object!
  */
 
-import { DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, OFFSCREEN_CHOICES, STARTUP_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
+import { FLAGS, DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, OFFSCREEN_CHOICES, STARTUP_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
 import { audioFile } from './_audio.mjs';
 import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './_helpers.mjs';
 import { IMAGE, TILE_SIZE } from './_image.mjs';
@@ -310,7 +310,7 @@ export const Mate = class {
 		if (
 			null === this.animation ||
 			id !== this.animation.id ||
-			! this.animation.allowExit
+			! (FLAGS.allowExit & this.animation.flags)
 		) {
 			this.allowExit = false;
 		}
@@ -335,7 +335,7 @@ export const Mate = class {
 		}
 
 		// Should we allow the mate to walk off-screen?
-		if (this.animation.allowExit && ! this.allowExit) {
+		if ((FLAGS.allowExit & this.animation.flags) && ! this.allowExit) {
 			// Give it a one-in-five chance.
 			this.allowExit = 4 === Math.floor(Math.random() * 5);
 		}
@@ -689,7 +689,7 @@ export const Mate = class {
 			// Use a timeout to transition the animation so the last frame doesn't get cut off.
 			setTimeout(() => {
 				// Maybe we can flip it?
-				if (this.animation.autoFlip) {
+				if (FLAGS.autoFlip & this.animation.flags) {
 					this.flip();
 				}
 
@@ -713,7 +713,7 @@ export const Mate = class {
 		}
 
 		// Did we hit an edge?
-		if (! this.animation.ignoreEdges && null !== this.animation.edge) {
+		if (null !== this.animation.edge && ! (FLAGS.ignoreEdges & this.animation.flags)) {
 			let change = false;
 
 			// Too left.
@@ -763,7 +763,7 @@ export const Mate = class {
 		}
 
 		// Does gravity matter?
-		if (this.animation.forceGravity && this.y < sh - TILE_SIZE - 2) {
+		if ((FLAGS.forceGravity & this.animation.flags) && this.y < sh - TILE_SIZE - 2) {
 			this.setAnimation(FALLING_ANIMATION);
 			return;
 		}
@@ -776,7 +776,7 @@ export const Mate = class {
 			(this.y >= sh - TILE_SIZE && 0 < this.animation.end.y)
 		) {
 			// We can ignore a few animations.
-			if (! this.animation.ignoreEdges) {
+			if (! (FLAGS.ignoreEdges & this.animation.flags)) {
 				// Pick something else.
 				if (! this.child) {
 					// If we've gone offscreen, start over.
@@ -953,7 +953,7 @@ export const Mate = class {
 
 		// If gravity applies and we're too high, glue to the bottom.
 		const sh = screenHeight();
-		if (this.animation.forceGravity && this.y < sh - TILE_SIZE) {
+		if ((FLAGS.forceGravity & this.animation.flags) && this.y < sh - TILE_SIZE) {
 			this.setPosition(this.x, sh - TILE_SIZE, true);
 			return;
 		}

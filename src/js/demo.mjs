@@ -4,7 +4,7 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
+import { ANIMATIONS, CHILD_ANIMATIONS, DRAGGING_ANIMATION, FLAGS, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
@@ -145,20 +145,14 @@ new Vue(/** @type {!VueApp} */ ({
 				'frames': v.frames,
 				/** @type {?MateAnimationAudio} */
 				'audio': v.audio,
-				/** @type {boolean} */
-				'allowExit': v.allowExit,
-				/** @type {boolean} */
-				'autoFlip': v.autoFlip,
 				/** @type {number} */
 				'defaultChoice': v.defaultChoice,
-				/** @type {boolean} */
-				'forceGravity': v.forceGravity,
 				/** @type {number} */
 				'offscreenChoice': v.offscreenChoice,
-				/** @type {boolean} */
-				'ignoreEdges': v.ignoreEdges,
 				/** @type {number} */
 				'startupChoice': v.startupChoice,
+				/** @type {number} */
+				'flags': v.flags,
 				/** @type {number} */
 				'childId': v.childId,
 				/** @type {?Array<MateAnimationPossibility>} */
