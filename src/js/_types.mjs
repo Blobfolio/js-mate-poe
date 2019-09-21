@@ -161,3 +161,16 @@ export var VueComponent;
  * }}
  */
 export var VueProp;
+
+/**
+ * Vue App
+ *
+ * @typedef {{
+	el: (Element|string),
+	data: Object,
+	mounted: Function,
+	methods: Object,
+	computed: Object
+ * }}
+ */
+export var VueApp;

@@ -10,7 +10,7 @@ import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
 import { poeSprite } from './_demo_poe_sprite.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
-import { MateAnimationAudio, MateAnimationPosition, MateAnimationPossibility, MateAnimationState } from './_types.mjs';
+import { MateAnimationAudio, MateAnimationPosition, MateAnimationPossibility, MateAnimationState, VueApp } from './_types.mjs';
 
 
 
@@ -83,7 +83,7 @@ window['Vue']['component']('poe-sprite', poeSprite);
 window['Vue']['component']('poe-tree', poeTree);
 
 // Get Vue going!
-new window['Vue']({
+new Vue(/** @type {!VueApp} */ ({
 	/** @type {string} */
 	'el': '#app',
 
@@ -274,4 +274,4 @@ new window['Vue']({
 			}, {});
 		},
 	},
-});
+}));
