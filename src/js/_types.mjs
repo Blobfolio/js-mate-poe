@@ -4,6 +4,34 @@
 
 
 
+// ---------------------------------------------------------------------
+// Callbacks
+// ---------------------------------------------------------------------
+
+/**
+ * Position Callback
+ *
+ * @typedef {function():MateAnimationPosition} */
+export var MateAnimationPositionCB;
+
+/**
+ * Repeat Callback
+ *
+ * @typedef {function():number} */
+export var MateAnimationRepeatCB;
+
+/**
+ * State Callback
+ *
+ * @typedef {function():MateAnimationState} */
+export var MateAnimationStateCB;
+
+
+
+// ---------------------------------------------------------------------
+// Animations
+// ---------------------------------------------------------------------
+
 /**
  * An animation audio.
  *
@@ -35,13 +63,13 @@ export var MateAnimationPosition;
 export var MateAnimationPossibility;
 
 /**
- * Raw Animation scene.
+ * Dynamic animation scene.
  *
  * @typedef {{
-	startFrom: (null|Function|MateAnimationPosition),
-	start: (number|Function|!MateAnimationState),
-	end: (number|Function|!MateAnimationState),
-	repeat: (Function|number),
+	startFrom: (null|MateAnimationPositionCB|MateAnimationPosition),
+	start: (number|MateAnimationStateCB|!MateAnimationState),
+	end: (number|MateAnimationStateCB|!MateAnimationState),
+	repeat: (MateAnimationRepeatCB|number),
 	repeatFrom: number,
 	frames: Array<number>,
 	audio: ?MateAnimationAudio,
@@ -107,6 +135,24 @@ export var MateAnimationState;
 export var MateAnimationStep;
 
 /**
+ * Dynamic animation sequence.
+ *
+ * @typedef {{
+	id: number,
+	name: string,
+	scene: Array<RawMateAnimationScene>,
+	useDefault: number,
+	useEntrance: number,
+	useFirst: number,
+	flags: number,
+	childId: number,
+	edge: (null|number|Array<(number|!MateAnimationPossibility)>),
+	next: (null|number|Array<(number|!MateAnimationPossibility)>)
+ * }}
+ */
+export var RawMateAnimation;
+
+/**
  * An animation sequence.
  *
  * @typedef {{
@@ -124,23 +170,11 @@ export var MateAnimationStep;
  */
 export var MateAnimation;
 
-/**
- * A raw animation sequence.
- *
- * @typedef {{
-	id: number,
-	name: string,
-	scene: Array<RawMateAnimationScene>,
-	useDefault: number,
-	useEntrance: number,
-	useFirst: number,
-	flags: number,
-	childId: number,
-	edge: (null|number|Array<(number|!MateAnimationPossibility)>),
-	next: (null|number|Array<(number|!MateAnimationPossibility)>)
- * }}
- */
-export var RawMateAnimation;
+
+
+// ---------------------------------------------------------------------
+// Misc
+// ---------------------------------------------------------------------
 
 /**
  * MateEvent

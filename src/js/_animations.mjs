@@ -4,7 +4,7 @@
 
 import { screenHeight, screenWidth } from './_helpers.mjs';
 import { TILE_SIZE } from './_image.mjs';
-import { MateAnimationPosition, MateAnimationPossibility, MateAnimationScene, RawMateAnimationScene, MateAnimationState, MateAnimation, RawMateAnimation } from './_types.mjs';
+import { MateAnimationPosition, MateAnimationPossibility, MateAnimationPositionCB, MateAnimationStateCB, MateAnimationScene, RawMateAnimationScene, MateAnimationState, MateAnimation, RawMateAnimation } from './_types.mjs';
 
 
 
@@ -2535,7 +2535,7 @@ export const animation = function(id) {
 /**
  * Standardize MateAnimationPosition
  *
- * @param {(null|Function|MateAnimationPosition)} position Position.
+ * @param {(null|MateAnimationPositionCB|MateAnimationPosition)} position Position.
  * @return {?MateAnimationPosition} Position.
  */
 export const standardizeMateAnimationPosition = function(position) {
@@ -2546,7 +2546,7 @@ export const standardizeMateAnimationPosition = function(position) {
 
 	// Resolve the callback.
 	if ('function' === typeof position) {
-		position = position();
+		position = /** @type {MateAnimationPositionCB} */ (position());
 	}
 
 	if (
@@ -2558,7 +2558,7 @@ export const standardizeMateAnimationPosition = function(position) {
 		return null;
 	}
 
-	return /** @type {!MateAnimationPosition} */ (position);
+	return /** @type {MateAnimationPosition} */ (position);
 };
 
 /**
@@ -2595,22 +2595,22 @@ export const standardizeMateAnimationScene = function(scenes) {
 /**
  * Standardize MateAnimationState
  *
- * @param {(number|Function|!MateAnimationState)} state State.
+ * @param {(number|MateAnimationStateCB|!MateAnimationState)} state State.
  * @return {MateAnimationState} State.
  */
 export const standardizeMateAnimationState = function(state) {
 	// Resolve the callback.
 	if ('function' === typeof state) {
-		state = state();
+		state = /** @type {MateAnimationState} */ (state());
 	}
 
 	// A number by itself indicates the speed (without x/y movement).
 	if ('number' === typeof state) {
-		state = {
+		state = /** @type {MateAnimationState} */ ({
 			x: 0,
 			y: 0,
 			speed: state,
-		};
+		});
 	}
 	// Otherwise make sure it has the right bits.
 	else if (
@@ -2621,14 +2621,14 @@ export const standardizeMateAnimationState = function(state) {
 		('number' !== typeof state.speed)
 	) {
 		// We have to return something, so here's a good default.
-		state = {
+		state = /** @type {MateAnimationState} */ ({
 			x: 0,
 			y: 0,
 			speed: 100,
-		};
+		});
 	}
 
-	return /** @type {!MateAnimationState} */ (state);
+	return /** @type {MateAnimationState} */ (state);
 };
 
 /**

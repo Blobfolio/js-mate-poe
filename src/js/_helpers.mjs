@@ -228,8 +228,8 @@ export const rankedChoice = function(v) {
 		if ('number' === typeof v[0]) {
 			return v[0];
 		}
-		else if ('number' === typeof v[0].id) {
-			return v[0].id;
+		else if ('number' === typeof /** @type {MateAnimationPossibility} */ (v[0]).id) {
+			return /** @type {MateAnimationPossibility} */ (v[0]).id;
 		}
 
 		return 0;
@@ -244,13 +244,13 @@ export const rankedChoice = function(v) {
 			out.push(v[i]);
 		}
 		else if (
-			'number' === typeof v[i].weight &&
-			'number' === typeof v[i].id &&
-			0 < v[i].weight &&
-			0 < v[i].id
+			'number' === typeof /** @type {MateAnimationPossibility} */ (v[i]).weight &&
+			'number' === typeof /** @type {MateAnimationPossibility} */ (v[i]).id &&
+			0 < /** @type {MateAnimationPossibility} */ (v[i]).weight &&
+			0 < /** @type {MateAnimationPossibility} */ (v[i]).id
 		) {
-			for (let j = 0; j < v[i].weight; ++j) {
-				out.push(v[i].id);
+			for (let j = 0; j < /** @type {MateAnimationPossibility} */ (v[i]).weight; ++j) {
+				out.push(/** @type {MateAnimationPossibility} */ (v[i]).id);
 			}
 		}
 	}

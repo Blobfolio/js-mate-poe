@@ -88,7 +88,7 @@ export const Mate = class {
 				bindEvent(
 					this.el,
 					'mousedown',
-					(/** @type {Event} */ e) => this.onDragStart(e),
+					(/** @type {MouseEvent} */ e) => this.onDragStart(e),
 					{ passive: true }
 				);
 				bindEvent(
@@ -636,7 +636,7 @@ export const Mate = class {
 	/**
 	 * Paint: Tick
 	 *
-	 * @param {?number=} now Now.
+	 * @param {number} now Now.
 	 * @return {void} Nothing.
 	 */
 	paint(now) {
@@ -681,7 +681,7 @@ export const Mate = class {
 		}
 
 		// Play audio?
-		if (step.audio && window['Poe']['audio']()) {
+		if (step.audio && /** @type {function():boolean} */ (window['Poe']['audio'])()) {
 			makeNoise(step.audio);
 		}
 
@@ -933,7 +933,7 @@ export const Mate = class {
 	/**
 	 * Event: Mouse Move
 	 *
-	 * @param {Event} e Event.
+	 * @param {MouseEvent} e Event.
 	 * @return {void} Nothing.
 	 */
 	onDragStart(e) {
