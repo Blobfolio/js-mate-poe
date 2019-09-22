@@ -3,7 +3,14 @@
  */
 
 import { CSS } from './_css.mjs';
-import { bindEvent, clearEvents, logInfo, LOGO, NAME, VERSION } from './_helpers.mjs';
+import {
+	bindEvent,
+	clearEvents,
+	logInfo,
+	LOGO,
+	NAME,
+	VERSION
+} from './_helpers.mjs';
 import { Mate } from './_mate.mjs';
 
 
