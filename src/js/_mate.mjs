@@ -971,6 +971,29 @@ export const Mate = class {
 	}
 
 	/**
+	 * On Drag
+	 *
+	 * @param {MouseEvent} e Event.
+	 * @return {void} Nothing.
+	 * @public
+	 */
+	onDrag(e) {
+		if (this.dragging) {
+			/** @type {number} */
+			const x = parseFloat(e.clientX) || 0;
+
+			/** @type {number} */
+			const y = parseFloat(e.clientY) || 0;
+
+			this.setPosition(
+				x - TILE_SIZE / 2,
+				y - TILE_SIZE / 2,
+				true
+			);
+		}
+	}
+
+	/**
 	 * End Drag
 	 *
 	 * @return {void} Nothing.

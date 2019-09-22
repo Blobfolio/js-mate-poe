@@ -5,7 +5,6 @@
 import { CSS } from './_css.mjs';
 import { bindEvent, clearEvents, logInfo, LOGO, NAME, VERSION } from './_helpers.mjs';
 import { Mate } from './_mate.mjs';
-import { TILE_SIZE } from './_image.mjs';
 
 
 
@@ -210,14 +209,7 @@ const Poe = class {
 	 */
 	static onDrag(e) {
 		if (null !== _mate && _mate.isDragging()) {
-			const x = parseFloat(e.clientX) || 0;
-			const y = parseFloat(e.clientY) || 0;
-
-			_mate.setPosition(
-				x - TILE_SIZE / 2,
-				y - TILE_SIZE / 2,
-				true
-			);
+			_mate.onDrag(e);
 		}
 	}
 
