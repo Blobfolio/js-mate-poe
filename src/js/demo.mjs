@@ -4,14 +4,14 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, FLAGS, standardizeMateAnimationPosition, standardizeMateAnimationState } from './_animations.mjs';
+import { ANIMATIONS, FLAGS, standardizeMateAnimationState } from './_animations.mjs';
 import { poeAnimation } from './_demo_poe_animation.mjs';
 import { poeFrame } from './_demo_poe_frame.mjs';
 import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
 import { poeSprite } from './_demo_poe_sprite.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
-import { MateAnimationAudio, MateAnimationPosition, MateAnimationPossibility, MateAnimationState, VueApp } from './_types.mjs';
+import { MateAnimationPossibility, RawMateAnimationScene, MateAnimationScene, RawMateAnimation, VueApp } from './_types.mjs';
 
 
 
@@ -71,6 +71,37 @@ const standardizeMateAnimationPossibility = function(v) {
 	return out;
 };
 
+/**
+ * Standardize MateAnimationScene
+ *
+ * @param {Array<RawMateAnimationScene>} scenes Scenes.
+ * @return {Array<MateAnimationScene>} Scenes.
+ */
+export const standardizeMateAnimationScene = function(scenes) {
+	/** @type {Array<MateAnimationScene>} */
+	let out = [];
+
+	/** @type {number} */
+	const length = scenes.length;
+
+	for (let i = 0; i < length; ++i) {
+		const v = /** @type {!RawMateAnimationScene} */ (scenes[i]);
+
+		out.push(/** @type {!MateAnimationScene} */ ({
+			'startFrom': ('function' === typeof v.startFrom ? v.startFrom() : v.startFrom),
+			'start': standardizeMateAnimationState(v.start),
+			'end': standardizeMateAnimationState(v.end),
+			'repeat': ('function' === typeof v.repeat ? v.repeat() : v.repeat),
+			'repeatFrom': v.repeatFrom,
+			'frames': v.frames,
+			'audio': v.audio,
+			'flags': v.flags,
+		}));
+	}
+
+	return out;
+};
+
 
 // ---------------------------------------------------------------------
 // Vue!
@@ -93,55 +124,64 @@ new Vue(/** @type {!VueApp} */ ({
 		'name': NAME,
 		'version': VERSION,
 
-		'animations': ANIMATIONS.reduce((out, v) => {
-			// Same for next and edge.
-			const next = standardizeMateAnimationPossibility(v.next);
-			const edge = standardizeMateAnimationPossibility(v.edge);
+		'animations': ANIMATIONS.reduce(
+			/**
+			 * Collection
+			 *
+			 * @param {Array} out Collection.
+			 * @param {RawMateAnimation} v Animation.
+			 * @return {Array} Collection.
+			 */
+			(out, v) => {
+				// Test variable duration before we set the info.
 
-			out.push({
 				/** @type {number} */
-				'id': v.id,
-				/** @type {string} */
-				'name': v.name,
+				const sceneLength = v.scene.length;
+
 				/** @type {boolean} */
-				'variableDuration': ('function' === typeof v.repeat),
-				/** @type {?MateAnimationPosition} */
-				'startFrom': standardizeMateAnimationPosition(v.startFrom),
-				/** @type {MateAnimationState} */
-				'start': standardizeMateAnimationState(v.start),
-				/** @type {MateAnimationState} */
-				'end': standardizeMateAnimationState(v.end),
-				/** @type {number} */
-				'repeat': ('function' === typeof v.repeat ? v.repeat() : v.repeat),
-				/** @type {number} */
-				'repeatFrom': v.repeatFrom,
-				/** @type {Array<number>} */
-				'frames': v.frames,
-				/** @type {?MateAnimationAudio} */
-				'audio': v.audio,
-				/** @type {number} */
-				'useDefault': v.useDefault,
-				/** @type {number} */
-				'useEntrance': v.useEntrance,
-				/** @type {number} */
-				'useFirst': v.useFirst,
-				/** @type {number} */
-				'flags': v.flags,
-				/** @type {number} */
-				'childId': v.childId,
-				/** @type {?Array<MateAnimationPossibility>} */
-				'edge': edge,
-				/** @type {?Array<MateAnimationPossibility>} */
-				'next': next,
-			});
+				let variableDuration = false;
+				for (let i = 0; i < sceneLength; ++i) {
+					if ('function' === typeof v.scene[i].repeat) {
+						variableDuration = true;
+						break;
+					}
+				}
 
-			return out;
-		}, []).sort((a, b) => {
-			let a_key = `${(FLAGS.demoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
-			let b_key = `${(FLAGS.demoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
+				out.push({
+					/** @type {number} */
+					'id': v.id,
+					/** @type {string} */
+					'name': v.name,
+					/** @type {boolean} */
+					'variableDuration': variableDuration,
+					/** @type {Array<MateAnimationScene>} */
+					'scene': standardizeMateAnimationScene(v.scene),
+					/** @type {number} */
+					'useDefault': v.useDefault,
+					/** @type {number} */
+					'useEntrance': v.useEntrance,
+					/** @type {number} */
+					'useFirst': v.useFirst,
+					/** @type {number} */
+					'flags': v.flags,
+					/** @type {number} */
+					'childId': v.childId,
+					/** @type {?Array<MateAnimationPossibility>} */
+					'edge': standardizeMateAnimationPossibility(v.edge),
+					/** @type {?Array<MateAnimationPossibility>} */
+					'next': standardizeMateAnimationPossibility(v.next),
+				});
 
-			return (a_key < b_key) ? -1 : 1;
-		}),
+				return out;
+			},
+			[]
+		)
+			.sort((a, b) => {
+				let a_key = `${(FLAGS.demoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
+				let b_key = `${(FLAGS.demoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
+
+				return (a_key < b_key) ? -1 : 1;
+			}),
 
 		'immersive': false,
 
@@ -236,7 +276,7 @@ new Vue(/** @type {!VueApp} */ ({
 				out[v['id']] = {
 					'id': v['id'],
 					'name': v['name'],
-					'frame': v['frames'][0],
+					'frame': v['scene'][0]['frames'][0],
 				};
 
 				return out;

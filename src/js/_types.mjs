@@ -35,6 +35,38 @@ export var MateAnimationPosition;
 export var MateAnimationPossibility;
 
 /**
+ * Raw Animation scene.
+ *
+ * @typedef {{
+	startFrom: (null|Function|MateAnimationPosition),
+	start: (number|Function|!MateAnimationState),
+	end: (number|Function|!MateAnimationState),
+	repeat: (Function|number),
+	repeatFrom: number,
+	frames: Array<number>,
+	audio: ?MateAnimationAudio,
+	flags: number
+ * }}
+ */
+export var RawMateAnimationScene;
+
+/**
+ * Animation scene.
+ *
+ * @typedef {{
+	startFrom: ?MateAnimationPosition,
+	start: !MateAnimationState,
+	end: !MateAnimationState,
+	repeat: number,
+	repeatFrom: number,
+	frames: Array<number>,
+	audio: ?MateAnimationAudio,
+	flags: number
+ * }}
+ */
+export var MateAnimationScene;
+
+/**
  * Fields required to initialize setAnimation().
  *
  * @typedef {{
@@ -61,12 +93,15 @@ export var MateAnimationState;
  *
  * @typedef {{
  	step: number,
+ 	scene: number,
 	time: number,
 	interval: number,
 	frame: number,
 	x: number,
 	y: number,
-	audio: ?string
+	audio: ?string,
+	flip: boolean,
+	flags: number
  * }}
  */
 export var MateAnimationStep;
@@ -77,13 +112,7 @@ export var MateAnimationStep;
  * @typedef {{
 	id: number,
 	name: string,
-	startFrom: ?MateAnimationPosition,
-	start: !MateAnimationState,
-	end: !MateAnimationState,
-	repeat: number,
-	repeatFrom: number,
-	frames: Array<number>,
-	audio: ?MateAnimationAudio,
+	scene: Array<MateAnimationScene>,
 	useDefault: number,
 	useEntrance: number,
 	useFirst: number,
@@ -101,13 +130,7 @@ export var MateAnimation;
  * @typedef {{
 	id: number,
 	name: string,
-	startFrom: (null|Function|MateAnimationPosition),
-	start: (number|Function|!MateAnimationState),
-	end: (number|Function|!MateAnimationState),
-	repeat: (Function|number),
-	repeatFrom: number,
-	frames: Array<number>,
-	audio: ?MateAnimationAudio,
+	scene: Array<RawMateAnimationScene>,
 	useDefault: number,
 	useEntrance: number,
 	useFirst: number,

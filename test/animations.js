@@ -5,13 +5,43 @@
 /* global describe */
 /* global it */
 /* global require */
-import { ANIMATIONS, DRAGGING_ANIMATION, MAX_ANIMATION } from '../src/js/_animations.mjs';
-import { audioFile } from '../src/js/_audio.mjs';
+import { ANIMATIONS, FLAGS, PLAYLIST, MAX_ANIMATION } from '../src/js/_animations.mjs';
 import { TILES_X, TILES_Y } from '../src/js/_image.mjs';
-import { MateAnimationPossibility } from '../src/js/_types.mjs';
+import { MateAnimationPossibility, RawMateAnimationScene, RawMateAnimation } from '../src/js/_types.mjs';
 const assert = require('chai').assert;
 
 
+
+/**
+ * Child animations.
+ *
+ * We are purposefully looking for child IDs using a different method than the main Poe program so we can check sanity between the two.
+ *
+ * @const {Set<number>}
+ */
+const CHILD_ANIMATIONS = ANIMATIONS.reduce(
+	/**
+	 * Collect Animations
+	 *
+	 * @param {Set<number>} out Collection.
+	 * @param {RawMateAnimation} v Animation.
+	 * @return {Set<number>} Collection.
+	 */
+	(out, v) => {
+		// Direct children are always children.
+		if (0 < v.childId) {
+			out.add(v.childId);
+		}
+
+		// Most children have the string "(Child)" in their name. This is less resource-intensive to look for than recursing through all the possible next/edge animations of direct children.
+		if (-1 !== v.name.indexOf('(Child)')) {
+			out.add(v.id);
+		}
+
+		return out;
+	},
+	new Set()
+);
 
 /**
  * Standardize Next/Edge Choices
@@ -133,7 +163,7 @@ const testState = function(label, v) {
 
 // Keep track of reachable animations.
 /** @type {Set} */
-let reachable = new Set([DRAGGING_ANIMATION]);
+let reachable = new Set([PLAYLIST.Drag]);
 
 /** @type {number} */
 const minFrame = 0;
@@ -181,83 +211,98 @@ describe('Animation Pathways', () => {
 			testChoices('Next', ANIMATIONS[i].next);
 			testChoices('Edge', ANIMATIONS[i].edge);
 
-			// Check the frames.
-			/** @type {number} */
-			const framesLength = ANIMATIONS[i].frames.length;
+			it(
+				'Scene is defined',
+				() => assert.isArray(ANIMATIONS[i].scene) &&
+					assert.isAbove(ANIMATIONS[i].scene.length, 0)
+			);
 
-			for (let j = 0; j < framesLength; ++j) {
-				it(
-					`Frame #${ANIMATIONS[i].frames[j]} is valid`,
-					() => assert.isNumber(ANIMATIONS[i].frames[j]) &&
-						assert.isAtLeast(ANIMATIONS[i].frames[j], minFrame) &&
-						assert.isAtMost(ANIMATIONS[i].frames[j], maxFrame)
-				);
-			}
+			for (let j = 0; j < ANIMATIONS[i].scene.length; ++j) {
+				/** @type {RawMateAnimationScene} */
+				const scene = ANIMATIONS[i].scene[j];
 
-			// Check the audio.
-			if (null !== ANIMATIONS[i].audio) {
-				it(
-					'Audio is specified',
-					() => assert.isString(ANIMATIONS[i].audio.file)
-				);
-
-				it(
-					`Audio ${ANIMATIONS[i].audio.file} is valid`,
-					() => assert.isString(audioFile(ANIMATIONS[i].audio.file)) &&
-						assert.isOk(audioFile(ANIMATIONS[i].audio.file))
-				);
-			}
-			else {
-				it(
-					'Audio is not specified',
-					() => assert.isNull(ANIMATIONS[i].audio)
-				);
-			}
-
-			// Dynamic callbacks almost always rely on window size, which Node doesn't understand. From here on, we'll only test non-callback values.
-			if (
-				null !== ANIMATIONS[i].startFrom &&
-				'function' !== typeof ANIMATIONS[i].startFrom
-			) {
-				it(
-					'StartFrom is specified',
-					() => assert.isObject(ANIMATIONS[i].startFrom) &&
-						assert.isNumber(ANIMATIONS[i].startFrom.x) &&
-						assert.isNumber(ANIMATIONS[i].startFrom.y)
-				);
-			}
-
-			testState('Start', ANIMATIONS[i].start);
-			testState('End', ANIMATIONS[i].end);
-
-			// Repeat and repeatFrom can be looked at together.
-			if ('function' !== typeof ANIMATIONS[i].repeat) {
-				it(
-					'Repeat is specified',
-					() => assert.isNumber(ANIMATIONS[i].repeat) &&
-						assert.isAtLeast(ANIMATIONS[i].repeat, 0)
-				);
-
-				if (ANIMATIONS[i].repeat) {
+				// Dynamic callbacks almost always rely on window size, which Node doesn't understand. From here on, we'll only test non-callback values.
+				if (
+					null !== scene.startFrom &&
+					'function' !== typeof scene.startFrom
+				) {
 					it(
-						'RepeatFrom is specified',
-						() => assert.isNumber(ANIMATIONS[i].repeatFrom) &&
-							assert.isAtLeast(ANIMATIONS[i].repeatFrom, 0)
+						'StartFrom is specified',
+						() => assert.isObject(scene.startFrom) &&
+							assert.isNumber(scene.startFrom.x) &&
+							assert.isNumber(scene.startFrom.y)
+					);
+				}
+
+				// Check the frames.
+				/** @type {number} */
+				const framesLength = scene.frames.length;
+
+				for (let k = 0; k < framesLength; ++k) {
+					it(
+						`Frame #${scene.frames[k]} is valid`,
+						() => assert.isNumber(scene.frames[k]) &&
+							assert.isAtLeast(scene.frames[k], minFrame) &&
+							assert.isAtMost(scene.frames[k], maxFrame)
+					);
+				}
+
+				// Check the audio.
+				if (null !== scene.audio) {
+					it(
+						'Audio is specified',
+						() => assert.isString(scene.audio.file)
+					);
+
+					it(
+						`Audio ${scene.audio.file} is valid`,
+						() => assert.include(['BAA', 'SNEEZE', 'YAWN'], scene.audio.file)
 					);
 				}
 				else {
 					it(
-						'Repeat is specified',
-						() => assert.strictEqual(0, ANIMATIONS[i].repeatFrom)
+						'Audio is not specified',
+						() => assert.isNull(scene.audio)
 					);
 				}
-			}
-			// If we can't test repeat, we can at least assert repeatFrom is not negative.
-			else {
+
+				testState('Start', scene.start);
+				testState('End', scene.end);
+
+				// Repeat and repeatFrom can be looked at together.
+				if ('function' !== typeof scene.repeat) {
+					it(
+						'Repeat is specified',
+						() => assert.isNumber(scene.repeat) &&
+							assert.isAtLeast(scene.repeat, 0)
+					);
+
+					if (scene.repeat) {
+						it(
+							'RepeatFrom is specified',
+							() => assert.isNumber(scene.repeatFrom) &&
+								assert.isAtLeast(scene.repeatFrom, 0)
+						);
+					}
+					else {
+						it(
+							'Repeat is specified',
+							() => assert.strictEqual(0, scene.repeatFrom)
+						);
+					}
+				}
+				// If we can't test repeat, we can at least assert repeatFrom is not negative.
+				else {
+					it(
+						'RepeatFrom is specified',
+						() => assert.isNumber(scene.repeatFrom) &&
+							assert.isAtLeast(scene.repeatFrom, 0)
+					);
+				}
+
 				it(
-					'RepeatFrom is specified',
-					() => assert.isNumber(ANIMATIONS[i].repeatFrom) &&
-						assert.isAtLeast(ANIMATIONS[i].repeatFrom, 0)
+					'Flags are specified',
+					() => assert.isNumber(scene.flags)
 				);
 			}
 
@@ -291,8 +336,21 @@ describe('Animation Pathways', () => {
 describe('Animation Reachability', () => {
 	for (let i = 0; i < MAX_ANIMATION; ++i) {
 		it(
-			`Animation #${i + 1} is reachable.`,
+			`Animation #${i + 1} is reachable`,
 			() => assert.isTrue(reachable.has(i + 1))
+		);
+
+		const isChild = CHILD_ANIMATIONS.has(i + 1);
+		it(
+			`Animation #${i + 1} has consistent privileges`,
+			() => assert.strictEqual(
+				! (FLAGS.noChildren & ANIMATIONS[i].flags),
+				isChild
+			) &&
+				assert.strictEqual(
+					!! (FLAGS.noParents & ANIMATIONS[i].flags),
+					! isChild
+				)
 		);
 	}
 });

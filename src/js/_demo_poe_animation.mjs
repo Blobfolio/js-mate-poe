@@ -3,8 +3,8 @@
  */
 
 /* eslint-disable quote-props */
-import { DRAGGING_ANIMATION, FALLING_ANIMATION, FLAGS } from './_animations.mjs';
-import { MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
+import { FLAGS, PLAYLIST } from './_animations.mjs';
+import { MateAnimationScene, MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
 
 
 
@@ -47,49 +47,9 @@ export const poeAnimation = {
 		},
 
 		/** @type {VueProp} */
-		'startFrom': {
-			'type': [Object, null],
-			'required': false,
-			'default': null,
-		},
-
-		/** @type {VueProp} */
-		'start': {
-			'type': Object,
+		'scene': {
+			'type': [Array],
 			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'end': {
-			'type': Object,
-			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'repeat': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'repeatFrom': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'frames': {
-			'type': Array,
-			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'audio': {
-			'type': [Object, null],
-			'required': false,
-			'default': null,
 		},
 
 		/** @type {VueProp} */
@@ -163,7 +123,16 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'hasAudio': function() {
-			return null !== this['audio'] && 'string' === typeof this['audio']['file'];
+			for (let i = 0; i < this['sceneLength']; ++i) {
+				if (
+					null !== this['scene'][i]['audio'] &&
+					'string' === typeof this['scene'][i]['audio']['file']
+				) {
+					return true;
+				}
+			}
+
+			return false;
 		},
 
 		/**
@@ -209,7 +178,7 @@ export const poeAnimation = {
 		 */
 		'isDependent': function() {
 			// Dragging and falling are special.
-			if (DRAGGING_ANIMATION === this['id'] || FALLING_ANIMATION === this['id']) {
+			if (PLAYLIST.Drag === this['id'] || PLAYLIST.Fall === this['id']) {
 				return true;
 			}
 
@@ -228,6 +197,24 @@ export const poeAnimation = {
 		},
 
 		/**
+		 * Is Repeatable?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'isRepeated': function() {
+			/** @type {number} */
+			const framesLength = this['frames'].length;
+
+			for (let i = 0; i < framesLength; ++i) {
+				if (this['frames'][i].repeat) {
+					return true;
+				}
+			}
+
+			return false;
+		},
+
+		/**
 		 * Duration
 		 *
 		 * @return {string} Duration.
@@ -237,7 +224,10 @@ export const poeAnimation = {
 				return '(varies)';
 			}
 
+			/** @type {number} */
 			const length = this['steps'].length;
+
+			/** @type {number} */
 			let duration = 0;
 			for (let i = 0; i < length; ++i) {
 				duration += this['steps'][i].interval;
@@ -247,13 +237,65 @@ export const poeAnimation = {
 		},
 
 		/**
+		 * Frames
+		 *
+		 * @return {Array} Frames.
+		 */
+		'frames': function() {
+			/** @type {Array} */
+			let out = [];
+
+			// Loop the scenes.
+			for (let i = 0; i < this['sceneLength']; ++i) {
+				/** @type {boolean} */
+				const repeat = 0 < this['scene'][i]['repeat'];
+
+				/** @type {number} */
+				const repeatFrom = repeat ? this['scene'][i]['repeatFrom'] : 0;
+
+				/** @type {number} */
+				const length = this['scene'][i]['frames'].length;
+
+				for (let j = 0; j < length; ++j) {
+					out.push({
+						'id': this['scene'][i]['frames'][j],
+						'repeat': repeat && j >= repeatFrom,
+						'flipped': false,
+					});
+				}
+			}
+
+			return out;
+		},
+
+		/**
+		 * Scene Length
+		 *
+		 * @return {number} Length.
+		 */
+		'sceneLength': function() {
+			return this['scene'].length;
+		},
+
+		/**
 		 * Speed
 		 *
 		 * @return {string} Speed.
 		 */
 		'speed': function() {
-			const start = `${this['start']['speed']}ms`;
-			const end = `${this['start']['speed']}ms`;
+			/** @type {Array<number>} */
+			let soup = [];
+
+			for (let i = 0; i < this['sceneLength']; ++i) {
+				soup.push(this['scene'][i]['start']['speed']);
+				soup.push(this['scene'][i]['end']['speed']);
+			}
+
+			/** @type {string} */
+			const start = `${Math.min(...soup)}ms`;
+
+			/** @type {string} */
+			const end = `${Math.max(...soup)}ms`;
 
 			if (start === end) {
 				return start;
@@ -270,44 +312,79 @@ export const poeAnimation = {
 		 * @return {Array<MateAnimationStep>} Steps.
 		 */
 		'steps': function() {
+			/** @type {Array<MateAnimationStep>} */
 			let out = [];
 
-			const framesLength = this['frames'].length;
-			const stepsLength = framesLength + (framesLength + this['repeatFrom']) * this['repeat'];
-			const speedDiff = this['end']['speed'] - this['start']['speed'];
-			const xDiff = this['end']['x'] - this['start']['x'];
-			const yDiff = this['end']['y'] - this['start']['y'];
+			/** @type {number} */
 			const now = 0;
 
-			let last = 0 - this['start']['speed'];
-			for (let i = 0; i < stepsLength; ++i) {
-				const progress = i / stepsLength;
-				const time = Math.floor(last + this['start']['speed'] + speedDiff * progress);
-				const interval = time - last;
-				last = time;
+			/** @type {number} */
+			let step = 0;
 
-				// What frame should we show?
+			/** @type {number} */
+			let last = 0 - this['scene'][0]['start']['speed'];
+
+			// Loop through the scenes.
+			for (let i = 0; i < this['sceneLength']; ++i) {
+				/** @type {MateAnimationScene} */
+				const scene = this['scene'][i];
+
 				/** @type {number} */
-				let frame = 0;
-				if (i < framesLength) {
-					frame = this['frames'][i];
-				}
-				else if (! this['repeatFrom']) {
-					frame = this['frames'][i % framesLength];
-				}
-				else {
-					frame = this['frames'][this['repeatFrom'] + (i - this['repeatFrom']) % (framesLength - this['repeatFrom'])];
-				}
+				const framesLength = scene['frames'].length;
 
-				out.push(/** @type {!MateAnimationStep} */ ({
-					'step': i,
-					'time': now + time,
-					'interval': interval,
-					'frame': frame,
-					'x': this['start']['x'] + xDiff * progress,
-					'y': this['start']['y'] + yDiff * progress,
-					'audio': null,
-				}));
+				/** @type {number} */
+				const stepsLength = framesLength + (framesLength - scene['repeatFrom']) * scene['repeat'];
+
+				/** @type {number} */
+				const speedDiff = scene['end']['speed'] - scene['start']['speed'];
+
+				/** @type {number} */
+				const xDiff = scene['end']['x'] - scene['start']['x'];
+
+				/** @type {number} */
+				const yDiff = scene['end']['y'] - scene['start']['y'];
+
+				// Figure out what each slice should look like.
+				for (let j = 0; j < stepsLength; ++j) {
+					/** @type {number} */
+					const progress = j / stepsLength;
+
+					/** @type {number} */
+					const time = Math.floor(last + scene['start']['speed'] + speedDiff * progress);
+
+					/** @type {number} */
+					const interval = time - last;
+
+					last = time;
+
+					// What frame should we show?
+					/** @type {number} */
+					let frame = 0;
+					if (j < framesLength) {
+						frame = scene['frames'][j];
+					}
+					else if (! scene['repeatFrom']) {
+						frame = scene['frames'][j % framesLength];
+					}
+					else {
+						frame = scene['frames'][scene['repeatFrom'] + (j - scene['repeatFrom']) % (framesLength - scene['repeatFrom'])];
+					}
+
+					out.push(/** @type {!MateAnimationStep} */ ({
+						'step': step,
+						'scene': i,
+						'time': now + time,
+						'interval': interval,
+						'frame': frame,
+						'x': scene['start']['x'] + xDiff * progress,
+						'y': scene['start']['y'] + yDiff * progress,
+						'audio': null,
+						'flip': !! ((FLAGS.autoFlip & scene['flags']) && stepsLength - 1 === j),
+						'flags': scene['flags'],
+					}));
+
+					++step;
+				}
 			}
 
 			return out;
@@ -400,13 +477,13 @@ export const poeAnimation = {
 
 			<div
 				class="frames-list"
-				:class="{ 'is-repeatable' : repeat > 0 }"
+				:class="{ 'is-repeatable' : isRepeated > 0 }"
 			>
 				<poe-frame
 					v-for="(f, index) in frames"
 					:key="'frame-' + id + '-' + index"
-					:frame="f"
-					:repeat="repeat > 0 && index >= repeatFrom"
+					:frame="f.id"
+					:repeat="f.repeat"
 				></poe-frame>
 			</div>
 

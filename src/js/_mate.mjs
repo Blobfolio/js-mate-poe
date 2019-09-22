@@ -2,11 +2,11 @@
  * @file The sprite object!
  */
 
-import { FLAGS, DRAGGING_ANIMATION, FALLING_ANIMATION, DEFAULT_CHOICES, ENTRANCE_CHOICES, FIRST_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
-import { audioFile } from './_audio.mjs';
+import { FLAGS, PLAYLIST, DEFAULT_CHOICES, ENTRANCE_CHOICES, FIRST_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
+import { makeNoise } from './_audio.mjs';
 import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './_helpers.mjs';
 import { IMAGE, TILE_SIZE } from './_image.mjs';
-import { MateAnimation, MateAnimationPossibility, MateAnimationSetup, MateAnimationStep } from './_types.mjs';
+import { MateAnimation, MateAnimationPossibility, MateAnimationScene, MateAnimationSetup, MateAnimationStep } from './_types.mjs';
 
 
 
@@ -72,9 +72,12 @@ export const Mate = class {
 	setupEl() {
 		if (! isElement(this.el)) {
 			this.el = document.createElement('DIV');
-			this.el.className = 'poe';
+			this.el.className = 'poe' + (this.child ? ' is-child' : '');
+
+			// Bind events to the main Mate.
 			if (this.child) {
-				this.el.classList.add('is-child');
+				// Add the fade-in class after a little delay.
+				requestAnimationFrame(() => this.el.classList.add('fade-in'));
 			}
 			else {
 				bindEvent(
@@ -310,22 +313,29 @@ export const Mate = class {
 		if (
 			null === this.animation ||
 			id !== this.animation.id ||
-			! (FLAGS.allowExit & this.animation.flags)
+			! (FLAGS.allowExit & this.animation.scene[0].flags)
 		) {
 			this.allowExit = false;
 		}
 
 		// Pull the animation details, if any.
 		this.animation = animation(id);
-		if (null === this.animation) {
-			console.error(`Invalid animation ID: ${id}`);
+		if (
+			(null === this.animation) ||
+			(this.child && (FLAGS.noChildren & this.animation.flags))
+		) {
+			// If the parent got a bad animation request, we should hear about it!
+			if (! this.child) {
+				console.error(`Invalid animation ID: ${id}`);
+			}
+
 			this.destroy();
 			return false;
 		}
 
 		// We might need to force the child's destruction.
 		if (
-			(FALLING_ANIMATION === id) ||
+			(PLAYLIST.Fall === id) ||
 			(
 				null !== this.mate &&
 				this.animation.childId
@@ -335,19 +345,19 @@ export const Mate = class {
 		}
 
 		// Should we allow the mate to walk off-screen?
-		if ((FLAGS.allowExit & this.animation.flags) && ! this.allowExit) {
+		if ((FLAGS.allowExit & this.animation.scene[0].flags) && ! this.allowExit) {
 			// Give it a one-in-five chance.
 			this.allowExit = 4 === Math.floor(Math.random() * 5);
 		}
 
 		// If this animation has a fixed starting place, go ahead and set it.
 		if (
-			null !== this.animation.startFrom &&
-			'number' === typeof this.animation.startFrom.x &&
-			'number' === typeof this.animation.startFrom.y
+			null !== this.animation.scene[0].startFrom &&
+			'number' === typeof this.animation.scene[0].startFrom.x &&
+			'number' === typeof this.animation.scene[0].startFrom.y
 		) {
-			x = this.animation.startFrom.x;
-			y = this.animation.startFrom.y;
+			x = this.animation.scene[0].startFrom.x;
+			y = this.animation.scene[0].startFrom.y;
 			this.setFlip(false);
 		}
 
@@ -360,71 +370,92 @@ export const Mate = class {
 		this.steps = [];
 
 		/** @type {number} */
-		const framesLength = this.animation.frames.length;
-
-		/** @type {number} */
-		const stepsLength = framesLength + (framesLength - this.animation.repeatFrom) * this.animation.repeat;
-
-		/** @type {number} */
-		const speedDiff = this.animation.end.speed - this.animation.start.speed;
-
-		/** @type {number} */
-		const xDiff = this.animation.end.x - this.animation.start.x;
-
-		/** @type {number} */
-		const yDiff = this.animation.end.y - this.animation.start.y;
+		const sceneLength = this.animation.scene.length;
 
 		/** @type {number} */
 		const now = performance.now();
 
-		// Figure out what each slice should look like.
 		/** @type {number} */
-		let last = 0 - this.animation.start.speed;
-		for (let i = 0; i < stepsLength; ++i) {
-			/** @type {number} */
-			const progress = i / stepsLength;
+		let step = 0;
+
+		/** @type {number} */
+		let last = 0 - this.animation.scene[0].start.speed;
+
+		// Loop through the scenes.
+		for (let i = 0; i < sceneLength; ++i) {
+			/** @type {MateAnimationScene} */
+			const scene = this.animation.scene[i];
 
 			/** @type {number} */
-			const time = Math.floor(last + this.animation.start.speed + speedDiff * progress);
+			const framesLength = scene.frames.length;
 
 			/** @type {number} */
-			const interval = time - last;
+			const stepsLength = framesLength + (framesLength - scene.repeatFrom) * scene.repeat;
 
-			last = time;
-
-			// What frame should we show?
 			/** @type {number} */
-			let frame = 0;
-			if (i < framesLength) {
-				frame = this.animation.frames[i];
-			}
-			else if (! this.animation.repeatFrom) {
-				frame = this.animation.frames[i % framesLength];
-			}
-			else {
-				frame = this.animation.frames[this.animation.repeatFrom + (i - this.animation.repeatFrom) % (framesLength - this.animation.repeatFrom)];
-			}
+			const speedDiff = scene.end.speed - scene.start.speed;
 
-			/** @type {?string} */
-			let audio = null;
-			if (
-				null !== this.animation.audio &&
-				this.animation.audio.file &&
-				this.animation.audio.start === i
-			) {
-				audio = audioFile(this.animation.audio.file);
-			}
+			/** @type {number} */
+			const xDiff = scene.end.x - scene.start.x;
 
-			this.steps.push(/** @type {!MateAnimationStep} */ ({
-				step: i,
-				time: now + time,
-				interval: interval,
-				frame: frame,
-				x: this.animation.start.x + xDiff * progress,
-				y: this.animation.start.y + yDiff * progress,
-				audio: audio,
-			}));
+			/** @type {number} */
+			const yDiff = scene.end.y - scene.start.y;
+
+			// Figure out what each slice should look like.
+			for (let j = 0; j < stepsLength; ++j) {
+				/** @type {number} */
+				const progress = j / stepsLength;
+
+				/** @type {number} */
+				const time = Math.floor(last + scene.start.speed + speedDiff * progress);
+
+				/** @type {number} */
+				const interval = time - last;
+
+				last = time;
+
+				// What frame should we show?
+				/** @type {number} */
+				let frame = 0;
+				if (j < framesLength) {
+					frame = scene.frames[j];
+				}
+				else if (! scene.repeatFrom) {
+					frame = scene.frames[j % framesLength];
+				}
+				else {
+					frame = scene.frames[scene.repeatFrom + (j - scene.repeatFrom) % (framesLength - scene.repeatFrom)];
+				}
+
+				/** @type {?string} */
+				let audio = null;
+				if (
+					null !== scene.audio &&
+					scene.audio.file &&
+					scene.audio.start === j
+				) {
+					audio = scene.audio.file;
+				}
+
+				this.steps.push(/** @type {!MateAnimationStep} */ ({
+					step: step,
+					scene: i,
+					time: now + time,
+					interval: interval,
+					frame: frame,
+					x: scene.start.x + xDiff * progress,
+					y: scene.start.y + yDiff * progress,
+					audio: audio,
+					flip: !! ((FLAGS.autoFlip & scene.flags) && stepsLength - 1 === j),
+					flags: scene.flags,
+				}));
+
+				++step;
+			}
 		}
+
+		// Reverse the steps so we can pop() instead of shift().
+		this.steps = this.steps.reverse();
 
 		// Set up the child if applicable.
 		if (this.animation.childId) {
@@ -449,10 +480,10 @@ export const Mate = class {
 		// Bath dive.
 		// Black Sheep.
 		// Stargazing.
-		case 23:
-		case 31:
-		case 56:
-		case 64:
+		case PLAYLIST.BathDiveChild:
+		case PLAYLIST.BlackSheepChild:
+		case PLAYLIST.StargazeChild:
+		case PLAYLIST.ChasingAMartianChild:
 			setup = {
 				id: this.animation.childId,
 				x: null,
@@ -462,9 +493,9 @@ export const Mate = class {
 			break;
 
 		// Eat.
-		case 27:
+		case PLAYLIST.FlowerChild:
 			setup = {
-				id: 27,
+				id: PLAYLIST.FlowerChild,
 				x: this.flipped ?
 					this.x + TILE_SIZE * 0.9 :
 					this.x - TILE_SIZE * 0.9,
@@ -474,9 +505,9 @@ export const Mate = class {
 			break;
 
 		// Abduction.
-		case 58:
+		case PLAYLIST.AbductionChild:
 			setup = {
-				id: 58,
+				id: PLAYLIST.AbductionChild,
 				x: this.x,
 				y: screenHeight() - TILE_SIZE * 2 - 4 * 120,
 			};
@@ -484,9 +515,9 @@ export const Mate = class {
 			break;
 
 		// Abduction beam.
-		case 61:
+		case PLAYLIST.AbductionBeamChild:
 			setup = {
-				id: 61,
+				id: PLAYLIST.AbductionBeamChild,
 				x: this.x,
 				y: screenHeight() - TILE_SIZE,
 			};
@@ -632,8 +663,8 @@ export const Mate = class {
 
 		/** @type {?MateAnimationStep} */
 		let step = null;
-		while (undefined !== this.steps[0] && this.steps[0].time <= now) {
-			step = this.steps.shift();
+		while (undefined !== this.steps[stepsLength - 1] && this.steps[stepsLength - 1].time <= now) {
+			step = this.steps.pop();
 			--stepsLength;
 		}
 
@@ -641,11 +672,6 @@ export const Mate = class {
 		if (null === step) {
 			this.queuePaint();
 			return;
-		}
-
-		// Fade child sprites in.
-		if (this.child && ! this.el.classList.contains('fade-in')) {
-			this.el.className += ' fade-in';
 		}
 
 		// Always set the frame.
@@ -656,8 +682,7 @@ export const Mate = class {
 
 		// Play audio?
 		if (step.audio && window['Poe']['audio']()) {
-			const audio = new Audio(step.audio);
-			audio.play();
+			makeNoise(step.audio);
 		}
 
 		// Pull dimensions once.
@@ -689,7 +714,7 @@ export const Mate = class {
 			// Use a timeout to transition the animation so the last frame doesn't get cut off.
 			setTimeout(() => {
 				// Maybe we can flip it?
-				if (FLAGS.autoFlip & this.animation.flags) {
+				if (step.flip) {
 					this.flip();
 				}
 
@@ -711,9 +736,13 @@ export const Mate = class {
 
 			return;
 		}
+		// Flip now.
+		else if (step.flip) {
+			this.flip();
+		}
 
 		// Did we hit an edge?
-		if (null !== this.animation.edge && ! (FLAGS.ignoreEdges & this.animation.flags)) {
+		if (null !== this.animation.edge && ! (FLAGS.ignoreEdges & step.flags)) {
 			let change = false;
 
 			// Too left.
@@ -763,20 +792,20 @@ export const Mate = class {
 		}
 
 		// Does gravity matter?
-		if ((FLAGS.forceGravity & this.animation.flags) && this.y < sh - TILE_SIZE - 2) {
-			this.setAnimation(FALLING_ANIMATION);
+		if ((FLAGS.forceGravity & step.flags) && this.y < sh - TILE_SIZE - 2) {
+			this.setAnimation(PLAYLIST.Fall);
 			return;
 		}
 
 		// Can't finish?
 		if (
-			(! this.allowExit && 0 > this.x && 0 > this.animation.end.x) ||
-			(! this.allowExit && this.x > sw - TILE_SIZE && 0 < this.animation.end.x) ||
-			(0 > this.y && 0 > this.animation.end.y) ||
-			(this.y >= sh - TILE_SIZE && 0 < this.animation.end.y)
+			(! this.allowExit && 0 > this.x && 0 > this.animation.scene[step.scene].end.x) ||
+			(! this.allowExit && this.x > sw - TILE_SIZE && 0 < this.animation.scene[step.scene].end.x) ||
+			(0 > this.y && 0 > this.animation.scene[step.scene].end.y) ||
+			(this.y >= sh - TILE_SIZE && 0 < this.animation.scene[step.scene].end.y)
 		) {
 			// We can ignore a few animations.
-			if (! (FLAGS.ignoreEdges & this.animation.flags)) {
+			if (! (FLAGS.ignoreEdges & step.flags)) {
 				// Pick something else.
 				if (! this.child) {
 					// If we've gone offscreen, start over.
@@ -842,9 +871,9 @@ export const Mate = class {
 		// Choose something!
 		switch (id) {
 		// Fall from a random place.
-		case 5:
+		case PLAYLIST.Fall:
 			return this.setAnimation(
-				5,
+				PLAYLIST.Fall,
 				Math.random() * (screenWidth() - TILE_SIZE),
 				0 - TILE_SIZE
 			);
@@ -914,7 +943,7 @@ export const Mate = class {
 			this.setFlip(false);
 			this.dragging = true;
 			this.el.classList.add('is-dragging');
-			this.setAnimation(DRAGGING_ANIMATION);
+			this.setAnimation(PLAYLIST.Drag);
 		}
 	}
 
@@ -927,7 +956,7 @@ export const Mate = class {
 		if (this.dragging) {
 			this.dragging = false;
 			this.el.classList.remove('is-dragging');
-			this.setAnimation(FALLING_ANIMATION);
+			this.setAnimation(PLAYLIST.Fall);
 		}
 	}
 
@@ -952,15 +981,24 @@ export const Mate = class {
 		}
 
 		// If gravity applies and we're too high, glue to the bottom.
+		/** @type {number} */
 		const sh = screenHeight();
-		if ((FLAGS.forceGravity & this.animation.flags) && this.y < sh - TILE_SIZE) {
+
+		/** @type {number} */
+		const stepsLength = this.steps.length;
+		if (
+			stepsLength &&
+			(FLAGS.forceGravity & this.steps[stepsLength - 1].flags) &&
+			this.y < sh - TILE_SIZE
+		) {
 			this.setPosition(this.x, sh - TILE_SIZE, true);
 			return;
 		}
 
 		// Climbing down we need to be glued to the right side.
+		/** @type {number} */
 		const sw = screenWidth();
-		if (41 === this.animation.id && sw - TILE_SIZE !== this.x) {
+		if (PLAYLIST.ClimbDown === this.animation.id && sw - TILE_SIZE !== this.x) {
 			this.setPosition(sw - TILE_SIZE, this.y, true);
 			return;
 		}

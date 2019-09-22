@@ -16,18 +16,27 @@ export const YAWN = 'data:audio/mp3;base64,//OAxAAAAAAAAAAAAFhpbmcAAAAPAAAAVQAAI
 /**
  * Get Audio
  *
- * @param {string} audio Audio.
- * @return {string} Audio.
+ * @param {string} name Audio.
+ * @return {void} Nothing.
  */
-export const audioFile = function(audio) {
-	switch (audio.toUpperCase()) {
+export const makeNoise = function(name) {
+	/* @type {?string} */
+	let file = null;
+
+	switch (name) {
 	case 'BAA':
-		return BAA;
+		file = BAA;
+		break;
 	case 'SNEEZE':
-		return SNEEZE;
+		file = SNEEZE;
+		break;
 	case 'YAWN':
-		return YAWN;
+		file = YAWN;
+		break;
+	default:
+		return;
 	}
 
-	return '';
+	const audio = new Audio(file);
+	audio.play();
 };

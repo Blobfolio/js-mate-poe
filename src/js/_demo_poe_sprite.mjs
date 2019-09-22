@@ -93,26 +93,38 @@ export const poeSprite = {
 				 * @return {Array} Collection.
 				 */
 				(out, v) => {
-					/** @type {MateAnimationState} */
-					const start = standardizeMateAnimationState(v.start);
-
-					/** @type {!number} */
-					let repeat = Number(('function' === typeof v.repeat) ? 5 : v.repeat);
-					if (repeatMax < repeat) {
-						repeat = repeatMax;
-					}
-
 					/** @type {number} */
-					const repeatFrom = repeat ? v.repeatFrom : 0;
+					const scenesLength = v.scene.length;
 
-					out.push({
-						'id': v.id,
-						'name': v.name,
-						'speed': start.speed,
-						'repeat': repeat,
-						'repeatFrom': repeatFrom,
-						'frames': v.frames,
-					});
+					// Do it by scene.
+					for (let i = 0; i < scenesLength; ++i) {
+						/** @type {MateAnimationState} */
+						const start = standardizeMateAnimationState(v.scene[i].start);
+
+						/** @type {!number} */
+						let repeat = Number(('function' === typeof v.scene[i].repeat) ? 5 : v.scene[i].repeat);
+						if (repeatMax < repeat) {
+							repeat = repeatMax;
+						}
+
+						/** @type {number} */
+						const repeatFrom = repeat ? v.scene[i].repeatFrom : 0;
+
+						/** @type {string} */
+						let name = v.name;
+						if (0 < i) {
+							name += ` (#${i})`;
+						}
+
+						out.push({
+							'id': `${v.id}_${i}`,
+							'name': name,
+							'speed': start.speed,
+							'repeat': repeat,
+							'repeatFrom': repeatFrom,
+							'frames': v.scene[i].frames,
+						});
+					}
 
 					return out;
 				},
