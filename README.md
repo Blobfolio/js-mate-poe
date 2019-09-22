@@ -27,11 +27,11 @@ The JS Mate Poe script has also been heavily optimized using [Google Closure Com
 
 | Encoding | Size |
 | -------- | ---- |
-| None | 92,115 Bytes |
-| Gzip | 53,970 Bytes |
-| Brotli | 50,985 Bytes |
+| None | 91,054 Bytes |
+| Gzip | 53,978 Bytes |
+| Brotli | 50,956 Bytes |
 
-[Version 1.0.2](https://github.com/Blobfolio/js-mate-poe/releases) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
+[Version 1.0.3](https://github.com/Blobfolio/js-mate-poe/releases) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
 
 JS Mate Poe *does not* support alternate characters or sprites; it's Poe or bust. Also intentionally omitted are interactions with individual page elements such as `<div>` or `<h1>`; edge detection is instead bound to the main window.
 
