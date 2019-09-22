@@ -30,6 +30,7 @@ const Poe = class {
 	 * Start Sprites
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static start() {
 		// Don't run this more than once.
@@ -51,6 +52,7 @@ const Poe = class {
 	 * Set Up
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	static setup() {
 		if (null !== _mate) {
@@ -60,7 +62,7 @@ const Poe = class {
 		bindEvent(
 			document.documentElement,
 			'mousemove',
-			(/** @type {Event} */ e) => Poe.onDrag(e),
+			(/** @type {MouseEvent} */ e) => Poe.onDrag(e),
 			{ passive: true }
 		);
 		bindEvent(
@@ -79,6 +81,7 @@ const Poe = class {
 	 * Add Styles to the Page
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	static setupStyle() {
 		// This only needs to happen once.
@@ -86,8 +89,10 @@ const Poe = class {
 			return;
 		}
 
+		/** @type {Element} */
 		const parent = document.head || document.body;
 
+		/** @type {Element} */
 		let style = document.createElement('STYLE');
 		style.type = 'text/css';
 		style.id = 'css-mate-poe';
@@ -100,6 +105,7 @@ const Poe = class {
 	 * Destroy
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static stop() {
 		_mate.destroy();
@@ -120,6 +126,7 @@ const Poe = class {
 	 * Play Audio?
 	 *
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	static audio() {
 		return _audio;
@@ -138,6 +145,7 @@ const Poe = class {
 	 * @param {number=} x Start at X.
 	 * @param {number=} y Start at Y.
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	static setAnimation(id, x, y) {
 		if (null === _mate) {
@@ -152,6 +160,7 @@ const Poe = class {
 	 *
 	 * @param {boolean} on Status.
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static setAudio(on) {
 		_audio = !! on;
@@ -168,6 +177,7 @@ const Poe = class {
 	 * Console: ASCII Art
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static printAscii() {
 		/* eslint-disable-next-line */
@@ -178,6 +188,7 @@ const Poe = class {
 	 * Console: Version
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static printVersion() {
 		/* eslint-disable-next-line */
@@ -194,6 +205,7 @@ const Poe = class {
 	 * On Resize
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static onResize() {
 		if (null !== _mate) {
@@ -204,8 +216,9 @@ const Poe = class {
 	/**
 	 * On Drag
 	 *
-	 * @param {Event} e Event.
+	 * @param {MouseEvent} e Event.
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static onDrag(e) {
 		if (null !== _mate && _mate.isDragging()) {
@@ -217,6 +230,7 @@ const Poe = class {
 	 * On Drag End
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	static onDragEnd() {
 		if (null !== _mate && _mate.isDragging()) {

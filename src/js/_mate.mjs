@@ -44,46 +44,112 @@ export const Mate = class {
 	 * @param {boolean=} child Treat as child sprite.
 	 */
 	constructor(child) {
-		/** @type {Mate} */
+		/**
+		 * @type {?Mate}
+		 * @private
+		 * @default
+		 */
 		this.mate = null;
 
-		/** @type {boolean} */
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
 		this.child = !! child;
 
-		/** @type {?Element} */
-		this.el = null;
+		/**
+		 * @type {?HTMLDivElement}
+		 * @private
+		 * @default
+		 */
+		this.el = /** @type {HTMLDivElement} */ (document.createElement('DIV'));
+		this.el.className = 'poe' + (this.child ? ' is-child' : '');
 
-		/** @type {?Element} */
-		this.img = null;
+		/**
+		 * @type {?HTMLImageElement}
+		 * @private
+		 * @default
+		 */
+		this.img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
+		this.img.alt = NAME;
+		this.img.src = IMAGE;
+		this.el.appendChild(this.img);
 
-		/** @type {boolean} */
+		// Add the element to the body.
+		document.body.appendChild(this.el);
+
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
 		this.allowExit = false;
 
-		/** @type {number} */
+		/**
+		 * @type {number}
+		 * @private
+		 * @default
+		 */
 		this.x = -100;
 
-		/** @type {number} */
+		/**
+		 * @type {number}
+		 * @private
+		 * @default
+		 */
 		this.y = -100;
 
-		/** @type {boolean} */
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
+		this.bound = false;
+
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
 		this.queued = false;
 
-		/** @type {number} */
+		/**
+		 * @type {number}
+		 * @private
+		 * @default
+		 */
 		this.frame = 0;
 
-		/** @type {Array<MateAnimationStep>} */
+		/**
+		 * @type {Array<MateAnimationStep>}
+		 * @private
+		 * @default
+		 */
 		this.steps = [];
 
-		/** @type {boolean} */
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
 		this.flipped = false;
 
-		/** @type {boolean} */
+		/**
+		 * @type {boolean}
+		 * @private
+		 * @default
+		 */
 		this.dragging = false;
 
-		/** @type {?MateAnimation} */
+		/**
+		 * @type {?MateAnimation}
+		 * @private
+		 * @default
+		 */
 		this.animation = null;
 
-		// Create the element and bindings.
+		// Set up element bindings.
 		this.setupEl();
 	}
 
@@ -91,46 +157,44 @@ export const Mate = class {
 	 * Create Element
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	setupEl() {
-		if (! isElement(this.el)) {
-			this.el = document.createElement('DIV');
-			this.el.className = 'poe' + (this.child ? ' is-child' : '');
+		// Don't double-bind.
+		if (this.bound) {
+			return;
+		}
+		this.bound = true;
 
-			// Bind events to the main Mate.
-			if (this.child) {
-				// Add the fade-in class after a little delay.
-				requestAnimationFrame(() => this.el.classList.add('fade-in'));
-			}
-			else {
-				bindEvent(
-					this.el,
-					'contextmenu',
-					cbPreventDefault
-				);
-				bindEvent(
-					this.el,
-					'mousedown',
-					(/** @type {MouseEvent} */ e) => this.onDragStart(e),
-					{ passive: true }
-				);
-				bindEvent(
-					this.el,
-					'dblclick',
-					(/** @type {Event} */ e) => {
-						e.preventDefault();
-						const event = new CustomEvent('poeDestroy');
+		// Bind events to the main Mate.
+		if (this.child) {
+			// Add the fade-in class after a little delay.
+			requestAnimationFrame(() => this.el.classList.add('fade-in'));
+		}
+		else {
+			bindEvent(
+				this.el,
+				'contextmenu',
+				cbPreventDefault
+			);
+			bindEvent(
+				this.el,
+				'mousedown',
+				(/** @type {MouseEvent} */ e) => this.onDragStart(e),
+				{ passive: true }
+			);
+			bindEvent(
+				this.el,
+				'dblclick',
+				(/** @type {Event} */ e) => {
+					e.preventDefault();
+					/** @type {?Event} */
+					const event = new CustomEvent('poeDestroy');
+					if (null !== event) {
 						window.dispatchEvent(event);
 					}
-				);
-			}
-
-			this.img = document.createElement('IMG');
-			this.img.alt = NAME;
-			this.img.src = IMAGE;
-			this.el.appendChild(this.img);
-
-			document.body.appendChild(this.el);
+				}
+			);
 		}
 	}
 
@@ -138,6 +202,7 @@ export const Mate = class {
 	 * Destroy!
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	destroy() {
 		// Remove the element and bindings.
@@ -146,6 +211,11 @@ export const Mate = class {
 			if (! this.child) {
 				// Remove bound events.
 				clearEvents(this.el);
+
+				// Remove the image.
+				this.el.removeChild(this.img);
+				delete this.img;
+				this.img = null;
 
 				// Kill the element.
 				document.body.removeChild(this.el);
@@ -160,8 +230,16 @@ export const Mate = class {
 				setTimeout(() => {
 					if (null !== this.el) {
 						// Give the owner a chance to clear its reference.
+						/** @type {?Event} */
 						const event = new CustomEvent('poeChildDestroy');
-						this.el.dispatchEvent(event);
+						if (null !== event) {
+							this.el.dispatchEvent(event);
+						}
+
+						// Remove the image.
+						this.el.removeChild(this.img);
+						delete this.img;
+						this.img = null;
 
 						// Kill the element.
 						document.body.removeChild(this.el);
@@ -179,6 +257,7 @@ export const Mate = class {
 	 * Disable Mate
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	destroyMate() {
 		if (null !== this.mate) {
@@ -197,13 +276,9 @@ export const Mate = class {
 	 * Reset
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	reset() {
-		if (null !== this.img) {
-			delete this.img;
-			this.img = null;
-		}
-
 		this.child = false;
 		this.allowExit = false;
 		this.x = -100;
@@ -226,6 +301,7 @@ export const Mate = class {
 	 * Is Child?
 	 *
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	isChild() {
 		return !! this.child;
@@ -235,6 +311,7 @@ export const Mate = class {
 	 * Is Dragging?
 	 *
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	isDragging() {
 		return !! this.dragging;
@@ -244,6 +321,7 @@ export const Mate = class {
 	 * Is Flipped?
 	 *
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	isFlipped() {
 		return !! this.flipped;
@@ -253,6 +331,7 @@ export const Mate = class {
 	 * Is Partially Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isPartiallyVisible() {
 		return (this.isPartiallyVisibleX() || this.isPartiallyVisibleY());
@@ -262,6 +341,7 @@ export const Mate = class {
 	 * Is Partially Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isPartiallyVisibleX() {
 		return this.isVisibleX() &&
@@ -273,6 +353,7 @@ export const Mate = class {
 	 * Is Partially Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isPartiallyVisibleY() {
 		return this.isVisibleY() &&
@@ -284,6 +365,7 @@ export const Mate = class {
 	 * Is Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isVisible() {
 		return this.isVisibleX() && this.isVisibleY();
@@ -293,6 +375,7 @@ export const Mate = class {
 	 * Is Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isVisibleX() {
 		return null !== this.el &&
@@ -304,6 +387,7 @@ export const Mate = class {
 	 * Is Visible?
 	 *
 	 * @return {boolean} True/false.
+	 * @private
 	 */
 	isVisibleY() {
 		return null !== this.el &&
@@ -324,6 +408,7 @@ export const Mate = class {
 	 * @param {?number=} x Start at X.
 	 * @param {?number=} y Start at Y.
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	setAnimation(id, x, y) {
 		if (0 >= id) {
@@ -494,6 +579,7 @@ export const Mate = class {
 	 * Set Child Animation
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	enableMate() {
 		/** @type {?MateAnimationSetup} */
@@ -567,6 +653,7 @@ export const Mate = class {
 	 *
 	 * @param {boolean} flip Flip.
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	setFlip(flip) {
 		flip = !! flip;
@@ -581,6 +668,7 @@ export const Mate = class {
 	 * Toggle Flip
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	flip() {
 		this.setFlip(! this.flipped);
@@ -593,6 +681,7 @@ export const Mate = class {
 	 * @param {number} y Y position.
 	 * @param {boolean=} absolute Jump to the literal position.
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	setPosition(x, y, absolute) {
 		x = parseFloat(x) || 0;
@@ -632,6 +721,7 @@ export const Mate = class {
 	 * Paint: Position/Flip
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	paintTransform() {
 		/* @type {string} */
@@ -661,6 +751,7 @@ export const Mate = class {
 	 *
 	 * @param {number} now Now.
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	paint(now) {
 		this.queued = false;
@@ -709,7 +800,11 @@ export const Mate = class {
 		}
 
 		// Pull dimensions once.
+
+		/** @type {number} */
 		const sw = screenWidth();
+
+		/** @type {number} */
 		const sh = screenHeight();
 
 		// Flip it?
@@ -766,6 +861,7 @@ export const Mate = class {
 
 		// Did we hit an edge?
 		if (null !== this.animation.edge && ! (FLAGS.ignoreEdges & step.flags)) {
+			/** @type {boolean} */
 			let change = false;
 
 			// Too left.
@@ -859,6 +955,7 @@ export const Mate = class {
 	 * Prevent multiple callbacks being bound to the same animationFrame.
 	 *
 	 * @return {void} Nothing.
+	 * @private
 	 */
 	queuePaint() {
 		if (! this.queued) {
@@ -876,6 +973,7 @@ export const Mate = class {
 	 * Choose First Animation
 	 *
 	 * @return {boolean} True/false.
+	 * @public
 	 */
 	start() {
 		// This cannot be called on a child.
@@ -917,6 +1015,7 @@ export const Mate = class {
 	 *
 	 * @param {(null|number|Array<(number|MateAnimationPossibility)>)} choices Choices.
 	 * @return {number} Animation ID.
+	 * @private
 	 */
 	chooseNext(choices) {
 		// If we're in the middle of exiting, let's just keep going.
@@ -939,6 +1038,7 @@ export const Mate = class {
 		}
 
 		// Pick something random!
+		/** @type {number} */
 		const result = rankedChoice(choices);
 		if (! result || ! verifyAnimationId(result)) {
 			return this.chooseNext(null);
@@ -958,6 +1058,7 @@ export const Mate = class {
 	 *
 	 * @param {MouseEvent} e Event.
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	onDragStart(e) {
 		if (! this.dragging && (1 === e.buttons) && (0 === e.button)) {
@@ -997,6 +1098,7 @@ export const Mate = class {
 	 * End Drag
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	endDrag() {
 		if (this.dragging) {
@@ -1010,6 +1112,7 @@ export const Mate = class {
 	 * Event: Resize
 	 *
 	 * @return {void} Nothing.
+	 * @public
 	 */
 	onResize() {
 		// We can't check.
