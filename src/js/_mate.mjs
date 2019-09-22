@@ -2,11 +2,34 @@
  * @file The sprite object!
  */
 
-import { FLAGS, PLAYLIST, DEFAULT_CHOICES, ENTRANCE_CHOICES, FIRST_CHOICES, animation, verifyAnimationId } from './_animations.mjs';
+import {
+	animation,
+	DEFAULT_CHOICES,
+	ENTRANCE_CHOICES,
+	FIRST_CHOICES,
+	FLAGS,
+	PLAYLIST,
+	verifyAnimationId
+} from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
-import { cbPreventDefault, bindEvent, clearEvents, isElement, NAME, rankedChoice, screenWidth, screenHeight } from './_helpers.mjs';
+import {
+	bindEvent,
+	cbPreventDefault,
+	clearEvents,
+	isElement,
+	NAME,
+	rankedChoice,
+	screenHeight,
+	screenWidth
+} from './_helpers.mjs';
 import { IMAGE, TILE_SIZE } from './_image.mjs';
-import { MateAnimation, MateAnimationPossibility, MateAnimationScene, MateAnimationSetup, MateAnimationStep } from './_types.mjs';
+import {
+	MateAnimation,
+	MateAnimationPossibility,
+	MateAnimationScene,
+	MateAnimationSetup,
+	MateAnimationStep
+} from './_types.mjs';
 
 
 

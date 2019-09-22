@@ -11,7 +11,13 @@ import { poeIcon } from './_demo_poe_icon.mjs';
 import { poeTree } from './_demo_poe_tree.mjs';
 import { poeSprite } from './_demo_poe_sprite.mjs';
 import { NAME, VERSION } from './_helpers.mjs';
-import { MateAnimationPossibility, RawMateAnimationScene, MateAnimationScene, RawMateAnimation, VueApp } from './_types.mjs';
+import {
+	MateAnimationPossibility,
+	MateAnimationScene,
+	RawMateAnimation,
+	RawMateAnimationScene,
+	VueApp
+} from './_types.mjs';
 
 
 

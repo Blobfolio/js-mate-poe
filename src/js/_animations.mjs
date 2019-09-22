@@ -4,7 +4,17 @@
 
 import { screenHeight, screenWidth } from './_helpers.mjs';
 import { TILE_SIZE } from './_image.mjs';
-import { MateAnimationPosition, MateAnimationPossibility, MateAnimationPositionCB, MateAnimationStateCB, MateAnimationScene, RawMateAnimationScene, MateAnimationState, MateAnimation, RawMateAnimation } from './_types.mjs';
+import {
+	MateAnimation,
+	MateAnimationPosition,
+	MateAnimationPositionCB,
+	MateAnimationPossibility,
+	MateAnimationScene,
+	MateAnimationState,
+	MateAnimationStateCB,
+	RawMateAnimation,
+	RawMateAnimationScene
+} from './_types.mjs';
 
 
 
