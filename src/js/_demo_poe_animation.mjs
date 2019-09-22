@@ -283,19 +283,33 @@ export const poeAnimation = {
 		 * @return {string} Speed.
 		 */
 		'speed': function() {
-			/** @type {Array<number>} */
-			let soup = [];
+			/** @type {number} */
+			let min = 9999999999;
+
+			/** @type {number} */
+			let max = 0;
 
 			for (let i = 0; i < this['sceneLength']; ++i) {
-				soup.push(this['scene'][i]['start']['speed']);
-				soup.push(this['scene'][i]['end']['speed']);
+				if (this['scene'][i]['start']['speed'] < min) {
+					min = this['scene'][i]['start']['speed'];
+				}
+				else if (max < this['scene'][i]['start']['speed']) {
+					max = this['scene'][i]['start']['speed'];
+				}
+
+				if (this['scene'][i]['end']['speed'] < min) {
+					min = this['scene'][i]['end']['speed'];
+				}
+				else if (max < this['scene'][i]['end']['speed']) {
+					max = this['scene'][i]['end']['speed'];
+				}
 			}
 
 			/** @type {string} */
-			const start = `${Math.min(...soup)}ms`;
+			const start = `${min}ms`;
 
 			/** @type {string} */
-			const end = `${Math.max(...soup)}ms`;
+			const end = `${max}ms`;
 
 			if (start === end) {
 				return start;
