@@ -3,8 +3,14 @@
  */
 
 /* eslint-disable quote-props */
-import { FLAGS, PLAYLIST } from './_animations.mjs';
-import { MateAnimationScene, MateAnimationStep, VueComponent, VueProp } from './_types.mjs';
+import {
+	FLAGS,
+	MateAnimationScene,
+	MateAnimationStep,
+	PLAYLIST,
+	VueComponent,
+	VueProp
+} from './_types.mjs';
 
 
 
@@ -124,10 +130,7 @@ export const poeAnimation = {
 		 */
 		'hasAudio': function() {
 			for (let i = 0; i < this['sceneLength']; ++i) {
-				if (
-					null !== this['scene'][i]['audio'] &&
-					'string' === typeof this['scene'][i]['audio']['file']
-				) {
+				if (null !== this['scene'][i]['audio']) {
 					return true;
 				}
 			}

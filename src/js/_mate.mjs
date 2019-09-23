@@ -7,8 +7,6 @@ import {
 	DEFAULT_CHOICES,
 	ENTRANCE_CHOICES,
 	FIRST_CHOICES,
-	FLAGS,
-	PLAYLIST,
 	verifyAnimationId
 } from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
@@ -24,11 +22,14 @@ import {
 } from './_helpers.mjs';
 import { IMAGE, TILE_SIZE } from './_image.mjs';
 import {
+	FLAGS,
+	PLAYLIST,
 	MateAnimation,
 	MateAnimationPossibility,
 	MateAnimationScene,
 	MateAnimationSetup,
-	MateAnimationStep
+	MateAnimationStep,
+	SOUNDS
 } from './_types.mjs';
 
 
@@ -535,14 +536,14 @@ export const Mate = class {
 					frame = scene.frames[scene.repeatFrom + (j - scene.repeatFrom) % (framesLength - scene.repeatFrom)];
 				}
 
-				/** @type {?string} */
+				/** @type {?SOUNDS} */
 				let audio = null;
 				if (
 					null !== scene.audio &&
-					scene.audio.file &&
+					scene.audio.sound &&
 					scene.audio.start === j
 				) {
-					audio = scene.audio.file;
+					audio = scene.audio.sound;
 				}
 
 				this.steps.push(/** @type {!MateAnimationStep} */ ({

@@ -5,6 +5,7 @@
 import { screenHeight, screenWidth } from './_helpers.mjs';
 import { TILE_SIZE } from './_image.mjs';
 import {
+	FLAGS,
 	MateAnimation,
 	MateAnimationPosition,
 	MateAnimationPositionCB,
@@ -12,8 +13,10 @@ import {
 	MateAnimationScene,
 	MateAnimationState,
 	MateAnimationStateCB,
+	PLAYLIST,
 	RawMateAnimation,
-	RawMateAnimationScene
+	RawMateAnimationScene,
+	SOUNDS
 } from './_types.mjs';
 
 
@@ -21,76 +24,6 @@ import {
 // ---------------------------------------------------------------------
 // Animations
 // ---------------------------------------------------------------------
-
-/**
- * Animation Flags
- *
- * @enum {number}
- */
-export const FLAGS = {
-	allowExit: 1,
-	autoFlip: 2,
-	forceGravity: 4,
-	ignoreEdges: 8,
-	demoPlay: 16,
-	noChildren: 32,
-	noParents: 64,
-};
-
-/**
- * Animation IDs
- *
- * @enum {number}
- */
-export const PLAYLIST = {
-	Walk: 1,
-	Rotate: 2,
-	Drag: 3,
-	Fall: 4,
-	GraspingFall: 5,
-	Run: 6,
-	Boing: 7,
-	Bounce: 8,
-	Splat: 9,
-	Urinate: 10,
-	PlayDead: 11,
-	Scream: 12,
-	Sleep: 13,
-	Doze: 14,
-	BoredSleep: 15,
-	BathDive: 16,
-	BathDiveChild: 17,
-	Jump: 18,
-	Eat: 19,
-	FlowerChild: 20,
-	BlackSheep: 21,
-	BlackSheepChild: 22,
-	BeginRun: 23,
-	RunEnd: 24,
-	ClimbUp: 25,
-	ReachCeiling: 26,
-	WalkUpsideDown: 27,
-	ReachSide: 28,
-	ClimbDown: 29,
-	ReachFloor: 30,
-	Beg: 31,
-	Bleat: 32,
-	Handstand: 33,
-	Slide: 34,
-	BathCoolDown: 35,
-	Roll: 36,
-	Sneeze: 37,
-	Scratch: 38,
-	Stargaze: 39,
-	StargazeChild: 40,
-	Abduction: 41,
-	AbductionChild: 42,
-	AbductionBeamingChild: 43,
-	AbductionBeamChild: 44,
-	ChasingAMartian: 45,
-	ChasingAMartianChild: 46,
-	Spin: 47,
-};
 
 /**
  * All Animations
@@ -677,7 +610,7 @@ export const ANIMATIONS = [
 					1,
 				],
 				audio: {
-					file: 'YAWN',
+					sound: SOUNDS.Yawn,
 					start: 1,
 				},
 				flags: FLAGS.forceGravity,
@@ -702,7 +635,7 @@ export const ANIMATIONS = [
 					6,
 				],
 				audio: {
-					file: 'YAWN',
+					sound: SOUNDS.Yawn,
 					start: 5,
 				},
 				flags: FLAGS.forceGravity,
@@ -1661,7 +1594,7 @@ export const ANIMATIONS = [
 					3,
 				],
 				audio: {
-					file: 'BAA',
+					sound: SOUNDS.Baa,
 					start: 1,
 				},
 				flags: FLAGS.forceGravity,
@@ -1899,7 +1832,7 @@ export const ANIMATIONS = [
 					3,
 				],
 				audio: {
-					file: 'SNEEZE',
+					sound: SOUNDS.Sneeze,
 					start: 0,
 				},
 				flags: FLAGS.forceGravity,

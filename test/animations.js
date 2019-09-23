@@ -5,9 +5,16 @@
 /* global describe */
 /* global it */
 /* global require */
-import { ANIMATIONS, FLAGS, PLAYLIST, MAX_ANIMATION } from '../src/js/_animations.mjs';
+import { ANIMATIONS, MAX_ANIMATION } from '../src/js/_animations.mjs';
 import { TILES_X, TILES_Y } from '../src/js/_image.mjs';
-import { MateAnimationPossibility, RawMateAnimationScene, RawMateAnimation } from '../src/js/_types.mjs';
+import {
+	FLAGS,
+	MateAnimationPossibility,
+	PLAYLIST,
+	RawMateAnimation,
+	RawMateAnimationScene,
+	SOUNDS
+} from '../src/js/_types.mjs';
 const assert = require('chai').assert;
 
 
@@ -251,12 +258,16 @@ describe('Animation Pathways', () => {
 				if (null !== scene.audio) {
 					it(
 						'Audio is specified',
-						() => assert.isString(scene.audio.file)
+						() => assert.isNumber(scene.audio.sound)
 					);
 
 					it(
-						`Audio ${scene.audio.file} is valid`,
-						() => assert.include(['BAA', 'SNEEZE', 'YAWN'], scene.audio.file)
+						`Audio ${scene.audio.sound} is valid`,
+						() => assert.include([
+							SOUNDS.Baa,
+							SOUNDS.Sneeze,
+							SOUNDS.Yawn,
+						], scene.audio.sound)
 					);
 				}
 				else {
