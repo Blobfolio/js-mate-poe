@@ -10,6 +10,7 @@ import {
 	verifyAnimationId
 } from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
+import { IMAGE } from './_bin.mjs';
 import {
 	bindEvent,
 	cbPreventDefault,
@@ -20,7 +21,7 @@ import {
 	screenHeight,
 	screenWidth
 } from './_helpers.mjs';
-import { IMAGE, TILE_SIZE } from './_image.mjs';
+import { TILE_SIZE } from './_image.mjs';
 import {
 	FLAGS,
 	PLAYLIST,
