@@ -686,8 +686,8 @@ export const Mate = class {
 	 * @private
 	 */
 	setPosition(x, y, absolute) {
-		x = parseFloat(x) || 0;
-		y = parseFloat(y) || 0;
+		x = parseInt(x, 10) || 0;
+		y = parseInt(y, 10) || 0;
 
 		// Move somewhere specific.
 		if (absolute) {
