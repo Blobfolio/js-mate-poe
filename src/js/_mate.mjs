@@ -10,13 +10,11 @@ import {
 	verifyAnimationId
 } from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
-import { IMAGE } from './_bin.mjs';
 import {
 	bindEvent,
 	cbPreventDefault,
 	clearEvents,
 	isElement,
-	NAME,
 	rankedChoice,
 	screenHeight,
 	screenWidth
@@ -32,6 +30,15 @@ import {
 	MateAnimationStep,
 	SOUNDS
 } from './_types.mjs';
+
+
+
+/**
+ * Regular Expression for Frame Class
+ *
+ * @const {RegExp}
+ */
+const _frameRegExp = /poe-f\d+/g;
 
 
 
@@ -67,16 +74,6 @@ export const Mate = class {
 		 */
 		this.el = /** @type {HTMLDivElement} */ (document.createElement('DIV'));
 		this.el.className = 'poe' + (this.child ? ' is-child' : '');
-
-		/**
-		 * @type {?HTMLImageElement}
-		 * @private
-		 * @default
-		 */
-		this.img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
-		this.img.alt = NAME;
-		this.img.src = IMAGE;
-		this.el.appendChild(this.img);
 
 		// Add the element to the body.
 		document.body.appendChild(this.el);
@@ -214,11 +211,6 @@ export const Mate = class {
 				// Remove bound events.
 				clearEvents(this.el);
 
-				// Remove the image.
-				this.el.removeChild(this.img);
-				delete this.img;
-				this.img = null;
-
 				// Kill the element.
 				document.body.removeChild(this.el);
 				delete this.el;
@@ -237,11 +229,6 @@ export const Mate = class {
 						if (null !== event) {
 							this.el.dispatchEvent(event);
 						}
-
-						// Remove the image.
-						this.el.removeChild(this.img);
-						delete this.img;
-						this.img = null;
 
 						// Kill the element.
 						document.body.removeChild(this.el);
@@ -793,7 +780,10 @@ export const Mate = class {
 		// Always set the frame.
 		if (this.frame !== step.frame) {
 			this.frame = step.frame;
-			this.img.className = `poe-f${this.frame}`;
+
+			/** @type {string} */
+			const classes = this.el.className.replace(_frameRegExp, '').trim();
+			this.el.className = `${classes} poe-f${this.frame}`;
 		}
 
 		// Play audio?
