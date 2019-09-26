@@ -291,6 +291,7 @@ body {
 	background-size: $width $height;
 	background-repeat: no-repeat;
 	background-position: top left;
+	image-rendering: crisp-edges;
 }
 
 // There are a lot of frames! As with the main js-mate-poe.scss, we're skipping the first frame as it maches the default position.
