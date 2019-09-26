@@ -21,11 +21,7 @@
 	cursor: grab;
 	z-index: 99999;
 	overflow: hidden;
-
-	background-image: url($image);
-	background-size: $width $height;
-	background-repeat: no-repeat;
-	background-position: top left;
+	filter: blur(0);
 
 	// Animation: Dragging.
 	&.is-dragging { cursor: grabbing; }
@@ -39,6 +35,23 @@
 
 	// Children fade in.
 	&.fade-in { opacity: 1; }
+
+	// The image.
+	&-img {
+		position: relative !important;
+		display: block !important;
+		width: $width !important;
+		height: $height !important;
+		min-width: $width !important;
+		max-width: none !important;
+		min-height: $height !important;
+		max-height: none !important;
+		margin: 0 !important;
+		padding: 0 !important;
+
+		pointer-events: none;
+		filter: blur(0);
+	} // .poe-img
 }
 
 // There are a lot of frames! (We're skipping the first frame (0) as it matches the default position.)
@@ -47,10 +60,10 @@
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
 
 	@if $x != 0 and $y != 0 {
-		.poe-f#{$frame} { background-position: $x $y; }
+		.poe-img.poe-f#{$frame} { transform: translate($x, $y); }
 	} @else if $x != 0 {
-		.poe-f#{$frame} { background-position-x: $x; }
+		.poe-img.poe-f#{$frame} { transform: translateX($x); }
 	} @else if $y != 0 {
-		.poe-f#{$frame} { background-position-y: $y; }
+		.poe-img.poe-f#{$frame} { transform: translateY($y); }
 	}
 }

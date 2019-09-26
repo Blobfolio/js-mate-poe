@@ -10,6 +10,7 @@ import {
 	verifyAnimationId
 } from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
+import { IMAGE } from './_bin.mjs';
 import {
 	bindEvent,
 	cbPreventDefault,
@@ -30,15 +31,6 @@ import {
 	MateAnimationStep,
 	SOUNDS
 } from './_types.mjs';
-
-
-
-/**
- * Regular Expression for Frame Class
- *
- * @const {RegExp}
- */
-const _frameRegExp = /poe-f\d+/g;
 
 
 
@@ -74,6 +66,11 @@ export const Mate = class {
 		 */
 		this.el = /** @type {HTMLDivElement} */ (document.createElement('DIV'));
 		this.el.className = 'poe' + (this.child ? ' is-child' : '');
+
+		/** @type {HTMLImageElement} */
+		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
+		img.src = IMAGE;
+		this.el.appendChild(img);
 
 		// Add the element to the body.
 		document.body.appendChild(this.el);
@@ -780,10 +777,7 @@ export const Mate = class {
 		// Always set the frame.
 		if (this.frame !== step.frame) {
 			this.frame = step.frame;
-
-			/** @type {string} */
-			const classes = this.el.className.replace(_frameRegExp, '').trim();
-			this.el.className = `${classes} poe-f${this.frame}`;
+			this.el.children[0].className = `poe-img poe-f${this.frame}`;
 		}
 
 		// Play audio?
