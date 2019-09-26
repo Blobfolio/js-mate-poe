@@ -63,13 +63,34 @@ export const LOGO = `
 // Screen
 // ---------------------------------------------------------------------
 
+/** @type {number} Height. */
+let _screenHeight = 0;
+
+/** @type {number} Width. */
+let _screenWidth = 0;
+
 /**
  * Screen Height
  *
  * @return {number} Height.
  */
 export const screenHeight = function() {
-	return parseInt(window.innerHeight, 10) || 0;
+	return _screenHeight;
+};
+
+/**
+ * Set Screen Height
+ *
+ * @param {number=} height Height.
+ * @return {void} Nothing.
+ */
+export const setScreenHeight = function(height) {
+	if ('number' === typeof height) {
+		_screenHeight = parseInt(height, 10) || 0;
+	}
+	else {
+		_screenHeight = parseInt(window.innerHeight, 10) || 0;
+	}
 };
 
 /**
@@ -78,6 +99,21 @@ export const screenHeight = function() {
  * @return {number} Width.
  */
 export const screenWidth = function() {
+	return _screenWidth;
+};
+
+/**
+ * Set Screen Width
+ *
+ * @param {number=} width Width.
+ * @return {void} Nothing.
+ */
+export const setScreenWidth = function(width) {
+	if ('number' === typeof width) {
+		_screenWidth = parseInt(width, 10) || 0;
+		return;
+	}
+
 	/** @type {number} */
 	const windowWidth = parseInt(window.innerWidth, 10) || 0;
 
@@ -86,12 +122,24 @@ export const screenWidth = function() {
 
 	// If the document width is a little bit smaller than the window width, there's probably a scrollbar.
 	if (docWidth < windowWidth && docWidth + 25 >= windowWidth) {
-		return docWidth;
+		_screenWidth = docWidth;
 	}
 	else {
-		return windowWidth;
+		_screenWidth = windowWidth;
 	}
 };
+
+// Make sure the screen dimensions are correctly set at load.
+if (performance.timing.loadEventEnd) {
+	setScreenHeight();
+	setScreenWidth();
+}
+else {
+	window.addEventListener('load', () => {
+		setScreenHeight();
+		setScreenWidth();
+	}, { once: true });
+}
 
 
 

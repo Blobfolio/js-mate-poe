@@ -9,6 +9,8 @@ import {
 	logInfo,
 	LOGO,
 	NAME,
+	setScreenHeight,
+	setScreenWidth,
 	VERSION
 } from './_helpers.mjs';
 import { Mate } from './_mate.mjs';
@@ -216,7 +218,13 @@ const Poe = class {
 	 */
 	static onResize() {
 		if (null !== _mate) {
-			requestAnimationFrame(() => _mate.onResize());
+			requestAnimationFrame(() => {
+				setScreenHeight();
+				setScreenWidth();
+
+				// Run mate operations if any.
+				_mate.onResize();
+			});
 		}
 	}
 
