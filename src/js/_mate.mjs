@@ -670,8 +670,8 @@ export const Mate = class {
 	 * @private
 	 */
 	setPosition(x, y, absolute) {
-		x = parseInt(x, 10) || 0;
-		y = parseInt(y, 10) || 0;
+		x = parseFloat(x) || 0;
+		y = parseFloat(y) || 0;
 
 		// Move somewhere specific.
 		if (absolute) {
@@ -981,7 +981,7 @@ export const Mate = class {
 		case PLAYLIST.Fall:
 			return this.setAnimation(
 				PLAYLIST.Fall,
-				Math.random() * (screenWidth() - TILE_SIZE),
+				parseInt(Math.random() * (screenWidth() - TILE_SIZE), 10),
 				0 - TILE_SIZE
 			);
 
