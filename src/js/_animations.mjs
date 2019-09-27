@@ -2220,7 +2220,7 @@ export const ANIMATIONS = [
 					4,
 				],
 				audio: null,
-				flags: FLAGS.forceGravity,
+				flags: FLAGS.forceGravity | FLAGS.ignoreEdges,
 			},
 		],
 		useDefault: 0,
