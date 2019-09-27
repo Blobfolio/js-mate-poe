@@ -291,6 +291,7 @@ body {
 	background-size: $width $height;
 	background-repeat: no-repeat;
 	background-position: top left;
+	filter: blur(0);
 	image-rendering: crisp-edges;
 }
 

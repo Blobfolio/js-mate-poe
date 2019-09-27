@@ -22,6 +22,7 @@
 	z-index: 99999;
 	overflow: hidden;
 	filter: blur(0);
+	image-rendering: crisp-edges;
 
 	// Animation: Dragging.
 	&.is-dragging { cursor: grabbing; }
@@ -51,7 +52,7 @@
 
 		pointer-events: none;
 		filter: blur(0);
-		image-rendering: crisp-edges !important;
+		image-rendering: crisp-edges;
 	} // .poe-img
 }
 

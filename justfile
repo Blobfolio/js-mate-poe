@@ -90,6 +90,7 @@ test_dir  := base_dir + "/test"
 @_csso IN OUT:
 	just _header "Minifying CSS."
 	csso -i "{{ IN }}" -o "{{ OUT }}"
+	sed -i 's/image-rendering:crisp-edges/image-rendering:pixelated;image-rendering:crisp-edges/g' "{{ OUT }}"
 
 
 # Build a JS module from the CSS.
