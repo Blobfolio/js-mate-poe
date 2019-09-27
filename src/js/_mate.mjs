@@ -69,30 +69,30 @@ export const Mate = class {
 		mateId = parseInt(mateId, 10) || 0;
 
 		/**
-		 * @type {number}
-		 * @public
-		 * @default
+		 * The Mate ID
+		 *
+		 * @public {number}
 		 */
 		this.mateId = mateId;
 
 		/**
-		 * @type {number}
-		 * @private
-		 * @default
+		 * The Child Mate ID
+		 *
+		 * @private {number}
 		 */
 		this.childMateId = 0;
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * Mate is Child?
+		 *
+		 * @private {boolean}
 		 */
 		this.child = child;
 
 		/**
-		 * @type {?HTMLDivElement}
-		 * @private
-		 * @default
+		 * The Mate Element
+		 *
+		 * @private {?HTMLDivElement}
 		 */
 		this.el = /** @type {HTMLDivElement} */ (document.createElement('DIV'));
 		this.el.className = 'poe' + (this.child ? ' is-child' : '');
@@ -106,72 +106,72 @@ export const Mate = class {
 		document.body.appendChild(this.el);
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * Whether Mate Can Walk Offscreen
+		 *
+		 * @private {boolean}
 		 */
 		this.mayExit = false;
 
 		/**
-		 * @type {number}
-		 * @private
-		 * @default
+		 * Current X Position
+		 *
+		 * @private {number}
 		 */
 		this.x = -100;
 
 		/**
-		 * @type {number}
-		 * @private
-		 * @default
+		 * Current Y Position
+		 *
+		 * @private {number}
 		 */
 		this.y = -100;
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * Whether We've Bound Event Listeners
+		 *
+		 * @private {boolean}
 		 */
 		this.bound = false;
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * RAF Queue
+		 *
+		 * @private {boolean}
 		 */
 		this.queued = false;
 
 		/**
-		 * @type {number}
-		 * @private
-		 * @default
+		 * Current Frame
+		 *
+		 * @private {number}
 		 */
 		this.frame = 0;
 
 		/**
-		 * @type {Array<MateAnimationStep>}
-		 * @private
-		 * @default
+		 * Steps to Paint
+		 *
+		 * @private {Array<MateAnimationStep>}
 		 */
 		this.steps = [];
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * Mate is Flipped?
+		 *
+		 * @private {boolean}
 		 */
 		this.flipped = false;
 
 		/**
-		 * @type {boolean}
-		 * @private
-		 * @default
+		 * Mate is Dragging?
+		 *
+		 * @private {boolean}
 		 */
 		this.dragging = false;
 
 		/**
-		 * @type {?MateAnimation}
-		 * @private
-		 * @default
+		 * Current Animation
+		 *
+		 * @private {?MateAnimation}
 		 */
 		this.animation = null;
 
