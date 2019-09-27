@@ -217,14 +217,16 @@ export const clearEvents = function(el) {
 		return;
 	}
 
-	_events = _events.filter((v) => {
-		if (v.el === el) {
-			el.removeEventListener(v.hook, v.cb);
-			return false;
-		}
+	/** @type {number} */
+	const length = _events.length;
 
-		return true;
-	});
+	for (let i = length - 1; 0 <= i; --i) {
+		if (_events[i].el === el) {
+			el.removeEventListener(_events[i].hook, _events[i].cb);
+			delete _events[i];
+			_events.splice(i, 1);
+		}
+	}
 };
 
 /**

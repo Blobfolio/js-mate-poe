@@ -15,7 +15,6 @@ import {
 	bindEvent,
 	cbPreventDefault,
 	clearEvents,
-	isElement,
 	rankedChoice,
 	screenHeight,
 	screenWidth
@@ -34,6 +33,26 @@ import {
 
 
 
+/**
+ * Mates
+ *
+ * A workaround for terrible class support in Javascript. Think of these as static properties on Mate.
+ *
+ * @type {{
+	length: number,
+	primary: ?Mate,
+	children: Object<number, Mate>
+ * }}
+ */
+let _mates = {
+	length: 0,
+	primary: null,
+	children: {},
+};
+
+/**
+ * Mate
+ */
 export const Mate = class {
 	// -----------------------------------------------------------------
 	// Setup
@@ -42,22 +61,33 @@ export const Mate = class {
 	/**
 	 * A Poe Sprite!
 	 *
-	 * @param {boolean=} child Treat as child sprite.
+	 * @param {boolean} child Treat as child sprite.
+	 * @param {number} mateId Mate ID.
 	 */
-	constructor(child) {
+	constructor(child, mateId) {
+		child = !! child;
+		mateId = parseInt(mateId, 10) || 0;
+
 		/**
-		 * @type {?Mate}
+		 * @type {number}
+		 * @public
+		 * @default
+		 */
+		this.mateId = mateId;
+
+		/**
+		 * @type {number}
 		 * @private
 		 * @default
 		 */
-		this.mate = null;
+		this.childMateId = 0;
 
 		/**
 		 * @type {boolean}
 		 * @private
 		 * @default
 		 */
-		this.child = !! child;
+		this.child = child;
 
 		/**
 		 * @type {?HTMLDivElement}
@@ -80,7 +110,7 @@ export const Mate = class {
 		 * @private
 		 * @default
 		 */
-		this.allowExit = false;
+		this.mayExit = false;
 
 		/**
 		 * @type {number}
@@ -164,8 +194,12 @@ export const Mate = class {
 
 		// Bind events to the main Mate.
 		if (this.child) {
-			// Add the fade-in class after a little delay.
-			requestAnimationFrame(() => this.el.classList.add('fade-in'));
+			// Add the fade-in class after a little delay so it paints.
+			setTimeout(() => {
+				if (null !== this.el) {
+					this.el.classList.add('fade-in');
+				}
+			}, 5);
 		}
 		else {
 			bindEvent(
@@ -184,58 +218,52 @@ export const Mate = class {
 				'dblclick',
 				(/** @type {Event} */ e) => {
 					e.preventDefault();
+
 					/** @type {?Event} */
-					const event = new CustomEvent('poeDestroy');
+					const event = new CustomEvent('poeShutdown');
 					if (null !== event) {
 						window.dispatchEvent(event);
 					}
-				}
+				},
+				{ once: true }
 			);
 		}
 	}
 
 	/**
-	 * Destroy!
+	 * Clean-Up
 	 *
+	 * Remove all references so the object can be deleted from memory.
+	 *
+	 * @param {?boolean=} fade Fade out.
 	 * @return {void} Nothing.
-	 * @public
 	 */
-	destroy() {
-		// Remove the element and bindings.
-		if (isElement(this.el)) {
-			// Remove the main sprite.
-			if (! this.child) {
-				// Remove bound events.
-				clearEvents(this.el);
+	detach(fade) {
+		fade = !! fade;
+		if (fade && null !== this.el) {
+			this.el.classList.remove('fade-in');
+			setTimeout(() => this.detach(), 500);
+			return;
+		}
 
-				// Kill the element.
-				document.body.removeChild(this.el);
-				delete this.el;
-				this.el = null;
+		if (null !== this.el) {
+			// Remove bound events.
+			clearEvents(this.el);
 
-				this.reset();
-			}
-			// Remove the child.
-			else {
-				this.el.classList.remove('fade-in');
-				setTimeout(() => {
-					if (null !== this.el) {
-						// Give the owner a chance to clear its reference.
-						/** @type {?Event} */
-						const event = new CustomEvent('poeChildDestroy');
-						if (null !== event) {
-							this.el.dispatchEvent(event);
-						}
+			// Kill the element.
+			document.body.removeChild(this.el);
+			delete this.el;
+			this.el = null;
+		}
 
-						// Kill the element.
-						document.body.removeChild(this.el);
-						delete this.el;
-						this.el = null;
-					}
+		if (this.childMateId) {
+			this.detachChild();
+		}
 
-					this.reset();
-				}, 500);
-			}
+		/** @type {?Event} */
+		const event = new CustomEvent('poeDetached', {detail: {mateId: this.mateId}});
+		if (null !== event) {
+			window.dispatchEvent(event);
 		}
 	}
 
@@ -245,36 +273,16 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 * @private
 	 */
-	destroyMate() {
-		if (null !== this.mate) {
-			try {
-				this.mate.destroy();
-				delete this.mate;
-				this.mate = null;
-			} catch (Ex) {
-				delete this.mate;
-				this.mate = null;
+	detachChild() {
+		if (this.childMateId) {
+			/** @type {?Mate} */
+			let child = Mate.get(this.childMateId);
+			if (null !== child) {
+				child.detach();
 			}
-		}
-	}
 
-	/**
-	 * Reset
-	 *
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	reset() {
-		this.child = false;
-		this.allowExit = false;
-		this.x = -100;
-		this.y = -100;
-		this.queued = false;
-		this.frame = 0;
-		this.steps = [];
-		this.flipped = false;
-		this.dragging = false;
-		this.animation = null;
+			this.childMateId = 0;
+		}
 	}
 
 
@@ -399,7 +407,7 @@ export const Mate = class {
 	setAnimation(id, x, y) {
 		if (0 >= id) {
 			console.error(`Invalid animation ID: ${id}`);
-			this.destroy();
+			this.detach();
 			return false;
 		}
 
@@ -409,7 +417,7 @@ export const Mate = class {
 			id !== this.animation.id ||
 			! (FLAGS.allowExit & this.animation.scene[0].flags)
 		) {
-			this.allowExit = false;
+			this.mayExit = false;
 		}
 
 		// Pull the animation details, if any.
@@ -423,7 +431,7 @@ export const Mate = class {
 				console.error(`Invalid animation ID: ${id}`);
 			}
 
-			this.destroy();
+			this.detach();
 			return false;
 		}
 
@@ -431,17 +439,17 @@ export const Mate = class {
 		if (
 			(PLAYLIST.Fall === id) ||
 			(
-				null !== this.mate &&
+				this.childMateId &&
 				this.animation.childId
 			)
 		) {
-			this.destroyMate();
+			this.detachChild();
 		}
 
 		// Should we allow the mate to walk off-screen?
-		if ((FLAGS.allowExit & this.animation.scene[0].flags) && ! this.allowExit) {
+		if ((FLAGS.allowExit & this.animation.scene[0].flags) && ! this.mayExit) {
 			// Give it a one-in-five chance.
-			this.allowExit = 4 === Math.floor(Math.random() * 5);
+			this.mayExit = 4 === Math.floor(Math.random() * 5);
 		}
 
 		// If this animation has a fixed starting place, go ahead and set it.
@@ -553,7 +561,7 @@ export const Mate = class {
 
 		// Set up the child if applicable.
 		if (this.animation.childId) {
-			this.enableMate();
+			this.attachChild();
 		}
 
 		// Do it!
@@ -567,7 +575,7 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 * @private
 	 */
-	enableMate() {
+	attachChild() {
 		/** @type {?MateAnimationSetup} */
 		let setup = null;
 
@@ -625,13 +633,19 @@ export const Mate = class {
 			return;
 		}
 
-		this.mate = new Mate(true);
-		this.mate.setFlip(this.flipped);
-		this.mate.setAnimation(setup.id, setup.x, setup.y);
-		this.mate.el.addEventListener('poeChildDestroy', () => {
-			delete this.mate;
-			this.mate = null;
-		}, {once: true});
+		/** @type {?Mate} */
+		let mate = Mate.init(true);
+		if (null === mate) {
+			this.childMateId = 0;
+			return;
+		}
+
+		this.childMateId = mate.mateId;
+
+		requestAnimationFrame(() => {
+			mate.setFlip(this.flipped);
+			mate.setAnimation(setup.id, setup.x, setup.y);
+		});
 	}
 
 	/**
@@ -749,14 +763,14 @@ export const Mate = class {
 		if ((null === this.el) || ! stepsLength) {
 			// If a child, make sure we kill it!
 			if (this.child) {
-				this.destroy();
+				this.detach();
 			}
 
 			return;
 		}
 
 		// If we've exited, simply restart.
-		if (this.allowExit && ! this.isVisible()) {
+		if (this.mayExit && ! this.isVisible()) {
 			this.start();
 			return;
 		}
@@ -834,7 +848,7 @@ export const Mate = class {
 				}
 				// Remove child sprite.
 				else {
-					this.destroy();
+					this.detach(true);
 				}
 			}, step.interval);
 
@@ -851,13 +865,13 @@ export const Mate = class {
 			let change = false;
 
 			// Too left.
-			if (! this.allowExit && 0 > x && 0 >= this.x) {
+			if (! this.mayExit && 0 > x && 0 >= this.x) {
 				this.setPosition(0, this.y, true);
 				change = true;
 			}
 			// Too right.
 			else if (
-				! this.allowExit &&
+				! this.mayExit &&
 				0 < x &&
 				this.x >= sw - TILE_SIZE
 			) {
@@ -904,8 +918,8 @@ export const Mate = class {
 
 		// Can't finish?
 		if (
-			(! this.allowExit && 0 > this.x && 0 > this.animation.scene[step.scene].end.x) ||
-			(! this.allowExit && this.x > sw - TILE_SIZE && 0 < this.animation.scene[step.scene].end.x) ||
+			(! this.mayExit && 0 > this.x && 0 > this.animation.scene[step.scene].end.x) ||
+			(! this.mayExit && this.x > sw - TILE_SIZE && 0 < this.animation.scene[step.scene].end.x) ||
 			(0 > this.y && 0 > this.animation.scene[step.scene].end.y) ||
 			(this.y >= sh - TILE_SIZE && 0 < this.animation.scene[step.scene].end.y)
 		) {
@@ -923,7 +937,7 @@ export const Mate = class {
 				}
 				// Destroy the child!
 				else {
-					this.destroy();
+					this.detach();
 				}
 
 				return;
@@ -964,12 +978,12 @@ export const Mate = class {
 	start() {
 		// This cannot be called on a child.
 		if (this.child) {
-			this.destroy();
+			this.detach();
 			return false;
 		}
 
 		// Prevent circular restarts.
-		this.allowExit = false;
+		this.mayExit = false;
 		this.setFlip(false);
 
 		/** @type {number} */
@@ -1005,7 +1019,7 @@ export const Mate = class {
 	 */
 	chooseNext(choices) {
 		// If we're in the middle of exiting, let's just keep going.
-		if (this.allowExit && this.isPartiallyVisible()) {
+		if (this.mayExit && this.isPartiallyVisible()) {
 			return this.animation.id;
 		}
 
@@ -1048,8 +1062,8 @@ export const Mate = class {
 	 */
 	onDragStart(e) {
 		if (! this.dragging && (1 === e.buttons) && (0 === e.button)) {
-			this.destroyMate();
-			this.allowExit = false;
+			this.detachChild();
+			this.mayExit = false;
 			this.setFlip(false);
 			this.dragging = true;
 			this.el.classList.add('is-dragging');
@@ -1137,5 +1151,136 @@ export const Mate = class {
 			this.setPosition(sw - TILE_SIZE, this.y, true);
 			return;
 		}
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Static
+	// -----------------------------------------------------------------
+
+	/**
+	 * New Mate
+	 *
+	 * @param {boolean=} child Is Child?
+	 * @return {?Mate} Mate or null.
+	 */
+	static init(child) {
+		child = !! child;
+		if (child !== (null !== _mates.primary)) {
+			return null;
+		}
+
+		/** @type {number} */
+		let mateId = 2;
+		while ('undefined' !== typeof _mates.children[mateId]) {
+			++mateId;
+		}
+
+		++_mates.length;
+		if (child) {
+			_mates.children[mateId] = new Mate(true, mateId);
+			return _mates.children[mateId];
+		}
+		else {
+			_mates.primary = new Mate(false, 1);
+			return _mates.primary;
+		}
+	}
+
+	/**
+	 * Delete Mate
+	 *
+	 * @param {number} mateId Mate ID.
+	 * @return {void} Nothing.
+	 */
+	static delete(mateId) {
+		mateId = parseInt(mateId, 10) || 0;
+
+		// Is this the primary?
+		if (null !== _mates.primary && mateId === _mates.primary.mateId) {
+			Mate.deleteChildren();
+			delete _mates.primary;
+			_mates.primary = null;
+		}
+		// A child mate?
+		else if ('undefined' !== typeof _mates.children[mateId]) {
+			delete _mates.children[mateId];
+		}
+
+		// Update the length.
+		_mates.length = (null !== _mates.primary ? 1 + Object.keys(_mates.children).length : 0);
+	}
+
+	/**
+	 * Delete All
+	 *
+	 * @return {void} Nothing.
+	 */
+	static deleteAll() {
+		if (null !== _mates.primary) {
+			_mates.primary.detach();
+		}
+		else {
+			Mate.deleteChildren();
+		}
+	}
+
+	/**
+	 * Delete Children
+	 *
+	 * @return {void} Nothing.
+	 */
+	static deleteChildren() {
+		/** @type {Array<number>} */
+		const keys = /** @type {!Array<number>} */ (Object.keys(/** @type {!Object<number, Mate>} */ (_mates.children)));
+
+		/** @type {number} */
+		const length = keys.length;
+
+		for (let i = 0; i < length; ++i) {
+			/** @type {?Mate} */
+			let mate = Mate.get(keys[i]);
+			if (null !== mate) {
+				mate.detach();
+			}
+		}
+	}
+
+	/**
+	 * Get Mate
+	 *
+	 * @param {number} mateId Mate ID.
+	 * @return {?Mate} Mate or null.
+	 */
+	static get(mateId) {
+		mateId = parseInt(mateId, 10) || 0;
+
+		if (null !== _mates.primary && mateId === _mates.primary.mateId) {
+			return _mates.primary;
+		}
+		else if ('undefined' !== typeof _mates.children[mateId]) {
+			return _mates.children[mateId];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Length
+	 *
+	 * @return {number} Mate length.
+	 */
+	static get length() {
+		return _mates.length;
+	}
+
+	/**
+	 * Primary
+	 *
+	 * @return {?Mate} Primary mate.
+	 */
+	static get primary() {
+		return _mates.primary;
 	}
 };

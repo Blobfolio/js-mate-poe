@@ -17,9 +17,6 @@ import { Mate } from './_mate.mjs';
 
 
 
-/** @type {?Mate} */
-let _mate = null;
-
 /** @type {boolean} */
 let _audio = true;
 
@@ -43,7 +40,7 @@ const Poe = class {
 	 */
 	static start() {
 		// Don't run this more than once.
-		if (null !== _mate) {
+		if (Mate.length) {
 			return;
 		}
 
@@ -51,8 +48,7 @@ const Poe = class {
 		Poe.setup();
 
 		// Start the mate!
-		_mate = new Mate();
-		_mate.start();
+		Mate.init(false).start();
 
 		logInfo('started.');
 	}
@@ -64,7 +60,7 @@ const Poe = class {
 	 * @private
 	 */
 	static setup() {
-		if (null !== _mate) {
+		if (Mate.length) {
 			return;
 		}
 
@@ -81,7 +77,8 @@ const Poe = class {
 			{ passive: true }
 		);
 		bindEvent(window, 'resize', Poe.onResize, { passive: true });
-		bindEvent(window, 'poeDestroy', Poe.stop);
+		bindEvent(window, 'poeShutdown', Poe.stop);
+		bindEvent(window, 'poeDetached', Poe.onDetach);
 
 		Poe.setupStyle();
 	}
@@ -117,8 +114,8 @@ const Poe = class {
 	 * @public
 	 */
 	static stop() {
-		_mate.destroy();
-		_mate = null;
+		Mate.deleteAll();
+
 		clearEvents(document.documentElement);
 		clearEvents(window);
 
@@ -157,11 +154,11 @@ const Poe = class {
 	 * @public
 	 */
 	static setAnimation(id, x, y) {
-		if (null === _mate) {
+		if (null === Mate.primary) {
 			return false;
 		}
 
-		return _mate.setAnimation(id, x, y);
+		return Mate.primary.setAnimation(id, x, y);
 	}
 
 	/**
@@ -211,21 +208,15 @@ const Poe = class {
 	// -----------------------------------------------------------------
 
 	/**
-	 * On Resize
+	 * On Detach
 	 *
+	 * @param {Event} e Event.
 	 * @return {void} Nothing.
-	 * @public
 	 */
-	static onResize() {
-		if (null !== _mate) {
-			requestAnimationFrame(() => {
-				setScreenHeight();
-				setScreenWidth();
-
-				// Run mate operations if any.
-				_mate.onResize();
-			});
-		}
+	static onDetach(e) {
+		/** @type {number} */
+		const mateId = parseInt(e.detail.mateId, 10) || 0;
+		Mate.delete(mateId);
 	}
 
 	/**
@@ -236,8 +227,8 @@ const Poe = class {
 	 * @public
 	 */
 	static onDrag(e) {
-		if (null !== _mate && _mate.isDragging()) {
-			_mate.onDrag(e);
+		if (null !== Mate.primary && Mate.primary.isDragging()) {
+			Mate.primary.onDrag(e);
 		}
 	}
 
@@ -248,8 +239,26 @@ const Poe = class {
 	 * @public
 	 */
 	static onDragEnd() {
-		if (null !== _mate && _mate.isDragging()) {
-			_mate.endDrag();
+		if (null !== Mate.primary && Mate.primary.isDragging()) {
+			Mate.primary.endDrag();
+		}
+	}
+
+	/**
+	 * On Resize
+	 *
+	 * @return {void} Nothing.
+	 * @public
+	 */
+	static onResize() {
+		if (null !== Mate.primary) {
+			requestAnimationFrame(() => {
+				setScreenHeight();
+				setScreenWidth();
+
+				// Run mate operations if any.
+				Mate.primary.onResize();
+			});
 		}
 	}
 };
