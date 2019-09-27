@@ -33,7 +33,7 @@ export const makeNoise = function(sound) {
 		return;
 	}
 
-	/** @type {Audio} */
+	/** @const {Audio} */
 	const audio = new Audio(file);
 	audio.play();
 };

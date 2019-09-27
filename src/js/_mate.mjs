@@ -36,12 +36,12 @@ import {
 /**
  * Mates
  *
- * A workaround for terrible class support in Javascript. Think of these as static properties on Mate.
+ * These should be static properties on Mate but Javascript classes are a joke and neither eslint nor Closure Compiler understand them.
  *
  * @type {{
 	length: number,
 	primary: ?Mate,
-	children: Object<number, Mate>
+	children: !Object<number, Mate>
  * }}
  */
 let _mates = {
@@ -219,7 +219,7 @@ export const Mate = class {
 				(/** @type {Event} */ e) => {
 					e.preventDefault();
 
-					/** @type {?Event} */
+					/** @const {?Event} */
 					const event = new CustomEvent('poeShutdown');
 					if (null !== event) {
 						window.dispatchEvent(event);
@@ -260,7 +260,7 @@ export const Mate = class {
 			this.detachChild();
 		}
 
-		/** @type {?Event} */
+		/** @const {?Event} */
 		const event = new CustomEvent('poeDetached', {detail: {mateId: this.mateId}});
 		if (null !== event) {
 			window.dispatchEvent(event);
@@ -471,10 +471,10 @@ export const Mate = class {
 		// Precalculate the steps.
 		this.steps = [];
 
-		/** @type {number} */
+		/** @const {number} */
 		const sceneLength = this.animation.scene.length;
 
-		/** @type {number} */
+		/** @const {number} */
 		const now = performance.now();
 
 		/** @type {number} */
@@ -485,33 +485,33 @@ export const Mate = class {
 
 		// Loop through the scenes.
 		for (let i = 0; i < sceneLength; ++i) {
-			/** @type {MateAnimationScene} */
+			/** @const {MateAnimationScene} */
 			const scene = this.animation.scene[i];
 
-			/** @type {number} */
+			/** @const {number} */
 			const framesLength = scene.frames.length;
 
-			/** @type {number} */
+			/** @const {number} */
 			const stepsLength = framesLength + (framesLength - scene.repeatFrom) * scene.repeat;
 
-			/** @type {number} */
+			/** @const {number} */
 			const speedDiff = scene.end.speed - scene.start.speed;
 
-			/** @type {number} */
+			/** @const {number} */
 			const xDiff = scene.end.x - scene.start.x;
 
-			/** @type {number} */
+			/** @const {number} */
 			const yDiff = scene.end.y - scene.start.y;
 
 			// Figure out what each slice should look like.
 			for (let j = 0; j < stepsLength; ++j) {
-				/** @type {number} */
+				/** @const {number} */
 				const progress = j / stepsLength;
 
-				/** @type {number} */
+				/** @const {number} */
 				const time = Math.floor(last + scene.start.speed + speedDiff * progress);
 
-				/** @type {number} */
+				/** @const {number} */
 				const interval = time - last;
 
 				last = time;
@@ -801,10 +801,10 @@ export const Mate = class {
 
 		// Pull dimensions once.
 
-		/** @type {number} */
+		/** @const {number} */
 		const sw = screenWidth();
 
-		/** @type {number} */
+		/** @const {number} */
 		const sh = screenHeight();
 
 		// Flip it?
@@ -812,7 +812,7 @@ export const Mate = class {
 		/** @type {number} */
 		let x = step.x;
 
-		/** @type {number} */
+		/** @const {number} */
 		const y = step.y;
 
 		if (this.flipped) {
@@ -986,7 +986,7 @@ export const Mate = class {
 		this.mayExit = false;
 		this.setFlip(false);
 
-		/** @type {number} */
+		/** @const {number} */
 		const id = rankedChoice(FIRST_CHOICES);
 
 		// Choose something!
@@ -1038,7 +1038,7 @@ export const Mate = class {
 		}
 
 		// Pick something random!
-		/** @type {number} */
+		/** @const {number} */
 		const result = rankedChoice(choices);
 		if (! result || ! verifyAnimationId(result)) {
 			return this.chooseNext(null);
@@ -1080,10 +1080,10 @@ export const Mate = class {
 	 */
 	onDrag(e) {
 		if (this.dragging) {
-			/** @type {number} */
+			/** @const {number} */
 			const x = parseFloat(e.clientX) || 0;
 
-			/** @type {number} */
+			/** @const {number} */
 			const y = parseFloat(e.clientY) || 0;
 
 			this.setPosition(
@@ -1130,10 +1130,10 @@ export const Mate = class {
 		}
 
 		// If gravity applies and we're too high, glue to the bottom.
-		/** @type {number} */
+		/** @const {number} */
 		const sh = screenHeight();
 
-		/** @type {number} */
+		/** @const {number} */
 		const stepsLength = this.steps.length;
 		if (
 			stepsLength &&
@@ -1145,7 +1145,7 @@ export const Mate = class {
 		}
 
 		// Climbing down we need to be glued to the right side.
-		/** @type {number} */
+		/** @const {number} */
 		const sw = screenWidth();
 		if (PLAYLIST.ClimbDown === this.animation.id && sw - TILE_SIZE !== this.x) {
 			this.setPosition(sw - TILE_SIZE, this.y, true);
@@ -1232,10 +1232,10 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 */
 	static deleteChildren() {
-		/** @type {Array<number>} */
-		const keys = /** @type {!Array<number>} */ (Object.keys(/** @type {!Object<number, Mate>} */ (_mates.children)));
+		/** @const {Array<number>} */
+		const keys = /** @type {!Array<number>} */ (Object.keys(_mates.children));
 
-		/** @type {number} */
+		/** @const {number} */
 		const length = keys.length;
 
 		for (let i = 0; i < length; ++i) {

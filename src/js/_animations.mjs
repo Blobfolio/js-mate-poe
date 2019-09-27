@@ -2340,7 +2340,7 @@ export const DEFAULT_CHOICES = ANIMATIONS.reduce(
 			out.push(v.id);
 		}
 		else if (v.useDefault) {
-			/** @type {MateAnimationPossibility} */
+			/** @const {MateAnimationPossibility} */
 			const weight = {
 				weight: v.useDefault,
 				id: v.id,
@@ -2372,7 +2372,7 @@ export const ENTRANCE_CHOICES = ANIMATIONS.reduce(
 			out.push(v.id);
 		}
 		else if (v.useEntrance) {
-			/** @type {MateAnimationPossibility} */
+			/** @const {MateAnimationPossibility} */
 			const weight = {
 				weight: v.useEntrance,
 				id: v.id,
@@ -2404,7 +2404,7 @@ export const FIRST_CHOICES = ANIMATIONS.reduce(
 			out.push(v.id);
 		}
 		else if (v.useFirst) {
-			/** @type {MateAnimationPossibility} */
+			/** @const {MateAnimationPossibility} */
 			const weight = {
 				weight: v.useFirst,
 				id: v.id,
@@ -2458,7 +2458,7 @@ export const animation = function(id) {
 		return null;
 	}
 
-	/** @type {RawMateAnimation} */
+	/** @const {RawMateAnimation} */
 	const value = ANIMATIONS[id - 1];
 
 	return /** @type {MateAnimation} */ ({
@@ -2514,10 +2514,11 @@ export const standardizeMateAnimationScene = function(scenes) {
 	/** @type {Array<MateAnimationScene>} */
 	let out = [];
 
-	/** @type {number} */
+	/** @const {number} */
 	const length = scenes.length;
 
 	for (let i = 0; i < length; ++i) {
+		/** @const {!RawMateAnimationScene} */
 		const v = /** @type {!RawMateAnimationScene} */ (scenes[i]);
 
 		out.push(/** @type {!MateAnimationScene} */ ({

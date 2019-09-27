@@ -114,10 +114,10 @@ export const setScreenWidth = function(width) {
 		return;
 	}
 
-	/** @type {number} */
+	/** @const {number} */
 	const windowWidth = parseInt(window.innerWidth, 10) || 0;
 
-	/** @type {number} */
+	/** @const {number} */
 	const docWidth = parseInt(document.documentElement.offsetWidth, 10) || 0;
 
 	// If the document width is a little bit smaller than the window width, there's probably a scrollbar.
@@ -217,7 +217,7 @@ export const clearEvents = function(el) {
 		return;
 	}
 
-	/** @type {number} */
+	/** @const {number} */
 	const length = _events.length;
 
 	for (let i = length - 1; 0 <= i; --i) {

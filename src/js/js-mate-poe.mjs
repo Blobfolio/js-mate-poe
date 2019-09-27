@@ -95,7 +95,7 @@ const Poe = class {
 			return;
 		}
 
-		/** @type {Element} */
+		/** @const {Element} */
 		const parent = document.head || document.body;
 
 		/** @type {Element} */
@@ -214,7 +214,7 @@ const Poe = class {
 	 * @return {void} Nothing.
 	 */
 	static onDetach(e) {
-		/** @type {number} */
+		/** @const {number} */
 		const mateId = parseInt(e.detail.mateId, 10) || 0;
 		Mate.delete(mateId);
 	}
