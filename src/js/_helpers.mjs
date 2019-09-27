@@ -129,20 +129,6 @@ export const setScreenWidth = function(width) {
 	}
 };
 
-// Make sure the screen dimensions are correctly set at load.
-if ('undefined' !== typeof window) {
-	if ('performance' in window && performance.timing.loadEventEnd) {
-		setScreenHeight();
-		setScreenWidth();
-	}
-	else {
-		window.addEventListener('load', () => {
-			setScreenHeight();
-			setScreenWidth();
-		}, { once: true });
-	}
-}
-
 
 
 // ---------------------------------------------------------------------

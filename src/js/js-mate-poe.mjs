@@ -81,6 +81,10 @@ const Poe = class {
 		bindEvent(window, 'poeDetached', Poe.onDetach);
 
 		Poe.setupStyle();
+
+		// Go ahead and set the width and height as soon as the browser begins painting.
+		setScreenHeight();
+		setScreenWidth();
 	}
 
 	/**
