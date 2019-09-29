@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable quote-props */
-import { VueComponent, VueProp } from './_types.mjs';
+import { VueComponent, VueProp } from '../_types.mjs';
 
 
 

@@ -117,13 +117,22 @@ test_dir  := base_dir + "/test"
 # Eslint.
 @_eslint:
 	just _header "Linting Javascript."
-	npx eslint --color "{{ src_dir }}/js"/*.mjs "{{ test_dir }}"/*.js
+	npx eslint \
+		--color \
+		"{{ src_dir }}/js"/*.mjs \
+		"{{ src_dir }}/js/vue"/*.mjs \
+		"{{ test_dir }}"/*.js
 
 
 # Eslint Fix.
 @_eslint-fix:
 	just _header "Fixing Javascript."
-	npx eslint --color --fix "{{ src_dir }}/js"/*.mjs "{{ test_dir }}"/*.js || true
+	npx eslint \
+		--color \
+		--fix \
+		"{{ src_dir }}/js"/*.mjs \
+		"{{ src_dir }}/js/vue"/*.mjs \
+		"{{ test_dir }}"/*.js || true
 
 
 # Closure Compiler.
@@ -136,6 +145,7 @@ test_dir  := base_dir + "/test"
 		--language_out STABLE \
 		--externs "{{ src_dir }}/js/_externs.js" \
 		--js "{{ src_dir }}/js"/*.mjs \
+		--js "{{ src_dir }}/js/vue"/*.mjs \
 		--js_output_file "{{ OUT }}" \
 		--jscomp_off globalThis \
 		--jscomp_off unknownDefines \

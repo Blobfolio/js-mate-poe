@@ -3,8 +3,8 @@
  */
 
 /* eslint-disable quote-props */
-import { TILES_X, TILES_Y } from './_image.mjs';
-import { VueComponent, VueProp } from './_types.mjs';
+import { TILES_X, TILES_Y } from '../_image.mjs';
+import { VueComponent, VueProp } from '../_types.mjs';
 
 
 

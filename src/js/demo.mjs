@@ -7,11 +7,11 @@
 import { NAME, VERSION } from './_about.mjs';
 import { ANIMATIONS } from './_animations.mjs';
 import { demoResolveScenes, standardizeChoices } from './_helpers.mjs';
-import { poeAnimation } from './_demo_poe_animation.mjs';
-import { poeFrame } from './_demo_poe_frame.mjs';
-import { poeIcon } from './_demo_poe_icon.mjs';
-import { poeTree } from './_demo_poe_tree.mjs';
-import { poeSprite } from './_demo_poe_sprite.mjs';
+import { poeAnimation } from './vue/_demo_poe_animation.mjs';
+import { poeFrame } from './vue/_demo_poe_frame.mjs';
+import { poeIcon } from './vue/_demo_poe_icon.mjs';
+import { poeTree } from './vue/_demo_poe_tree.mjs';
+import { poeSprite } from './vue/_demo_poe_sprite.mjs';
 import {
 	Animation,
 	Flags,

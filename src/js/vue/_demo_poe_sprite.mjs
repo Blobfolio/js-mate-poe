@@ -4,10 +4,10 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS } from './_animations.mjs';
-import { demoResolveScene } from './_helpers.mjs';
-import { TILES_X, TILES_Y } from './_image.mjs';
-import { Animation, Scene, VueComponent, VueProp } from './_types.mjs';
+import { ANIMATIONS } from '../_animations.mjs';
+import { demoResolveScene } from '../_helpers.mjs';
+import { TILES_X, TILES_Y } from '../_image.mjs';
+import { Animation, Scene, VueComponent, VueProp } from '../_types.mjs';
 
 
 
