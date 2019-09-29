@@ -107,7 +107,7 @@ Some of the animation sequences make noise. Audio playback is enabled by default
 *Note:* Many browers — particularly mobile ones — block auto-playing audio, so JS Mate Poe might not be allowed to make noise regardless. This can be worked around by either asking users to whitelist auto-playing audio from your domain, or by having users click Poe with their mouse.
 
 **Example:**
-```
+```js
 // Audio is enabled by default.
 console.log(Poe.audio); // true
 
