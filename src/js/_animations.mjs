@@ -3,7 +3,7 @@
  */
 
 import { Poe } from './_poe.mjs';
-import { TILE_SIZE } from './_image.mjs';
+import { TILE_SIZE } from './_media.mjs';
 import {
 	Animation,
 	Flags,

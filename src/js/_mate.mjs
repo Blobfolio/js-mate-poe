@@ -9,10 +9,9 @@ import {
 	ENTRANCE_CHOICES,
 	FIRST_CHOICES
 } from './_animations.mjs';
-import { makeNoise } from './_audio.mjs';
 import { IMAGE } from './_bin.mjs';
 import { xDirection, yDirection } from './_helpers.mjs';
-import { TILE_SIZE } from './_image.mjs';
+import { makeNoise, TILE_SIZE } from './_media.mjs';
 import { Poe } from './_poe.mjs';
 import {
 	Animation,

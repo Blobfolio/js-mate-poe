@@ -3,7 +3,7 @@
  */
 
 import { MAX_ANIMATION_ID } from './_animations.mjs';
-import { TILES_X, TILES_Y } from './_image.mjs';
+import { TILES_X, TILES_Y } from './_media.mjs';
 import { Direction, Playlist, Scene, SceneRepeat, WeightedChoice } from './_types.mjs';
 
 
