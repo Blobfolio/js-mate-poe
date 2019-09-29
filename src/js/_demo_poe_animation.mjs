@@ -518,7 +518,7 @@ export const poeAnimation = {
 					v-if="hasChild"
 					:key="'tree-child-' + id"
 					trunk="Child"
-					:values="[{ weight: 1, id: childId }]"
+					:values="[[childId, 1]]"
 				></poe-tree>
 
 				<poe-tree

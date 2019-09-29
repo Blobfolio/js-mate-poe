@@ -93,7 +93,7 @@ new Vue(/** @type {!VueApp} */ ({
 					/** @type {number} */
 					'flags': flags,
 					/** @type {number} */
-					'childId': null === v.childId ? 0 : v.childId,
+					'childId': (null === v.childId) ? 0 : v.childId,
 					/** @type {?Array<WeightedChoice>} */
 					'edge': standardizeChoices(v.edge),
 					/** @type {?Array<WeightedChoice>} */
