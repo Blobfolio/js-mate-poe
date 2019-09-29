@@ -496,8 +496,9 @@ export const Poe = {
 
 		/** @const {!Array} */
 		const out = [
-			`%c${time} %c${Poe.name} ${msg}`,
+			`%c${time} %c${Poe.name} %c${msg}`,
 			'color:#b2bec3;',
+			'color:#ff1493;font-weight:bold;',
 			'',
 		];
 
