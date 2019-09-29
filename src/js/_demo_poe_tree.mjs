@@ -37,18 +37,18 @@ export const poeTree = {
 		 */
 		'branches': function() {
 			let out = [];
-			const length = this['values'].length;
 
-			for (let i = 0; i < length; ++i) {
+			for (let i = 0; i < this['values'].length; ++i) {
 				if (
-					'number' !== typeof this['values'][i]['id'] ||
-					'number' !== typeof this['values'][i]['weight']
+					'number' !== typeof this['values'][i][0] ||
+					'number' !== typeof this['values'][i][1] ||
+					0 >= this['values'][i][1]
 				) {
 					continue;
 				}
 
 				/** @type {(Object|boolean)} */
-				const tmp = this['$root']['summary'](this['values'][i]['id']);
+				const tmp = this['$root']['summary'](this['values'][i][0]);
 				if (false === tmp) {
 					continue;
 				}
@@ -57,7 +57,7 @@ export const poeTree = {
 					'id': tmp['id'],
 					'name': tmp['name'],
 					'frame': tmp['frame'],
-					'weight': Math.floor(this['values'][i]['weight'] / this['totalWeight'] * 1000) / 10,
+					'weight': Math.floor(this['values'][i][1] / this['totalWeight'] * 1000) / 10,
 				});
 			}
 
@@ -90,8 +90,8 @@ export const poeTree = {
 		 */
 		'totalWeight': function() {
 			return this['values'].reduce((out, v) => {
-				if ('number' === typeof v['weight']) {
-					out += v['weight'];
+				if ('number' === typeof v[1]) {
+					out += v[1];
 				}
 
 				return out;

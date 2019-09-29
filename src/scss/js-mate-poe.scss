@@ -24,18 +24,17 @@
 	filter: blur(0);
 	image-rendering: crisp-edges;
 
+	opacity: 1;
+	transition: opacity .5s ease;
+
 	// Animation: Dragging.
 	&.is-dragging { cursor: grabbing; }
 
 	// Child sprite.
-	&.is-child {
-		opacity: 0;
-		transition: opacity .5s ease;
-		pointer-events: none;
-	}
+	&.is-child { pointer-events: none; }
 
 	// Children fade in.
-	&.fade-in { opacity: 1; }
+	&.is-disabled { opacity: 0; }
 
 	// The image.
 	&-img {

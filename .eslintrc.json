@@ -17,7 +17,8 @@
             "tagNamePreference": {
                 "returns": "return",
                 "constant": "const",
-                "class": "constructor"
+                "class": "constructor",
+                "suppress": "suppress"
             },
             "preferredTypes": {
                 "object": "Object",

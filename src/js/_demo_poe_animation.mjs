@@ -4,10 +4,10 @@
 
 /* eslint-disable quote-props */
 import {
-	FLAGS,
-	MateAnimationScene,
-	MateAnimationStep,
-	PLAYLIST,
+	Flags,
+	Playlist,
+	Scene,
+	Step,
 	VueComponent,
 	VueProp
 } from './_types.mjs';
@@ -46,37 +46,9 @@ export const poeAnimation = {
 		},
 
 		/** @type {VueProp} */
-		'variableDuration': {
-			'type': Boolean,
-			'required': false,
-			'default': false,
-		},
-
-		/** @type {VueProp} */
-		'scene': {
+		'scenes': {
 			'type': [Array],
 			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'useDefault': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'useEntrance': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'useFirst': {
-			'type': Number,
-			'required': false,
-			'default': 0,
 		},
 
 		/** @type {VueProp} */
@@ -128,9 +100,9 @@ export const poeAnimation = {
 		 *
 		 * @return {boolean} True/false.
 		 */
-		'hasAudio': function() {
-			for (let i = 0; i < this['sceneLength']; ++i) {
-				if (null !== this['scene'][i]['audio']) {
+		'hasSound': function() {
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				if (null !== this['scenes'][i]['sound']) {
 					return true;
 				}
 			}
@@ -181,13 +153,13 @@ export const poeAnimation = {
 		 */
 		'isDependent': function() {
 			// Dragging and falling are special.
-			if (PLAYLIST.Drag === this['id'] || PLAYLIST.Fall === this['id']) {
+			if (Playlist.Drag === this['id'] || Playlist.Fall === this['id']) {
 				return true;
 			}
 
-			return ! this['useDefault'] &&
-				! this['useFirst'] &&
-				! this['useEntrance'];
+			return ! this['defaultChoice'] &&
+				! this['firstChoice'] &&
+				! this['entranceChoice'];
 		},
 
 		/**
@@ -196,7 +168,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'isPlayable': function() {
-			return !! (FLAGS.demoPlay & this['flags']);
+			return !! (Flags.DemoPlay & this['flags']);
 		},
 
 		/**
@@ -218,6 +190,15 @@ export const poeAnimation = {
 		},
 
 		/**
+		 * Variable Duration
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'variableDuration': function() {
+			return !! (Flags.VariableDuration & this['flags']);
+		},
+
+		/**
 		 * Duration
 		 *
 		 * @return {string} Duration.
@@ -228,14 +209,18 @@ export const poeAnimation = {
 			}
 
 			/** @type {number} */
-			const length = this['steps'].length;
-
-			/** @type {number} */
 			let duration = 0;
-			for (let i = 0; i < length; ++i) {
-				duration += this['steps'][i].interval;
+			for (let i = 0; i < this['steps'].length; ++i) {
+				duration += this['steps'][i]['interval'];
 			}
 
+			// Display big numbers as seconds.
+			if (1000 < duration) {
+				duration = Math.floor(duration / 100) / 10;
+				return new Intl.NumberFormat('en-US', {}).format(duration) + 's';
+			}
+
+			// Otherwise milliseconds will do.
 			return new Intl.NumberFormat('en-US', {}).format(duration) + 'ms';
 		},
 
@@ -249,19 +234,16 @@ export const poeAnimation = {
 			let out = [];
 
 			// Loop the scenes.
-			for (let i = 0; i < this['sceneLength']; ++i) {
+			for (let i = 0; i < this['scenes'].length; ++i) {
 				/** @type {boolean} */
-				const repeat = 0 < this['scene'][i]['repeat'];
+				const repeat = null !== this['scenes'][i]['repeat'];
 
 				/** @type {number} */
-				const repeatFrom = repeat ? this['scene'][i]['repeatFrom'] : 0;
+				const repeatFrom = repeat ? this['scenes'][i]['repeat'][1] : 0;
 
-				/** @type {number} */
-				const length = this['scene'][i]['frames'].length;
-
-				for (let j = 0; j < length; ++j) {
+				for (let j = 0; j < this['scenes'][i]['frames'].length; ++j) {
 					out.push({
-						'id': this['scene'][i]['frames'][j],
+						'id': this['scenes'][i]['frames'][j],
 						'repeat': repeat && j >= repeatFrom,
 						'flipped': false,
 					});
@@ -269,15 +251,6 @@ export const poeAnimation = {
 			}
 
 			return out;
-		},
-
-		/**
-		 * Scene Length
-		 *
-		 * @return {number} Length.
-		 */
-		'sceneLength': function() {
-			return this['scene'].length;
 		},
 
 		/**
@@ -292,19 +265,19 @@ export const poeAnimation = {
 			/** @type {number} */
 			let max = 0;
 
-			for (let i = 0; i < this['sceneLength']; ++i) {
-				if (this['scene'][i]['start']['speed'] < min) {
-					min = this['scene'][i]['start']['speed'];
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				if (this['scenes'][i]['from'][2] < min) {
+					min = this['scenes'][i]['from'][2];
 				}
-				else if (max < this['scene'][i]['start']['speed']) {
-					max = this['scene'][i]['start']['speed'];
+				else if (max < this['scenes'][i]['from'][2]) {
+					max = this['scenes'][i]['from'][2];
 				}
 
-				if (this['scene'][i]['end']['speed'] < min) {
-					min = this['scene'][i]['end']['speed'];
+				if (this['scenes'][i]['to'][2] < min) {
+					min = this['scenes'][i]['to'][2];
 				}
-				else if (max < this['scene'][i]['end']['speed']) {
-					max = this['scene'][i]['end']['speed'];
+				else if (max < this['scenes'][i]['to'][2]) {
+					max = this['scenes'][i]['to'][2];
 				}
 			}
 
@@ -326,10 +299,10 @@ export const poeAnimation = {
 		 *
 		 * Calculate the animation steps.
 		 *
-		 * @return {Array<MateAnimationStep>} Steps.
+		 * @return {Array<Step>} Steps.
 		 */
 		'steps': function() {
-			/** @type {Array<MateAnimationStep>} */
+			/** @type {Array<Step>} */
 			let out = [];
 
 			/** @type {number} */
@@ -339,27 +312,33 @@ export const poeAnimation = {
 			let step = 0;
 
 			/** @type {number} */
-			let last = 0 - this['scene'][0]['start']['speed'];
+			let last = 0 - this['scenes'][0]['from'][2];
 
 			// Loop through the scenes.
-			for (let i = 0; i < this['sceneLength']; ++i) {
-				/** @type {MateAnimationScene} */
-				const scene = this['scene'][i];
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				/** @type {!Scene} */
+				const scene = this['scenes'][i];
 
 				/** @type {number} */
 				const framesLength = scene['frames'].length;
 
-				/** @type {number} */
-				const stepsLength = framesLength + (framesLength - scene['repeatFrom']) * scene['repeat'];
+				/** @const {number} */
+				const repeat = null !== scene['repeat'] ? Math.floor(scene['repeat'][0]) : 0;
+
+				/** @const {number} */
+				const repeatFrom = repeat ? Math.floor(scene['repeat'][1]) : 0;
 
 				/** @type {number} */
-				const speedDiff = scene['end']['speed'] - scene['start']['speed'];
+				const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
 
 				/** @type {number} */
-				const xDiff = scene['end']['x'] - scene['start']['x'];
+				const speedDiff = scene['to'][2] - scene['from'][2];
 
 				/** @type {number} */
-				const yDiff = scene['end']['y'] - scene['start']['y'];
+				const xDiff = scene['to'][0] - scene['from'][0];
+
+				/** @type {number} */
+				const yDiff = scene['to'][1] - scene['from'][1];
 
 				// Figure out what each slice should look like.
 				for (let j = 0; j < stepsLength; ++j) {
@@ -367,7 +346,7 @@ export const poeAnimation = {
 					const progress = j / stepsLength;
 
 					/** @type {number} */
-					const time = Math.floor(last + scene['start']['speed'] + speedDiff * progress);
+					const time = Math.floor(last + scene['from'][2] + speedDiff * progress);
 
 					/** @type {number} */
 					const interval = time - last;
@@ -380,23 +359,23 @@ export const poeAnimation = {
 					if (j < framesLength) {
 						frame = scene['frames'][j];
 					}
-					else if (! scene['repeatFrom']) {
+					else if (! repeatFrom) {
 						frame = scene['frames'][j % framesLength];
 					}
 					else {
-						frame = scene['frames'][scene['repeatFrom'] + (j - scene['repeatFrom']) % (framesLength - scene['repeatFrom'])];
+						frame = scene['frames'][repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
 					}
 
-					out.push(/** @type {!MateAnimationStep} */ ({
+					out.push(/** @type {!Step} */ ({
 						'step': step,
 						'scene': i,
 						'time': now + time,
 						'interval': interval,
 						'frame': frame,
-						'x': scene['start']['x'] + xDiff * progress,
-						'y': scene['start']['y'] + yDiff * progress,
-						'audio': null,
-						'flip': !! ((FLAGS.autoFlip & scene['flags']) && stepsLength - 1 === j),
+						'x': scene['from'][0] + xDiff * progress,
+						'y': scene['from'][1] + yDiff * progress,
+						'sound': null,
+						'flip': !! ((Flags.AutoFlip & scene['flags']) && stepsLength - 1 === j),
 						'flags': scene['flags'],
 					}));
 
@@ -405,6 +384,33 @@ export const poeAnimation = {
 			}
 
 			return out;
+		},
+
+		/**
+		 * Default Choice
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'defaultChoice': function() {
+			return !! (Flags.DefaultChoice & this['flags']);
+		},
+
+		/**
+		 * Entrance Choice
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'entranceChoice': function() {
+			return !! (Flags.EntranceChoice & this['flags']);
+		},
+
+		/**
+		 * First Choice
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'firstChoice': function() {
+			return !! (Flags.FirstChoice & this['flags']);
 		},
 	},
 
@@ -434,7 +440,7 @@ export const poeAnimation = {
 					></poe-icon>
 
 					<poe-icon
-						v-if="hasAudio"
+						v-if="hasSound"
 						class="animation-legend-icon"
 						icon="audio"
 						title="Makes Noise"
@@ -448,21 +454,21 @@ export const poeAnimation = {
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < useFirst"
+						v-if="firstChoice"
 						class="animation-legend-icon"
 						icon="startup"
 						title="Startup Choice"
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < useDefault"
+						v-if="defaultChoice"
 						class="animation-legend-icon"
 						icon="default"
 						title="Default Choice"
 					></poe-icon>
 
 					<poe-icon
-						v-if="0 < useEntrance"
+						v-if="entranceChoice"
 						class="animation-legend-icon"
 						icon="offscreen"
 						title="Offscreen Choice"
@@ -477,7 +483,7 @@ export const poeAnimation = {
 						title="Playback Speed"
 					></poe-icon>
 
-					<div class="animation-legend-value">{{ speed }}</div>
+					<div class="animation-legend-value is-lower">{{ speed }}</div>
 				</div>
 
 				<!-- Time. -->
@@ -488,7 +494,7 @@ export const poeAnimation = {
 						title="Playback Duration"
 					></poe-icon>
 
-					<div class="animation-legend-value">{{ duration }}</div>
+					<div class="animation-legend-value is-lower">{{ duration }}</div>
 				</div>
 			</div><!-- .animation-legends -->
 

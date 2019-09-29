@@ -4,6 +4,8 @@
 
 
 
+// We can't import typedefs in extern files yet so have to specify a few things redundantly.
+
 /**
  * Vue Component
  *

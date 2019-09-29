@@ -13,14 +13,75 @@
  *
  * @enum {number}
  */
-export const FLAGS = {
-	allowExit: 1,
-	autoFlip: 2,
-	forceGravity: 4,
-	ignoreEdges: 8,
-	demoPlay: 16,
-	noChildren: 32,
-	noParents: 64,
+export const Flags = {
+	// Animation: OK to manually play during demo.
+	DemoPlay: 1,
+	// Animation: Not for children.
+	NoChildren: 2,
+	// Animation: Not for parents.
+	NoParents: 4,
+
+	// Demo: Default Choice.
+	DefaultChoice: 1,
+	// Demo: Entrance Choice.
+	EntranceChoice: 2,
+	// Demo: First Choice.
+	FirstChoice: 4,
+	// Demo: Variable Duration.
+	VariableDuration: 8,
+
+	// Scene: Allow exit.
+	AllowExit: 1,
+	// Scene: Flip after.
+	AutoFlip: 2,
+	// Scene: Sprite should be at the bottom of the page.
+	ForceGravity: 4,
+	// Scene: Edges don't need to trigger edge sequences.
+	IgnoreEdges: 8,
+	// Scene: Mate may exit during current scene (randomly decided).
+	MayExit: 1,
+
+	// Mate: Event bindings are set.
+	IsBound: 2,
+	// Mate: Dragging is happening.
+	IsDragging: 4,
+	// Mate: Sprite is flipped.
+	IsFlipped: 8,
+	// Mate: Is visible.
+	IsVisible: 16,
+
+	// Poe: Debug.
+	Debug: 1,
+	// Poe: Play Audio.
+	MakeNoise: 2,
+
+	// Position: Absolute.
+	Absolute: 1,
+};
+
+/**
+ * Directions
+ *
+ * @enum {number}
+ */
+export const Direction = {
+	None: 0,
+	Up: 1,
+	Down: 2,
+	Left: 3,
+	Right: 4,
+};
+
+/**
+ * Log Type
+ *
+ * @enum {number}
+ */
+export const LogType = {
+	Info: 0,
+	Log: 1,
+	Warning: 2,
+	Error: 3,
 };
 
 /**
@@ -28,7 +89,7 @@ export const FLAGS = {
  *
  * @enum {number}
  */
-export const PLAYLIST = {
+export const Playlist = {
 	Walk: 1,
 	Rotate: 2,
 	Drag: 3,
@@ -76,6 +137,7 @@ export const PLAYLIST = {
 	ChasingAMartian: 45,
 	ChasingAMartianChild: 46,
 	Spin: 47,
+	WallSlide: 48,
 };
 
 /**
@@ -83,7 +145,7 @@ export const PLAYLIST = {
  *
  * @enum {number}
  */
-export const SOUNDS = {
+export const Sound = {
 	Baa: 1,
 	Sneeze: 2,
 	Yawn: 3,
@@ -96,23 +158,18 @@ export const SOUNDS = {
 // ---------------------------------------------------------------------
 
 /**
- * Position Callback
+ * Scene Position Callback
  *
- * @typedef {function():MateAnimationPosition} */
-export var MateAnimationPositionCB;
+ * @typedef {function():!ScenePosition}
+ */
+export var ScenePositionCB;
 
 /**
- * Repeat Callback
+ * Scene Repeat Callback
  *
- * @typedef {function():number} */
-export var MateAnimationRepeatCB;
-
-/**
- * State Callback
- *
- * @typedef {function():MateAnimationState} */
-export var MateAnimationStateCB;
-
+ * @typedef {function():!SceneRepeat}
+ */
+export var SceneRepeatCB;
 
 
 // ---------------------------------------------------------------------
@@ -120,142 +177,91 @@ export var MateAnimationStateCB;
 // ---------------------------------------------------------------------
 
 /**
- * An animation audio.
+ * Animation
  *
  * @typedef {{
-	sound: SOUNDS,
-	start: number
+	id: !Playlist,
+	name: string,
+	scenes: !Array<!Scene>,
+	useDefault: number,
+	useEntrance: number,
+	useFirst: number,
+	flags: number,
+	childId: ?Playlist,
+	edge: (null|!Playlist|!Array<WeightedChoice>),
+	next: (null|!Playlist|!Array<WeightedChoice>)
  * }}
  */
-export var MateAnimationAudio;
+export var Animation;
 
 /**
- * Fields required to initialize setAnimation().
+ * Mate Dom State
  *
- * @typedef {{
-	x: number,
-	y: number
- * }}
+ * @typedef {Array<string, string, string>}
  */
-export var MateAnimationPosition;
+export var DomState;
 
 /**
- * Weighted animation (set to occur more or less frequently).
+ * Scene
  *
  * @typedef {{
-	weight: number,
-	id: number
- * }}
- */
-export var MateAnimationPossibility;
-
-/**
- * Dynamic animation scene.
- *
- * @typedef {{
-	startFrom: (null|MateAnimationPositionCB|MateAnimationPosition),
-	start: (number|MateAnimationStateCB|!MateAnimationState),
-	end: (number|MateAnimationStateCB|!MateAnimationState),
-	repeat: (MateAnimationRepeatCB|number),
-	repeatFrom: number,
-	frames: Array<number>,
-	audio: ?MateAnimationAudio,
+	start: (null|!ScenePosition|!ScenePositionCB),
+	from: !ScenePosition,
+	to: !ScenePosition,
+	repeat: (null|!SceneRepeat|!SceneRepeatCB),
+	frames: !Array<number>,
+	sound: ?SceneSound,
 	flags: number
  * }}
  */
-export var RawMateAnimationScene;
+export var Scene;
 
 /**
- * Animation scene.
+ * Scene Position
  *
- * @typedef {{
-	startFrom: ?MateAnimationPosition,
-	start: !MateAnimationState,
-	end: !MateAnimationState,
-	repeat: number,
-	repeatFrom: number,
-	frames: Array<number>,
-	audio: ?MateAnimationAudio,
-	flags: number
- * }}
+ * @typedef {!Array<number, number, ?number>}
  */
-export var MateAnimationScene;
+export var ScenePosition;
 
 /**
- * Fields required to initialize setAnimation().
+ * Frame Repeat
  *
- * @typedef {{
- 	id: number,
-	x: ?number,
-	y: ?number
- * }}
+ * @typedef {!Array<number, number>}
  */
-export var MateAnimationSetup;
+export var SceneRepeat;
 
 /**
- * An animation state (usually a start or end point).
+ * Frame Sound
  *
- * @typedef {{
-	x: number,
-	y: number,
-	speed: number
- * }}
+ * @typedef {!Array<number, number>}
  */
-export var MateAnimationState;
+export var SceneSound;
 
 /**
- * Where an animation should be at a given point.
+ * Step
  *
  * @typedef {{
- 	step: number,
- 	scene: number,
+	step: number,
+	scene: number,
 	time: number,
 	interval: number,
 	frame: number,
 	x: number,
 	y: number,
-	audio: ?SOUNDS,
+	sound: ?Sound,
 	flip: boolean,
 	flags: number
  * }}
  */
-export var MateAnimationStep;
+export var Step;
 
 /**
- * Dynamic animation sequence.
+ * Weighted Animation Choice
  *
- * @typedef {{
-	id: number,
-	name: string,
-	scene: Array<RawMateAnimationScene>,
-	useDefault: number,
-	useEntrance: number,
-	useFirst: number,
-	flags: number,
-	childId: number,
-	edge: (null|number|Array<(number|!MateAnimationPossibility)>),
-	next: (null|number|Array<(number|!MateAnimationPossibility)>)
- * }}
+ * @typedef {!Array<Playlist, number>}
  */
-export var RawMateAnimation;
+export var WeightedChoice;
 
-/**
- * An animation sequence.
- *
- * @typedef {{
-	id: number,
-	name: string,
-	scene: Array<MateAnimationScene>,
-	useDefault: number,
-	useEntrance: number,
-	useFirst: number,
-	flags: number,
-	childId: number,
-	edge: (null|number|Array<(number|!MateAnimationPossibility)>),
-	next: (null|number|Array<(number|!MateAnimationPossibility)>)
- * }}
- */
-export var MateAnimation;
 
 
 
@@ -264,7 +270,7 @@ export var MateAnimation;
 // ---------------------------------------------------------------------
 
 /**
- * MateEvent
+ * Event
  *
  * @typedef {{
 	el: (Element|Window),

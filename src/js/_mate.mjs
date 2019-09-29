@@ -1,478 +1,546 @@
 /**
- * @file The sprite object!
+ * @file Mates!
  */
 
 import {
 	animation,
+	chooseAnimation,
 	DEFAULT_CHOICES,
 	ENTRANCE_CHOICES,
-	FIRST_CHOICES,
-	verifyAnimationId
+	FIRST_CHOICES
 } from './_animations.mjs';
 import { makeNoise } from './_audio.mjs';
 import { IMAGE } from './_bin.mjs';
-import {
-	bindEvent,
-	cbPreventDefault,
-	clearEvents,
-	rankedChoice,
-	screenHeight,
-	screenWidth
-} from './_helpers.mjs';
+import { xDirection, yDirection } from './_helpers.mjs';
 import { TILE_SIZE } from './_image.mjs';
+import { Poe } from './_poe.mjs';
 import {
-	FLAGS,
-	PLAYLIST,
-	MateAnimation,
-	MateAnimationPossibility,
-	MateAnimationScene,
-	MateAnimationSetup,
-	MateAnimationStep,
-	SOUNDS
+	Animation,
+	Direction,
+	DomState,
+	Flags,
+	LogType,
+	Playlist,
+	Scene,
+	Sound,
+	Step,
+	WeightedChoice
 } from './_types.mjs';
 
 
 
 /**
- * Mates
- *
- * These should be static properties on Mate but Javascript classes are a joke and neither eslint nor Closure Compiler understand them.
- *
- * @type {{
-	length: number,
-	primary: ?Mate,
-	children: !Object<number, Mate>
- * }}
+ * Child Mate
  */
-let _mates = {
-	length: 0,
-	primary: null,
-	children: {},
-};
-
-/**
- * Mate
- */
-export const Mate = class {
+export const ChildMate = class {
 	// -----------------------------------------------------------------
-	// Setup
+	// Construction
 	// -----------------------------------------------------------------
 
 	/**
-	 * A Poe Sprite!
+	 * Constructor
 	 *
-	 * @param {boolean} child Treat as child sprite.
 	 * @param {number} mateId Mate ID.
 	 */
-	constructor(child, mateId) {
-		child = !! child;
+	constructor(mateId) {
 		mateId = parseInt(mateId, 10) || 0;
 
-		/**
-		 * The Mate ID
-		 *
-		 * @public {number}
-		 */
-		this.mateId = mateId;
+		/** @private {number} */
+		this._mateId = mateId;
 
-		/**
-		 * The Child Mate ID
-		 *
-		 * @private {number}
-		 */
-		this.childMateId = 0;
+		/** @private {?HTMLDivElement} */
+		this._el = null;
 
-		/**
-		 * Mate is Child?
-		 *
-		 * @private {boolean}
-		 */
-		this.child = child;
+		/** @private {number} */
+		this._flags = 0;
 
-		/**
-		 * The Mate Element
-		 *
-		 * @private {?HTMLDivElement}
-		 */
-		this.el = /** @type {HTMLDivElement} */ (document.createElement('DIV'));
-		this.el.className = 'poe' + (this.child ? ' is-child' : '');
+		/** @private {number} */
+		this._x = -100;
+
+		/** @private {number} */
+		this._y = -100;
+
+		/** @private {number} */
+		this._frame = 0;
+
+		/** @private {?Animation} */
+		this._animation = null;
+
+		/** @private {?number} */
+		this._raf = null;
+
+		/** @private {Array<Step>} */
+		this._steps = [];
+
+		/** @private {Array<string, string, string>} */
+		this._domLast = ['', '', ''];
+
+		// Finish setup.
+		this.setupDom();
+	}
+
+	/**
+	 * Setup DOM Nodes
+	 *
+	 * @return {void} Nothing.
+	 */
+	setupDom() {
+		// Only do this once.
+		if (null !== this._el) {
+			return;
+		}
+
+		this._el = /** @type {!HTMLDivElement} */ (document.createElement('DIV'));
+		this._el.className = this.elClass;
 
 		/** @type {HTMLImageElement} */
 		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
 		img.src = IMAGE;
-		this.el.appendChild(img);
+		img.className = this.imgClass;
+		this._el.appendChild(img);
 
 		// Add the element to the body.
-		document.body.appendChild(this.el);
-
-		/**
-		 * Whether Mate Can Walk Offscreen
-		 *
-		 * @private {boolean}
-		 */
-		this.mayExit = false;
-
-		/**
-		 * Current X Position
-		 *
-		 * @private {number}
-		 */
-		this.x = -100;
-
-		/**
-		 * Current Y Position
-		 *
-		 * @private {number}
-		 */
-		this.y = -100;
-
-		/**
-		 * Whether We've Bound Event Listeners
-		 *
-		 * @private {boolean}
-		 */
-		this.bound = false;
-
-		/**
-		 * RAF Queue
-		 *
-		 * @private {boolean}
-		 */
-		this.queued = false;
-
-		/**
-		 * Current Frame
-		 *
-		 * @private {number}
-		 */
-		this.frame = 0;
-
-		/**
-		 * Steps to Paint
-		 *
-		 * @private {Array<MateAnimationStep>}
-		 */
-		this.steps = [];
-
-		/**
-		 * Mate is Flipped?
-		 *
-		 * @private {boolean}
-		 */
-		this.flipped = false;
-
-		/**
-		 * Mate is Dragging?
-		 *
-		 * @private {boolean}
-		 */
-		this.dragging = false;
-
-		/**
-		 * Current Animation
-		 *
-		 * @private {?MateAnimation}
-		 */
-		this.animation = null;
-
-		// Set up element bindings.
-		this.setupEl();
+		document.body.appendChild(this._el);
 	}
 
 	/**
-	 * Create Element
+	 * Spawn Child
 	 *
 	 * @return {void} Nothing.
-	 * @private
 	 */
-	setupEl() {
-		// Don't double-bind.
-		if (this.bound) {
+	spawnChild() {
+		// No children.
+		if (null === this._animation || null === this._animation.childId) {
 			return;
 		}
-		this.bound = true;
 
-		// Bind events to the main Mate.
-		if (this.child) {
-			// Add the fade-in class after a little delay so it paints.
-			setTimeout(() => {
-				if (null !== this.el) {
-					this.el.classList.add('fade-in');
-				}
-			}, 5);
+		/** @type {!Array<number>} */
+		let setup;
+
+		switch (this._animation.childId) {
+		// Bath dive.
+		// Black Sheep.
+		// Stargazing.
+		case Playlist.BathDiveChild:
+		case Playlist.BlackSheepChild:
+		case Playlist.StargazeChild:
+		case Playlist.ChasingAMartianChild:
+			setup = [this._animation.childId];
+			break;
+
+		// Eat.
+		case Playlist.FlowerChild:
+			setup = [
+				Playlist.FlowerChild,
+				(Flags.IsFlipped & this._flags) ?
+					this._x + TILE_SIZE * 0.9 :
+					this._x - TILE_SIZE * 0.9,
+				this._y,
+			];
+
+			break;
+
+		// Abduction.
+		case Playlist.AbductionChild:
+			setup = [
+				Playlist.AbductionChild,
+				this._x,
+				Poe.height - TILE_SIZE * 2 - 4 * 120,
+			];
+
+			break;
+
+		// Abduction beam.
+		case Playlist.AbductionBeamChild:
+			setup = [
+				Playlist.AbductionBeamChild,
+				this._x,
+				Poe.height - TILE_SIZE,
+			];
+
+			break;
+		default:
+			return;
+		}
+
+		/** @type {!ChildMate} */
+		let mate = Poe.initMate();
+		mate.flipped = this.flipped;
+		mate.setAnimation(...setup);
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Getters and Setters
+	// -----------------------------------------------------------------
+
+	/**
+	 * Animation ID
+	 *
+	 * @return {?Playlist} Animation or null.
+	 */
+	get animationId() {
+		if (null === this._animation) {
+			return null;
+		}
+
+		return this._animation.id;
+	}
+
+	/**
+	 * Animation ID
+	 *
+	 * @param {?Playlist} animationId Animation ID.
+	 * @return {void} Nothing.
+	 */
+	set animationId(animationId) {
+		if (null === animationId) {
+			this.stop();
 		}
 		else {
-			bindEvent(
-				this.el,
-				'contextmenu',
-				cbPreventDefault
-			);
-			bindEvent(
-				this.el,
-				'mousedown',
-				(/** @type {MouseEvent} */ e) => this.onDragStart(e),
-				{ passive: true }
-			);
-			bindEvent(
-				this.el,
-				'dblclick',
-				(/** @type {Event} */ e) => {
-					e.preventDefault();
-
-					/** @const {?Event} */
-					const event = new CustomEvent('poeShutdown');
-					if (null !== event) {
-						window.dispatchEvent(event);
-					}
-				},
-				{ once: true }
-			);
+			this.setAnimation(animationId);
 		}
 	}
 
 	/**
-	 * Clean-Up
+	 * Element Base Class(es)
 	 *
-	 * Remove all references so the object can be deleted from memory.
+	 * @return {string} Class.
+	 */
+	get baseClass() {
+		return 'poe is-child';
+	}
+
+	/**
+	 * DOM State
 	 *
-	 * @param {?boolean=} fade Fade out.
+	 * @return {DomState} State.
+	 */
+	get domState() {
+		return [
+			this.elClass,
+			this.elStyleTransform,
+			this.imgClass,
+		];
+	}
+
+	/**
+	 * Dragging
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get dragging() {
+		return !! (Flags.IsDragging & this._flags);
+	}
+
+	/**
+	 * Dragging
+	 *
+	 * @param {boolean} v True/false.
 	 * @return {void} Nothing.
 	 */
-	detach(fade) {
-		fade = !! fade;
-		if (fade && null !== this.el) {
-			this.el.classList.remove('fade-in');
-			setTimeout(() => this.detach(), 500);
-			return;
+	set dragging(v) {
+		// No flip.
+		if (! v) {
+			this._flags &= ~Flags.IsDragging;
 		}
-
-		if (null !== this.el) {
-			// Remove bound events.
-			clearEvents(this.el);
-
-			// Kill the element.
-			document.body.removeChild(this.el);
-			delete this.el;
-			this.el = null;
-		}
-
-		if (this.childMateId) {
-			this.detachChild();
-		}
-
-		/** @const {?Event} */
-		const event = new CustomEvent('poeDetached', {detail: {mateId: this.mateId}});
-		if (null !== event) {
-			window.dispatchEvent(event);
+		// Yes flip.
+		else {
+			this._flags |= Flags.IsDragging;
 		}
 	}
 
 	/**
-	 * Disable Mate
+	 * Element Class(es)
+	 *
+	 * @return {string} Class.
+	 */
+	get elClass() {
+		/** @type {string} */
+		let out = this.baseClass;
+
+		// If there is no animation, we're done.
+		if (null === this._animation) {
+			out += ' is-disabled';
+			return out;
+		}
+
+		// Dragging?
+		if (this.dragging) {
+			out += ' is-dragging';
+			return out;
+		}
+
+		return out;
+	}
+
+	/**
+	 * Element Style
+	 *
+	 * @return {string} Style.
+	 */
+	get elStyleTransform() {
+		/** @type {string} */
+		let out = '';
+
+		// Position first.
+		if (this._x && this._y) {
+			out += `translate(${this._x}px, ${this._y}px)`;
+		}
+		else if (this._x) {
+			out += `translateX(${this._x}px)`;
+		}
+		else if (this._y) {
+			out += `translateY(${this._y}px)`;
+		}
+
+		// Flipped?
+		if (Flags.IsFlipped & this._flags) {
+			out += ' rotateY(180deg)';
+		}
+
+		return out;
+	}
+
+	/**
+	 * Flip
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get flipped() {
+		return !! (Flags.IsFlipped & this._flags);
+	}
+
+	/**
+	 * Flip
+	 *
+	 * @param {boolean} v True/false.
+	 * @return {void} Nothing.
+	 */
+	set flipped(v) {
+		// No flip.
+		if (! v) {
+			this._flags &= ~Flags.IsFlipped;
+		}
+		// Yes flip.
+		else {
+			this._flags |= Flags.IsFlipped;
+		}
+	}
+
+	/**
+	 * Image Class(es)
+	 *
+	 * @return {string} Class.
+	 */
+	get imgClass() {
+		/** @type {string} */
+		let out = 'poe-img';
+
+		// If there is no animation, we're done.
+		if (0 < this._frame) {
+			out += ' poe-f' + this._frame;
+		}
+
+		return out;
+	}
+
+	/**
+	 * Mate ID
+	 *
+	 * @return {number} Mate ID.
+	 */
+	get mateId() {
+		return this._mateId;
+	}
+
+	/**
+	 * May Exit
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get mayExit() {
+		return !! (Flags.MayExit & this._flags);
+	}
+
+	/**
+	 * May Exit
+	 *
+	 * @param {boolean} v True/false.
+	 * @return {void} Nothing.
+	 */
+	set mayExit(v) {
+		// No flip.
+		if (! v) {
+			this._flags &= ~Flags.MayExit;
+		}
+		// Yes flip.
+		else {
+			this._flags |= Flags.MayExit;
+		}
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Methods
+	// -----------------------------------------------------------------
+
+	/**
+	 * Reset Animation
 	 *
 	 * @return {void} Nothing.
-	 * @private
 	 */
-	detachChild() {
-		if (this.childMateId) {
-			/** @type {?Mate} */
-			let child = Mate.get(this.childMateId);
-			if (null !== child) {
-				child.detach();
-			}
+	resetAnimation() {
+		if (null !== this._animation) {
+			delete this._animation;
+			this._animation = null;
+		}
 
-			this.childMateId = 0;
+		if (this._steps.length) {
+			delete this._steps;
+			this._steps = [];
 		}
 	}
-
-
-
-	// -----------------------------------------------------------------
-	// Getters
-	// -----------------------------------------------------------------
-
-	/**
-	 * Is Child?
-	 *
-	 * @return {boolean} True/false.
-	 * @public
-	 */
-	isChild() {
-		return !! this.child;
-	}
-
-	/**
-	 * Is Dragging?
-	 *
-	 * @return {boolean} True/false.
-	 * @public
-	 */
-	isDragging() {
-		return !! this.dragging;
-	}
-
-	/**
-	 * Is Flipped?
-	 *
-	 * @return {boolean} True/false.
-	 * @public
-	 */
-	isFlipped() {
-		return !! this.flipped;
-	}
-
-	/**
-	 * Is Partially Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isPartiallyVisible() {
-		return (this.isPartiallyVisibleX() || this.isPartiallyVisibleY());
-	}
-
-	/**
-	 * Is Partially Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isPartiallyVisibleX() {
-		return this.isVisibleX() &&
-			(0 > this.x || screenWidth() - TILE_SIZE < this.x);
-
-	}
-
-	/**
-	 * Is Partially Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isPartiallyVisibleY() {
-		return this.isVisibleY() &&
-			(0 > this.y || screenHeight() - TILE_SIZE < this.y);
-
-	}
-
-	/**
-	 * Is Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isVisible() {
-		return this.isVisibleX() && this.isVisibleY();
-	}
-
-	/**
-	 * Is Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isVisibleX() {
-		return null !== this.el &&
-			(0 - TILE_SIZE < this.x) &&
-			(screenWidth() > this.x);
-	}
-
-	/**
-	 * Is Visible?
-	 *
-	 * @return {boolean} True/false.
-	 * @private
-	 */
-	isVisibleY() {
-		return null !== this.el &&
-			(0 - TILE_SIZE < this.y) &&
-			(screenHeight() > this.y);
-	}
-
-
-
-	// -----------------------------------------------------------------
-	// Setters
-	// -----------------------------------------------------------------
 
 	/**
 	 * Set Animation
 	 *
-	 * @param {number} id Animation ID.
-	 * @param {?number=} x Start at X.
-	 * @param {?number=} y Start at Y.
-	 * @return {boolean} True/false.
-	 * @public
+	 * @param {!Playlist} animationId Animation ID.
+	 * @param {number=} x Start from X.
+	 * @param {number=} y Start from Y.
+	 * @return {void} Nothing.
 	 */
-	setAnimation(id, x, y) {
-		if (0 >= id) {
-			console.error(`Invalid animation ID: ${id}`);
-			this.detach();
-			return false;
-		}
+	setAnimation(animationId, x, y) {
+		// Stop any in-progress ticks.
+		this.cancelTick();
 
-		// Disable exit possibility if we're changing animations or the animation doesn't allow exiting.
+		animationId = /** @type {!Playlist} */ (parseInt(animationId, 10) || 0);
+
+		// Disable the exit possibility if we're changing animations and the property doesn't hold.
 		if (
-			null === this.animation ||
-			id !== this.animation.id ||
-			! (FLAGS.allowExit & this.animation.scene[0].flags)
+			(null === this._animation) ||
+			(animationId !== this._animation.id) ||
+			! (Flags.AllowExit & this._animation.scenes[0].flags)
 		) {
 			this.mayExit = false;
 		}
 
-		// Pull the animation details, if any.
-		this.animation = animation(id);
+		// Make sure it is valid.
+		this._animation = animation(animationId);
 		if (
-			(null === this.animation) ||
-			(this.child && (FLAGS.noChildren & this.animation.flags))
+			null === this._animation ||
+			(Flags.NoChildren & this._animation.flags)
 		) {
-			// If the parent got a bad animation request, we should hear about it!
-			if (! this.child) {
-				console.error(`Invalid animation ID: ${id}`);
-			}
-
-			this.detach();
-			return false;
+			Poe.log(
+				`Invalid animation ID: ${animationId}`,
+				LogType.Error
+			);
+			this.stop();
+			return;
 		}
 
-		// We might need to force the child's destruction.
-		if (
-			(PLAYLIST.Fall === id) ||
-			(
-				this.childMateId &&
-				this.animation.childId
-			)
-		) {
-			this.detachChild();
+		// Set the starting position.
+		this.setAnimationStart(x, y);
+
+		// Handle the steps.
+		this.setSteps();
+
+		// Spawn required child.
+		this.spawnChild();
+
+		// Tick it.
+		this.maybeTick();
+	}
+
+	/**
+	 * Set Animation Starting Position
+	 *
+	 * @param {number=} x Start from X.
+	 * @param {number=} y Start from Y.
+	 * @return {void} Nothing.
+	 */
+	setAnimationStart(x, y) {
+		if (null === this._animation) {
+			return;
 		}
 
-		// Should we allow the mate to walk off-screen?
-		if ((FLAGS.allowExit & this.animation.scene[0].flags) && ! this.mayExit) {
-			// Give it a one-in-five chance.
-			this.mayExit = 4 === Math.floor(Math.random() * 5);
-		}
-
-		// If this animation has a fixed starting place, go ahead and set it.
-		if (
-			null !== this.animation.scene[0].startFrom &&
-			'number' === typeof this.animation.scene[0].startFrom.x &&
-			'number' === typeof this.animation.scene[0].startFrom.y
-		) {
-			x = this.animation.scene[0].startFrom.x;
-			y = this.animation.scene[0].startFrom.y;
-			this.setFlip(false);
-		}
-
-		// Move it somewhere before we begin?
+		// Force the position.
 		if ('number' === typeof x && 'number' === typeof y) {
 			this.setPosition(x, y, true);
 		}
+		// If the animation has its own starting point, start there.
+		else if (
+			null !== this._animation.scenes[0].start &&
+			'number' === typeof this._animation.scenes[0].start[0] &&
+			'number' === typeof this._animation.scenes[0].start[1]
+		) {
+			this.setPosition(
+				this._animation.scenes[0].start[0],
+				this._animation.scenes[0].start[1],
+				true
+			);
+			this._flags &= ~Flags.IsFlipped;
+		}
+	}
 
-		// Precalculate the steps.
-		this.steps = [];
+	/**
+	 * Set Next Animation
+	 *
+	 * @return {void} Nothing.
+	 */
+	setNextAnimation() {
+		if (null === this._animation || null === this._animation.next) {
+			this.stop();
+			return;
+		}
 
-		/** @const {number} */
-		const sceneLength = this.animation.scene.length;
+		/** @const {?Playlist} */
+		const next = chooseAnimation(this._animation.next);
+		if (null === next) {
+			this.stop();
+			return;
+		}
+
+		// Set it!
+		this.setAnimation(next);
+	}
+
+	/**
+	 * Set Edge Animation
+	 *
+	 * @return {void} Nothing.
+	 */
+	setEdgeAnimation() {
+		if (null === this._animation || null === this._animation.edge) {
+			this.stop();
+			return;
+		}
+
+		/** @const {?Playlist} */
+		const next = chooseAnimation(this._animation.edge);
+		if (null === next) {
+			this.stop();
+			return;
+		}
+
+		// Set it!
+		this.setAnimation(next);
+	}
+
+	/**
+	 * Set Steps
+	 *
+	 * @return {void} Nothing.
+	 */
+	setSteps() {
+		if (null === this._animation) {
+			return;
+		}
+
+		delete this._steps;
+		this._steps = [];
 
 		/** @const {number} */
 		const now = performance.now();
@@ -481,27 +549,33 @@ export const Mate = class {
 		let step = 0;
 
 		/** @type {number} */
-		let last = 0 - this.animation.scene[0].start.speed;
+		let last = 0 - this._animation.scenes[0].from[2];
 
 		// Loop through the scenes.
-		for (let i = 0; i < sceneLength; ++i) {
-			/** @const {MateAnimationScene} */
-			const scene = this.animation.scene[i];
+		for (let i = 0; i < this._animation.scenes.length; ++i) {
+			/** @const {Scene} */
+			const scene = this._animation.scenes[i];
 
 			/** @const {number} */
 			const framesLength = scene.frames.length;
 
 			/** @const {number} */
-			const stepsLength = framesLength + (framesLength - scene.repeatFrom) * scene.repeat;
+			const repeat = null !== scene.repeat ? scene.repeat[0] : 0;
 
 			/** @const {number} */
-			const speedDiff = scene.end.speed - scene.start.speed;
+			const repeatFrom = repeat ? scene.repeat[1] : 0;
 
 			/** @const {number} */
-			const xDiff = scene.end.x - scene.start.x;
+			const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
 
 			/** @const {number} */
-			const yDiff = scene.end.y - scene.start.y;
+			const speedDiff = scene.to[2] - scene.from[2];
+
+			/** @const {number} */
+			const xDiff = scene.to[0] - scene.from[0];
+
+			/** @const {number} */
+			const yDiff = scene.to[1] - scene.from[1];
 
 			// Figure out what each slice should look like.
 			for (let j = 0; j < stepsLength; ++j) {
@@ -509,7 +583,7 @@ export const Mate = class {
 				const progress = j / stepsLength;
 
 				/** @const {number} */
-				const time = Math.floor(last + scene.start.speed + speedDiff * progress);
+				const time = Math.floor(last + scene.from[2] + speedDiff * progress);
 
 				/** @const {number} */
 				const interval = time - last;
@@ -522,33 +596,34 @@ export const Mate = class {
 				if (j < framesLength) {
 					frame = scene.frames[j];
 				}
-				else if (! scene.repeatFrom) {
+				else if (! repeatFrom) {
 					frame = scene.frames[j % framesLength];
 				}
 				else {
-					frame = scene.frames[scene.repeatFrom + (j - scene.repeatFrom) % (framesLength - scene.repeatFrom)];
+					frame = scene.frames[repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
 				}
 
-				/** @type {?SOUNDS} */
-				let audio = null;
+				/** @type {?Sound} */
+				let sound = null;
 				if (
-					null !== scene.audio &&
-					scene.audio.sound &&
-					scene.audio.start === j
+					null !== scene.sound &&
+					'number' === typeof scene.sound[0] &&
+					'number' === typeof scene.sound[1] &&
+					scene.sound[1] === j
 				) {
-					audio = scene.audio.sound;
+					sound = /** @type {!Sound} */ (scene.sound[0]);
 				}
 
-				this.steps.push(/** @type {!MateAnimationStep} */ ({
+				this._steps.push(/** @type {!Step} */ ({
 					step: step,
 					scene: i,
 					time: now + time,
 					interval: interval,
 					frame: frame,
-					x: scene.start.x + xDiff * progress,
-					y: scene.start.y + yDiff * progress,
-					audio: audio,
-					flip: !! ((FLAGS.autoFlip & scene.flags) && stepsLength - 1 === j),
+					x: scene.from[0] + xDiff * progress,
+					y: scene.from[1] + yDiff * progress,
+					sound: sound,
+					flip: !! ((Flags.AutoFlip & scene.flags) && stepsLength - 1 === j),
 					flags: scene.flags,
 				}));
 
@@ -557,412 +632,169 @@ export const Mate = class {
 		}
 
 		// Reverse the steps so we can pop() instead of shift().
-		this.steps = this.steps.reverse();
-
-		// Set up the child if applicable.
-		if (this.animation.childId) {
-			this.attachChild();
-		}
-
-		// Do it!
-		this.queuePaint();
-		return true;
+		this._steps = this._steps.reverse();
 	}
 
 	/**
-	 * Set Child Animation
-	 *
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	attachChild() {
-		/** @type {?MateAnimationSetup} */
-		let setup = null;
-
-		switch (this.animation.childId) {
-		// Bath dive.
-		// Black Sheep.
-		// Stargazing.
-		case PLAYLIST.BathDiveChild:
-		case PLAYLIST.BlackSheepChild:
-		case PLAYLIST.StargazeChild:
-		case PLAYLIST.ChasingAMartianChild:
-			setup = {
-				id: this.animation.childId,
-				x: null,
-				y: null,
-			};
-
-			break;
-
-		// Eat.
-		case PLAYLIST.FlowerChild:
-			setup = {
-				id: PLAYLIST.FlowerChild,
-				x: this.flipped ?
-					this.x + TILE_SIZE * 0.9 :
-					this.x - TILE_SIZE * 0.9,
-				y: this.y,
-			};
-
-			break;
-
-		// Abduction.
-		case PLAYLIST.AbductionChild:
-			setup = {
-				id: PLAYLIST.AbductionChild,
-				x: this.x,
-				y: screenHeight() - TILE_SIZE * 2 - 4 * 120,
-			};
-
-			break;
-
-		// Abduction beam.
-		case PLAYLIST.AbductionBeamChild:
-			setup = {
-				id: PLAYLIST.AbductionBeamChild,
-				x: this.x,
-				y: screenHeight() - TILE_SIZE,
-			};
-
-			break;
-		}
-
-		// Nothing doing?
-		if (null === setup) {
-			return;
-		}
-
-		/** @type {?Mate} */
-		let mate = Mate.init(true);
-		if (null === mate) {
-			this.childMateId = 0;
-			return;
-		}
-
-		this.childMateId = mate.mateId;
-
-		requestAnimationFrame(() => {
-			mate.setFlip(this.flipped);
-			mate.setAnimation(setup.id, setup.x, setup.y);
-		});
-	}
-
-	/**
-	 * Set Flip
-	 *
-	 * @param {boolean} flip Flip.
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	setFlip(flip) {
-		flip = !! flip;
-
-		if (this.flipped !== flip) {
-			this.flipped = flip;
-			this.paintTransform();
-		}
-	}
-
-	/**
-	 * Toggle Flip
-	 *
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	flip() {
-		this.setFlip(! this.flipped);
-	}
-
-	/**
-	 * Move Sprite
+	 * Set Position
 	 *
 	 * @param {number} x X position.
 	 * @param {number} y Y position.
-	 * @param {boolean=} absolute Jump to the literal position.
+	 * @param {boolean=} absolute Absolute.
 	 * @return {void} Nothing.
-	 * @private
 	 */
 	setPosition(x, y, absolute) {
 		x = parseFloat(x) || 0;
 		y = parseFloat(y) || 0;
 
-		// Move somewhere specific.
 		if (absolute) {
-			// No change.
-			if (this.x === x && this.y === y) {
-				return;
-			}
-
-			this.x = x;
-			this.y = y;
+			this._x = x;
+			this._y = y;
 		}
-		else {
-			// No change.
-			if (! x && ! y) {
-				return;
-			}
-
-			this.x += x;
-			this.y += y;
+		else if (x || y) {
+			this._x += x;
+			this._y += y;
 		}
-
-		// Literally move it.
-		this.paintTransform();
-	}
-
-
-
-	// -----------------------------------------------------------------
-	// Painting
-	// -----------------------------------------------------------------
-
-	/**
-	 * Paint: Position/Flip
-	 *
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	paintTransform() {
-		/* @type {string} */
-		let css = '';
-
-		// Position.
-		if (this.x && this.y) {
-			css += `translate(${this.x}px, ${this.y}px)`;
-		}
-		else if (this.x) {
-			css += `translateX(${this.x}px)`;
-		}
-		else if (this.y) {
-			css += `translateY(${this.y}px)`;
-		}
-
-		// Rotation.
-		if (this.flipped) {
-			css += ' rotateY(180deg)';
-		}
-
-		this.el.style.transform = css;
-	}
-
-	/**
-	 * Paint: Tick
-	 *
-	 * @param {number} now Now.
-	 * @return {void} Nothing.
-	 * @private
-	 */
-	paint(now) {
-		this.queued = false;
-
-		/** @type {number} */
-		let stepsLength = this.steps.length;
-
-		// Should we be animating?
-		if ((null === this.el) || ! stepsLength) {
-			// If a child, make sure we kill it!
-			if (this.child) {
-				this.detach();
-			}
-
-			return;
-		}
-
-		// If we've exited, simply restart.
-		if (this.mayExit && ! this.isVisible()) {
-			this.start();
-			return;
-		}
-
-		/** @type {?MateAnimationStep} */
-		let step = null;
-		while (undefined !== this.steps[stepsLength - 1] && this.steps[stepsLength - 1].time <= now) {
-			step = this.steps.pop();
-			--stepsLength;
-		}
-
-		// We might be a bit early.
-		if (null === step) {
-			this.queuePaint();
-			return;
-		}
-
-		// Always set the frame.
-		if (this.frame !== step.frame) {
-			this.frame = step.frame;
-			this.el.children[0].className = `poe-img poe-f${this.frame}`;
-		}
-
-		// Play audio?
-		if (step.audio && /** @type {function():boolean} */ (window['Poe']['audio'])()) {
-			makeNoise(step.audio);
-		}
-
-		// Pull dimensions once.
-
-		/** @const {number} */
-		const sw = screenWidth();
-
-		/** @const {number} */
-		const sh = screenHeight();
-
-		// Flip it?
-
-		/** @type {number} */
-		let x = step.x;
-
-		/** @const {number} */
-		const y = step.y;
-
-		if (this.flipped) {
-			x = 0 - x;
-		}
-
-		// Move it along.
-		this.setPosition(x, y);
 
 		// No animations go below the screen edge.
-		if (this.y >= sh - TILE_SIZE) {
-			this.setPosition(this.x, sh - TILE_SIZE, true);
+		if (this._y >= Poe.height - TILE_SIZE) {
+			this._y = Poe.height - TILE_SIZE;
 		}
-
-		// The animation is over.
-		if (! stepsLength) {
-			// Use a timeout to transition the animation so the last frame doesn't get cut off.
-			setTimeout(() => {
-				// Maybe we can flip it?
-				if (step.flip) {
-					this.flip();
-				}
-
-				// Where to?
-				if (! this.child || null !== this.animation.next) {
-					// If we've gone offscreen, start over.
-					if (! this.child && ! this.isVisible()) {
-						this.start();
-						return;
-					}
-
-					this.setAnimation(this.chooseNext(this.animation.next));
-				}
-				// Remove child sprite.
-				else {
-					this.detach(true);
-				}
-			}, step.interval);
-
-			return;
-		}
-		// Flip now.
-		else if (step.flip) {
-			this.flip();
-		}
-
-		// Did we hit an edge?
-		if (null !== this.animation.edge && ! (FLAGS.ignoreEdges & step.flags)) {
-			/** @type {boolean} */
-			let change = false;
-
-			// Too left.
-			if (! this.mayExit && 0 > x && 0 >= this.x) {
-				this.setPosition(0, this.y, true);
-				change = true;
-			}
-			// Too right.
-			else if (
-				! this.mayExit &&
-				0 < x &&
-				this.x >= sw - TILE_SIZE
-			) {
-				this.setPosition(sw - TILE_SIZE, this.y, true);
-				change = true;
-			}
-			// Too high.
-			else if (0 > y && 0 >= this.y) {
-				this.setPosition(this.x, 0, true);
-				change = true;
-			}
-			// Too low.
-			else if (
-				0 < y &&
-				this.y >= sh - TILE_SIZE
-			) {
-				this.setPosition(this.x, sh - TILE_SIZE, true);
-				change = true;
-			}
-
-			// Go somewhere else!
-			if (change) {
-				// Border crawling only works from the left.
-				if (1 === this.animation.id && this.flipped) {
-					this.setAnimation(2, this.x, this.y);
-					return;
-				}
-
-				// Let nature do its thing.
-				this.setAnimation(
-					this.chooseNext(this.animation.edge),
-					this.x,
-					this.y
-				);
-				return;
-			}
-		}
-
-		// Does gravity matter?
-		if ((FLAGS.forceGravity & step.flags) && this.y < sh - TILE_SIZE - 2) {
-			this.setAnimation(PLAYLIST.Fall);
-			return;
-		}
-
-		// Can't finish?
-		if (
-			(! this.mayExit && 0 > this.x && 0 > this.animation.scene[step.scene].end.x) ||
-			(! this.mayExit && this.x > sw - TILE_SIZE && 0 < this.animation.scene[step.scene].end.x) ||
-			(0 > this.y && 0 > this.animation.scene[step.scene].end.y) ||
-			(this.y >= sh - TILE_SIZE && 0 < this.animation.scene[step.scene].end.y)
-		) {
-			// We can ignore a few animations.
-			if (! (FLAGS.ignoreEdges & step.flags)) {
-				// Pick something else.
-				if (! this.child) {
-					// If we've gone offscreen, start over.
-					if (! this.isVisible()) {
-						this.start();
-						return;
-					}
-
-					this.setAnimation(this.chooseNext(null));
-				}
-				// Destroy the child!
-				else {
-					this.detach();
-				}
-
-				return;
-			}
-		}
-
-		// Do it all over again!
-		this.queuePaint();
-		return;
 	}
 
 	/**
-	 * Queue Painting
+	 * Check Edges
 	 *
-	 * Prevent multiple callbacks being bound to the same animationFrame.
+	 * @param {Direction} xDir X Direction.
+	 * @param {Direction} yDir Y Direction.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkEdges(xDir, yDir) {
+		if (null === this._animation) {
+			return false;
+		}
+
+		/** @type {boolean} */
+		let changed = false;
+
+		// Too up.
+		if (Direction.Up === yDir && 0 >= this._y) {
+			this.setPosition(this._x, 0, true);
+			changed = true;
+		}
+		// Too down.
+		else if (Direction.Down === yDir && this._y >= Poe.height - TILE_SIZE) {
+			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
+			changed = true;
+		}
+
+		// Do something else.
+		if (changed) {
+			this.setEdgeAnimation();
+		}
+
+		return changed;
+	}
+
+	/**
+	 * Check Gravity
+	 *
+	 * @return {boolean} True if changes were made.
+	 */
+	checkGravity() {
+		if (
+			null !== this._animation &&
+			this._y < Poe.height - TILE_SIZE
+		) {
+			this.stop();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check Sanity
+	 *
+	 * This is like checkEdges() except it does not alter coordinates along the way; it just moves onto the next logical sequence.
+	 *
+	 * @param {Direction} xDir X Direction.
+	 * @param {Direction} yDir Y Direction.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkSanity(xDir, yDir) {
+		if (null === this._animation) {
+			return false;
+		}
+
+		// We cannot do it!
+		if (
+			(Direction.Down !== yDir && 0 > this._y) ||
+			(Direction.Up !== yDir && this._y > Poe.height - TILE_SIZE)
+		) {
+			this.stop();
+			return true;
+		}
+
+		return false;
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// State
+	// -----------------------------------------------------------------
+
+	/**
+	 * Is Disabled?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	isDisabled() {
+		return null === this._el || null === this._animation;
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Destruction
+	// -----------------------------------------------------------------
+
+	/**
+	 * Destructor
 	 *
 	 * @return {void} Nothing.
-	 * @private
 	 */
-	queuePaint() {
-		if (! this.queued) {
-			this.queued = true;
-			requestAnimationFrame((/** @type {number} */ n) => this.paint(n));
+	destructor() {
+		// Stop the animation.
+		if (null !== this._animation) {
+			this.stop();
+		}
+
+		// Remove the elements.
+		if (null !== this._el) {
+			document.body.removeChild(this._el);
+			delete this._el;
+			this._el = null;
 		}
 	}
+
+	/**
+	 * Stop
+	 *
+	 * @return {void} Nothing.
+	 */
+	stop() {
+		this.cancelTick();
+
+		this.resetAnimation();
+
+		this.flipped = false;
+		this.dragging = false;
+		this.mayExit = false;
+		this.maybePaint();
+	}
+
 
 
 	// -----------------------------------------------------------------
@@ -970,113 +802,649 @@ export const Mate = class {
 	// -----------------------------------------------------------------
 
 	/**
-	 * Choose First Animation
+	 * Cancel Tick
 	 *
-	 * @return {boolean} True/false.
-	 * @public
+	 * @return {void} Nothing.
 	 */
-	start() {
-		// This cannot be called on a child.
-		if (this.child) {
-			this.detach();
+	cancelTick() {
+		if (null !== this._raf) {
+			cancelAnimationFrame(this._raf);
+			this._raf = null;
+		}
+	}
+
+	/**
+	 * Maybe Tick
+	 *
+	 * @return {void} Nothing.
+	 */
+	maybeTick() {
+		// Queue a tick!
+		if (null === this._raf) {
+			this._raf = requestAnimationFrame((n) => this.tick(n));
+		}
+	}
+
+	/**
+	 * Tick
+	 *
+	 * @param {number} now Now.
+	 * @return {void} Nothing.
+	 */
+	tick(now) {
+		// There's nothing to tick.
+		if (
+			null === this._el ||
+			null === this._animation ||
+			! this._steps.length
+		) {
+			this._raf = null;
+			return;
+		}
+
+		// Queue up the next tick prematurely to avoid overlap.
+		this._raf = requestAnimationFrame((n) => this.tick(n));
+
+		/** @const {?boolean} */
+		const result = this.step(now);
+
+		// The animation is over with nothing replacing it.
+		if (false === result) {
+			this.cancelTick();
+			this.stop();
+			return;
+		}
+		// We didn't abort due to time constraints.
+		else if (true === result) {
+			this.maybePaint();
+		}
+	}
+
+	/**
+	 * Step
+	 *
+	 * @param {number} now Now.
+	 * @return {?boolean} True/false.
+	 */
+	step(now) {
+		// There is no animation; we shouldn't be doing anything.
+		if (null === this._animation) {
 			return false;
 		}
 
-		// Prevent circular restarts.
-		this.mayExit = false;
-		this.setFlip(false);
+		// Too early, or we're out of steps.
+		if (this._steps[this._steps.length - 1].time > now) {
+			return null;
+		}
 
-		/** @const {number} */
-		const id = rankedChoice(FIRST_CHOICES);
+		/** @const {Step} */
+		const step = this._steps.pop();
+
+		// Set the frame.
+		this._frame = step.frame;
+
+		// Play audio?
+		if (null !== step.sound && Poe.audio) {
+			makeNoise(step.sound);
+		}
+
+		/** @type {number} */
+		let x = step.x;
+
+		/** @type {number} */
+		const y = step.y;
+
+		// Flip the X if we need to.
+		if (this.flipped) {
+			x = 0 - x;
+		}
+
+		// Move it along.
+		this.setPosition(x, y);
+
+		// The animation is over.
+		if (! this._steps.length) {
+			this.cancelTick();
+
+			// Use a timeout to transition the animation so the last frame doesn't get chopped off.
+			setTimeout(() => {
+				// Should we flip it?
+				if (step.flip) {
+					this.flipped = ! this.flipped;
+				}
+
+				// Where too?
+				this.setNextAnimation();
+			}, step.interval);
+
+			return true;
+		}
+		// We need to flip.
+		else if (step.flip) {
+			this.flipped = ! this.flipped;
+		}
+
+		// Which way are we moving?
+
+		/** @const {Direction} */
+		const xDir = xDirection(x);
+
+		/** @const {Direction} */
+		const yDir = yDirection(y);
+
+		// Does gravity matter?
+		if (Flags.ForceGravity & step.flags) {
+			if (this.checkGravity()) {
+				return true;
+			}
+		}
+
+		// Check edges.
+		if (! (Flags.IgnoreEdges & step.flags)) {
+			if (null !== this._animation.edge) {
+				if (this.checkEdges(xDir, yDir)) {
+					return true;
+				}
+			}
+			else if (this.checkSanity(xDir, yDir)) {
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Maybe Paint
+	 *
+	 * @return {void} Nothing.
+	 */
+	maybePaint() {
+		// Don't paint if we don't have an element.
+		if (null === this._el) {
+			return;
+		}
+
+		/** @const {DomState} */
+		const after = this.domState;
+
+		// Element class.
+		if (this._domLast[0] !== after[0]) {
+			this._domLast[0] = after[0];
+			this._el.className = after[0];
+		}
+
+		// Element style transform.
+		if (this._domLast[1] !== after[1]) {
+			this._domLast[1] = after[1];
+			this._el.style.transform = after[1];
+		}
+
+		// The image.
+		if (this._domLast[2] !== after[2]) {
+			this._domLast[2] = after[2];
+			this._el.children[0].className = after[2];
+		}
+	}
+};
+
+/**
+ * Primary Mate
+ */
+export const Mate = class extends ChildMate {
+	// -----------------------------------------------------------------
+	// Construction
+	// -----------------------------------------------------------------
+
+	/**
+	 * Constructor
+	 *
+	 * @param {number} mateId Mate ID.
+	 */
+	constructor(mateId) {
+		super(mateId);
+
+		/** @private {Object<string, Function>} */
+		this._events = {};
+
+		/** @private {!IntersectionObserver} */
+		this._observer = new IntersectionObserver(
+			(e) => this.onIntersect(e),
+			{
+				root: null,
+				rootMargin: '0px',
+				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+			}
+		);
+
+		this.setupEvents();
+	}
+
+	/**
+	 * Bind Event Listeners
+	 *
+	 * @return {void} Nothing.
+	 */
+	setupEvents() {
+		// Only do this once.
+		if (Flags.IsBound & this._flags) {
+			return;
+		}
+		this._flags |= Flags.IsBound;
+
+		this._events['contextmenu'] = (/** @type {Event} */ e) => { e.preventDefault(); };
+		this._events['mousedown'] = (/** @type {!MouseEvent} */ e) => this.onDragStart(e);
+		this._events['dblclick'] = (/** @type {Event} */ e) => {
+			e.preventDefault();
+
+			/** @const {?Event} */
+			const event = new CustomEvent('poestop');
+			if (null !== event) {
+				window.dispatchEvent(event);
+			}
+		};
+
+		this._el.addEventListener('contextmenu', this._events['contextmenu']);
+		this._el.addEventListener(
+			'mousedown',
+			this._events['mousedown'],
+			{ passive: true }
+		);
+		this._el.addEventListener(
+			'dblclick',
+			this._events['dblclick'],
+			{ once: true }
+		);
+
+		this._observer.observe(/** @type {!Element} */ (this._el));
+	}
+
+	/**
+	 * Start
+	 *
+	 * @return {void} Nothing.
+	 */
+	start() {
+		// Prevent circular restarts.
+		this.flipped = false;
+		this.dragging = false;
+		this.mayExit = false;
+
+		/** @const {!Playlist} */
+		const id = /** @type {!Playlist} */ (chooseAnimation(FIRST_CHOICES));
 
 		// Choose something!
 		switch (id) {
 		// Fall from a random place.
-		case PLAYLIST.Fall:
-			return this.setAnimation(
-				PLAYLIST.Fall,
-				parseInt(Math.random() * (screenWidth() - TILE_SIZE), 10),
+		case Playlist.Fall:
+			this.setAnimation(
+				Playlist.Fall,
+				Math.floor(Math.random() * (Poe.width - TILE_SIZE)),
 				0 - TILE_SIZE
 			);
+			return;
 
 		// Bath Dive.
 		// Black Sheep.
 		// Chase a Martian!
 		// Stargaze.
 		default:
-			return this.setAnimation(id);
+			this.setAnimation(id);
 		}
 	}
 
+
+
+	// -----------------------------------------------------------------
+	// Getters and Setters
+	// -----------------------------------------------------------------
+
 	/**
-	 * Choose an Animation
+	 * Element Base Class(es)
 	 *
-	 * Choose an animation given a sequence, or pick something "normal" at random.
-	 *
-	 * @param {(null|number|Array<(number|MateAnimationPossibility)>)} choices Choices.
-	 * @return {number} Animation ID.
-	 * @private
+	 * @return {string} Class.
 	 */
-	chooseNext(choices) {
-		// If we're in the middle of exiting, let's just keep going.
-		if (this.mayExit && this.isPartiallyVisible()) {
-			return this.animation.id;
-		}
+	get baseClass() {
+		return 'poe';
+	}
 
-		// A number is all there is.
-		if ('number' === typeof choices && verifyAnimationId(choices)) {
-			return choices;
-		}
+	/**
+	 * Visible?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get visible() {
+		return !! (Flags.IsVisible & this._flags);
+	}
 
-		// We need to choose something random.
-		if (
-			null === choices ||
-			! Array.isArray(choices) ||
-			! choices.length
-		) {
-			choices = this.isVisible() ? DEFAULT_CHOICES : ENTRANCE_CHOICES;
+	/**
+	 * Visible?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set visible(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.IsVisible;
 		}
-
-		// Pick something random!
-		/** @const {number} */
-		const result = rankedChoice(choices);
-		if (! result || ! verifyAnimationId(result)) {
-			return this.chooseNext(null);
+		// Yes visible.
+		else {
+			this._flags |= Flags.IsVisible;
 		}
-
-		return result;
 	}
 
 
 
 	// -----------------------------------------------------------------
-	// Callbacks
+	// Methods
 	// -----------------------------------------------------------------
 
 	/**
-	 * Event: Mouse Move
+	 * Set Animation
 	 *
-	 * @param {MouseEvent} e Event.
+	 * @param {Playlist} animationId Animation ID.
+	 * @param {number=} x Start from X.
+	 * @param {number=} y Start from Y.
 	 * @return {void} Nothing.
-	 * @public
+	 */
+	setAnimation(animationId, x, y) {
+		// Stop any in-progress ticks.
+		this.cancelTick();
+
+		animationId = /** @type {!Playlist} */ (parseInt(animationId, 10) || 0);
+
+		// Disable the exit possibility if we're changing animations and the property doesn't hold.
+		if (
+			(null === this._animation) ||
+			(animationId !== this._animation.id) ||
+			! (Flags.AllowExit & this._animation.scenes[0].flags)
+		) {
+			this.mayExit = false;
+		}
+
+		// Make sure it is valid.
+		this._animation = animation(animationId);
+		if (
+			null === this._animation ||
+			(Flags.NoParents & this._animation.flags)
+		) {
+			Poe.log(
+				`Invalid animation ID: ${animationId}`,
+				LogType.Error
+			);
+
+			// Primary mates cannot be unset in this way.
+			/** @const {?Event} */
+			const event = new CustomEvent('poestop');
+			if (null !== event) {
+				window.dispatchEvent(event);
+			}
+
+			return;
+		}
+
+		// Kill children if falling.
+		if (Playlist.Fall === animationId) {
+			Poe.stopChildren();
+		}
+
+		// Allow off-screen exits?
+		if (
+			(Flags.AllowExit & this._animation.scenes[0].flags) &&
+			! this.mayExit &&
+			4 === Math.floor(Math.random() * 5)
+		) {
+			this.mayExit = true;
+		}
+
+		// Set the starting position.
+		this.setAnimationStart(x, y);
+
+		// Handle the steps.
+		this.setSteps();
+
+		// Spawn required child.
+		this.spawnChild();
+
+		// Tick it.
+		this.maybeTick();
+	}
+
+	/**
+	 * Set Next Animation
+	 *
+	 * @return {void} Nothing.
+	 */
+	setNextAnimation() {
+		/** @type {null|!Playlist|!Array<WeightedChoice>} */
+		let choices = null;
+
+		if (! this.visible) {
+			choices = ENTRANCE_CHOICES;
+		}
+		else if (null !== this._animation && null !== this._animation.next) {
+			choices = this._animation.next;
+		}
+		else {
+			choices = DEFAULT_CHOICES;
+		}
+
+		/** @const {?Playlist} */
+		const next = chooseAnimation(choices);
+		if (null === next) {
+			Poe.log(
+				'Unable to set the next animation.',
+				LogType.Error
+			);
+			this.stop();
+			return;
+		}
+
+		// Set it!
+		this.setAnimation(next);
+	}
+
+	/**
+	 * Check Edges
+	 *
+	 * @param {Direction} xDir X Direction.
+	 * @param {Direction} yDir Y Direction.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkEdges(xDir, yDir) {
+		if (null === this._animation) {
+			return false;
+		}
+
+		/** @type {boolean} */
+		let changed = false;
+
+		// Check the horizontal if we aren't allowed to walk off screen.
+		if (! this.mayExit) {
+			// Too left.
+			if (Direction.Left === xDir && 0 >= this._x) {
+				this.setPosition(0, this._y, true);
+				changed = true;
+			}
+			// Too right.
+			else if (Direction.Right === xDir && this._x >= Poe.width - TILE_SIZE) {
+				this.setPosition(Poe.width - TILE_SIZE, this._y, true);
+				changed = true;
+			}
+		}
+
+		// Too up.
+		if (Direction.Up === yDir && 0 >= this._y) {
+			this.setPosition(this._x, 0, true);
+			changed = true;
+		}
+		// Too down.
+		else if (Direction.Down === yDir && this._y >= Poe.height - TILE_SIZE) {
+			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
+			changed = true;
+		}
+
+		// Do something else.
+		if (changed) {
+			this.setEdgeAnimation();
+		}
+
+		return changed;
+	}
+
+	/**
+	 * Check Gravity
+	 *
+	 * @return {boolean} True if changes were made.
+	 */
+	checkGravity() {
+		if (
+			null !== this._animation &&
+			this._y < Poe.height - TILE_SIZE
+		) {
+			this.setAnimation(Playlist.Fall);
+			Poe.stopChildren();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check Sanity
+	 *
+	 * This is like checkEdges() except it does not alter coordinates along the way; it just moves onto the next logical sequence.
+	 *
+	 * @param {Direction} xDir X Direction.
+	 * @param {Direction} yDir Y Direction.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkSanity(xDir, yDir) {
+		if (null === this._animation) {
+			return false;
+		}
+
+		// We cannot do it!
+		if (
+			(Direction.Right !== xDir && 0 > this._x) ||
+			(Direction.Left !== xDir && this._x > Poe.width - TILE_SIZE) ||
+			(Direction.Down !== yDir && 0 > this._y) ||
+			(Direction.Up !== yDir && this._y > Poe.height - TILE_SIZE)
+		) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Destruction
+	// -----------------------------------------------------------------
+
+	/**
+	 * Destructor
+	 *
+	 * @return {void} Nothing.
+	 */
+	destructor() {
+		// Cancel the ticks.
+		this.cancelTick();
+
+		// Make sure we've stopped.
+		if (null !== this._animation) {
+			this.resetAnimation();
+		}
+
+		if (null !== this._el) {
+			this.removeEvents();
+			document.body.removeChild(this._el);
+			delete this._el;
+			this._el = null;
+		}
+	}
+
+	/**
+	 * Stop
+	 *
+	 * @return {void} Nothing.
+	 */
+	stop() {
+		Poe.log(
+			'Poe reached an unnatural end!',
+			LogType.Error
+		);
+
+		/** @const {?Event} */
+		const event = new CustomEvent('poestop');
+		if (null !== event) {
+			window.dispatchEvent(event);
+		}
+	}
+
+	/**
+	 * Remove Event Listeners
+	 *
+	 * @return {void} Nothing.
+	 */
+	removeEvents() {
+		// Nothing bound, nothing to lose.
+		if (! (Flags.IsBound & this._flags)) {
+			return;
+		}
+		this._flags &= ~Flags.IsBound;
+
+		/** @const {!Array<string>} */
+		const keys = Object.keys(/** @type {!Object} */ (this._events));
+		for (let i = 0; i < keys.length; ++i) {
+			this._el.removeEventListener(keys[i], this._events[keys[i]]);
+			delete this._events[keys[i]];
+		}
+
+		this._observer.unobserve(/** @type {!Element} */ (this._el));
+		this._observer.disconnect();
+		delete this._observer;
+	}
+
+
+
+	// -----------------------------------------------------------------
+	// Callback Handlers
+	// -----------------------------------------------------------------
+
+	/**
+	 * Drag Start
+	 *
+	 * @param {!MouseEvent} e Event.
+	 * @return {void} Nothing.
 	 */
 	onDragStart(e) {
-		if (! this.dragging && (1 === e.buttons) && (0 === e.button)) {
-			this.detachChild();
-			this.mayExit = false;
-			this.setFlip(false);
+		if (
+			! this.dragging &&
+			(1 === e.buttons) &&
+			(0 === e.button)
+		) {
+			// Cancel all children.
+			Poe.stopChildren();
+
+			// Update the flags.
 			this.dragging = true;
-			this.el.classList.add('is-dragging');
-			this.setAnimation(PLAYLIST.Drag);
+			this.flipped = false;
+			this.mayExit = false;
+
+			// Set the animation.
+			this.setAnimation(Playlist.Drag);
 		}
 	}
 
 	/**
-	 * On Drag
+	 * Drag
 	 *
-	 * @param {MouseEvent} e Event.
+	 * @param {!MouseEvent} e Event.
 	 * @return {void} Nothing.
-	 * @public
 	 */
 	onDrag(e) {
 		if (this.dragging) {
@@ -1098,189 +1466,82 @@ export const Mate = class {
 	 * End Drag
 	 *
 	 * @return {void} Nothing.
-	 * @public
 	 */
-	endDrag() {
+	onEndDrag() {
 		if (this.dragging) {
 			this.dragging = false;
-			this.el.classList.remove('is-dragging');
-			this.setAnimation(PLAYLIST.Fall);
+			this.setAnimation(Playlist.Fall);
 		}
 	}
 
 	/**
-	 * Event: Resize
+	 * Intersect
 	 *
+	 * @param {Array<IntersectionObserverEntry>} entries Entries.
 	 * @return {void} Nothing.
-	 * @public
 	 */
-	onResize() {
-		// We can't check.
-		if (
-			(null === this.el) ||
-			(null === this.animation)
-		) {
+	onIntersect(entries) {
+		if ('undefined' === typeof entries[0]) {
 			return;
 		}
 
-		// If we're invisible, reboot.
-		if (! this.isVisible()) {
+		this.visible = (0 < entries[0].intersectionRatio);
+	}
+
+	/**
+	 * Resize
+	 *
+	 * @return {void} Nothing.
+	 */
+	onResize() {
+		// Nothing to do.
+		if (null === this._animation) {
+			return;
+		}
+
+		// Do something from off-screen.
+		if (! this.visible) {
 			this.start();
 			return;
 		}
 
-		// If gravity applies and we're too high, glue to the bottom.
-		/** @const {number} */
-		const sh = screenHeight();
+		/** @type {boolean} */
+		let changed = false;
 
-		/** @const {number} */
-		const stepsLength = this.steps.length;
+		// Check gravity.
 		if (
-			stepsLength &&
-			(FLAGS.forceGravity & this.steps[stepsLength - 1].flags) &&
-			this.y < sh - TILE_SIZE
+			this._steps.length &&
+			(Flags.ForceGravity & this._steps[this._steps.length - 1].flags) &&
+			Poe.height - TILE_SIZE !== this._y
 		) {
-			this.setPosition(this.x, sh - TILE_SIZE, true);
-			return;
+			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
+			changed = true;
 		}
 
-		// Climbing down we need to be glued to the right side.
-		/** @const {number} */
-		const sw = screenWidth();
-		if (PLAYLIST.ClimbDown === this.animation.id && sw - TILE_SIZE !== this.x) {
-			this.setPosition(sw - TILE_SIZE, this.y, true);
-			return;
-		}
-	}
+		// Climbing up and down requires being glued to the sides.
+		if (Playlist.ClimbDown === this._animation.id) {
+			/** @const {number} */
+			const position = this.flipped ? 0 : Poe.width - TILE_SIZE;
 
-
-
-	// -----------------------------------------------------------------
-	// Static
-	// -----------------------------------------------------------------
-
-	/**
-	 * New Mate
-	 *
-	 * @param {boolean=} child Is Child?
-	 * @return {?Mate} Mate or null.
-	 */
-	static init(child) {
-		child = !! child;
-		if (child !== (null !== _mates.primary)) {
-			return null;
-		}
-
-		/** @type {number} */
-		let mateId = 2;
-		while ('undefined' !== typeof _mates.children[mateId]) {
-			++mateId;
-		}
-
-		++_mates.length;
-		if (child) {
-			_mates.children[mateId] = new Mate(true, mateId);
-			return _mates.children[mateId];
-		}
-		else {
-			_mates.primary = new Mate(false, 1);
-			return _mates.primary;
-		}
-	}
-
-	/**
-	 * Delete Mate
-	 *
-	 * @param {number} mateId Mate ID.
-	 * @return {void} Nothing.
-	 */
-	static delete(mateId) {
-		mateId = parseInt(mateId, 10) || 0;
-
-		// Is this the primary?
-		if (null !== _mates.primary && mateId === _mates.primary.mateId) {
-			Mate.deleteChildren();
-			delete _mates.primary;
-			_mates.primary = null;
-		}
-		// A child mate?
-		else if ('undefined' !== typeof _mates.children[mateId]) {
-			delete _mates.children[mateId];
-		}
-
-		// Update the length.
-		_mates.length = (null !== _mates.primary ? 1 + Object.keys(_mates.children).length : 0);
-	}
-
-	/**
-	 * Delete All
-	 *
-	 * @return {void} Nothing.
-	 */
-	static deleteAll() {
-		if (null !== _mates.primary) {
-			_mates.primary.detach();
-		}
-		else {
-			Mate.deleteChildren();
-		}
-	}
-
-	/**
-	 * Delete Children
-	 *
-	 * @return {void} Nothing.
-	 */
-	static deleteChildren() {
-		/** @const {Array<number>} */
-		const keys = /** @type {!Array<number>} */ (Object.keys(_mates.children));
-
-		/** @const {number} */
-		const length = keys.length;
-
-		for (let i = 0; i < length; ++i) {
-			/** @type {?Mate} */
-			let mate = Mate.get(keys[i]);
-			if (null !== mate) {
-				mate.detach();
+			if (position !== this._x) {
+				this.setPosition(position, this._y, true);
+				changed = true;
 			}
 		}
-	}
+		// Climbing up requires being glued to the left.
+		else if (Playlist.ClimbUp === this._animation.id) {
+			/** @const {number} */
+			const position = this.flipped ? Poe.width - TILE_SIZE : 0;
 
-	/**
-	 * Get Mate
-	 *
-	 * @param {number} mateId Mate ID.
-	 * @return {?Mate} Mate or null.
-	 */
-	static get(mateId) {
-		mateId = parseInt(mateId, 10) || 0;
-
-		if (null !== _mates.primary && mateId === _mates.primary.mateId) {
-			return _mates.primary;
-		}
-		else if ('undefined' !== typeof _mates.children[mateId]) {
-			return _mates.children[mateId];
+			if (position !== this._x) {
+				this.setPosition(position, this._y, true);
+				changed = true;
+			}
 		}
 
-		return null;
-	}
-
-	/**
-	 * Length
-	 *
-	 * @return {number} Mate length.
-	 */
-	static get length() {
-		return _mates.length;
-	}
-
-	/**
-	 * Primary
-	 *
-	 * @return {?Mate} Primary mate.
-	 */
-	static get primary() {
-		return _mates.primary;
+		// Paint if we changed something.
+		if (changed) {
+			this.maybePaint();
+		}
 	}
 };

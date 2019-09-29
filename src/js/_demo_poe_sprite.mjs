@@ -4,9 +4,10 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, standardizeMateAnimationState } from './_animations.mjs';
+import { ANIMATIONS } from './_animations.mjs';
+import { demoResolveScene } from './_helpers.mjs';
 import { TILES_X, TILES_Y } from './_image.mjs';
-import { MateAnimationState, RawMateAnimation, VueComponent, VueProp } from './_types.mjs';
+import { Animation, Scene, VueComponent, VueProp } from './_types.mjs';
 
 
 
@@ -89,40 +90,37 @@ export const poeSprite = {
 				 * Presets
 				 *
 				 * @param {Array} out Collection.
-				 * @param {RawMateAnimation} v Value.
+				 * @param {Animation} v Value.
 				 * @return {Array} Collection.
 				 */
 				(out, v) => {
-					/** @type {number} */
-					const scenesLength = v.scene.length;
-
 					// Do it by scene.
-					for (let i = 0; i < scenesLength; ++i) {
-						/** @type {MateAnimationState} */
-						const start = standardizeMateAnimationState(v.scene[i].start);
+					for (let i = 0; i < v.scenes.length; ++i) {
+						/** @const {!Scene} */
+						const scene = demoResolveScene(v.scenes[i]);
 
 						/** @type {!number} */
-						let repeat = Number(('function' === typeof v.scene[i].repeat) ? 5 : v.scene[i].repeat);
+						let repeat = (null === scene.repeat) ? 0 : Math.floor(scene.repeat[0]);
 						if (repeatMax < repeat) {
 							repeat = repeatMax;
 						}
 
 						/** @type {number} */
-						const repeatFrom = repeat ? v.scene[i].repeatFrom : 0;
+						const repeatFrom = repeat ? Math.floor(scene.repeat[1]) : 0;
 
 						/** @type {string} */
 						let name = v.name;
 						if (0 < i) {
-							name += ` (#${i})`;
+							name += ` (#${i + 1})`;
 						}
 
 						out.push({
 							'id': `${v.id}_${i}`,
 							'name': name,
-							'speed': start.speed,
+							'speed': Math.floor(scene.from[2]),
 							'repeat': repeat,
 							'repeatFrom': repeatFrom,
-							'frames': v.scene[i].frames,
+							'frames': scene.frames,
 						});
 					}
 
@@ -181,13 +179,12 @@ export const poeSprite = {
 				this['frames'].splice(index, 1);
 			}
 
-			const length = this['frames'].length;
-			if (! length) {
+			if (! this['frames'].length) {
 				this['repeatFrom'] = 0;
 				this['repeat'] = 0;
 			}
-			else if (length <= this['repeatFrom']) {
-				this['repeatFrom'] = length - 1;
+			else if (this['frames'].length <= this['repeatFrom']) {
+				this['repeatFrom'] = this['frames'].length - 1;
 			}
 		},
 
@@ -230,10 +227,9 @@ export const poeSprite = {
 		 */
 		'tickCycle': function() {
 			_timeout = null;
-			const length = this['playlist'].length;
 
 			// No change needed.
-			if (0 > this['tick'] || 2 > length) {
+			if (0 > this['tick'] || 2 > this['playlist'].length) {
 				return;
 			}
 
@@ -241,10 +237,9 @@ export const poeSprite = {
 			let tick = this['tick'] + 1;
 
 			// Start over.
-			if (length <= tick) {
+			if (this['playlist'].length <= tick) {
 				tick = 0;
 			}
-
 
 			// Bump the frame as needed.
 			Vue.nextTick(() => {

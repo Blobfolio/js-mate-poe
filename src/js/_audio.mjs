@@ -2,17 +2,19 @@
  * @file Audio.
  */
 
-
-
 import { BAA, SNEEZE, YAWN } from './_bin.mjs';
-import { SOUNDS } from './_types.mjs';
+import { Poe } from './_poe.mjs';
+import { LogType, Sound } from './_types.mjs';
 
 
+
+/** @type {boolean} */
+let _audio_warned = false;
 
 /**
  * Get Audio
  *
- * @param {SOUNDS} sound Audio.
+ * @param {Sound} sound Audio.
  * @return {void} Nothing.
  */
 export const makeNoise = function(sound) {
@@ -20,13 +22,13 @@ export const makeNoise = function(sound) {
 	let file = null;
 
 	switch (sound) {
-	case SOUNDS.Baa:
+	case Sound.Baa:
 		file = BAA;
 		break;
-	case SOUNDS.Sneeze:
+	case Sound.Sneeze:
 		file = SNEEZE;
 		break;
-	case SOUNDS.Yawn:
+	case Sound.Yawn:
 		file = YAWN;
 		break;
 	default:
@@ -35,5 +37,13 @@ export const makeNoise = function(sound) {
 
 	/** @const {Audio} */
 	const audio = new Audio(file);
-	audio.play();
+	audio.play().catch(() => {
+		if (! _audio_warned) {
+			_audio_warned = true;
+			Poe.log(
+				'Hint: try clicking Poe with your mouse.',
+				LogType.Warning
+			);
+		}
+	});
 };

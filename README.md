@@ -23,15 +23,15 @@ There have been dozens of ports of Screen Mate Poe over the past 23 years, inclu
 
 JS Mate Poe is a web-first, self-contained implementation written in vanilla Javascript. Everything it needs — graphics, sounds, styles — are embedded in the [main script](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/js-mate-poe.min.js), making installation a breeze. It takes advantage of all of the latest and greatest [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript) goodies, including `requestAnimationFrame()` to maximize playback framerate while keeping resource requirements to a minimum.
 
-The JS Mate Poe script has also been heavily optimized using [Google Closure Compiler](https://developers.google.com/closure/compiler/). Its impact on your page's load time will be minimal, particularly if your server uses Gzip and/or Brotli encodings.
+The JS Mate Poe script has also been heavily optimized using [Google Closure Compiler](https://developers.google.com/closure/compiler/). Its impact on your page's load time will be minimal, particularly if your server supports serving Gzip and/or Brotli-encoded data.
 
 | Encoding | Size |
 | -------- | ---- |
-| None | 91,054 Bytes |
-| Gzip | 53,978 Bytes |
-| Brotli | 50,956 Bytes |
+| None | 95,736 Bytes |
+| Gzip | 55,085 Bytes |
+| Brotli | 51,644 Bytes |
 
-[Version 1.0.3](https://github.com/Blobfolio/js-mate-poe/releases) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
+[Version 1.1.0](https://github.com/Blobfolio/js-mate-poe/releases) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
 
 JS Mate Poe *does not* support alternate characters or sprites; it's Poe or bust. Also intentionally omitted are interactions with individual page elements such as `<div>` or `<h1>`; edge detection is instead bound to the main window.
 
@@ -55,7 +55,7 @@ Adding the screen mate to your web page is very easy. All you need to do is down
 If your web page has a lot going on, you might want to wait to trigger Poe's entrance until everything has loaded.
 
 ```js
-window.addEventListener('load', () => Poe.start(), { once: true });
+window.addEventListener('load', Poe.start, { once: true });
 ```
 
 
@@ -100,70 +100,24 @@ Poe.start();
 
 
 &nbsp;
-### Poe.audio()
+### Audio Playback
 
-Test whether or not Poe audio playback is enabled. This is `true` by default, but the ability can be toggled using [Poe.setAudio()](#poesetaudio).
+Some of the animation sequences make noise. Audio playback is enabled by default because it is adorable, but it can be disabled if you're a party pooper.
+
+*Note:* Many browers — particularly mobile ones — block auto-playing audio, so JS Mate Poe might not be allowed to make noise regardless. This can be worked around by either asking users to whitelist auto-playing audio from your domain, or by having users click Poe with their mouse.
 
 **Example:**
 ```
 // Audio is enabled by default.
-console.log(Poe.audio()); // true
+console.log(Poe.audio); // true
 
 // But if you turn it off...
-Poe.setAudio(false);
-console.log(Poe.audio()); // false
-```
+Poe.audio = false;
+console.log(Poe.audio); // false
 
-
-&nbsp;
-### Poe.setAudio()
-
-Some of the animation sequences make noise. Audio playback is enabled by default because it is adorable, but if you want a quieter experience, you can use this method to explicitly control this behavior.
-
-*Note:* Many browers — particularly mobile ones — block auto-playing audio, so JS Mate Poe might not be allowed to make noise regardless. This can be worked around by either asking users to whitelist auto-playing audio from your domain, or by executing this method from an interactive callback, such as an `onClick()` event.
-
-**Arguments:**
-
-| Type | Description | Default |
-| ---- | ----------- | ------- |
-| *boolean* | `true` to enable audio playback, `false` to disable it. | `false` |
-
-**Example:**
-
-```js
-// Audio is enabled by default.
-Poe.start();
-
-// Turn it off by calling this method with no arguments, or by passing an explicit false.
-Poe.setAudio();      // Audio off.
-Poe.setAudio(false); // Audio off.
-
-// Or turn it back on by passing true.
-Poe.setAudio(true);  // Audio on.
-```
-
-
-&nbsp;
-### Poe.printAscii()
-
-Print an ASCII art version of Poe to the browser's debug console. It is doubtful many people will notice, but the important thing is that *you* know it's there.
-
-**Example:**
-
-```js
-Poe.printAscii(); // A picture prints.
-```
-
-
-&nbsp;
-### Poe.printVersion()
-
-Print the program name and version to the browser's debug console.
-
-**Example:**
-
-```js
-Poe.printVersion(); // "JS Mate Poe: 1.0.1"
+// And back on again if you want.
+Poe.audio = true;
+console.log(Poe.audio); // true
 ```
 
 

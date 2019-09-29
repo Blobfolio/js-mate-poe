@@ -12,15 +12,14 @@
 	</style>
 </head>
 <body>
-	<script src="../js-mate-poe.min.js?ver=10"></script>
+	<script src="../js-mate-poe.min.js?ver=11"></script>
 	<script>
 		(function() {
-			// Print some details to console.
-			Poe.printAscii();
-			Poe.printVersion();
+			// Enable extra console output for demo-purposes.
+			Poe.debug = true;
 
-			// Wait for window.load() so we aren't competing with document compilation, etc.
-			window.addEventListener('load', () => Poe.start(), { once: true });
+			// Start it!
+			window.addEventListener('load', Poe.start, { once: true });
 		})();
 	</script>
 </body>

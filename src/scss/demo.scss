@@ -271,6 +271,8 @@ body {
 		&-value {
 			@extend .accent;
 			color: lightsteelblue;
+
+			&.is-lower { text-transform: lowercase; }
 		} // .animation-legend-value
 	} // .animation-legend
 }

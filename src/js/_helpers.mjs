@@ -2,304 +2,370 @@
  * @file Miscellaneous helper functions.
  */
 
-import { MateAnimationPossibility, MateEvent } from './_types.mjs';
+import { MAX_ANIMATION_ID } from './_animations.mjs';
+import { TILES_X, TILES_Y } from './_image.mjs';
+import { Direction, Playlist, Scene, SceneRepeat, WeightedChoice } from './_types.mjs';
 
 
 
 // ---------------------------------------------------------------------
-// Information
+// Positioning
 // ---------------------------------------------------------------------
 
 /**
- * Program Name
+ * X Direction
  *
- * @const {string}
+ * @param {number} movement Movement.
+ * @return {Direction} Direction.
  */
-export const NAME = 'JS Mate Poe';
+export const xDirection = function(movement) {
+	if (0 < movement) {
+		return Direction.Right;
+	}
+	else if (0 > movement) {
+		return Direction.Left;
+	}
 
-/**
- * Program Version
- *
- * @const {string}
- */
-export const VERSION = '1.0.3';
-
-/**
- * Logo
- *
- * @const {string}
- */
-export const LOGO = `
-                              .*//*
-                     *@%&%.*&       @   ,
-                    @                ,     *
-                   @.                       @
-                   (%                       *&(,
-                    *&. ..                      .@
-                  && ..,.,@@@*                  @
-                @* ..,,,/@,*,,,, /@.              %/
-               @ .,,,,,(% ,,,,******,&,          ,@/
-             /@. .,,,,#@.,**,.*@/*****(#            .@
-     ,@@@@@@@.  .,,.,.,*@(//(/////%(***/#            .@
-   @%  .........,.,,,,.../&//%%(///*@/*/@.            @
- .@...........%%  .../# ...%(#&..@(/%%/*/&            @
- @ ...,..,..., (@@@@@/....,&@%.@..@(/@/**@          (#
-/( ......,,.....,,.,..........*@@(##*@/*#%           @.
-@*..,.,...,...,,,,,,,,...   ..  .@%*@/*/&             @
-#@,,.,....,,..,,,,,,,,,.@@&,*(,,,,(@**@*.            .@
- @(,..,,...,..,,,,..,,@% @&//(///*/&@.               @
-  @&..,,,,,....,,,,,.@   .. ./((*.                @#
-   *@#...,.,.,,,./@@&@ ....        .   .   .      ,&
-      *@#. ,.,.&&   .... .   . . .  .. .          .@
-          ,@@@@#    ... .   .   .                 &/
-              @@            ....      . ..     *@@
-               *@%       . .  .           %(
-                   .,* ,@( ..   &%@,  ./@%
-`;
-
-
-
-// ---------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------
-
-/** @type {number} Height. */
-let _screenHeight = 0;
-
-/** @type {number} Width. */
-let _screenWidth = 0;
-
-/**
- * Screen Height
- *
- * @return {number} Height.
- */
-export const screenHeight = function() {
-	return _screenHeight;
+	return Direction.None;
 };
 
 /**
- * Set Screen Height
+ * Y Direction
  *
- * @param {number=} height Height.
- * @return {void} Nothing.
+ * @param {number} movement Movement.
+ * @return {Direction} Direction.
  */
-export const setScreenHeight = function(height) {
-	if ('number' === typeof height) {
-		_screenHeight = parseInt(height, 10) || 0;
+export const yDirection = function(movement) {
+	if (0 < movement) {
+		return Direction.Down;
 	}
-	else {
-		_screenHeight = parseInt(window.innerHeight, 10) || 0;
-	}
-};
-
-/**
- * Screen Width
- *
- * @return {number} Width.
- */
-export const screenWidth = function() {
-	return _screenWidth;
-};
-
-/**
- * Set Screen Width
- *
- * @param {number=} width Width.
- * @return {void} Nothing.
- */
-export const setScreenWidth = function(width) {
-	if ('number' === typeof width) {
-		_screenWidth = parseInt(width, 10) || 0;
-		return;
+	else if (0 > movement) {
+		return Direction.Up;
 	}
 
-	/** @const {number} */
-	const windowWidth = parseInt(window.innerWidth, 10) || 0;
-
-	/** @const {number} */
-	const docWidth = parseInt(document.documentElement.offsetWidth, 10) || 0;
-
-	// If the document width is a little bit smaller than the window width, there's probably a scrollbar.
-	if (docWidth < windowWidth && docWidth + 25 >= windowWidth) {
-		_screenWidth = docWidth;
-	}
-	else {
-		_screenWidth = windowWidth;
-	}
+	return Direction.None;
 };
 
 
 
 // ---------------------------------------------------------------------
-// Types
+// Formatting
 // ---------------------------------------------------------------------
 
 /**
- * Is Element?
+ * Zero Pad
  *
- * @param {*} v Value.
- * @param {?string=} tag Tag.
- * @return {boolean} True/false.
+ * Pad a number with leading zeroes if needed.
+ *
+ * @param {number} v Number.
+ * @param {number} length Target length.
+ * @return {string} Padded number.
  */
-export const isElement = function(v, tag) {
-	return ('object' === typeof v) &&
-		null !== v &&
-		'string' === typeof v.nodeName &&
-		(
-			! tag ||
-			('string' !== typeof tag) ||
-			tag.toUpperCase() === v.nodeName
-		);
+export const zeroPad = function(v, length) {
+	length = parseInt(length, 10) || 0;
+
+	/** @type {string} */
+	let str = (parseInt(v, 10) || 0).toString();
+
+	while (str.length < length) {
+		str = '0' + str;
+	}
+
+	return str;
+};
+
+/**
+ * Standardize Choices
+ *
+ * @param {null|!Playlist|!Array<WeightedChoice>} choices Choices.
+ * @return {null|!Array<WeightedChoice>} Choices.
+ */
+export const standardizeChoices = function(choices) {
+	if (null === choices) {
+		return null;
+	}
+	else if ('number' === typeof choices) {
+		return [[choices, 1]];
+	}
+
+	return choices;
 };
 
 
 
 // ---------------------------------------------------------------------
-// Events
+// Demo
 // ---------------------------------------------------------------------
 
-/** @type {Array<MateEvent>} */
-let _events = [];
+/* eslint-disable quote-props */
 
 /**
- * Add Event
+ * Resolve Scene
  *
- * @param {Element|Window} el Element.
- * @param {string} hook Hook.
- * @param {Function} cb Callback.
- * @param {?Object=} options Bind options.
- * @return {void} Nothing.
+ * @param {!Scene} scene Scene.
+ * @return {!Scene} Scene.
  */
-export const bindEvent = function(el, hook, cb, options) {
-	if (el !== window && ! isElement(el)) {
-		return;
+export const demoResolveScene = function(scene) {
+	/** @type {?SceneRepeat} */
+	let repeat = null;
+	if ('function' === typeof scene.repeat) {
+		repeat = scene.repeat();
+	}
+	else if (null !== scene.repeat) {
+		repeat = [...scene.repeat];
 	}
 
-	// Store it.
-	_events.push({
-		el: el,
-		hook: hook,
-		cb: cb,
+	return /** @type {!Scene} */ ({
+		'start': 'function' === typeof scene.start ? scene.start() : scene.start,
+		'from': [...scene.from],
+		'to': [...scene.to],
+		'repeat': repeat,
+		'frames': [...scene.frames],
+		'sound': null === scene.sound ? null : [...scene.sound],
+		'flags': scene.flags,
 	});
-
-	// Add with options.
-	if (undefined !== options && null !== options && 'object' === typeof options) {
-		el.addEventListener(hook, cb, options);
-	}
-	else {
-		el.addEventListener(hook, cb);
-	}
 };
 
 /**
- * Remove Events
+ * Resolve Scenes
  *
- * @param {Element|Window} el Element.
- * @return {void} Nothing.
- */
-export const clearEvents = function(el) {
-	if (el !== window && ! isElement(el)) {
-		return;
-	}
-
-	/** @const {number} */
-	const length = _events.length;
-
-	for (let i = length - 1; 0 <= i; --i) {
-		if (_events[i].el === el) {
-			el.removeEventListener(_events[i].hook, _events[i].cb);
-			delete _events[i];
-			_events.splice(i, 1);
-		}
-	}
-};
-
-/**
- * Event: Prevent Default
+ * Scene values can have dynamic callbacks; this will execute callbacks to return static values.
  *
- * @param {Event} e Event.
- * @return {void} Nothing.
+ * @param {!Array<!Scene>} scenes Scenes.
+ * @return {!Array<!Scene>} Scenes.
  */
-export const cbPreventDefault = function(e) {
-	e.preventDefault();
-};
-
-/**
- * Event: Info
- *
- * @param {string} msg Message.
- * @return {void} Nothing.
- */
-export const logInfo = function(msg) {
-	console.info(`${NAME} ${msg}`);
-};
-
-
-
-// ---------------------------------------------------------------------
-// Misc
-// ---------------------------------------------------------------------
-
-/**
- * Ranked Choice
- *
- * @param {(number|Array<(number|MateAnimationPossibility)>)} v Choices.
- * @return {number} Entry.
- */
-export const rankedChoice = function(v) {
-	if ('number' === typeof v) {
-		return v;
-	}
-	else if (! Array.isArray(v)) {
-		return 0;
-	}
-
-	/** @type {number} */
-	let length = v.length;
-	if (! length) {
-		return 0;
-	}
-
-	// If there's just one thing, that's what we return.
-	if (1 === length) {
-		if ('number' === typeof v[0]) {
-			return v[0];
-		}
-		else if ('number' === typeof /** @type {MateAnimationPossibility} */ (v[0]).id) {
-			return /** @type {MateAnimationPossibility} */ (v[0]).id;
-		}
-
-		return 0;
-	}
-
-	// Build a weighted array.
-	/** @type {Array<number>} */
+export const demoResolveScenes = function(scenes) {
+	/** @type {!Array<!Scene>} */
 	let out = [];
 
-	for (let i = 0; i < length; ++i) {
-		if ('number' === typeof v[i]) {
-			out.push(v[i]);
-		}
-		else if (
-			'number' === typeof /** @type {MateAnimationPossibility} */ (v[i]).weight &&
-			'number' === typeof /** @type {MateAnimationPossibility} */ (v[i]).id &&
-			0 < /** @type {MateAnimationPossibility} */ (v[i]).weight &&
-			0 < /** @type {MateAnimationPossibility} */ (v[i]).id
-		) {
-			for (let j = 0; j < /** @type {MateAnimationPossibility} */ (v[i]).weight; ++j) {
-				out.push(/** @type {MateAnimationPossibility} */ (v[i]).id);
+	for (let i = 0; i < scenes.length; ++i) {
+		out.push(demoResolveScene(scenes[i]));
+	}
+
+	return out;
+};
+
+/* eslint-enable quote-props */
+
+
+
+// ---------------------------------------------------------------------
+// Enum Types
+// ---------------------------------------------------------------------
+
+/**
+ * Direction
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isDirection = function(v) {
+	return 'number' === typeof v && 0 <= v && 4 >= v;
+};
+
+/**
+ * Playlist
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isPlaylist = function(v) {
+	return 'number' === typeof v && 0 < v && MAX_ANIMATION_ID >= v;
+};
+
+/**
+ * Sound
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isSound = function(v) {
+	return 'number' === typeof v && 0 < v && 3 >= v;
+};
+
+
+
+// ---------------------------------------------------------------------
+// Other Types
+// ---------------------------------------------------------------------
+
+/**
+ * Animation
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isAnimation = function(v) {
+	return 'object' === typeof v &&
+		null !== v &&
+		'id' in v && isPlaylist(v.id) &&
+		'string' === typeof v.name &&
+		'scenes' in v && isSceneList(v.scenes) &&
+		'number' === typeof v.useDefault && 0 <= v.useDefault &&
+		'number' === typeof v.useFirst && 0 <= v.useFirst &&
+		'number' === typeof v.useEntrance && 0 <= v.useEntrance &&
+		'number' === typeof v.flags && 0 <= v.flags &&
+		'childId' in v &&
+		(null === v.childId || isPlaylist(v.childId)) &&
+		'edge' in v && isChoiceList(v.edge) &&
+		'next' in v && isChoiceList(v.next);
+};
+
+/**
+ * Choice List
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isChoiceList = function(v) {
+	if (null === v || isPlaylist(v)) {
+		return true;
+	}
+
+	if (Array.isArray(v) && v.length) {
+		for (let i = 0; i < v.length; ++i) {
+			if (
+				! Array.isArray(v[i]) ||
+				2 !== v[i].length ||
+				! isPlaylist(v[i][0]) ||
+				'number' !== typeof v[i][1] ||
+				0 >= v[i][1]
+			) {
+				return false;
 			}
 		}
+
+		return true;
 	}
 
-	length = out.length;
-	if (! length) {
-		return 0;
-	}
-	else if (1 === length) {
-		return out[0];
+	return false;
+};
+
+/**
+ * Frame List
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isFrameList = function(v) {
+	if (! Array.isArray(v) || ! v.length) {
+		return false;
 	}
 
-	return out[Math.floor(Math.random() * length)];
+	/** @const {number} */
+	const MAX_FRAMES = TILES_X * TILES_Y;
+
+	for (let i = 0; i < v.length; ++i) {
+		if ('number' !== typeof v[i] || 0 > v[i] || MAX_FRAMES <= v[i]) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
+ * Scene
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isScene = function(v) {
+	return 'object' === typeof v &&
+		null !== v &&
+		'start' in v && isScenePosition(v.start, true) &&
+		'from' in v && isScenePosition(v.from) &&
+		'to' in v && isScenePosition(v.to) &&
+		'repeat' in v && isSceneRepeat(v.repeat, true) &&
+		'frames' in v && isFrameList(v.frames) &&
+		'sound' in v && isSceneSound(v.sound) &&
+		'number' === typeof v.flags && 0 <= v.flags;
+};
+
+/**
+ * Scene List
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isSceneList = function(v) {
+	if (! Array.isArray(v) || ! v.length) {
+		return false;
+	}
+
+	for (let i = 0; i < v.length; ++i) {
+		if (! isScene(v[i])) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+/**
+ * Scene Position
+ *
+ * @param {*} v Value.
+ * @param {boolean=} cb Can be a callback.
+ * @return {boolean} True/false.
+ */
+export const isScenePosition = function(v, cb) {
+	if (null === v) {
+		return true;
+	}
+
+	cb = !! cb;
+	if (cb && 'function' === typeof v) {
+		return true;
+	}
+
+	return Array.isArray(v) &&
+		2 <= v.length &&
+		3 >= v.length &&
+		'number' === typeof v[0] &&
+		'number' === typeof v[1] &&
+		('undefined' === typeof v[2] || 'number' === typeof v[2]);
+};
+
+/**
+ * Scene Repeat
+ *
+ * @param {*} v Value.
+ * @param {boolean=} cb Can be a callback.
+ * @return {boolean} True/false.
+ */
+export const isSceneRepeat = function(v, cb) {
+	if (null === v) {
+		return true;
+	}
+
+	cb = !! cb;
+	if (cb && 'function' === typeof v) {
+		return true;
+	}
+
+	return Array.isArray(v) &&
+		2 === v.length &&
+		'number' === typeof v[0] &&
+		0 < v[0] &&
+		'number' === typeof v[1] &&
+		0 <= v[1];
+};
+
+/**
+ * Scene Sound
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isSceneSound = function(v) {
+	if (null === v) {
+		return true;
+	}
+
+	return Array.isArray(v) &&
+		2 === v.length &&
+		isSound(v[0]) &&
+		'number' === typeof v[1] &&
+		0 <= v[1];
 };
