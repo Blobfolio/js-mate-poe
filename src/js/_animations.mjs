@@ -3,7 +3,7 @@
  */
 
 import { Poe } from './_poe.mjs';
-import { TILE_SIZE } from './_image.mjs';
+import { TILE_SIZE } from './_media.mjs';
 import {
 	Animation,
 	Flags,
@@ -742,7 +742,7 @@ export const ANIMATIONS = [
 				start: null,
 				from: [0, 0, 30],
 				to: [0, 0, 30],
-				repeat: [5, 20],
+				repeat: [70, 19],
 				frames: [
 					146,
 					146,
@@ -763,18 +763,6 @@ export const ANIMATIONS = [
 					148,
 					147,
 					147,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
-					146,
 					146,
 				],
 				sound: null,

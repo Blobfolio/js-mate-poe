@@ -10,7 +10,7 @@ import {
 	Step,
 	VueComponent,
 	VueProp
-} from './_types.mjs';
+} from '../_types.mjs';
 
 
 
