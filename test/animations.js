@@ -2,13 +2,12 @@
  * @file Animation unit tests.
  */
 
+/* global assert */
 /* global describe */
 /* global it */
-/* global require */
 import { ANIMATIONS, MAX_ANIMATION_ID } from '../src/js/_animations.mjs';
 import { isAnimation } from '../src/js/_helpers.mjs';
 import { Playlist } from '../src/js/_types.mjs';
-const assert = require('chai').assert;
 
 
 

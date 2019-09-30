@@ -53,6 +53,23 @@ export const yDirection = function(movement) {
 // ---------------------------------------------------------------------
 
 /**
+ * Standardize Choices
+ *
+ * @param {null|!Playlist|!Array<WeightedChoice>} choices Choices.
+ * @return {null|!Array<WeightedChoice>} Choices.
+ */
+export const standardizeChoices = function(choices) {
+	if (null === choices) {
+		return null;
+	}
+	else if ('number' === typeof choices) {
+		return [[choices, 1]];
+	}
+
+	return choices;
+};
+
+/**
  * Zero Pad
  *
  * Pad a number with leading zeroes if needed.
@@ -72,23 +89,6 @@ export const zeroPad = function(v, length) {
 	}
 
 	return str;
-};
-
-/**
- * Standardize Choices
- *
- * @param {null|!Playlist|!Array<WeightedChoice>} choices Choices.
- * @return {null|!Array<WeightedChoice>} Choices.
- */
-export const standardizeChoices = function(choices) {
-	if (null === choices) {
-		return null;
-	}
-	else if ('number' === typeof choices) {
-		return [[choices, 1]];
-	}
-
-	return choices;
 };
 
 
