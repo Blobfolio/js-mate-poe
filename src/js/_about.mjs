@@ -28,7 +28,7 @@ export const VERSION = '1.1.0';
  *
  * @const {string}
  */
-export const LOGO = `
+export const ASCII = `
                               .*//*
                      *@%&%.*&       @   ,
                     @                ,     *

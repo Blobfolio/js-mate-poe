@@ -2,7 +2,7 @@
  * @file Poe
  */
 
-import { LOGO, NAME, REPO, VERSION } from './_about.mjs';
+import { ASCII, NAME, REPO, VERSION } from './_about.mjs';
 import { CSS } from './_css.mjs';
 import { zeroPad } from './_helpers.mjs';
 import { ChildMate, Mate } from './_mate.mjs';
@@ -466,7 +466,7 @@ export const Poe = {
 	 */
 	help() {
 		/* eslint-disable-next-line */
-		console.info(`%c${LOGO}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
+		console.info(`%c${ASCII}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
 
 		/* eslint-disable-next-line */
 		console.info(`%c${Poe.name}: %c${Poe.version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
