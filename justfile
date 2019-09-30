@@ -37,7 +37,7 @@ test_dir  := base_dir + "/test"
 
 @test: _check_dependencies
 	just _header "Unit tests!"
-	npx mocha --require esm
+	npx karma start --single-run --browsers ChromeHeadless "{{ base_dir }}/karma.conf.js"
 	just _notify "Unit tests are looking good!"
 
 
