@@ -1367,9 +1367,11 @@ export const Mate = class extends ChildMate {
 	 * @param {Direction} yDir Y Direction.
 	 * @return {boolean} True if changes were made.
 	 */
+	/* eslint-disable no-unused-vars */
 	checkSanity(xDir, yDir) {
 		return false;
 	}
+	/* eslint-enable no-unused-vars */
 
 
 
