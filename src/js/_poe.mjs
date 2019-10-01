@@ -6,6 +6,7 @@ import { ASCII, NAME, REPO, VERSION } from './_about.mjs';
 import { CSS } from './_css.mjs';
 import { zeroPad } from './_helpers.mjs';
 import { ChildMate, Mate } from './_mate.mjs';
+import { TILE_SIZE } from './_media.mjs';
 import { Flags, LogType, Playlist } from './_types.mjs';
 
 
@@ -36,6 +37,10 @@ export const Poe = {
 	_width: 0,
 	/** @private {number} */
 	_height: 0,
+	/** @private {?IntersectionObserver} */
+	_xObserver: null,
+	/** @private {?IntersectionObserver} */
+	_yObserver: null,
 
 
 
@@ -62,7 +67,13 @@ export const Poe = {
 		Poe.initMate();
 		Poe._primary.start();
 
-		// Console log.
+		// Console messages.
+
+		// Print extra information when debug is enabled.
+		if (Poe.debug) {
+			Poe.help();
+		}
+
 		Poe.log('Sheep happens!', LogType.Log);
 	},
 
@@ -76,6 +87,16 @@ export const Poe = {
 		// We don't need to do this more than once.
 		if (null !== Poe._primary) {
 			return;
+		}
+
+		// Set up styles.
+		if (! document.getElementById('css-mate-poe')) {
+			/** @type {Element} */
+			let style = document.createElement('LINK');
+			style.rel = 'stylesheet';
+			style.id = 'css-mate-poe';
+			style.href = URL.createObjectURL(new Blob([CSS], { type: 'text/css' }));
+			(document.head || document.body).appendChild(style);
 		}
 
 		// Bind events.
@@ -108,20 +129,25 @@ export const Poe = {
 			{ passive: true }
 		);
 
-		// Set up styles.
-		if (! document.getElementById('css-mate-poe')) {
-			/** @type {Element} */
-			let style = document.createElement('LINK');
-			style.rel = 'stylesheet';
-			style.id = 'css-mate-poe';
-			style.href = URL.createObjectURL(new Blob([CSS], { type: 'text/css' }));
-			(document.head || document.body).appendChild(style);
-		}
+		// Set up observers.
 
-		// Print help.
-		if (Poe.debug) {
-			Poe.help();
-		}
+		Poe._xObserver = new IntersectionObserver(
+			(e) => Poe.onXIntersect(e),
+			{
+				root: null,
+				rootMargin: `0px -${TILE_SIZE / 2}px 0px -${TILE_SIZE / 2}px`,
+				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+			}
+		);
+
+		Poe._yObserver = new IntersectionObserver(
+			(e) => Poe.onYIntersect(e),
+			{
+				root: null,
+				rootMargin: `-${TILE_SIZE / 2}px 0px -${TILE_SIZE / 2}px 0px`,
+				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+			}
+		);
 	},
 
 	/**
@@ -150,6 +176,32 @@ export const Poe = {
 		Poe._length = 2 + Poe._children.length;
 		Poe._children.push(new ChildMate(Poe._length));
 		return /** @type {!ChildMate} */ (Poe._children[Poe._children.length - 1]);
+	},
+
+	/**
+	 * Observe Mate
+	 *
+	 * @param {!Element} el Element.
+	 * @return {void} Nothing.
+	 */
+	observe(el) {
+		if (null !== Poe._xObserver && null !== Poe._yObserver) {
+			Poe._xObserver.observe(el);
+			Poe._yObserver.observe(el);
+		}
+	},
+
+	/**
+	 * Unobserve Mate
+	 *
+	 * @param {!Element} el Element.
+	 * @return {void} Nothing.
+	 */
+	unobserve(el) {
+		if (null !== Poe._xObserver && null !== Poe._yObserver) {
+			Poe._xObserver.unobserve(el);
+			Poe._yObserver.unobserve(el);
+		}
 	},
 
 
@@ -398,6 +450,12 @@ export const Poe = {
 		window.removeEventListener('poestop', Poe.stop);
 		window.removeEventListener('resize', Poe.onResize);
 
+		// Unbind observers.
+		Poe._xObserver.disconnect();
+		Poe._xObserver = null;
+		Poe._yObserver.disconnect();
+		Poe._yObserver = null;
+
 		// Kill the width and height since we're no longer listening.
 		Poe._height = 0;
 		Poe._width = 0;
@@ -570,13 +628,81 @@ export const Poe = {
 	 */
 	onResize() {
 		requestAnimationFrame(() => {
+			// Note the previous height.
+			/** @const {number} */
+			const oldHeight = Poe._height;
+
 			Poe._height = Poe.calculateHeight();
 			Poe._width = Poe.calculateWidth();
 
 			// Nudge the mate if needed.
 			if (null !== Poe._primary) {
 				Poe._primary.onResize();
+
+				// If the height got bigger, floor values might remain incorrect. Rather than binding extra event listeners, we can just check and fix those here.
+				if (oldHeight < Poe._height) {
+					Poe._primary.checkFloor();
+					for (let i = 0; i < Poe._children.length; ++i) {
+						Poe._children[i].checkFloor();
+					}
+				}
 			}
 		});
+	},
+
+	/**
+	 * X Intersect
+	 *
+	 * A mate is within 20px of either side of the screen.
+	 *
+	 * @param {Array<!IntersectionObserverEntry>} e Entries.
+	 * @return {void} Nothing.
+	 */
+	onXIntersect(e) {
+		// Loop the elements!
+		for (let i = 0; i < e.length; ++i) {
+			/** @const {number} */
+			const mateId = parseInt(e[i].target.getAttribute('data-mate-id'), 10) || 0;
+
+			if (mateId) {
+				/** @const {null|!Mate|!ChildMate} */
+				const mate = Poe.getMate(mateId);
+				if (null !== mate) {
+					mate.onXIntersect(e[i]);
+					continue;
+				}
+			}
+
+			// Something is weird; let's stop watching.
+			Poe.unobserve(e[i].target);
+		}
+	},
+
+	/**
+	 * Y Intersect
+	 *
+	 * A mate is within 20px of the top or bottom of the screen.
+	 *
+	 * @param {Array<!IntersectionObserverEntry>} e Entries.
+	 * @return {void} Nothing.
+	 */
+	onYIntersect(e) {
+		// Loop the elements!
+		for (let i = 0; i < e.length; ++i) {
+			/** @const {number} */
+			const mateId = parseInt(e[i].target.getAttribute('data-mate-id'), 10) || 0;
+
+			if (mateId) {
+				/** @const {null|!Mate|!ChildMate} */
+				const mate = Poe.getMate(mateId);
+				if (null !== mate) {
+					mate.onYIntersect(e[i]);
+					continue;
+				}
+			}
+
+			// Something is weird; let's stop watching.
+			Poe.unobserve(e[i].target);
+		}
 	},
 };

@@ -106,6 +106,9 @@ export const ChildMate = class {
 
 		// Add the element to the body.
 		document.body.appendChild(this._el);
+
+		// Watch its movements.
+		Poe.observe(this._el);
 	}
 
 	/**
@@ -215,6 +218,32 @@ export const ChildMate = class {
 	 */
 	get baseClass() {
 		return 'poe is-child';
+	}
+
+	/**
+	 * Bottom Side?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get bottomSide() {
+		return !! (Flags.BottomSide & this._flags);
+	}
+
+	/**
+	 * Bottom Side?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set bottomSide(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.BottomSide;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.BottomSide;
+		}
 	}
 
 	/**
@@ -411,6 +440,32 @@ export const ChildMate = class {
 	}
 
 	/**
+	 * Left Side?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get leftSide() {
+		return !! (Flags.LeftSide & this._flags);
+	}
+
+	/**
+	 * Left Side?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set leftSide(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.LeftSide;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.LeftSide;
+		}
+	}
+
+	/**
 	 * Mate ID
 	 *
 	 * @return {number} Mate ID.
@@ -442,6 +497,110 @@ export const ChildMate = class {
 		// Yes flip.
 		else {
 			this._flags |= Flags.MayExit;
+		}
+	}
+
+	/**
+	 * On Floor?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get onFloor() {
+		return !! (Flags.OnFloor & this._flags);
+	}
+
+	/**
+	 * On Floor?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set onFloor(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.OnFloor;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.OnFloor;
+		}
+	}
+
+	/**
+	 * Right Side?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get rightSide() {
+		return !! (Flags.RightSide & this._flags);
+	}
+
+	/**
+	 * Right Side?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set rightSide(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.RightSide;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.RightSide;
+		}
+	}
+
+	/**
+	 * Top Side?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get topSide() {
+		return !! (Flags.TopSide & this._flags);
+	}
+
+	/**
+	 * Top Side?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set topSide(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.TopSide;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.TopSide;
+		}
+	}
+
+	/**
+	 * Visible?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get visible() {
+		return !! (Flags.IsVisible & this._flags);
+	}
+
+	/**
+	 * Visible?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set visible(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.IsVisible;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.IsVisible;
 		}
 	}
 
@@ -752,40 +911,6 @@ export const ChildMate = class {
 	}
 
 	/**
-	 * Check Edges
-	 *
-	 * @param {Direction} xDir X Direction.
-	 * @param {Direction} yDir Y Direction.
-	 * @return {boolean} True if changes were made.
-	 */
-	checkEdges(xDir, yDir) {
-		if (null === this._animation) {
-			return false;
-		}
-
-		/** @type {boolean} */
-		let changed = false;
-
-		// Too up.
-		if (Direction.Up === yDir && 0 >= this._y) {
-			this.setPosition(this._x, 0, true);
-			changed = true;
-		}
-		// Too down.
-		else if (Direction.Down === yDir && this._y >= Poe.height - TILE_SIZE) {
-			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
-			changed = true;
-		}
-
-		// Do something else.
-		if (changed) {
-			this.setEdgeAnimation();
-		}
-
-		return changed;
-	}
-
-	/**
 	 * Check Gravity
 	 *
 	 * @return {boolean} True if changes were made.
@@ -803,25 +928,68 @@ export const ChildMate = class {
 	}
 
 	/**
-	 * Check Sanity
+	 * Check Bottom
 	 *
-	 * This is like checkEdges() except it does not alter coordinates along the way; it just moves onto the next logical sequence.
-	 *
-	 * @param {Direction} xDir X Direction.
-	 * @param {Direction} yDir Y Direction.
+	 * @param {?Direction} dir Direction of movement.
 	 * @return {boolean} True if changes were made.
 	 */
-	checkSanity(xDir, yDir) {
-		if (null === this._animation) {
-			return false;
+	checkBottom(dir) {
+		if (
+			null !== this._animation &&
+			Direction.Down === dir &&
+			this._y >= Poe.height - TILE_SIZE
+		) {
+			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
+			this.setEdgeAnimation();
+			return true;
 		}
 
-		// We cannot do it!
-		if (
-			(Direction.Down !== yDir && 0 > this._y) ||
-			(Direction.Up !== yDir && this._y > Poe.height - TILE_SIZE)
-		) {
-			this.stop();
+		return false;
+	}
+
+	/**
+	 * Check Floor
+	 *
+	 * @return {void} Nothing.
+	 */
+	checkFloor() {
+		this.onFloor = this._y === Poe.height - TILE_SIZE;
+	}
+
+	/* eslint-disable no-unused-vars */
+
+	/**
+	 * Check Left
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkLeft(dir) {
+		return false;
+	}
+
+	/**
+	 * Check Right
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkRight(dir) {
+		return false;
+	}
+
+	/* eslint-enable no-unused-vars */
+
+	/**
+	 * Check Top
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkTop(dir) {
+		if (null !== this._animation && Direction.Up === dir && 0 >= this._y) {
+			this.setPosition(this._x, 0, true);
+			this.setEdgeAnimation();
 			return true;
 		}
 
@@ -862,6 +1030,7 @@ export const ChildMate = class {
 
 		// Remove the elements.
 		if (null !== this._el) {
+			Poe.unobserve(this._el);
 			document.body.removeChild(this._el);
 			delete this._el;
 			this._el = null;
@@ -1013,30 +1182,35 @@ export const ChildMate = class {
 			this.flipped = ! this.flipped;
 		}
 
-		// Which way are we moving?
-
-		/** @const {Direction} */
-		const xDir = xDirection(x);
-
-		/** @const {Direction} */
-		const yDir = yDirection(y);
-
-		// Does gravity matter?
-		if (Flags.ForceGravity & step.flags) {
-			if (this.checkGravity()) {
-				return true;
-			}
+		// Gravity.
+		/** @const {boolean} */
+		const gravity = !! (Flags.ForceGravity & step.flags);
+		if (gravity && ! this.onFloor && this.checkGravity()) {
+			return true;
 		}
 
-		// Check edges.
+		// Edge checks.
 		if (! (Flags.IgnoreEdges & step.flags)) {
-			if (null !== this._animation.edge) {
-				if (this.checkEdges(xDir, yDir)) {
+			if (this.leftSide) {
+				if (this.checkLeft(xDirection(x))) {
 					return true;
 				}
 			}
-			else if (this.checkSanity(xDir, yDir)) {
-				return true;
+			else if (this.rightSide) {
+				if (this.checkRight(xDirection(x))) {
+					return true;
+				}
+			}
+
+			if (this.topSide) {
+				if (this.checkTop(yDirection(y))) {
+					return true;
+				}
+			}
+			else if (! gravity && this.bottomSide) {
+				if (this.checkBottom(yDirection(y))) {
+					return true;
+				}
 			}
 		}
 
@@ -1074,6 +1248,85 @@ export const ChildMate = class {
 			this.imgClass = value;
 		}
 	}
+
+	// -----------------------------------------------------------------
+	// Callback Handlers
+	// -----------------------------------------------------------------
+
+	/**
+	 * Any Intersection
+	 *
+	 * This updates the visibility flag.
+	 *
+	 * @return {void} Nothing.
+	 */
+	onIntersect() {
+		this.visible = 0 - TILE_SIZE < this._x &&
+			Poe.width > this._x &&
+			0 - TILE_SIZE < this._y &&
+			Poe.height > this._y;
+	}
+
+	/**
+	 * X Intersect
+	 *
+	 * A mate is within 20px of either side of the screen.
+	 *
+	 * @param {!IntersectionObserverEntry} e Entry.
+	 * @return {void} Nothing.
+	 */
+	onXIntersect(e) {
+		// Fully within the X boundaries.
+		if (1 === e.intersectionRatio) {
+			this.leftSide = false;
+			this.rightSide = false;
+		}
+		// Approaching the left.
+		else if (this._x <= TILE_SIZE / 2) {
+			this.leftSide = true;
+			this.rightSide = false;
+		}
+		// Approaching the right.
+		else {
+			this.leftSide = false;
+			this.rightSide = true;
+		}
+
+		// Possibly update the visibility state.
+		this.onIntersect();
+	}
+
+	/**
+	 * Y Intersect
+	 *
+	 * A mate is within 20px of the top or bottom of the screen.
+	 *
+	 * @param {!IntersectionObserverEntry} e Entry.
+	 * @return {void} Nothing.
+	 */
+	onYIntersect(e) {
+		// Fully within the Y boundaries.
+		if (1 === e.intersectionRatio) {
+			this.topSide = false;
+			this.bottomSide = false;
+			this.onFloor = false;
+		}
+		// Approaching the top.
+		else if (this._y <= TILE_SIZE / 2) {
+			this.topSide = true;
+			this.bottomSide = false;
+			this.onFloor = false;
+		}
+		// Approaching the bottom.
+		else {
+			this.topSide = false;
+			this.bottomSide = true;
+			this.onFloor = (this._y === Poe.height - TILE_SIZE);
+		}
+
+		// Possibly update the visibility state.
+		this.onIntersect();
+	}
 };
 
 /**
@@ -1094,16 +1347,6 @@ export const Mate = class extends ChildMate {
 
 		/** @private {Object<string, Function>} */
 		this._events = {};
-
-		/** @private {!IntersectionObserver} */
-		this._observer = new IntersectionObserver(
-			(e) => this.onIntersect(e),
-			{
-				root: null,
-				rootMargin: '0px',
-				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-			}
-		);
 
 		this.setupEvents();
 	}
@@ -1143,8 +1386,6 @@ export const Mate = class extends ChildMate {
 			this._events['dblclick'],
 			{ once: true }
 		);
-
-		this._observer.observe(/** @type {!Element} */ (this._el));
 	}
 
 	/**
@@ -1194,32 +1435,6 @@ export const Mate = class extends ChildMate {
 	 */
 	get baseClass() {
 		return 'poe';
-	}
-
-	/**
-	 * Visible?
-	 *
-	 * @return {boolean} True/false.
-	 */
-	get visible() {
-		return !! (Flags.IsVisible & this._flags);
-	}
-
-	/**
-	 * Visible?
-	 *
-	 * @param {boolean} v Value.
-	 * @return {void} Nothing.
-	 */
-	set visible(v) {
-		// Not visible.
-		if (! v) {
-			this._flags &= ~Flags.IsVisible;
-		}
-		// Yes visible.
-		else {
-			this._flags |= Flags.IsVisible;
-		}
 	}
 
 
@@ -1293,51 +1508,31 @@ export const Mate = class extends ChildMate {
 	}
 
 	/**
-	 * Check Edges
+	 * Set Edge Animation
 	 *
-	 * @param {Direction} xDir X Direction.
-	 * @param {Direction} yDir Y Direction.
-	 * @return {boolean} True if changes were made.
+	 * @return {void} Nothing.
 	 */
-	checkEdges(xDir, yDir) {
+	setEdgeAnimation() {
 		if (null === this._animation) {
-			return false;
+			this.stop();
+			return;
 		}
 
-		/** @type {boolean} */
-		let changed = false;
-
-		// Check the horizontal if we aren't allowed to walk off screen.
-		if (! this.mayExit) {
-			// Too left.
-			if (Direction.Left === xDir && 0 >= this._x) {
-				this.setPosition(0, this._y, true);
-				changed = true;
-			}
-			// Too right.
-			else if (Direction.Right === xDir && this._x >= Poe.width - TILE_SIZE) {
-				this.setPosition(Poe.width - TILE_SIZE, this._y, true);
-				changed = true;
-			}
+		// If there is no edge animation, choose something else.
+		if (null === this._animation.edge) {
+			this.setNextAnimation();
+			return;
 		}
 
-		// Too up.
-		if (Direction.Up === yDir && 0 >= this._y) {
-			this.setPosition(this._x, 0, true);
-			changed = true;
-		}
-		// Too down.
-		else if (Direction.Down === yDir && this._y >= Poe.height - TILE_SIZE) {
-			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
-			changed = true;
+		/** @const {?Playlist} */
+		const next = chooseAnimation(this._animation.edge);
+		if (null === next) {
+			this.stop();
+			return;
 		}
 
-		// Do something else.
-		if (changed) {
-			this.setEdgeAnimation();
-		}
-
-		return changed;
+		// Set it!
+		this.setAnimation(next);
 	}
 
 	/**
@@ -1359,19 +1554,82 @@ export const Mate = class extends ChildMate {
 	}
 
 	/**
-	 * Check Sanity
+	 * Check Bottom
 	 *
-	 * This is like checkEdges() except it does not alter coordinates along the way; it just moves onto the next logical sequence.
-	 *
-	 * @param {Direction} xDir X Direction.
-	 * @param {Direction} yDir Y Direction.
+	 * @param {?Direction} dir Direction of movement.
 	 * @return {boolean} True if changes were made.
 	 */
-	/* eslint-disable no-unused-vars */
-	checkSanity(xDir, yDir) {
+	checkBottom(dir) {
+		if (
+			null !== this._animation &&
+			Direction.Down === dir &&
+			this._y >= Poe.height - TILE_SIZE
+		) {
+			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
+			this.setEdgeAnimation();
+			return true;
+		}
+
 		return false;
 	}
-	/* eslint-enable no-unused-vars */
+
+	/**
+	 * Check Left
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkLeft(dir) {
+		if (
+			null !== this._animation &&
+			! this.mayExit &&
+			Direction.Left === dir &&
+			0 >= this._x
+		) {
+			this.setPosition(0, this._y, true);
+			this.setEdgeAnimation();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check Right
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkRight(dir) {
+		if (
+			null !== this._animation &&
+			! this.mayExit &&
+			Direction.Right === dir &&
+			this._x >= Poe.width - TILE_SIZE
+		) {
+			this.setPosition(Poe.width - TILE_SIZE, this._y, true);
+			this.setEdgeAnimation();
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check Top
+	 *
+	 * @param {?Direction} dir Direction of movement.
+	 * @return {boolean} True if changes were made.
+	 */
+	checkTop(dir) {
+		if (null !== this._animation && Direction.Up === dir && 0 >= this._y) {
+			this.setPosition(this._x, 0, true);
+			this.setEdgeAnimation();
+			return true;
+		}
+
+		return false;
+	}
 
 
 
@@ -1394,6 +1652,7 @@ export const Mate = class extends ChildMate {
 		}
 
 		if (null !== this._el) {
+			Poe.unobserve(this._el);
 			this.removeEvents();
 			document.body.removeChild(this._el);
 			delete this._el;
@@ -1429,10 +1688,6 @@ export const Mate = class extends ChildMate {
 			this._el.removeEventListener(keys[i], this._events[keys[i]]);
 			delete this._events[keys[i]];
 		}
-
-		this._observer.unobserve(/** @type {!Element} */ (this._el));
-		this._observer.disconnect();
-		delete this._observer;
 	}
 
 
@@ -1498,20 +1753,6 @@ export const Mate = class extends ChildMate {
 			this.dragging = false;
 			this.setAnimation(Playlist.Fall);
 		}
-	}
-
-	/**
-	 * Intersect
-	 *
-	 * @param {Array<IntersectionObserverEntry>} entries Entries.
-	 * @return {void} Nothing.
-	 */
-	onIntersect(entries) {
-		if ('undefined' === typeof entries[0]) {
-			return;
-		}
-
-		this.visible = (0 < entries[0].intersectionRatio);
 	}
 
 	/**

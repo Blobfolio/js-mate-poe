@@ -49,6 +49,16 @@ export const Flags = {
 	IsFlipped: 8,
 	// Mate: Is visible.
 	IsVisible: 16,
+	// Mate: Left side.
+	TopSide: 32,
+	// Mate: Left side.
+	RightSide: 64,
+	// Mate: Left side.
+	BottomSide: 128,
+	// Mate: Left side.
+	LeftSide: 256,
+	// Mate: Floor.
+	OnFloor: 512,
 
 	// Poe: Warned about broken auto-play audio.
 	AudioWarned: 1,
