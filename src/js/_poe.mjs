@@ -325,6 +325,22 @@ export const Poe = {
 	// -----------------------------------------------------------------
 
 	/**
+	 * Audio Warning
+	 *
+	 * @return {void} Nothing.
+	 */
+	audioWarning() {
+		if (! (Flags.AudioWarned & Poe._flags)) {
+			Poe._flags |= Flags.AudioWarned;
+
+			Poe.log(
+				'Hint: try clicking Poe with your mouse.',
+				LogType.Warning
+			);
+		}
+	},
+
+	/**
 	 * Get Mate
 	 *
 	 * @param {number} mateId Mate ID.

@@ -1,5 +1,5 @@
 /**
- * @file Animation unit tests.
+ * @file Tests: Animations.
  */
 
 /* global assert */

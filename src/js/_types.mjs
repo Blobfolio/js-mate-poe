@@ -50,10 +50,12 @@ export const Flags = {
 	// Mate: Is visible.
 	IsVisible: 16,
 
+	// Poe: Warned about broken auto-play audio.
+	AudioWarned: 1,
 	// Poe: Debug.
-	Debug: 1,
+	Debug: 2,
 	// Poe: Play Audio.
-	MakeNoise: 2,
+	MakeNoise: 4,
 
 	// Position: Absolute.
 	Absolute: 1,
@@ -193,13 +195,6 @@ export var SceneRepeatCB;
  * }}
  */
 export var Animation;
-
-/**
- * Mate Dom State
- *
- * @typedef {Array<string, string, string>}
- */
-export var DomState;
 
 /**
  * Scene

@@ -160,7 +160,7 @@ export const demoResolveScenes = function(scenes) {
  * @return {boolean} True/false.
  */
 export const isDirection = function(v) {
-	return 'number' === typeof v && 0 <= v && 4 >= v;
+	return isUInt(v) && 4 >= /** @type {number} */ (v);
 };
 
 /**
@@ -170,7 +170,7 @@ export const isDirection = function(v) {
  * @return {boolean} True/false.
  */
 export const isPlaylist = function(v) {
-	return 'number' === typeof v && 0 < v && MAX_ANIMATION_ID >= v;
+	return isAbsInt(v) && MAX_ANIMATION_ID >= /** @type {number} */ (v);
 };
 
 /**
@@ -180,7 +180,7 @@ export const isPlaylist = function(v) {
  * @return {boolean} True/false.
  */
 export const isSound = function(v) {
-	return 'number' === typeof v && 0 < v && 3 >= v;
+	return isAbsInt(v) && 3 >= /** @type {number} */ (v);
 };
 
 
@@ -188,6 +188,26 @@ export const isSound = function(v) {
 // ---------------------------------------------------------------------
 // Other Types
 // ---------------------------------------------------------------------
+
+/**
+ * Is ABS Int
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isAbsInt = function(v) {
+	return 'number' === typeof v && Number.isInteger(v) && 0 < v;
+};
+
+/**
+ * Is Unsigned Int
+ *
+ * @param {*} v Value.
+ * @return {boolean} True/false.
+ */
+export const isUInt = function(v) {
+	return 'number' === typeof v && Number.isInteger(v) && 0 <= v;
+};
 
 /**
  * Animation
@@ -201,10 +221,10 @@ export const isAnimation = function(v) {
 		'id' in v && isPlaylist(v.id) &&
 		'string' === typeof v.name &&
 		'scenes' in v && isSceneList(v.scenes) &&
-		'number' === typeof v.useDefault && 0 <= v.useDefault &&
-		'number' === typeof v.useFirst && 0 <= v.useFirst &&
-		'number' === typeof v.useEntrance && 0 <= v.useEntrance &&
-		'number' === typeof v.flags && 0 <= v.flags &&
+		isUInt(v.useDefault) &&
+		isUInt(v.useFirst) &&
+		isUInt(v.useEntrance) &&
+		isUInt(v.flags) &&
 		'childId' in v &&
 		(null === v.childId || isPlaylist(v.childId)) &&
 		'edge' in v && isChoiceList(v.edge) &&
@@ -228,8 +248,7 @@ export const isChoiceList = function(v) {
 				! Array.isArray(v[i]) ||
 				2 !== v[i].length ||
 				! isPlaylist(v[i][0]) ||
-				'number' !== typeof v[i][1] ||
-				0 >= v[i][1]
+				! isAbsInt(v[i][1])
 			) {
 				return false;
 			}
@@ -256,7 +275,7 @@ export const isFrameList = function(v) {
 	const MAX_FRAMES = TILES_X * TILES_Y;
 
 	for (let i = 0; i < v.length; ++i) {
-		if ('number' !== typeof v[i] || 0 > v[i] || MAX_FRAMES <= v[i]) {
+		if (! isUInt(v[i]) || MAX_FRAMES <= v[i]) {
 			return false;
 		}
 	}
@@ -279,7 +298,7 @@ export const isScene = function(v) {
 		'repeat' in v && isSceneRepeat(v.repeat, true) &&
 		'frames' in v && isFrameList(v.frames) &&
 		'sound' in v && isSceneSound(v.sound) &&
-		'number' === typeof v.flags && 0 <= v.flags;
+		isUInt(v.flags);
 };
 
 /**
@@ -346,10 +365,8 @@ export const isSceneRepeat = function(v, cb) {
 
 	return Array.isArray(v) &&
 		2 === v.length &&
-		'number' === typeof v[0] &&
-		0 < v[0] &&
-		'number' === typeof v[1] &&
-		0 <= v[1];
+		isAbsInt(v[0]) &&
+		isUInt(v[1]);
 };
 
 /**
@@ -366,6 +383,5 @@ export const isSceneSound = function(v) {
 	return Array.isArray(v) &&
 		2 === v.length &&
 		isSound(v[0]) &&
-		'number' === typeof v[1] &&
-		0 <= v[1];
+		isUInt(v[1]);
 };

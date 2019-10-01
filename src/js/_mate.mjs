@@ -10,13 +10,12 @@ import {
 	FIRST_CHOICES
 } from './_animations.mjs';
 import { IMAGE } from './_bin.mjs';
-import { xDirection, yDirection } from './_helpers.mjs';
+import { isUInt, isSound, xDirection, yDirection } from './_helpers.mjs';
 import { makeNoise, TILE_SIZE } from './_media.mjs';
 import { Poe } from './_poe.mjs';
 import {
 	Animation,
 	Direction,
-	DomState,
 	Flags,
 	LogType,
 	Playlist,
@@ -71,8 +70,14 @@ export const ChildMate = class {
 		/** @private {Array<Step>} */
 		this._steps = [];
 
-		/** @private {Array<string, string, string>} */
-		this._domLast = ['', '', ''];
+		/** @private {string} */
+		this._elClass = '';
+
+		/** @private {string} */
+		this._elStyleTransform = '';
+
+		/** @private {string} */
+		this._imgClass = '';
 
 		// Finish setup.
 		this.setupDom();
@@ -91,6 +96,7 @@ export const ChildMate = class {
 
 		this._el = /** @type {!HTMLDivElement} */ (document.createElement('DIV'));
 		this._el.className = this.elClass;
+		this._el.setAttribute('data-mate-id', this._mateId);
 
 		/** @type {HTMLImageElement} */
 		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
@@ -212,19 +218,6 @@ export const ChildMate = class {
 	}
 
 	/**
-	 * DOM State
-	 *
-	 * @return {DomState} State.
-	 */
-	get domState() {
-		return [
-			this.elClass,
-			this.elStyleTransform,
-			this.imgClass,
-		];
-	}
-
-	/**
 	 * Dragging
 	 *
 	 * @return {boolean} True/false.
@@ -256,6 +249,30 @@ export const ChildMate = class {
 	 * @return {string} Class.
 	 */
 	get elClass() {
+		return this._elClass;
+	}
+
+	/**
+	 * Set Element Class(es)
+	 *
+	 * @param {string} v Classes.
+	 * @return {void} Nothing.
+	 */
+	set elClass(v) {
+		if ('string' === typeof v) {
+			this._elClass = v;
+			if (null !== this._el) {
+				this._el.className = v;
+			}
+		}
+	}
+
+	/**
+	 * Calculate Element Class(es)
+	 *
+	 * @return {string} Class.
+	 */
+	calculateElClass() {
 		/** @type {string} */
 		let out = this.baseClass;
 
@@ -275,11 +292,35 @@ export const ChildMate = class {
 	}
 
 	/**
-	 * Element Style
+	 * Element Transform Style
 	 *
 	 * @return {string} Style.
 	 */
 	get elStyleTransform() {
+		return this._elStyleTransform;
+	}
+
+	/**
+	 * Set Element Transform Style
+	 *
+	 * @param {string} v Style.
+	 * @return {void} Nothing.
+	 */
+	set elStyleTransform(v) {
+		if ('string' === typeof v) {
+			this._elStyleTransform = v;
+			if (null !== this._el) {
+				this._el.style.transform = v;
+			}
+		}
+	}
+
+	/**
+	 * Calculate Element Transform Style
+	 *
+	 * @return {string} Style.
+	 */
+	calculateElStyleTransform() {
 		/** @type {string} */
 		let out = '';
 
@@ -334,6 +375,30 @@ export const ChildMate = class {
 	 * @return {string} Class.
 	 */
 	get imgClass() {
+		return this._imgClass;
+	}
+
+	/**
+	 * Set Image Class(es)
+	 *
+	 * @param {string} v Style.
+	 * @return {void} Nothing.
+	 */
+	set imgClass(v) {
+		if ('string' === typeof v) {
+			this._imgClass = v;
+			if (null !== this._el) {
+				this._el.children[0].className = v;
+			}
+		}
+	}
+
+	/**
+	 * Calculate Image Class(es)
+	 *
+	 * @return {string} Style.
+	 */
+	calculateImgClass() {
 		/** @type {string} */
 		let out = 'poe-img';
 
@@ -428,16 +493,22 @@ export const ChildMate = class {
 
 		// Make sure it is valid.
 		this._animation = animation(animationId);
-		if (
-			null === this._animation ||
-			(Flags.NoChildren & this._animation.flags)
-		) {
+		if (! this.checkAnimation()) {
 			Poe.log(
 				`Invalid animation ID: ${animationId}`,
 				LogType.Error
 			);
-			this.stop();
+
 			return;
+		}
+
+		// Allow off-screen exits?
+		if (
+			(Flags.AllowExit & this._animation.scenes[0].flags) &&
+			! this.mayExit &&
+			4 === Math.floor(Math.random() * 5)
+		) {
+			this.mayExit = true;
 		}
 
 		// Set the starting position.
@@ -451,6 +522,25 @@ export const ChildMate = class {
 
 		// Tick it.
 		this.maybeTick();
+	}
+
+	/**
+	 * Check Animation
+	 *
+	 * Check a newly-assigned animation ID.
+	 *
+	 * @return {boolean} True/false.
+	 */
+	checkAnimation() {
+		if (
+			null === this._animation ||
+			(Flags.NoChildren & this._animation.flags)
+		) {
+			this.stop();
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -606,9 +696,9 @@ export const ChildMate = class {
 				let sound = null;
 				if (
 					null !== scene.sound &&
-					'number' === typeof scene.sound[0] &&
-					'number' === typeof scene.sound[1] &&
-					scene.sound[1] === j
+					isUInt(scene.sound[1]) &&
+					scene.sound[1] === j &&
+					isSound(scene.sound[0])
 				) {
 					sound = /** @type {!Sound} */ (scene.sound[0]);
 				}
@@ -964,25 +1054,24 @@ export const ChildMate = class {
 			return;
 		}
 
-		/** @const {DomState} */
-		const after = this.domState;
+		// Start with the element class. This won't change as frequently.
 
-		// Element class.
-		if (this._domLast[0] !== after[0]) {
-			this._domLast[0] = after[0];
-			this._el.className = after[0];
+		/** @type {string} */
+		let value = this.calculateElClass();
+		if (value !== this._elClass) {
+			this.elClass = value;
 		}
 
-		// Element style transform.
-		if (this._domLast[1] !== after[1]) {
-			this._domLast[1] = after[1];
-			this._el.style.transform = after[1];
+		// Style transforms?
+		value = this.calculateElStyleTransform();
+		if (value !== this._elStyleTransform) {
+			this.elStyleTransform = value;
 		}
 
-		// The image.
-		if (this._domLast[2] !== after[2]) {
-			this._domLast[2] = after[2];
-			this._el.children[0].className = after[2];
+		// The image class?
+		value = this.calculateImgClass();
+		if (value !== this._imgClass) {
+			this.imgClass = value;
 		}
 	}
 };
@@ -1140,39 +1229,17 @@ export const Mate = class extends ChildMate {
 	// -----------------------------------------------------------------
 
 	/**
-	 * Set Animation
+	 * Check Animation
 	 *
-	 * @param {Playlist} animationId Animation ID.
-	 * @param {number=} x Start from X.
-	 * @param {number=} y Start from Y.
-	 * @return {void} Nothing.
+	 * Check a newly-assigned animation ID.
+	 *
+	 * @return {boolean} True/false.
 	 */
-	setAnimation(animationId, x, y) {
-		// Stop any in-progress ticks.
-		this.cancelTick();
-
-		animationId = /** @type {!Playlist} */ (parseInt(animationId, 10) || 0);
-
-		// Disable the exit possibility if we're changing animations and the property doesn't hold.
-		if (
-			(null === this._animation) ||
-			(animationId !== this._animation.id) ||
-			! (Flags.AllowExit & this._animation.scenes[0].flags)
-		) {
-			this.mayExit = false;
-		}
-
-		// Make sure it is valid.
-		this._animation = animation(animationId);
+	checkAnimation() {
 		if (
 			null === this._animation ||
 			(Flags.NoParents & this._animation.flags)
 		) {
-			Poe.log(
-				`Invalid animation ID: ${animationId}`,
-				LogType.Error
-			);
-
 			// Primary mates cannot be unset in this way.
 			/** @const {?Event} */
 			const event = new CustomEvent('poestop');
@@ -1180,34 +1247,15 @@ export const Mate = class extends ChildMate {
 				window.dispatchEvent(event);
 			}
 
-			return;
+			return false;
 		}
 
 		// Kill children if falling.
-		if (Playlist.Fall === animationId) {
+		if (Playlist.Fall === this._animation.id) {
 			Poe.stopChildren();
 		}
 
-		// Allow off-screen exits?
-		if (
-			(Flags.AllowExit & this._animation.scenes[0].flags) &&
-			! this.mayExit &&
-			4 === Math.floor(Math.random() * 5)
-		) {
-			this.mayExit = true;
-		}
-
-		// Set the starting position.
-		this.setAnimationStart(x, y);
-
-		// Handle the steps.
-		this.setSteps();
-
-		// Spawn required child.
-		this.spawnChild();
-
-		// Tick it.
-		this.maybeTick();
+		return true;
 	}
 
 	/**
@@ -1320,21 +1368,6 @@ export const Mate = class extends ChildMate {
 	 * @return {boolean} True if changes were made.
 	 */
 	checkSanity(xDir, yDir) {
-		if (null === this._animation) {
-			return false;
-		}
-
-		// We cannot do it!
-		if (
-			(Direction.Right !== xDir && 0 > this._x) ||
-			(Direction.Left !== xDir && this._x > Poe.width - TILE_SIZE) ||
-			(Direction.Down !== yDir && 0 > this._y) ||
-			(Direction.Up !== yDir && this._y > Poe.height - TILE_SIZE)
-		) {
-
-			return true;
-		}
-
 		return false;
 	}
 
@@ -1372,16 +1405,8 @@ export const Mate = class extends ChildMate {
 	 * @return {void} Nothing.
 	 */
 	stop() {
-		Poe.log(
-			'Poe reached an unnatural end!',
-			LogType.Error
-		);
-
-		/** @const {?Event} */
-		const event = new CustomEvent('poestop');
-		if (null !== event) {
-			window.dispatchEvent(event);
-		}
+		// The main sprite cannot be killed this way.
+		this.start();
 	}
 
 	/**

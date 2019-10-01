@@ -13,7 +13,6 @@
     "csso": "*",
     "eslint": "^6.5.0",
     "eslint-plugin-jsdoc": "^15.9.5",
-    "esm": "*",
     "google-closure-compiler": "^20190909.0.0",
     "karma": "^4.3.0",
     "karma-chai": "^0.1.0",

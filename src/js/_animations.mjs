@@ -2,6 +2,7 @@
  * @file Animations
  */
 
+import { isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
 import { TILE_SIZE } from './_media.mjs';
 import {
@@ -2134,8 +2135,8 @@ export const animation = function(id) {
 		useFirst: v.useFirst,
 		flags: v.flags,
 		childId: v.childId,
-		edge: (null === v.edge) || ('number' === typeof v.edge) ? v.edge : JSON.parse(JSON.stringify(v.edge)),
-		next: (null === v.next) || ('number' === typeof v.next) ? v.next : JSON.parse(JSON.stringify(v.next)),
+		edge: v.edge,
+		next: v.next,
 	});
 };
 
@@ -2160,9 +2161,7 @@ export const chooseAnimation = function(choices) {
 	// Loop and build.
 	for (let i = 0; i < choices.length; ++i) {
 		if (
-			'number' === typeof choices[i][0] &&
-			'number' === typeof choices[i][1] &&
-			0 < choices[i][1] &&
+			isAbsInt(choices[i][1]) &&
 			verifyAnimationId(choices[i][0])
 		) {
 			for (let j = 0; j < choices[i][1]; ++j) {
@@ -2195,16 +2194,16 @@ export const resolveScene = function(scene) {
 		repeat = scene.repeat();
 	}
 	else if (null !== scene.repeat) {
-		repeat = [...scene.repeat];
+		repeat = scene.repeat;
 	}
 
 	return /** @type {!Scene} */ ({
 		start: 'function' === typeof scene.start ? scene.start() : scene.start,
-		from: [...scene.from],
-		to: [...scene.to],
+		from: scene.from,
+		to: scene.to,
 		repeat: repeat,
-		frames: [...scene.frames],
-		sound: null === scene.sound ? null : [...scene.sound],
+		frames: scene.frames,
+		sound: scene.sound,
 		flags: scene.flags,
 	});
 };
@@ -2231,10 +2230,9 @@ export const resolveScenes = function(scenes) {
 /**
  * Verify Animation ID
  *
- * @param {Playlist} id Animation ID.
+ * @param {!Playlist|number} id Animation ID.
  * @return {boolean} True/false.
  */
 export const verifyAnimationId = function(id) {
-	id = /** @type {!Playlist} */ (parseInt(id, 10) || -1);
-	return 0 < id && MAX_ANIMATION_ID >= id;
+	return isAbsInt(id) && MAX_ANIMATION_ID >= /** @type {number} */ (id);
 };
