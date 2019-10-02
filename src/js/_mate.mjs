@@ -1564,8 +1564,8 @@ export const Mate = class extends ChildMate {
 		if (
 			null !== this._animation &&
 			! this.mayExit &&
-			Direction.Right !== dir &&
-			0 > this._x
+			Direction.Left === dir &&
+			0 >= this._x
 		) {
 			this.setPosition(0, this._y, true);
 			this.setEdgeAnimation();
@@ -1585,8 +1585,8 @@ export const Mate = class extends ChildMate {
 		if (
 			null !== this._animation &&
 			! this.mayExit &&
-			Direction.Left !== dir &&
-			this._x > Poe.width - TILE_SIZE
+			Direction.Right === dir &&
+			this._x >= Poe.width - TILE_SIZE
 		) {
 			this.setPosition(Poe.width - TILE_SIZE, this._y, true);
 			this.setEdgeAnimation();
