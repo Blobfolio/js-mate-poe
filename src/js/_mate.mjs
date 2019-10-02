@@ -11,7 +11,7 @@ import {
 	FIRST_CHOICES
 } from './_animations.mjs';
 import { IMAGE } from './_bin.mjs';
-import { isUInt, isSound, xDirection, yDirection } from './_helpers.mjs';
+import { xDirection, yDirection } from './_helpers.mjs';
 import { makeNoise, TILE_SIZE } from './_media.mjs';
 import { Poe } from './_poe.mjs';
 import {
@@ -291,11 +291,9 @@ export const ChildMate = class {
 	 * @return {void} Nothing.
 	 */
 	set elClass(v) {
-		if ('string' === typeof v) {
-			this._elClass = v;
-			if (null !== this._el) {
-				this._el.className = v;
-			}
+		this._elClass = v;
+		if (null !== this._el) {
+			this._el.className = v;
 		}
 	}
 
@@ -339,11 +337,9 @@ export const ChildMate = class {
 	 * @return {void} Nothing.
 	 */
 	set elStyleTransform(v) {
-		if ('string' === typeof v) {
-			this._elStyleTransform = v;
-			if (null !== this._el) {
-				this._el.style.transform = v;
-			}
+		this._elStyleTransform = v;
+		if (null !== this._el) {
+			this._el.style.transform = v;
 		}
 	}
 
@@ -417,11 +413,9 @@ export const ChildMate = class {
 	 * @return {void} Nothing.
 	 */
 	set imgClass(v) {
-		if ('string' === typeof v) {
-			this._imgClass = v;
-			if (null !== this._el) {
-				this._el.children[0].className = v;
-			}
+		this._imgClass = v;
+		if (null !== this._el) {
+			this._el.children[0].className = v;
 		}
 	}
 
@@ -722,11 +716,7 @@ export const ChildMate = class {
 			this.setPosition(x, y, true);
 		}
 		// If the animation has its own starting point, start there.
-		else if (
-			null !== this._animation.scenes[0].start &&
-			'number' === typeof this._animation.scenes[0].start[0] &&
-			'number' === typeof this._animation.scenes[0].start[1]
-		) {
+		else if (null !== this._animation.scenes[0].start) {
 			this.setPosition(
 				this._animation.scenes[0].start[0],
 				this._animation.scenes[0].start[1],
@@ -842,12 +832,7 @@ export const ChildMate = class {
 
 				/** @type {?Sound} */
 				let sound = null;
-				if (
-					null !== scene.sound &&
-					isUInt(scene.sound[1]) &&
-					scene.sound[1] === j &&
-					isSound(scene.sound[0])
-				) {
+				if (null !== scene.sound && scene.sound[1] === j) {
 					sound = /** @type {!Sound} */ (scene.sound[0]);
 				}
 
