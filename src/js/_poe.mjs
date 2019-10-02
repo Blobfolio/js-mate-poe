@@ -467,7 +467,9 @@ export const Poe = {
 		Poe._width = 0;
 
 		// Console log.
-		Poe.log('The party is over.', LogType.Log);
+		if (Poe.debug) {
+			Poe.log('The party is over.', LogType.Log);
+		}
 	},
 
 	/**
