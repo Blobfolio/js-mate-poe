@@ -21,7 +21,7 @@ export const REPO = 'https://github.com/Blobfolio/js-mate-poe/';
  *
  * @const {string}
  */
-export const VERSION = '1.1.0';
+export const VERSION = '1.1.1';
 
 /**
  * Logo
