@@ -53,6 +53,7 @@ export const ANIMATIONS = [
 		/** @type {Array<WeightedChoice>} */
 		edge: [
 			[Playlist.Rotate, 5],
+			[Playlist.Scoot, 1],
 			[Playlist.ClimbUp, 1],
 		],
 		/** @type {Array<WeightedChoice>} */
@@ -2004,6 +2005,68 @@ export const ANIMATIONS = [
 		childId: null,
 		edge: Playlist.Rotate,
 		next: Playlist.WallSlide,
+	},
+	{
+		id: Playlist.Scoot,
+		name: 'Scoot',
+		/** @type {Array<Scene>} */
+		scenes: [
+			{
+				start: null,
+				from: [0, 0, 200],
+				to: [0, 0, 200],
+				repeat: null,
+				frames: [
+					52,
+				],
+				sound: null,
+				flags: Flags.ForceGravity,
+			},
+			{
+				start: null,
+				from: [6, 0, 200],
+				to: [6, 0, 200],
+				repeat: null,
+				frames: [
+					53,
+				],
+				sound: null,
+				flags: Flags.ForceGravity,
+			},
+			{
+				start: null,
+				from: [0, 0, 200],
+				to: [0, 0, 200],
+				repeat: null,
+				frames: [
+					52,
+				],
+				sound: null,
+				flags: Flags.ForceGravity,
+			},
+			{
+				start: null,
+				from: [6, 0, 200],
+				to: [6, 0, 200],
+				repeat: null,
+				frames: [
+					53,
+				],
+				sound: null,
+				flags: Flags.ForceGravity,
+			},
+		],
+		useDefault: 1,
+		useEntrance: 0,
+		useFirst: 0,
+		flags: Flags.DemoPlay | Flags.NoChildren,
+		childId: null,
+		edge: null,
+		next: [
+			[Playlist.Scoot, 4],
+			[Playlist.Rotate, 2],
+			[Playlist.Walk, 1],
+		],
 	},
 ];
 

@@ -152,6 +152,7 @@ export const Playlist = {
 	ChasingAMartianChild: 46,
 	Spin: 47,
 	WallSlide: 48,
+	Scoot: 49,
 };
 
 /**
