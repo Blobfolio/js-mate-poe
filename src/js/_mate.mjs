@@ -1322,7 +1322,7 @@ export const ChildMate = class {
 		else {
 			this.topSide = false;
 			this.bottomSide = true;
-			this.onFloor = (this._y === Poe.height - TILE_SIZE);
+			this.checkFloor();
 		}
 
 		// Possibly update the visibility state.
