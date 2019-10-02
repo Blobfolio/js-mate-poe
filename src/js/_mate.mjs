@@ -1190,7 +1190,7 @@ export const ChildMate = class {
 		}
 
 		// Edge checks.
-		if (! (Flags.IgnoreEdges & step.flags)) {
+		if (! this.dragging && ! (Flags.IgnoreEdges & step.flags)) {
 			if (this.leftSide) {
 				if (this.checkLeft(xDirection(x))) {
 					return true;
@@ -1207,6 +1207,7 @@ export const ChildMate = class {
 					return true;
 				}
 			}
+			// If the problem with the bottom was gravity, it's fixed.
 			else if (! gravity && this.bottomSide) {
 				if (this.checkBottom(yDirection(y))) {
 					return true;
