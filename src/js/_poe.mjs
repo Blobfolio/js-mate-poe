@@ -455,6 +455,13 @@ export const Poe = {
 		Poe._yObserver.disconnect();
 		Poe._yObserver = null;
 
+		// Remove the styles.
+		/** @const {Element} */
+		const style = document.getElementById('css-mate-poe');
+		if (null !== style) {
+			style.parentNode.removeChild(style);
+		}
+
 		// Kill the width and height since we're no longer listening.
 		Poe._height = 0;
 		Poe._width = 0;
