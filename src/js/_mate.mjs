@@ -1554,26 +1554,6 @@ export const Mate = class extends ChildMate {
 	}
 
 	/**
-	 * Check Bottom
-	 *
-	 * @param {?Direction} dir Direction of movement.
-	 * @return {boolean} True if changes were made.
-	 */
-	checkBottom(dir) {
-		if (
-			null !== this._animation &&
-			Direction.Down === dir &&
-			this._y >= Poe.height - TILE_SIZE
-		) {
-			this.setPosition(this._x, Poe.height - TILE_SIZE, true);
-			this.setEdgeAnimation();
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Check Left
 	 *
 	 * @param {?Direction} dir Direction of movement.
@@ -1608,22 +1588,6 @@ export const Mate = class extends ChildMate {
 			this._x > Poe.width - TILE_SIZE
 		) {
 			this.setPosition(Poe.width - TILE_SIZE, this._y, true);
-			this.setEdgeAnimation();
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Check Top
-	 *
-	 * @param {?Direction} dir Direction of movement.
-	 * @return {boolean} True if changes were made.
-	 */
-	checkTop(dir) {
-		if (null !== this._animation && Direction.Up === dir && 0 >= this._y) {
-			this.setPosition(this._x, 0, true);
 			this.setEdgeAnimation();
 			return true;
 		}
