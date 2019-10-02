@@ -2,6 +2,7 @@
  * @file Mates!
  */
 
+import { NAME } from './_about.mjs';
 import {
 	animation,
 	chooseAnimation,
@@ -96,11 +97,13 @@ export const ChildMate = class {
 
 		this._el = /** @type {!HTMLDivElement} */ (document.createElement('DIV'));
 		this._el.className = `${this.baseClass} is-disabled`;
+		this._el.setAttribute('aria-hidden', 'true');
 		this._el.setAttribute('data-mate-id', this._mateId);
 
 		/** @type {HTMLImageElement} */
 		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
 		img.src = IMAGE;
+		img.alt = NAME;
 		img.className = 'poe-img';
 		this._el.appendChild(img);
 
