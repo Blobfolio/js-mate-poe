@@ -35,6 +35,7 @@ test_dir  := base_dir + "/test"
 	just _success "JS Mate Poe has been built: {{ dist_dir }}"
 
 
+# Run unit tests.
 @test: _check_dependencies
 	just _header "Unit tests!"
 	npx karma start --single-run --browsers ChromeHeadless "{{ base_dir }}/karma.conf.js"
