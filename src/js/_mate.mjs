@@ -95,13 +95,13 @@ export const ChildMate = class {
 		}
 
 		this._el = /** @type {!HTMLDivElement} */ (document.createElement('DIV'));
-		this._el.className = this.elClass;
+		this._el.className = `${this.baseClass} is-disabled`;
 		this._el.setAttribute('data-mate-id', this._mateId);
 
 		/** @type {HTMLImageElement} */
 		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
 		img.src = IMAGE;
-		img.className = this.imgClass;
+		img.className = 'poe-img';
 		this._el.appendChild(img);
 
 		// Add the element to the body.
