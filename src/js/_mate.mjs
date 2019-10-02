@@ -1468,6 +1468,12 @@ export const Mate = class extends ChildMate {
 
 		// Kill children if falling.
 		if (Playlist.Fall === this._animation.id) {
+			// If we are totally off-screen, let's move it in-screen or it'll go on a while.
+			if (0 - TILE_SIZE >= this._x || Poe.width <= this._x) {
+				this._x = 0;
+				this._y = 0 - TILE_SIZE;
+			}
+
 			Poe.stopChildren();
 		}
 
