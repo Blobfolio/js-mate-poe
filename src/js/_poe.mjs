@@ -71,10 +71,9 @@ export const Poe = {
 
 		// Print extra information when debug is enabled.
 		if (Poe.debug) {
-			Poe.help();
+			Poe.greet();
+			Poe.log('Sheep happens!', LogType.Log);
 		}
-
-		Poe.log('Sheep happens!', LogType.Log);
 	},
 
 	/**
@@ -538,7 +537,7 @@ export const Poe = {
 	 *
 	 * @return {void} Nothing.
 	 */
-	help() {
+	greet() {
 		/* eslint-disable-next-line */
 		console.info(`%c${ASCII}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
 
