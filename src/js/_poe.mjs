@@ -92,10 +92,10 @@ export const Poe = {
 		// Set up styles.
 		if (! document.getElementById('css-mate-poe')) {
 			/** @type {Element} */
-			let style = document.createElement('LINK');
-			style.rel = 'stylesheet';
+			let style = document.createElement('STYLE');
 			style.id = 'css-mate-poe';
-			style.href = URL.createObjectURL(new Blob([CSS], { type: 'text/css' }));
+			style.type = 'text/css';
+			style.appendChild(document.createTextNode(CSS));
 			(document.head || document.body).appendChild(style);
 		}
 
