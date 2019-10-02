@@ -1454,10 +1454,14 @@ export const Mate = class extends ChildMate {
 		}
 
 		// Kill children if falling.
-		if (Playlist.Fall === this._animation.id) {
+		if (Flags.FallingAnimation & this._animation.flags) {
 			// If we are totally off-screen, let's move it in-screen or it'll go on a while.
-			if (0 - TILE_SIZE >= this._x || Poe.width <= this._x) {
+			if (0 - TILE_SIZE >= this._x) {
 				this._x = 0;
+				this._y = 0 - TILE_SIZE;
+			}
+			else if (Poe.width <= this._x) {
+				this._x = Poe.width - TILE_SIZE;
 				this._y = 0 - TILE_SIZE;
 			}
 

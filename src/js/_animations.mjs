@@ -165,7 +165,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 10,
-		flags: Flags.NoChildren,
+		flags: Flags.NoChildren | Flags.FallingAnimation,
 		childId: null,
 		edge: Playlist.Bounce,
 		next: Playlist.GraspingFall,
@@ -192,7 +192,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 0,
-		flags: Flags.NoChildren,
+		flags: Flags.NoChildren | Flags.FallingAnimation,
 		childId: null,
 		/** @type {Array<WeightedChoice>} */
 		edge: [
@@ -1999,7 +1999,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: Flags.NoChildren,
+		flags: Flags.NoChildren | Flags.FallingAnimation,
 		childId: null,
 		edge: Playlist.Rotate,
 		next: Playlist.WallSlide,

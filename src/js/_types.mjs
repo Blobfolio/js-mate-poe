@@ -20,6 +20,8 @@ export const Flags = {
 	NoChildren: 2,
 	// Animation: Not for parents.
 	NoParents: 4,
+	// Animation: Falling animation.
+	FallingAnimation: 8,
 
 	// Demo: Default Choice.
 	DefaultChoice: 1,
@@ -38,9 +40,9 @@ export const Flags = {
 	ForceGravity: 4,
 	// Scene: Edges don't need to trigger edge sequences.
 	IgnoreEdges: 8,
-	// Scene: Mate may exit during current scene (randomly decided).
-	MayExit: 1,
 
+	// Mate: Mate may exit during current scene (randomly decided).
+	MayExit: 1,
 	// Mate: Event bindings are set.
 	IsBound: 2,
 	// Mate: Dragging is happening.
