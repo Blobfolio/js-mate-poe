@@ -1283,7 +1283,7 @@ export const ChildMate = class {
 			this.rightSide = false;
 		}
 		// Approaching the left.
-		else if (this._x <= TILE_SIZE / 2) {
+		else if (10 >= this._x) {
 			this.leftSide = true;
 			this.rightSide = false;
 		}
@@ -1313,7 +1313,7 @@ export const ChildMate = class {
 			this.onFloor = false;
 		}
 		// Approaching the top.
-		else if (this._y <= TILE_SIZE / 2) {
+		else if (10 >= this._y) {
 			this.topSide = true;
 			this.bottomSide = false;
 			this.onFloor = false;

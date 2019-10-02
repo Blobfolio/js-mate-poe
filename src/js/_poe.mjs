@@ -6,7 +6,6 @@ import { ASCII, NAME, REPO, VERSION } from './_about.mjs';
 import { CSS } from './_css.mjs';
 import { zeroPad } from './_helpers.mjs';
 import { ChildMate, Mate } from './_mate.mjs';
-import { TILE_SIZE } from './_media.mjs';
 import { Flags, LogType, Playlist } from './_types.mjs';
 
 
@@ -134,7 +133,7 @@ export const Poe = {
 			(e) => Poe.onXIntersect(e),
 			{
 				root: null,
-				rootMargin: `0px -${TILE_SIZE / 2}px 0px -${TILE_SIZE / 2}px`,
+				rootMargin: '0px -10px 0px -10px',
 				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
 			}
 		);
@@ -143,7 +142,7 @@ export const Poe = {
 			(e) => Poe.onYIntersect(e),
 			{
 				root: null,
-				rootMargin: `-${TILE_SIZE / 2}px 0px -${TILE_SIZE / 2}px 0px`,
+				rootMargin: '-10px 0px -10px 0px',
 				threshold: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
 			}
 		);
