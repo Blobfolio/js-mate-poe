@@ -63,11 +63,5 @@
 	$x: (0 - $tile_size) * ($frame % $tiles_x);
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
 
-	@if $x != 0 and $y != 0 {
-		.poe-f#{$frame} { transform: translate($x, $y); }
-	} @else if $x != 0 {
-		.poe-f#{$frame} { transform: translateX($x); }
-	} @else if $y != 0 {
-		.poe-f#{$frame} { transform: translateY($y); }
-	}
+	.poe-f#{$frame} { transform: translate3d($x, $y, 0); }
 }

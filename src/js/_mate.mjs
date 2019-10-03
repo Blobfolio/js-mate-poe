@@ -392,14 +392,8 @@ export const ChildMate = class {
 		let out = '';
 
 		// Position first.
-		if (this._x && this._y) {
-			out += `translate(${this._x}px, ${this._y}px)`;
-		}
-		else if (this._x) {
-			out += `translateX(${this._x}px)`;
-		}
-		else if (this._y) {
-			out += `translateY(${this._y}px)`;
+		if (this._x || this._y) {
+			out += `translate3d(${this._x}px, ${this._y}px, 0)`;
 		}
 
 		// Flipped?
