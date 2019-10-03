@@ -19,7 +19,7 @@
 	height: $tile_size;
 
 	cursor: grab;
-	z-index: 99999;
+	z-index: 100000;
 	overflow: hidden;
 	filter: blur(0);
 	image-rendering: crisp-edges;
@@ -35,6 +35,9 @@
 
 	// Children fade in.
 	&.is-disabled { opacity: 0; }
+
+	// Push behind other sprites.
+	&.is-behind { z-index: 99999; }
 
 	// The image.
 	&-img {

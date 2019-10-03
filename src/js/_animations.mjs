@@ -1571,7 +1571,7 @@ export const ANIMATIONS = [
 		useEntrance: 0,
 		useFirst: 0,
 		flags: Flags.DemoPlay | Flags.NoChildren,
-		childId: null,
+		childId: Playlist.SneezeShadow,
 		edge: null,
 		next: Playlist.Walk,
 	},
@@ -2067,6 +2067,31 @@ export const ANIMATIONS = [
 			[Playlist.Rotate, 2],
 			[Playlist.Walk, 1],
 		],
+	},
+	{
+		id: Playlist.SneezeShadow,
+		name: 'Sneeze Shadow',
+		/** @type {Array<Scene>} */
+		scenes: [
+			{
+				start: null,
+				from: [20, 0, 100],
+				to: [0, 0, 100],
+				repeat: [3, 0],
+				frames: [
+					109,
+				],
+				sound: null,
+				flags: Flags.AllowExit | Flags.ForceGravity | Flags.IgnoreEdges,
+			},
+		],
+		useDefault: 0,
+		useEntrance: 0,
+		useFirst: 0,
+		flags: Flags.NoParents | Flags.StackBehind,
+		childId: null,
+		edge: null,
+		next: null,
 	},
 ];
 

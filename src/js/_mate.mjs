@@ -129,17 +129,12 @@ export const ChildMate = class {
 		let setup;
 
 		switch (this._animation.childId) {
-		// Bath dive.
-		// Black Sheep.
-		// Stargazing.
 		case Playlist.BathDiveChild:
 		case Playlist.BlackSheepChild:
 		case Playlist.StargazeChild:
 		case Playlist.ChasingAMartianChild:
 			setup = [this._animation.childId];
 			break;
-
-		// Eat.
 		case Playlist.FlowerChild:
 			setup = [
 				Playlist.FlowerChild,
@@ -150,8 +145,6 @@ export const ChildMate = class {
 			];
 
 			break;
-
-		// Abduction.
 		case Playlist.AbductionChild:
 			setup = [
 				Playlist.AbductionChild,
@@ -160,13 +153,24 @@ export const ChildMate = class {
 			];
 
 			break;
-
-		// Abduction beam.
 		case Playlist.AbductionBeamChild:
 			setup = [
 				Playlist.AbductionBeamChild,
 				this._x,
 				Poe.height - TILE_SIZE,
+			];
+
+			break;
+		case Playlist.SneezeShadow:
+			// This effect doesn't work quite right when flipped.
+			if (this.flipped) {
+				return;
+			}
+
+			setup = [
+				Playlist.SneezeShadow,
+				this._x,
+				this._y,
 			];
 
 			break;
@@ -221,6 +225,32 @@ export const ChildMate = class {
 	 */
 	get baseClass() {
 		return 'poe is-child';
+	}
+
+	/**
+	 * Stack Behind?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get behind() {
+		return !! (Flags.IsBehind & this._flags);
+	}
+
+	/**
+	 * Stack Behind?
+	 *
+	 * @param {boolean} v Value.
+	 * @return {void} Nothing.
+	 */
+	set behind(v) {
+		// Not visible.
+		if (! v) {
+			this._flags &= ~Flags.IsBehind;
+		}
+		// Yes visible.
+		else {
+			this._flags |= Flags.IsBehind;
+		}
 	}
 
 	/**
@@ -316,6 +346,11 @@ export const ChildMate = class {
 		if (this.dragging) {
 			out += ' is-dragging';
 			return out;
+		}
+
+		// Behind?
+		if (this.behind) {
+			out += ' is-behind';
 		}
 
 		return out;
@@ -666,6 +701,9 @@ export const ChildMate = class {
 		) {
 			this.mayExit = true;
 		}
+
+		// Stack behind?
+		this.behind = !! (Flags.StackBehind & this._animation.flags);
 
 		// Set the starting position.
 		this.setAnimationStart(x, y);

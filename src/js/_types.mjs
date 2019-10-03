@@ -22,6 +22,8 @@ export const Flags = {
 	NoParents: 4,
 	// Animation: Falling animation.
 	FallingAnimation: 8,
+	// Animation: Stack behind other frames.
+	StackBehind: 16,
 
 	// Demo: Default Choice.
 	DefaultChoice: 1,
@@ -43,24 +45,26 @@ export const Flags = {
 
 	// Mate: Mate may exit during current scene (randomly decided).
 	MayExit: 1,
+	// Mate: Mate should appear behind other mates.
+	IsBehind: 2,
 	// Mate: Event bindings are set.
-	IsBound: 2,
+	IsBound: 4,
 	// Mate: Dragging is happening.
-	IsDragging: 4,
+	IsDragging: 8,
 	// Mate: Sprite is flipped.
-	IsFlipped: 8,
+	IsFlipped: 16,
 	// Mate: Is visible.
-	IsVisible: 16,
+	IsVisible: 32,
 	// Mate: Left side.
-	TopSide: 32,
+	TopSide: 64,
 	// Mate: Left side.
-	RightSide: 64,
+	RightSide: 128,
 	// Mate: Left side.
-	BottomSide: 128,
+	BottomSide: 256,
 	// Mate: Left side.
-	LeftSide: 256,
+	LeftSide: 512,
 	// Mate: Floor.
-	OnFloor: 512,
+	OnFloor: 1024,
 
 	// Poe: Warned about broken auto-play audio.
 	AudioWarned: 1,
@@ -153,6 +157,7 @@ export const Playlist = {
 	Spin: 47,
 	WallSlide: 48,
 	Scoot: 49,
+	SneezeShadow: 50,
 };
 
 /**
