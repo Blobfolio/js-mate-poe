@@ -1697,7 +1697,7 @@ export const ANIMATIONS = [
 				start: null,
 				from: [0, 0, 200],
 				to: [0, 0, 200],
-				repeat: [10, 5],
+				repeat: [11, 5],
 				frames: [
 					9,
 					10,
@@ -2077,8 +2077,10 @@ export const ANIMATIONS = [
 				start: null,
 				from: [20, 0, 100],
 				to: [0, 0, 100],
-				repeat: [3, 0],
+				repeat: [3, 2],
 				frames: [
+					175,
+					175,
 					109,
 				],
 				sound: null,
