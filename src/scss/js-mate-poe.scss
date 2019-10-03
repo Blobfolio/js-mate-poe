@@ -21,8 +21,6 @@
 	cursor: grab;
 	z-index: 100000;
 	overflow: hidden;
-	filter: blur(0);
-	image-rendering: crisp-edges;
 
 	opacity: 1;
 	transition: opacity .5s ease;
@@ -53,8 +51,6 @@
 		padding: 0 !important;
 
 		pointer-events: none;
-		filter: blur(0);
-		image-rendering: crisp-edges;
 	} // .poe-img
 }
 
