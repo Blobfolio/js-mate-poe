@@ -1147,8 +1147,11 @@ export const ChildMate = class {
 		/** @const {Step} */
 		const step = this._steps.pop();
 
+		/** @const {number} */
+		const interval = step.interval / Poe.speed;
+
 		// Adjust the next animation time.
-		this._nextTick = now + step.interval;
+		this._nextTick = now + interval;
 
 		// Set the frame.
 		this._frame = step.frame;
@@ -1185,7 +1188,7 @@ export const ChildMate = class {
 
 				// Where too?
 				this.setNextAnimation();
-			}, step.interval);
+			}, interval);
 
 			return true;
 		}

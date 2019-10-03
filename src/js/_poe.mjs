@@ -33,6 +33,8 @@ export const Poe = {
 	/** @private {number} */
 	_length: 0,
 	/** @private {number} */
+	_speed: 1,
+	/** @private {number} */
 	_width: 0,
 	/** @private {number} */
 	_height: 0,
@@ -329,6 +331,30 @@ export const Poe = {
 	 */
 	get name() {
 		return NAME;
+	},
+
+	/**
+	 * Playback Speed
+	 *
+	 * @return {number} Height.
+	 */
+	get speed() {
+		return Poe._speed;
+	},
+
+	/**
+	 * Playback Speed
+	 *
+	 * @param {number} v Speed.
+	 * @return {void} Nothing.
+	 */
+	set speed(v) {
+		v = parseFloat(v) || 0;
+		if (0.1 > v) {
+			v = 0.1;
+		}
+
+		Poe._speed = v;
 	},
 
 	/**

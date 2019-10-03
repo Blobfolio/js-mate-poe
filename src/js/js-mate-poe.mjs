@@ -12,5 +12,6 @@ window['Poe']['animation'] = Poe.animation;
 window['Poe']['audio'] = Poe.audio;
 window['Poe']['debug'] = Poe.debug;
 window['Poe']['greet'] = Poe.greet;
+window['Poe']['speed'] = Poe.speed;
 window['Poe']['start'] = Poe.start;
 window['Poe']['stop'] = Poe.stop;
