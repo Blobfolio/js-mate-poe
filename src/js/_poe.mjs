@@ -65,16 +65,18 @@ export const Poe = {
 		Poe.setup();
 
 		// Start the primary mate!
-		Poe.initMate();
-		Poe._primary.start();
+		requestAnimationFrame(() => {
+			Poe.initMate();
+			Poe._primary.start();
 
-		// Console messages.
+			// Console messages.
 
-		// Print extra information when debug is enabled.
-		if (Poe.debug) {
-			Poe.greet();
-			Poe.log('Sheep happens!', LogType.Log);
-		}
+			// Print extra information when debug is enabled.
+			if (Poe.debug) {
+				Poe.greet();
+				Poe.log('Sheep happens!', LogType.Log);
+			}
+		});
 	},
 
 	/**
