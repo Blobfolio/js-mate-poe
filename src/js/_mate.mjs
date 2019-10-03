@@ -184,6 +184,7 @@ export const ChildMate = class {
 		/** @type {!ChildMate} */
 		let mate = Poe.initMate();
 		mate.flipped = this.flipped;
+		mate._nextTick = this._nextTick;
 		mate.setAnimation(...setup);
 	}
 
@@ -1179,16 +1180,16 @@ export const ChildMate = class {
 		if (! this._steps.length) {
 			this.cancelTick();
 
-			// Use a timeout to transition the animation so the last frame doesn't get chopped off.
-			setTimeout(() => {
-				// Should we flip it?
-				if (step.flip) {
+			// Should we flip it?
+			if (step.flip) {
+				// We have to delay this until after this step.
+				setTimeout(() => {
 					this.flipped = ! this.flipped;
-				}
+				}, interval);
+			}
 
-				// Where too?
-				this.setNextAnimation();
-			}, interval);
+			// Where too?
+			this.setNextAnimation();
 
 			return true;
 		}
@@ -1414,7 +1415,11 @@ export const Mate = class extends ChildMate {
 		this.flipped = false;
 		this.dragging = false;
 		this.mayExit = false;
-		this._nextTick = 0;
+
+		// Remove the next tick, but only if we're going to be paused for a long time.
+		if (200 < this._nextTick - performance.now()) {
+			this._nextTick = 0;
+		}
 
 		/** @const {!Playlist} */
 		const id = /** @type {!Playlist} */ (chooseAnimation(FIRST_CHOICES));
