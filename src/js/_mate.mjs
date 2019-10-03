@@ -65,6 +65,9 @@ export const ChildMate = class {
 		/** @private {?Animation} */
 		this._animation = null;
 
+		/** @private {number} */
+		this._nextTick = 0;
+
 		/** @private {?number} */
 		this._raf = null;
 
@@ -821,9 +824,6 @@ export const ChildMate = class {
 		delete this._steps;
 		this._steps = [];
 
-		/** @const {number} */
-		const now = performance.now();
-
 		/** @type {number} */
 		let step = 0;
 
@@ -877,7 +877,6 @@ export const ChildMate = class {
 				this._steps[step] = /** @type {!Step} */ ({
 					step: step,
 					scene: i,
-					time: now + time,
 					interval: time - last,
 					frame: frame,
 					x: scene.from[0] + (scene.to[0] - scene.from[0]) * progress,
@@ -1116,18 +1115,20 @@ export const ChildMate = class {
 		// Queue up the next tick prematurely to avoid overlap.
 		this._raf = requestAnimationFrame((n) => this.tick(n));
 
-		/** @const {?boolean} */
-		const result = this.step(now);
+		if (this._nextTick <= now) {
+			/** @const {?boolean} */
+			const result = this.step(now);
 
-		// The animation is over with nothing replacing it.
-		if (false === result) {
-			this.cancelTick();
-			this.stop();
-			return;
-		}
-		// We didn't abort due to time constraints.
-		else if (true === result) {
-			this.maybePaint();
+			// The animation is over with nothing replacing it.
+			if (false === result) {
+				this.cancelTick();
+				this.stop();
+				return;
+			}
+			// We didn't abort due to time constraints.
+			else if (true === result) {
+				this.maybePaint();
+			}
 		}
 	}
 
@@ -1143,13 +1144,11 @@ export const ChildMate = class {
 			return false;
 		}
 
-		// Too early, or we're out of steps.
-		if (this._steps[this._steps.length - 1].time > now) {
-			return null;
-		}
-
 		/** @const {Step} */
 		const step = this._steps.pop();
+
+		// Adjust the next animation time.
+		this._nextTick = now + step.interval;
 
 		// Set the frame.
 		this._frame = step.frame;
@@ -1412,6 +1411,7 @@ export const Mate = class extends ChildMate {
 		this.flipped = false;
 		this.dragging = false;
 		this.mayExit = false;
+		this._nextTick = 0;
 
 		/** @const {!Playlist} */
 		const id = /** @type {!Playlist} */ (chooseAnimation(FIRST_CHOICES));

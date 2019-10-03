@@ -256,7 +256,6 @@ export var SceneSound;
  * @typedef {{
 	step: number,
 	scene: number,
-	time: number,
 	interval: number,
 	frame: number,
 	x: number,
