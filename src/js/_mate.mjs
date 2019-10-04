@@ -1043,18 +1043,13 @@ export const ChildMate = class {
 		this.maybeTick();
 
 		if (this._nextTick <= now) {
-			/** @const {?boolean} */
-			const result = this.step(now);
-
-			// The animation is over with nothing replacing it.
-			if (false === result) {
+			if (this.step(now)) {
+				this.maybePaint();
+			}
+			else {
 				this.cancelTick();
 				this.stop();
 				return;
-			}
-			// We didn't abort due to time constraints.
-			else if (true === result) {
-				this.maybePaint();
 			}
 		}
 	}
@@ -1063,7 +1058,7 @@ export const ChildMate = class {
 	 * Step
 	 *
 	 * @param {number} now Now.
-	 * @return {?boolean} True/false.
+	 * @return {boolean} True/false.
 	 */
 	step(now) {
 		// There is no animation; we shouldn't be doing anything.
@@ -1115,14 +1110,13 @@ export const ChildMate = class {
 
 			return true;
 		}
+		// We don't need to check anything else if we're dragging.
+		else if (this.dragging) {
+			return true;
+		}
 		// We need to flip.
 		else if (step.flip) {
 			this.flipped = ! this.flipped;
-		}
-
-		// We don't need to check anything else if we're dragging.
-		if (this.dragging) {
-			return true;
 		}
 
 		// Gravity.
