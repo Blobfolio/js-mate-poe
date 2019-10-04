@@ -1093,13 +1093,15 @@ export const ChildMate = class {
 		/** @type {number} */
 		const y = step.y;
 
-		// Flip the X if we need to.
-		if (this.flipped) {
-			x = 0 - x;
-		}
+		if (x || y) {
+			// Flip the X if we need to.
+			if (this.flipped) {
+				x = 0 - x;
+			}
 
-		// Move it along.
-		this.setPosition(x, y);
+			// Move it along.
+			this.setPosition(x, y);
+		}
 
 		// The animation is over.
 		if (! this._steps.length) {
