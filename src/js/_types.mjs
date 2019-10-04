@@ -203,18 +203,11 @@ export const Sound = {
 // ---------------------------------------------------------------------
 
 /**
- * Scene Position Callback
+ * Scene Callback
  *
- * @typedef {function():!ScenePosition}
+ * @typedef {function():!Scene}
  */
-export var ScenePositionCB;
-
-/**
- * Scene Repeat Callback
- *
- * @typedef {function():!SceneRepeat}
- */
-export var SceneRepeatCB;
+export var SceneCB;
 
 
 // ---------------------------------------------------------------------
@@ -227,7 +220,7 @@ export var SceneRepeatCB;
  * @typedef {{
 	id: !Playlist,
 	name: string,
-	scenes: !Array<!Scene>,
+	scenes: !Array<(!Scene|!SceneCB)>,
 	useDefault: number,
 	useEntrance: number,
 	useFirst: number,
@@ -243,10 +236,10 @@ export var Animation;
  * Scene
  *
  * @typedef {{
-	start: (null|!ScenePosition|!ScenePositionCB),
+	start: ?ScenePosition,
 	from: !ScenePosition,
 	to: !ScenePosition,
-	repeat: (null|!SceneRepeat|!SceneRepeatCB),
+	repeat: ?SceneRepeat,
 	frames: !Array<number>,
 	sound: ?SceneSound,
 	flags: number

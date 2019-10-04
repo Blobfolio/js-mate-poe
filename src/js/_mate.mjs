@@ -829,8 +829,8 @@ export const ChildMate = class {
 
 		// Loop through the scenes.
 		for (let i = 0; i < this._animation.scenes.length; ++i) {
-			/** @const {Scene} */
-			const scene = this._animation.scenes[i];
+			/** @const {!Scene} */
+			const scene = /** @type {!Scene} */ (this._animation.scenes[i]);
 
 			/** @const {number} */
 			const framesLength = scene.frames.length;

@@ -68,7 +68,7 @@ new Vue(/** @type {!VueApp} */ ({
 				/** @type {number} */
 				let flags = v.flags;
 				for (let i = 0; i < v.scenes.length; ++i) {
-					if ('function' === typeof v.scenes[i].repeat) {
+					if ('function' === typeof v.scenes[i]) {
 						flags |= DemoFlags.VariableDuration;
 						break;
 					}
