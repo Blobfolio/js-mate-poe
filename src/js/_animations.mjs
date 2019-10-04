@@ -56,8 +56,8 @@ export const ANIMATIONS = [
 		/** @type {Array<WeightedChoice>} */
 		edge: [
 			[Playlist.Rotate, 5],
-			[Playlist.Scoot, 1],
-			[Playlist.ClimbUp, 5],
+			[Playlist.Scoot, 2],
+			[Playlist.ClimbUp, 1],
 		],
 		/** @type {Array<WeightedChoice>} */
 		next: [
@@ -163,12 +163,12 @@ export const ANIMATIONS = [
 				x: 0,
 				y: 250,
 				duration: 1050,
-				repeat: [20, 0],
+				repeat: [25, 0],
 				frames: [
 					133,
 				],
 				sound: null,
-				flags: 0,
+				flags: SceneFlags.EaseIn,
 			}),
 		],
 		useDefault: 0,
@@ -187,13 +187,16 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */ ({
 				start: null,
 				x: 0,
-				y: 330,
+				y: 800,
 				duration: 1320,
-				repeat: [10, 0],
+				repeat: [9, 0],
 				frames: [
 					46,
 					46,
 					46,
+					47,
+					47,
+					47,
 				],
 				sound: null,
 				flags: 0,
@@ -270,7 +273,7 @@ export const ANIMATIONS = [
 					6,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
+				flags: SceneFlags.ForceGravity | SceneFlags.EaseOut,
 			}),
 		],
 		useDefault: 0,
@@ -873,10 +876,9 @@ export const ANIMATIONS = [
 				start: null,
 				x: -30,
 				y: 0,
-				duration: 200,
+				duration: 100,
 				repeat: null,
 				frames: [
-					23,
 					23,
 					23,
 				],
@@ -1791,7 +1793,7 @@ export const ANIMATIONS = [
 					],
 					x: 0,
 					y: 0,
-					duration: 2100,
+					duration: 1100,
 					repeat: [20, 0],
 					frames: [
 						158,
@@ -1927,7 +1929,7 @@ export const ANIMATIONS = [
 				start: null,
 				x: 0,
 				y: 480,
-				duration: 3000,
+				duration: 2000,
 				repeat: [29, 0],
 				frames: [
 					158,
@@ -1936,7 +1938,7 @@ export const ANIMATIONS = [
 					161,
 				],
 				sound: null,
-				flags: SceneFlags.IgnoreEdges,
+				flags: SceneFlags.IgnoreEdges | SceneFlags.EaseOut,
 			}),
 		],
 		useDefault: 0,
@@ -1983,7 +1985,7 @@ export const ANIMATIONS = [
 						161,
 					],
 					sound: null,
-					flags: SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
+					flags: SceneFlags.EaseIn | SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -2004,7 +2006,7 @@ export const ANIMATIONS = [
 				start: null,
 				x: 0,
 				y: 0,
-				duration: 7200,
+				duration: 800,
 				repeat: [35, 7],
 				frames: [
 					BLANK_FRAME,

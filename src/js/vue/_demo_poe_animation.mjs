@@ -3,12 +3,11 @@
  */
 
 /* eslint-disable quote-props */
-import { resolveSceneSteps, sceneSpeed } from '../_animations.mjs';
+import { sceneSpeed } from '../_animations.mjs';
 import {
 	AnimationFlags,
 	DemoFlags,
 	Playlist,
-	Step,
 	VueComponent,
 	VueProp
 } from '../_types.mjs';
