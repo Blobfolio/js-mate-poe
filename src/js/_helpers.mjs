@@ -4,7 +4,7 @@
 
 import { MAX_ANIMATION_ID } from './_animations.mjs';
 import { TILES_X, TILES_Y } from './_media.mjs';
-import { Direction, Playlist, Scene, SceneRepeat, WeightedChoice } from './_types.mjs';
+import { Direction, Playlist, Scene, SceneCB, WeightedChoice } from './_types.mjs';
 
 
 
@@ -102,27 +102,24 @@ export const zeroPad = function(v, length) {
 /**
  * Resolve Scene
  *
- * @param {!Scene} scene Scene.
+ * @param {!Scene|!SceneCB} scene Scene.
  * @return {!Scene} Scene.
  */
 export const demoResolveScene = function(scene) {
-	/** @type {?SceneRepeat} */
-	let repeat = null;
-	if ('function' === typeof scene.repeat) {
-		repeat = scene.repeat();
-	}
-	else if (null !== scene.repeat) {
-		repeat = [...scene.repeat];
+	let out = scene;
+	if ('function' === typeof scene) {
+		out = /** @type {!Scene} */ (scene());
 	}
 
 	return /** @type {!Scene} */ ({
-		'start': 'function' === typeof scene.start ? scene.start() : scene.start,
-		'from': [...scene.from],
-		'to': [...scene.to],
-		'repeat': repeat,
-		'frames': [...scene.frames],
-		'sound': null === scene.sound ? null : [...scene.sound],
-		'flags': scene.flags,
+		'start': out.start,
+		'x': out.x,
+		'y': out.y,
+		'duration': out.duration,
+		'repeat': out.repeat,
+		'frames': out.frames,
+		'sound': out.sound,
+		'flags': out.flags,
 	});
 };
 
@@ -131,7 +128,7 @@ export const demoResolveScene = function(scene) {
  *
  * Scene values can have dynamic callbacks; this will execute callbacks to return static values.
  *
- * @param {!Array<!Scene>} scenes Scenes.
+ * @param {!Array<!Scene|!SceneCB>} scenes Scenes.
  * @return {!Array<!Scene>} Scenes.
  */
 export const demoResolveScenes = function(scenes) {
@@ -147,6 +144,41 @@ export const demoResolveScenes = function(scenes) {
 
 /* eslint-enable quote-props */
 
+
+
+// ---------------------------------------------------------------------
+// Easing
+// ---------------------------------------------------------------------
+
+/**
+ * Ease In/Out (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const ease = function(v) {
+	return 0.5 > v ? 2 * v * v : -1 + (4 - 2 * v) * v;
+};
+
+/**
+ * Ease In (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const easeIn = function(v) {
+	return v * v;
+};
+
+/**
+ * Ease Out (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const easeOut = function(v) {
+	return v * (2 - v);
+};
 
 
 // ---------------------------------------------------------------------
@@ -290,12 +322,17 @@ export const isFrameList = function(v) {
  * @return {boolean} True/false.
  */
 export const isScene = function(v) {
+	if ('function' === typeof v) {
+		return isScene(v());
+	}
+
 	return 'object' === typeof v &&
 		null !== v &&
-		'start' in v && isScenePosition(v.start, true) &&
-		'from' in v && isScenePosition(v.from) &&
-		'to' in v && isScenePosition(v.to) &&
-		'repeat' in v && isSceneRepeat(v.repeat, true) &&
+		'start' in v && isScenePosition(v.start) &&
+		'number' === typeof v.x &&
+		'number' === typeof v.y &&
+		isAbsInt(v.duration) &&
+		'repeat' in v && isSceneRepeat(v.repeat) &&
 		'frames' in v && isFrameList(v.frames) &&
 		'sound' in v && isSceneSound(v.sound) &&
 		isUInt(v.flags);
@@ -325,41 +362,27 @@ export const isSceneList = function(v) {
  * Scene Position
  *
  * @param {*} v Value.
- * @param {boolean=} cb Can be a callback.
  * @return {boolean} True/false.
  */
-export const isScenePosition = function(v, cb) {
+export const isScenePosition = function(v) {
 	if (null === v) {
 		return true;
 	}
 
-	cb = !! cb;
-	if (cb && 'function' === typeof v) {
-		return true;
-	}
-
 	return Array.isArray(v) &&
-		2 <= v.length &&
-		3 >= v.length &&
+		2 === v.length &&
 		'number' === typeof v[0] &&
-		'number' === typeof v[1] &&
-		('undefined' === typeof v[2] || 'number' === typeof v[2]);
+		'number' === typeof v[1];
 };
 
 /**
  * Scene Repeat
  *
  * @param {*} v Value.
- * @param {boolean=} cb Can be a callback.
  * @return {boolean} True/false.
  */
-export const isSceneRepeat = function(v, cb) {
+export const isSceneRepeat = function(v) {
 	if (null === v) {
-		return true;
-	}
-
-	cb = !! cb;
-	if (cb && 'function' === typeof v) {
 		return true;
 	}
 

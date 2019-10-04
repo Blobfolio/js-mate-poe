@@ -83,6 +83,13 @@ export const WIDTH = 640;
 export const HEIGHT = 440;
 
 /**
+ * Blank Frame
+ *
+ * @const {number}
+ */
+export const BLANK_FRAME = 174;
+
+/**
  * Frame Offset
  *
  * @param {number} frame Frame.

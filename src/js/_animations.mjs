@@ -2,17 +2,18 @@
  * @file Animations
  */
 
-import { isAbsInt } from './_helpers.mjs';
+import { ease, easeIn, easeOut, isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
-import { TILE_SIZE } from './_media.mjs';
+import { BLANK_FRAME, TILE_SIZE } from './_media.mjs';
 import {
 	Animation,
-	AnimationFlags,
+	AnimationFlag,
 	Playlist,
 	Scene,
-	SceneFlags,
-	SceneRepeat,
+	SceneCB,
+	SceneFlag,
 	Sound,
+	Step,
 	WeightedChoice
 } from './_types.mjs';
 
@@ -31,30 +32,31 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Walk,
 		name: 'Walk',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-2, 0, 200],
+				x: -84,
+				y: 0,
+				duration: 6300,
 				repeat: [20, 0],
 				frames: [
 					2,
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.AllowExit | SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		/** @type {Array<WeightedChoice>} */
 		edge: [
 			[Playlist.Rotate, 5],
-			[Playlist.Scoot, 1],
+			[Playlist.Scoot, 2],
 			[Playlist.ClimbUp, 1],
 		],
 		/** @type {Array<WeightedChoice>} */
@@ -76,12 +78,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Rotate,
 		name: 'Rotate',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 450,
 				repeat: null,
 				frames: [
 					3,
@@ -89,12 +92,14 @@ export const ANIMATIONS = [
 					10,
 				],
 				sound: null,
-				flags: SceneFlags.AutoFlip | SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.AutoFlip | SceneFlag.ForceGravity,
+			}),
+
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 450,
 				repeat: null,
 				frames: [
 					10,
@@ -102,13 +107,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		/** @type {Array<WeightedChoice>} */
@@ -120,13 +125,14 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Drag,
 		name: 'Drag',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
-				repeat: null,
+				x: 0,
+				y: 0,
+				duration: 2700,
+				repeat: [2, 0],
 				frames: [
 					42,
 					43,
@@ -137,12 +143,12 @@ export const ANIMATIONS = [
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Drag,
@@ -150,24 +156,25 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Fall,
 		name: 'Fall',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 1, 100],
-				to: [0, 10, 40],
-				repeat: [20, 0],
+				x: 0,
+				y: 250,
+				duration: 1050,
+				repeat: [25, 0],
 				frames: [
 					133,
 				],
 				sound: null,
-				flags: 0,
-			},
+				flags: SceneFlag.EaseIn,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 10,
-		flags: AnimationFlags.NoChildren | AnimationFlags.FallingAnimation,
+		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		edge: Playlist.Bounce,
 		next: Playlist.GraspingFall,
@@ -175,26 +182,30 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.GraspingFall,
 		name: 'Grasping Fall',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 10, 40],
-				to: [0, 10, 40],
-				repeat: [10, 0],
+				x: 0,
+				y: 800,
+				duration: 1320,
+				repeat: [9, 0],
 				frames: [
 					46,
 					46,
 					46,
+					47,
+					47,
+					47,
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren | AnimationFlags.FallingAnimation,
+		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		/** @type {Array<WeightedChoice>} */
 		edge: [
@@ -207,12 +218,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Run,
 		name: 'Run',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0, 100],
-				to: [-10, 0, 100],
+				x: -180,
+				y: 0,
+				duration: 1800,
 				repeat: [5, 0],
 				frames: [
 					5,
@@ -220,13 +232,13 @@ export const ANIMATIONS = [
 					4,
 				],
 				sound: null,
-				flags: SceneFlags.AllowExit | SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
 		/** @type {Array<WeightedChoice>} */
@@ -239,12 +251,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Boing,
 		name: 'Boing!',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [1, 0, 100],
-				to: [10, 0, 100],
+				x: 55,
+				y: 0,
+				duration: 1100,
 				repeat: null,
 				frames: [
 					62,
@@ -260,13 +273,13 @@ export const ANIMATIONS = [
 					6,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity | SceneFlag.EaseOut,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		/** @type {Array<WeightedChoice>} */
@@ -279,12 +292,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Bounce,
 		name: 'Bounce',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 300,
 				repeat: null,
 				frames: [
 					42,
@@ -292,27 +306,51 @@ export const ANIMATIONS = [
 					42,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, -2, 100],
-				to: [0, 3, 100],
+				x: 0,
+				y: -6,
+				duration: 200,
 				repeat: null,
 				frames: [
 					131,
 					42,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: 0,
+				y: 0,
+				duration: 100,
+				repeat: null,
+				frames: [
 					132,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: 0,
+				y: 6,
+				duration: 200,
+				repeat: null,
+				frames: [
 					42,
 					49,
 				],
 				sound: null,
 				flags: 0,
-			},
-			{
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 1600,
 				repeat: null,
 				frames: [
 					13,
@@ -333,13 +371,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -347,12 +385,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Splat,
 		name: 'Splat!',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 500],
+				x: 0,
+				y: 0,
+				duration: 1000,
 				repeat: null,
 				frames: [
 					48,
@@ -363,12 +402,12 @@ export const ANIMATIONS = [
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -376,29 +415,35 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Urinate,
 		name: 'Urinate',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(5 + Math.random() * 10);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 0,
+					duration: (7 + repeat * 2) * 150,
+					repeat: [repeat, 5],
+					frames: [
+						3,
+						12,
+						13,
+						103,
+						104,
+						105,
+						106,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
-				repeat: () => [Math.floor(5 + Math.random() * 10), 5],
-				frames: [
-					3,
-					12,
-					13,
-					103,
-					104,
-					105,
-					106,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 1050,
 				repeat: null,
 				frames: [
 					104,
@@ -410,13 +455,13 @@ export const ANIMATIONS = [
 					12,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -424,12 +469,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.PlayDead,
 		name: 'Play Dead',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 1600,
 				repeat: [4, 11],
 				frames: [
 					3,
@@ -446,13 +492,13 @@ export const ANIMATIONS = [
 					95,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -460,25 +506,26 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Scream,
 		name: 'Scream!',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 30],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 1300,
 				repeat: [12, 0],
 				frames: [
 					50,
 					51,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Run,
@@ -486,33 +533,39 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Sleep,
 		name: 'Sleep',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(10 + Math.random() * 20);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 0,
+					duration: (11 + repeat * 2) * 300,
+					repeat: [repeat, 9],
+					frames: [
+						3,
+						107,
+						108,
+						107,
+						108,
+						107,
+						31,
+						32,
+						33,
+						0,
+						1,
+					],
+					sound: [Sound.Yawn, 1],
+					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 1000],
-				to: [0, 0, 200],
-				repeat: () => [Math.floor(10 + Math.random() * 20), 9],
-				frames: [
-					3,
-					107,
-					108,
-					107,
-					108,
-					107,
-					31,
-					32,
-					33,
-					0,
-					1,
-				],
-				sound: [Sound.Yawn, 1],
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 3300,
 				repeat: null,
 				frames: [
 					0,
@@ -528,13 +581,13 @@ export const ANIMATIONS = [
 					6,
 				],
 				sound: [Sound.Yawn, 5],
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -542,30 +595,36 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Doze,
 		name: 'Doze',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(20 + Math.random() * 10);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 0,
+					duration: (8 + repeat * 2) * 200,
+					repeat: [repeat, 6],
+					frames: [
+						3,
+						6,
+						7,
+						8,
+						8,
+						7,
+						8,
+						8,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
-				repeat: () => [Math.floor(20 + Math.random() * 10), 6],
-				frames: [
-					3,
-					6,
-					7,
-					8,
-					8,
-					7,
-					8,
-					8,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 600,
 				repeat: null,
 				frames: [
 					8,
@@ -573,13 +632,13 @@ export const ANIMATIONS = [
 					6,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -587,31 +646,37 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BoredSleep,
 		name: 'Bored Sleep',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(30 + Math.random() * 10);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 0,
+					duration: (9 + repeat * 2) * 200,
+					repeat: [repeat, 7],
+					frames: [
+						3,
+						9,
+						10,
+						34,
+						35,
+						34,
+						35,
+						36,
+						36,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
-				repeat: () => [Math.floor(30 + Math.random() * 10), 7],
-				frames: [
-					3,
-					9,
-					10,
-					34,
-					35,
-					34,
-					35,
-					36,
-					36,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 1800,
 				repeat: null,
 				frames: [
 					35,
@@ -625,13 +690,13 @@ export const ANIMATIONS = [
 					9,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -639,26 +704,29 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BathDive,
 		name: 'Bath Dive',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width,
-					Poe.height - 600,
-				],
-				from: [-4, 3, 30],
-				to: [-4, 3, 30],
-				repeat: [146, 0],
-				frames: [
-					134,
-				],
-				sound: null,
-				flags: 0,
-			},
-			{
+			/** @type {!SceneCB} */ (() => {
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width,
+						Poe.height - 600,
+					],
+					x: -588,
+					y: 441,
+					duration: 4350,
+					repeat: [146, 0],
+					frames: [
+						134,
+					],
+					sound: null,
+					flags: 0,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 3, 30],
-				to: [-4, 3, 30],
+				x: -192,
+				y: 144,
+				duration: 1440,
 				repeat: null,
 				frames: [
 					135,
@@ -712,12 +780,12 @@ export const ANIMATIONS = [
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.BathDiveChild,
 		edge: Playlist.BathCoolDown,
 		next: Playlist.BathCoolDown,
@@ -725,26 +793,29 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BathDiveChild,
 		name: 'Bath Dive 👶',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width - 800 + TILE_SIZE + 10,
-					Poe.height - TILE_SIZE,
-				],
-				from: [0, 0, 30],
-				to: [0, 0, 30],
-				repeat: [171, 0],
-				frames: [
-					146,
-				],
-				sound: null,
-				flags: 0,
-			},
-			{
+			/** @type {!SceneCB} */ (() => {
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width - 800 + TILE_SIZE + 10,
+						Poe.height - TILE_SIZE,
+					],
+					x: 0,
+					y: 0,
+					duration: 5160,
+					repeat: [171, 0],
+					frames: [
+						146,
+					],
+					sound: null,
+					flags: 0,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 30],
-				to: [0, 0, 30],
+				x: 0,
+				y: 0,
+				duration: 2700,
 				repeat: [70, 19],
 				frames: [
 					146,
@@ -769,13 +840,13 @@ export const ANIMATIONS = [
 					146,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -783,12 +854,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Jump,
 		name: 'Jump',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, -8, 100],
-				to: [-10, 10, 100],
+				x: -50,
+				y: -30,
+				duration: 400,
 				repeat: null,
 				frames: [
 					76,
@@ -796,11 +868,30 @@ export const ANIMATIONS = [
 					30,
 					30,
 					30,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: -30,
+				y: 0,
+				duration: 100,
+				repeat: null,
+				frames: [
 					23,
 					23,
-					23,
-					23,
-					23,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: -50,
+				y: 30,
+				duration: 400,
+				repeat: null,
+				frames: [
 					24,
 					24,
 					24,
@@ -809,12 +900,12 @@ export const ANIMATIONS = [
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.WallSlide,
 		/** @type {Array<WeightedChoice>} */
@@ -826,12 +917,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Eat,
 		name: 'Eat',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 300],
-				to: [0, 0, 300],
+				x: 0,
+				y: 0,
+				duration: 7050,
 				repeat: [5, 5],
 				frames: [
 					6,
@@ -848,13 +940,13 @@ export const ANIMATIONS = [
 					6,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.FlowerChild,
 		edge: null,
 		next: Playlist.Walk,
@@ -862,12 +954,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.FlowerChild,
 		name: 'Flower 👶',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 300],
-				to: [0, 0, 300],
+				x: 0,
+				y: 0,
+				duration: 7050,
 				repeat: null,
 				frames: [
 					153,
@@ -914,18 +1007,18 @@ export const ANIMATIONS = [
 					152,
 					152,
 					152,
-					174,
-					174,
-					174,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -933,43 +1026,52 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BlackSheep,
 		name: 'Black Sheep ',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width + TILE_SIZE,
-					Poe.height - TILE_SIZE,
-				],
-				from: [-10, 0, 100],
-				to: [-10, 0, 100],
-				repeat: () => [Math.floor((Poe.width / 2) / 30 - 6), 0],
-				frames: [
-					5,
-					4,
-					4,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor((Poe.width / 2) / 30 - 6);
+
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width + TILE_SIZE,
+						Poe.height - TILE_SIZE,
+					],
+					x: -10 * (3 + repeat * 3),
+					y: 0,
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						5,
+						4,
+						4,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(25 + (Math.floor(Poe.width / 2) % 30) / 7);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: -3 * (2 + repeat * 2),
+					y: 0,
+					duration: (2 + repeat * 2) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						2,
+						3,
+					],
+					sound: null,
+					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-6, 0, 100],
-				to: [0, 0, 100],
-				repeat: () => [
-					Math.floor(25 + (Math.floor(Poe.width / 2) % 30) / 7),
-					0,
-				],
-				frames: [
-					2,
-					3,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 500],
-				to: [0, 0, 500],
+				x: 0,
+				y: 0,
+				duration: 7000,
 				repeat: null,
 				frames: [
 					8,
@@ -991,13 +1093,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.BlackSheepChild,
 		edge: null,
 		next: Playlist.Walk,
@@ -1005,66 +1107,64 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BlackSheepChild,
 		name: 'Black Sheep 👶',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					0 - TILE_SIZE,
-					Poe.height - TILE_SIZE,
-				],
-				from: [10, 0, 100],
-				to: [10, 0, 100],
-				repeat: () => [Math.floor((Poe.width / 2) / 30 - 6), 0],
-				frames: [
-					155,
-					154,
-					154,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+			/** @type {!Scene} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor((Poe.width / 2) / 30 - 6);
+
+				return /** @type {!Scene} */ ({
+					start: [
+						0 - TILE_SIZE,
+						Poe.height - TILE_SIZE,
+					],
+					x: 10 * (3 + repeat * 3),
+					y: 0,
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						155,
+						154,
+						154,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity,
+				});
+			}),
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(24 + (Math.floor(Poe.width / 2) % 30) / 7);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 3 * (2 + repeat * 2),
+					y: 0,
+					duration: (2 + repeat * 2) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						156,
+						157,
+					],
+					sound: null,
+					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0, 100],
-				to: [0, 0, 100],
-				repeat: () => [
-					Math.floor(24 + (Math.floor(Poe.width / 2) % 30) / 7),
-					0,
-				],
-				frames: [
-					156,
-					157,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 500],
-				to: [0, 0, 500],
+				x: 0,
+				y: 0,
+				duration: 4500,
 				repeat: [9, 0],
 				frames: [
 					157,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 20],
-				to: [0, 0, 20],
-				repeat: [20, 0],
-				frames: [
-					157,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1072,12 +1172,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BeginRun,
 		name: 'Begin Run',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-10, 0, 100],
+				x: -48,
+				y: 0,
+				duration: 1200,
 				repeat: null,
 				frames: [
 					2,
@@ -1090,13 +1191,13 @@ export const ANIMATIONS = [
 					5,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
 		next: Playlist.Run,
@@ -1104,12 +1205,12 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.RunEnd,
 		name: 'Run (End)',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0, 100],
-				to: [-2, 0, 200],
+				x: -60,
+				y: 0,
+				duration: 1500,
 				repeat: null,
 				frames: [
 					5,
@@ -1124,13 +1225,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
 		next: Playlist.Walk,
@@ -1138,27 +1239,32 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ClimbUp,
 		name: 'Climb Up',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: null,
-				from: [0, -2, 150],
-				to: [0, -2, 150],
-				repeat: () => [Math.floor(Poe.height / 2), 2],
-				frames: [
-					31,
-					30,
-					15,
-					16,
-				],
-				sound: null,
-				flags: 0,
-			},
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.height / 2);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: -2 * (4 + repeat * 2),
+					duration: (4 + repeat * 2) * 150,
+					repeat: [repeat, 2],
+					frames: [
+						31,
+						30,
+						15,
+						16,
+					],
+					sound: null,
+					flags: SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.ReachCeiling,
 		next: Playlist.ClimbUp,
@@ -1166,26 +1272,28 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ReachCeiling,
 		name: 'Reach Ceiling',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: null,
-				from: [0, 0, 200],
-				to: [2, 0, 200],
-				repeat: null,
-				frames: [
-					16,
-					17,
-					28,
-				],
-				sound: null,
-				flags: SceneFlags.AutoFlip,
-			},
+			/** @type {!Scene} */ (() => {
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 3,
+					y: 0,
+					duration: 300,
+					repeat: null,
+					frames: [
+						16,
+						17,
+						28,
+					],
+					sound: null,
+					flags: SceneFlag.AutoFlip,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.WalkUpsideDown,
@@ -1193,25 +1301,30 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.WalkUpsideDown,
 		name: 'Walk Upside Down',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: null,
-				from: [-2, 0, 150],
-				to: [-2, 0, 150],
-				repeat: () => [Math.floor(Poe.width / 2), 0],
-				frames: [
-					98,
-					97,
-				],
-				sound: null,
-				flags: 0,
-			},
+			/** @type {!Scene} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 2);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: -2 * (2 + repeat * 2),
+					y: 0,
+					duration: (2 + repeat * 2) * 150,
+					repeat: [repeat, 0],
+					frames: [
+						98,
+						97,
+					],
+					sound: null,
+					flags: 0,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.ReachSide,
 		next: Playlist.WalkUpsideDown,
@@ -1219,25 +1332,26 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ReachSide,
 		name: 'Reach Side',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 800],
-				to: [0, 0, 800],
+				x: 0,
+				y: 0,
+				duration: 400,
 				repeat: null,
 				frames: [
 					97,
 					97,
 				],
 				sound: null,
-				flags: SceneFlags.AutoFlip,
-			},
+				flags: SceneFlag.AutoFlip,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.ClimbDown,
@@ -1245,25 +1359,30 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ClimbDown,
 		name: 'Climb Down',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: null,
-				from: [0, 2, 150],
-				to: [0, 2, 150],
-				repeat: () => [Math.floor(Poe.height / 2), 0],
-				frames: [
-					19,
-					20,
-				],
-				sound: null,
-				flags: 0,
-			},
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.height / 2);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 2 * (2 + repeat * 2),
+					duration: (2 + repeat * 2) * 150,
+					repeat: [repeat, 0],
+					frames: [
+						19,
+						20,
+					],
+					sound: null,
+					flags: SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.ReachFloor,
 		next: Playlist.ClimbDown,
@@ -1271,12 +1390,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ReachFloor,
 		name: 'Reach Floor',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 900,
 				repeat: null,
 				frames: [
 					24,
@@ -1288,12 +1408,12 @@ export const ANIMATIONS = [
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1301,12 +1421,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Beg,
 		name: 'Beg',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 2400,
 				repeat: null,
 				frames: [
 					9,
@@ -1327,13 +1448,13 @@ export const ANIMATIONS = [
 					9,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1341,12 +1462,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Bleat,
 		name: 'Bleat',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 1400,
 				repeat: null,
 				frames: [
 					3,
@@ -1358,13 +1480,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: [Sound.Baa, 1],
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1372,12 +1494,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Handstand,
 		name: 'Handstand',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-2, 0, 200],
+				x: -20,
+				y: 0,
+				duration: 2000,
 				repeat: null,
 				frames: [
 					86,
@@ -1392,13 +1515,13 @@ export const ANIMATIONS = [
 					86,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1406,12 +1529,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Slide,
 		name: 'Slide',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 0, 50],
-				to: [0, 0, 200],
+				x: -22,
+				y: 0,
+				duration: 1100,
 				repeat: null,
 				frames: [
 					24,
@@ -1427,13 +1551,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1441,12 +1565,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.BathCoolDown,
 		name: 'Bath Cool Down',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 2400,
 				repeat: [2, 0],
 				frames: [
 					169,
@@ -1459,12 +1584,13 @@ export const ANIMATIONS = [
 					169,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 600,
 				repeat: null,
 				frames: [
 					119,
@@ -1475,13 +1601,13 @@ export const ANIMATIONS = [
 					10,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren,
+		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1489,12 +1615,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Roll,
 		name: 'Roll',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 450,
 				repeat: null,
 				frames: [
 					9,
@@ -1502,12 +1629,13 @@ export const ANIMATIONS = [
 					10,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [-8, 0, 100],
-				to: [-8, 0, 100],
+				x: -128,
+				y: 0,
+				duration: 800,
 				repeat: [1, 0],
 				frames: [
 					10,
@@ -1520,12 +1648,13 @@ export const ANIMATIONS = [
 					112,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 450,
 				repeat: null,
 				frames: [
 					10,
@@ -1533,13 +1662,13 @@ export const ANIMATIONS = [
 					9,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1547,12 +1676,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Sneeze,
 		name: 'Sneeze',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 1600,
 				repeat: null,
 				frames: [
 					108,
@@ -1565,13 +1695,13 @@ export const ANIMATIONS = [
 					3,
 				],
 				sound: [Sound.Sneeze, 0],
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.SneezeShadow,
 		edge: null,
 		next: Playlist.Walk,
@@ -1579,25 +1709,26 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Scratch,
 		name: 'Scratch',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 1200,
 				repeat: [3, 0],
 				frames: [
 					56,
 					57,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1605,27 +1736,30 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Stargaze,
 		name: 'Stargaze',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width,
-					Poe.height - TILE_SIZE,
-				],
-				from: [-2, 0, 100],
-				to: [-2, 0, 100],
-				repeat: [10, 0],
-				frames: [
-					2,
-					3,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+			/** @type {!SceneCB} */ (() => {
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width,
+						Poe.height - TILE_SIZE,
+					],
+					x: -44,
+					y: 0,
+					duration: 1100,
+					repeat: [10, 0],
+					frames: [
+						2,
+						3,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 50],
-				to: [0, 0, 50],
+				x: 0,
+				y: 0,
+				duration: 1050,
 				repeat: [15, 5],
 				frames: [
 					3,
@@ -1636,13 +1770,13 @@ export const ANIMATIONS = [
 					73,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.StargazeChild,
 		edge: null,
 		next: Playlist.Scream,
@@ -1650,26 +1784,29 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.StargazeChild,
 		name: 'Stargaze 👶',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					0 - TILE_SIZE,
-					TILE_SIZE * 2,
-				],
-				from: [0, 0, 100],
-				to: [0, 0, 100],
-				repeat: [20, 0],
-				frames: [
-					158,
-				],
-				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
-			{
+			/** @type {!SceneCB} */ (() => {
+				return /** @type {!Scene} */ ({
+					start: [
+						0 - TILE_SIZE,
+						TILE_SIZE * 2,
+					],
+					x: 0,
+					y: 0,
+					duration: 1100,
+					repeat: [20, 0],
+					frames: [
+						158,
+					],
+					sound: null,
+					flags: SceneFlag.IgnoreEdges,
+				});
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [5, -1, 25],
-				to: [5, -1, 25],
+				x: 820,
+				y: -164,
+				duration: 1025,
 				repeat: [40, 0],
 				frames: [
 					158,
@@ -1678,13 +1815,13 @@ export const ANIMATIONS = [
 					161,
 				],
 				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.IgnoreEdges,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1692,12 +1829,12 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Abduction,
 		name: 'Abduction',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 3400,
 				repeat: [11, 5],
 				frames: [
 					9,
@@ -1708,71 +1845,77 @@ export const ANIMATIONS = [
 					34,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
-				start: null,
-				from: [0, 0, 25],
-				to: [0, 0, 25],
-				repeat: () => [Math.floor(Poe.width / 4), 47],
-				frames: [
-					34,
-					34,
-					34,
-					34,
-					34,
-					34,
-					175,
-					34,
-					175,
-					86,
-					86,
-					175,
-					86,
-					175,
-					86,
-					175,
-					175,
-					34,
-					175,
-					86,
-					86,
-					175,
-					86,
-					175,
-					86,
-					175,
-					86,
-					175,
-					175,
-					34,
-					175,
-					86,
-					86,
-					175,
-					86,
-					175,
-					86,
-					175,
-					175,
-					34,
-					175,
-					86,
-					86,
-					175,
-					86,
-					175,
-					86,
-					175,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 4);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 0,
+					y: 0,
+					duration: (48 + repeat) * 25,
+					repeat: [repeat, 47],
+					frames: [
+						34,
+						34,
+						34,
+						34,
+						34,
+						34,
+						BLANK_FRAME,
+						34,
+						BLANK_FRAME,
+						86,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						BLANK_FRAME,
+						34,
+						BLANK_FRAME,
+						86,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						BLANK_FRAME,
+						34,
+						BLANK_FRAME,
+						86,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						BLANK_FRAME,
+						34,
+						BLANK_FRAME,
+						86,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+						86,
+						BLANK_FRAME,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.AbductionChild,
 		edge: null,
 		next: Playlist.ChasingAMartian,
@@ -1780,12 +1923,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.AbductionChild,
 		name: 'Abduction 👶',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 4, 25],
-				to: [0, 4, 25],
+				x: 0,
+				y: 480,
+				duration: 2000,
 				repeat: [29, 0],
 				frames: [
 					158,
@@ -1794,13 +1938,13 @@ export const ANIMATIONS = [
 					161,
 				],
 				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.IgnoreEdges | SceneFlag.EaseOut,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: Playlist.AbductionBeamingChild,
@@ -1808,12 +1952,12 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.AbductionBeamingChild,
 		name: 'Abduction Beaming 👶',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 25],
-				to: [0, 0, 25],
+				x: 0,
+				y: 0,
+				duration: 1200,
 				repeat: [11, 0],
 				frames: [
 					162,
@@ -1822,27 +1966,33 @@ export const ANIMATIONS = [
 					165,
 				],
 				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
-			{
-				start: null,
-				from: [4, -1, 25],
-				to: [4, -1, 25],
-				repeat: () => [Math.floor(Poe.width / 16), 0],
-				frames: [
-					158,
-					159,
-					160,
-					161,
-				],
-				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.IgnoreEdges,
+			}),
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 16);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					x: 4 * (4 + repeat * 4),
+					y: -1 * (4 + repeat * 4),
+					duration: (4 + repeat * 4) * 25,
+					repeat: [repeat, 0],
+					frames: [
+						158,
+						159,
+						160,
+						161,
+					],
+					sound: null,
+					flags: SceneFlag.EaseIn | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: Playlist.AbductionBeamChild,
 		edge: null,
 		next: null,
@@ -1850,31 +2000,32 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.AbductionBeamChild,
 		name: 'Abduction Beam 👶',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 25],
-				to: [0, 0, 25],
+				x: 0,
+				y: 0,
+				duration: 800,
 				repeat: [35, 7],
 				frames: [
-					175,
-					175,
-					175,
-					175,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
 					172,
 					172,
-					175,
+					BLANK_FRAME,
 					172,
 				],
 				sound: null,
-				flags: SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.IgnoreEdges,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1882,29 +2033,34 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ChasingAMartian,
 		name: 'Chasing a Martian!',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width + TILE_SIZE * 3,
-					Poe.height - TILE_SIZE,
-				],
-				from: [-10, 0, 100],
-				to: [-10, 0, 100],
-				repeat: () => [Math.floor(Poe.width / 2 / 30), 0],
-				frames: [
-					5,
-					4,
-					4,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
-			},
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 2 / 30);
+
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width + TILE_SIZE * 3,
+						Poe.height - TILE_SIZE,
+					],
+					x: -10 * (3 + repeat * 3),
+					y: 0,
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						5,
+						4,
+						4,
+					],
+					sound: null,
+					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.ChasingAMartianChild,
 		edge: null,
 		next: Playlist.Bleat,
@@ -1912,30 +2068,35 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.ChasingAMartianChild,
 		name: 'Chasing a Martian! 👶',
-		/** @type {Array<Scene>} */
 		scenes: [
-			{
-				start: () => [
-					Poe.width + TILE_SIZE,
-					Poe.height - TILE_SIZE,
-				],
-				from: [-12, 0, 100],
-				to: [-12, 0, 100],
-				repeat: () => [Math.floor(Poe.width / 48 + 4), 0],
-				frames: [
-					166,
-					167,
-					166,
-					168,
-				],
-				sound: null,
-				flags: SceneFlags.AllowExit | SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
-			},
+			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 48 + 4);
+
+				return /** @type {!Scene} */ ({
+					start: [
+						Poe.width + TILE_SIZE,
+						Poe.height - TILE_SIZE,
+					],
+					x: -12 * (4 + repeat * 4),
+					y: 0,
+					duration: (4 + repeat * 4) * 100,
+					repeat: [repeat, 0],
+					frames: [
+						166,
+						167,
+						166,
+						168,
+					],
+					sound: null,
+					flags: SceneFlag.AllowExit | SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+				});
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents,
+		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1943,12 +2104,13 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Spin,
 		name: 'Spin',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				x: 0,
+				y: 0,
+				duration: 1400,
 				repeat: null,
 				frames: [
 					3,
@@ -1967,13 +2129,13 @@ export const ANIMATIONS = [
 					12,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		/** @type {Array<WeightedChoice>} */
@@ -1985,24 +2147,25 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.WallSlide,
 		name: 'Wall Slide',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 5, 40],
-				to: [0, 5, 40],
+				x: 0,
+				y: 55,
+				duration: 440,
 				repeat: [10, 0],
 				frames: [
 					29,
 				],
 				sound: null,
 				flags: 0,
-			},
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoChildren | AnimationFlags.FallingAnimation,
+		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		edge: Playlist.Rotate,
 		next: Playlist.WallSlide,
@@ -2010,57 +2173,61 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.Scoot,
 		name: 'Scoot',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 200,
 				repeat: null,
 				frames: [
 					52,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0, 200],
-				to: [6, 0, 200],
+				x: 6,
+				y: 0,
+				duration: 200,
 				repeat: null,
 				frames: [
 					53,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				x: 0,
+				y: 0,
+				duration: 200,
 				repeat: null,
 				frames: [
 					52,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
-			{
+				flags: SceneFlag.ForceGravity,
+			}),
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0, 200],
-				to: [6, 0, 200],
+				x: 6,
+				y: 0,
+				duration: 200,
 				repeat: null,
 				frames: [
 					53,
 				],
 				sound: null,
-				flags: SceneFlags.ForceGravity,
-			},
+				flags: SceneFlag.ForceGravity,
+			}),
 		],
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.DemoPlay | AnimationFlags.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: [
@@ -2072,26 +2239,27 @@ export const ANIMATIONS = [
 	{
 		id: Playlist.SneezeShadow,
 		name: 'Sneeze Shadow',
-		/** @type {Array<Scene>} */
+		/** @type {Array<!Scene>} */
 		scenes: [
-			{
+			/** @type {!Scene} */ ({
 				start: null,
-				from: [20, 0, 100],
-				to: [0, 0, 100],
+				x: 60,
+				y: 0,
+				duration: 600,
 				repeat: [3, 2],
 				frames: [
-					175,
-					175,
+					BLANK_FRAME,
+					BLANK_FRAME,
 					109,
 				],
 				sound: null,
-				flags: SceneFlags.AllowExit | SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
-			},
+				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity | SceneFlag.IgnoreEdges,
+			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlags.NoParents | AnimationFlags.StackBehind,
+		flags: AnimationFlag.NoParents | AnimationFlag.StackBehind,
 		childId: null,
 		edge: null,
 		next: null,
@@ -2119,7 +2287,7 @@ export const CHILD_ANIMATIONS = ANIMATIONS.reduce(
 	 * @return {Set<Playlist>} Collection.
 	 */
 	(out, v) => {
-		if (AnimationFlags.NoParents & v.flags) {
+		if (AnimationFlag.NoParents & v.flags) {
 			out.add(v.id);
 		}
 
@@ -2221,7 +2389,7 @@ export const animation = function(id) {
 	return /** @type {!Animation} */ ({
 		id: v.id,
 		name: v.name,
-		scenes: resolveScenes(v.scenes),
+		scenes: /** @type {Array<!Scene>} */ (resolveScenes(v.scenes)),
 		useDefault: v.useDefault,
 		useEntrance: v.useEntrance,
 		useFirst: v.useFirst,
@@ -2243,8 +2411,7 @@ export const chooseAnimation = function(choices) {
 		return null;
 	}
 	else if ('number' === typeof choices) {
-		choices = /** @type {!Playlist} */ (parseInt(choices, 10) || 0);
-		return verifyAnimationId(choices) ? choices : null;
+		return choices;
 	}
 
 	/** @type {Array<Playlist>} */
@@ -2252,13 +2419,8 @@ export const chooseAnimation = function(choices) {
 
 	// Loop and build.
 	for (let i = 0; i < choices.length; ++i) {
-		if (
-			isAbsInt(choices[i][1]) &&
-			verifyAnimationId(choices[i][0])
-		) {
-			for (let j = 0; j < choices[i][1]; ++j) {
-				out.push(choices[i][0]);
-			}
+		for (let j = 0; j < choices[i][1]; ++j) {
+			out.push(choices[i][0]);
 		}
 	}
 
@@ -2276,28 +2438,15 @@ export const chooseAnimation = function(choices) {
 /**
  * Resolve Scene
  *
- * @param {Scene} scene Scene.
- * @return {Scene} Scene.
+ * @param {!Scene|!SceneCB} scene Scene.
+ * @return {!Scene} Scene.
  */
 export const resolveScene = function(scene) {
-	/** @type {?SceneRepeat} */
-	let repeat = null;
-	if ('function' === typeof scene.repeat) {
-		repeat = scene.repeat();
-	}
-	else if (null !== scene.repeat) {
-		repeat = scene.repeat;
+	if ('function' === typeof scene) {
+		return /** @type {!Scene} */ (scene());
 	}
 
-	return /** @type {!Scene} */ ({
-		start: 'function' === typeof scene.start ? scene.start() : scene.start,
-		from: scene.from,
-		to: scene.to,
-		repeat: repeat,
-		frames: scene.frames,
-		sound: scene.sound,
-		flags: scene.flags,
-	});
+	return scene;
 };
 
 /**
@@ -2309,7 +2458,7 @@ export const resolveScene = function(scene) {
  * @return {Array<Scene>} Scenes.
  */
 export const resolveScenes = function(scenes) {
-	/** @type {Array<Scene>} */
+	/** @type {Array<!Scene>} */
 	let out = [];
 
 	for (let i = 0; i < scenes.length; ++i) {
@@ -2317,6 +2466,174 @@ export const resolveScenes = function(scenes) {
 	}
 
 	return out;
+};
+
+/**
+ * Resolve Scene Steps
+ *
+ * @param {Array<!Scene>} scenes Scenes.
+ * @return {Array<!Step>} Steps.
+ */
+export const resolveSceneSteps = function(scenes) {
+	/** @type {Array<!Step>} */
+	let out = [];
+
+	/** @type {number} */
+	let step = 0;
+
+	// Loop through the scenes.
+	for (let i = 0; i < scenes.length; ++i) {
+		/** @const {number} */
+		const framesLength = scenes[i].frames.length;
+
+		/** @const {number} */
+		const repeat = null !== scenes[i].repeat ? scenes[i].repeat[0] : 0;
+
+		/** @const {number} */
+		const repeatFrom = repeat ? scenes[i].repeat[1] : 0;
+
+		/** @const {number} */
+		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
+
+		/** @type {number|!SceneFlag} */
+		let easing = 0;
+		if (SceneFlag.EaseOut & scenes[i].flags) {
+			easing = SceneFlag.EaseOut;
+		}
+		else if (SceneFlag.EaseIn & scenes[i].flags) {
+			easing = SceneFlag.EaseIn;
+		}
+		else if (SceneFlag.Ease & scenes[i].flags) {
+			easing = SceneFlag.Ease;
+		}
+
+		// Now that we know how many steps this scene has, let's build them!
+		for (let j = 0; j < stepsLength; ++j) {
+			// What frame should we show?
+			/** @type {number} */
+			let frame = 0;
+			if (j < framesLength) {
+				frame = scenes[i].frames[j];
+			}
+			else if (! repeatFrom) {
+				frame = scenes[i].frames[j % framesLength];
+			}
+			else {
+				frame = scenes[i].frames[repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
+			}
+
+			/** @type {?Sound} */
+			let sound = null;
+			if (null !== scenes[i].sound && scenes[i].sound[1] === j) {
+				sound = /** @type {!Sound} */ (scenes[i].sound[0]);
+			}
+
+			out[step] = /** @type {!Step} */ ({
+				step: step,
+				scene: i,
+				interval: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].duration,
+					0
+				),
+				frame: frame,
+				x: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].x,
+					easing
+				),
+				y: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].y,
+					easing
+				),
+				sound: sound,
+				flip: !! ((SceneFlag.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
+				flags: scenes[i].flags,
+			});
+
+			++step;
+		}
+	}
+
+	return out.reverse();
+};
+
+/**
+ * Get Scene Speed
+ *
+ * @param {!Scene} scene Scene.
+ * @return {number} Speed.
+ */
+export const sceneSpeed = function(scene) {
+	return Math.round(scene.duration / sceneStepsLength(scene));
+};
+
+/**
+ * Scene Slice Size
+ *
+ * Return the relative amount of progress to apply to transitions.
+ *
+ * @param {number} step Current step.
+ * @param {number} steps Steps.
+ * @param {number} total Total.
+ * @param {number|!SceneFlag} easing Easing.
+ * @return {number} Percentage slice.
+ */
+export const sceneStepSlice = function(step, steps, total, easing) {
+	if (0 >= step || 0 >= steps || ! total) {
+		return 0;
+	}
+
+	// Make sure we don't go over 100%.
+	if (step > steps) {
+		step = steps;
+	}
+
+	/** @type {number} */
+	let current = step / steps;
+
+	/** @type {number} */
+	let previous = (step - 1) / steps;
+
+	switch (easing) {
+	case SceneFlag.EaseOut:
+		current = easeOut(current);
+		previous = previous ? easeOut(previous) : 0;
+		break;
+	case SceneFlag.EaseIn:
+		current = easeIn(current);
+		previous = previous ? easeIn(previous) : 0;
+		break;
+	case SceneFlag.Ease:
+		current = ease(current);
+		previous = previous ? ease(previous) : 0;
+		break;
+	}
+
+	return current * total - previous * total;
+};
+
+/**
+ * Count Steps in Scene
+ *
+ * @param {!Scene} scene Scene.
+ * @return {number} Steps.
+ */
+export const sceneStepsLength = function(scene) {
+	/** @const {number} */
+	const framesLength = scene.frames.length;
+
+	/** @const {number} */
+	const repeat = null !== scene.repeat ? scene.repeat[0] : 0;
+
+	/** @const {number} */
+	const repeatFrom = repeat ? scene.repeat[1] : 0;
+
+	return framesLength + (framesLength - repeatFrom) * repeat;
 };
 
 /**

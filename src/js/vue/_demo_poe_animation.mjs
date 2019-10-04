@@ -3,13 +3,11 @@
  */
 
 /* eslint-disable quote-props */
+import { sceneSpeed } from '../_animations.mjs';
 import {
-	AnimationFlags,
-	DemoFlags,
+	AnimationFlag,
+	DemoFlag,
 	Playlist,
-	Scene,
-	SceneFlags,
-	Step,
 	VueComponent,
 	VueProp
 } from '../_types.mjs';
@@ -170,7 +168,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'isPlayable': function() {
-			return !! (AnimationFlags.DemoPlay & this['flags']);
+			return !! (AnimationFlag.DemoPlay & this['flags']);
 		},
 
 		/**
@@ -197,7 +195,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'variableDuration': function() {
-			return !! (DemoFlags.VariableDuration & this['flags']);
+			return !! (DemoFlag.VariableDuration & this['flags']);
 		},
 
 		/**
@@ -212,8 +210,8 @@ export const poeAnimation = {
 
 			/** @type {number} */
 			let duration = 0;
-			for (let i = 0; i < this['steps'].length; ++i) {
-				duration += this['steps'][i]['interval'];
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				duration += this['scenes'][i]['duration'];
 			}
 
 			// Display big numbers as seconds.
@@ -268,18 +266,14 @@ export const poeAnimation = {
 			let max = 0;
 
 			for (let i = 0; i < this['scenes'].length; ++i) {
-				if (this['scenes'][i]['from'][2] < min) {
-					min = this['scenes'][i]['from'][2];
-				}
-				else if (max < this['scenes'][i]['from'][2]) {
-					max = this['scenes'][i]['from'][2];
-				}
+				/** @const {number} */
+				const speed = sceneSpeed(this['scenes'][i]);
 
-				if (this['scenes'][i]['to'][2] < min) {
-					min = this['scenes'][i]['to'][2];
+				if (speed < min) {
+					min = speed;
 				}
-				else if (max < this['scenes'][i]['to'][2]) {
-					max = this['scenes'][i]['to'][2];
+				if (speed > max) {
+					max = speed;
 				}
 			}
 
@@ -297,104 +291,12 @@ export const poeAnimation = {
 		},
 
 		/**
-		 * Steps
-		 *
-		 * Calculate the animation steps.
-		 *
-		 * @return {Array<Step>} Steps.
-		 */
-		'steps': function() {
-			/** @type {Array<Step>} */
-			let out = [];
-
-			/** @type {number} */
-			const now = 0;
-
-			/** @type {number} */
-			let step = 0;
-
-			/** @type {number} */
-			let last = 0 - this['scenes'][0]['from'][2];
-
-			// Loop through the scenes.
-			for (let i = 0; i < this['scenes'].length; ++i) {
-				/** @type {!Scene} */
-				const scene = this['scenes'][i];
-
-				/** @type {number} */
-				const framesLength = scene['frames'].length;
-
-				/** @const {number} */
-				const repeat = null !== scene['repeat'] ? Math.floor(scene['repeat'][0]) : 0;
-
-				/** @const {number} */
-				const repeatFrom = repeat ? Math.floor(scene['repeat'][1]) : 0;
-
-				/** @type {number} */
-				const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
-
-				/** @type {number} */
-				const speedDiff = scene['to'][2] - scene['from'][2];
-
-				/** @type {number} */
-				const xDiff = scene['to'][0] - scene['from'][0];
-
-				/** @type {number} */
-				const yDiff = scene['to'][1] - scene['from'][1];
-
-				// Figure out what each slice should look like.
-				for (let j = 0; j < stepsLength; ++j) {
-					/** @type {number} */
-					const progress = j / stepsLength;
-
-					/** @type {number} */
-					const time = Math.floor(last + scene['from'][2] + speedDiff * progress);
-
-					/** @type {number} */
-					const interval = time - last;
-
-					last = time;
-
-					// What frame should we show?
-					/** @type {number} */
-					let frame = 0;
-					if (j < framesLength) {
-						frame = scene['frames'][j];
-					}
-					else if (! repeatFrom) {
-						frame = scene['frames'][j % framesLength];
-					}
-					else {
-						frame = scene['frames'][repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
-					}
-
-					out.push(/** @type {!Step} */ ({
-						'step': step,
-						'scene': i,
-						'time': now + time,
-						'interval': interval,
-						'frame': frame,
-						'x': scene['from'][0] + xDiff * progress,
-						'y': scene['from'][1] + yDiff * progress,
-						'sound': null,
-						'flip': !! ((SceneFlags.AutoFlip & scene['flags']) && stepsLength - 1 === j),
-						'flags': scene['flags'],
-					}));
-
-					++step;
-				}
-			}
-
-			return out;
-		},
-
-		/**
 		 * Default Choice
 		 *
 		 * @return {boolean} True/false.
 		 */
 		'defaultChoice': function() {
-			return !! (DemoFlags.DefaultChoice & this['flags']);
+			return !! (DemoFlag.DefaultChoice & this['flags']);
 		},
 
 		/**
@@ -403,7 +305,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'entranceChoice': function() {
-			return !! (DemoFlags.EntranceChoice & this['flags']);
+			return !! (DemoFlag.EntranceChoice & this['flags']);
 		},
 
 		/**
@@ -412,7 +314,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'firstChoice': function() {
-			return !! (DemoFlags.FirstChoice & this['flags']);
+			return !! (DemoFlag.FirstChoice & this['flags']);
 		},
 	},
 
