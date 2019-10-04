@@ -1028,7 +1028,7 @@ export const ANIMATIONS = [
 				start: null,
 				from: [0, 0],
 				to: [0, 0],
-				duration: 8500,
+				duration: 7000,
 				repeat: null,
 				frames: [
 					8,
@@ -1109,20 +1109,8 @@ export const ANIMATIONS = [
 				start: null,
 				from: [0, 0],
 				to: [0, 0],
-				duration: 500,
+				duration: 4500,
 				repeat: [9, 0],
-				frames: [
-					157,
-				],
-				sound: null,
-				flags: SceneFlags.ForceGravity,
-			}),
-			/** @type {!Scene} */ ({
-				start: null,
-				from: [0, 0],
-				to: [0, 0],
-				duration: 420,
-				repeat: [20, 0],
 				frames: [
 					157,
 				],

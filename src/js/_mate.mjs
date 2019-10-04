@@ -1342,7 +1342,7 @@ export const Mate = class extends ChildMate {
 		this.mayExit = false;
 
 		// Remove the next tick, but only if we're going to be paused for a long time.
-		if (200 < this._nextTick - performance.now()) {
+		if (2000 < this._nextTick - performance.now()) {
 			this._nextTick = 0;
 		}
 
