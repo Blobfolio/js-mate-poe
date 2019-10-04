@@ -1886,7 +1886,7 @@ export const ANIMATIONS = [
 				start: null,
 				from: [0, 4],
 				to: [0, 4],
-				duration: 3400,
+				duration: 3000,
 				repeat: [29, 0],
 				frames: [
 					158,
