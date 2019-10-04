@@ -13,7 +13,7 @@
  *
  * @enum {number}
  */
-export const AnimationFlags = {
+export const AnimationFlag = {
 	// OK to manually play during demo.
 	DemoPlay: 1,
 	// Not for children.
@@ -31,7 +31,7 @@ export const AnimationFlags = {
  *
  * @enum {number}
  */
-export const DemoFlags = {
+export const DemoFlag = {
 	// Default Choice.
 	DefaultChoice: 1,
 	// Entrance Choice.
@@ -43,49 +43,11 @@ export const DemoFlags = {
 };
 
 /**
- * Poe Flags
- *
- * @enum {number}
- */
-export const PoeFlags = {
-	// Warned about broken auto-play audio.
-	AudioWarned: 1,
-	// Debug.
-	Debug: 2,
-	// Play Audio.
-	MakeNoise: 4,
-};
-
-/**
- * Scene Flags
- *
- * @enum {number}
- */
-export const SceneFlags = {
-	// Allow exit.
-	AllowExit: 1,
-	// Flip after.
-	AutoFlip: 2,
-	// Ease.
-	Ease: 4,
-	// Ease In.
-	EaseIn: 8,
-	// Ease Out.
-	EaseOut: 16,
-	// Sprite should be at the bottom of the page.
-	ForceGravity: 32,
-	// Edges don't need to trigger edge sequences.
-	IgnoreEdges: 64,
-	// Variable duration.
-	VariableDuration: 128,
-};
-
-/**
  * Mate Flags
  *
  * @enum {number}
  */
-export const MateFlags = {
+export const MateFlag = {
 	// Mate: Left side.
 	BottomSide: 1,
 	// Mate: Mate should appear behind other mates.
@@ -108,6 +70,44 @@ export const MateFlags = {
 	RightSide: 512,
 	// Mate: Left side.
 	TopSide: 1024,
+};
+
+/**
+ * Poe Flags
+ *
+ * @enum {number}
+ */
+export const PoeFlag = {
+	// Warned about broken auto-play audio.
+	AudioWarned: 1,
+	// Debug.
+	Debug: 2,
+	// Play Audio.
+	MakeNoise: 4,
+};
+
+/**
+ * Scene Flags
+ *
+ * @enum {number}
+ */
+export const SceneFlag = {
+	// Allow exit.
+	AllowExit: 1,
+	// Flip after.
+	AutoFlip: 2,
+	// Ease.
+	Ease: 4,
+	// Ease In.
+	EaseIn: 8,
+	// Ease Out.
+	EaseOut: 16,
+	// Sprite should be at the bottom of the page.
+	ForceGravity: 32,
+	// Edges don't need to trigger edge sequences.
+	IgnoreEdges: 64,
+	// Variable duration.
+	VariableDuration: 128,
 };
 
 /**

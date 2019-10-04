@@ -5,8 +5,8 @@
 /* eslint-disable quote-props */
 import { sceneSpeed } from '../_animations.mjs';
 import {
-	AnimationFlags,
-	DemoFlags,
+	AnimationFlag,
+	DemoFlag,
 	Playlist,
 	VueComponent,
 	VueProp
@@ -168,7 +168,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'isPlayable': function() {
-			return !! (AnimationFlags.DemoPlay & this['flags']);
+			return !! (AnimationFlag.DemoPlay & this['flags']);
 		},
 
 		/**
@@ -195,7 +195,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'variableDuration': function() {
-			return !! (DemoFlags.VariableDuration & this['flags']);
+			return !! (DemoFlag.VariableDuration & this['flags']);
 		},
 
 		/**
@@ -296,7 +296,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'defaultChoice': function() {
-			return !! (DemoFlags.DefaultChoice & this['flags']);
+			return !! (DemoFlag.DefaultChoice & this['flags']);
 		},
 
 		/**
@@ -305,7 +305,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'entranceChoice': function() {
-			return !! (DemoFlags.EntranceChoice & this['flags']);
+			return !! (DemoFlag.EntranceChoice & this['flags']);
 		},
 
 		/**
@@ -314,7 +314,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'firstChoice': function() {
-			return !! (DemoFlags.FirstChoice & this['flags']);
+			return !! (DemoFlag.FirstChoice & this['flags']);
 		},
 	},
 

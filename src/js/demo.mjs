@@ -14,11 +14,11 @@ import { poeTree } from './vue/_demo_poe_tree.mjs';
 import { poeSprite } from './vue/_demo_poe_sprite.mjs';
 import {
 	Animation,
-	AnimationFlags,
-	DemoFlags,
+	AnimationFlag,
+	DemoFlag,
 	Playlist,
 	Scene,
-	SceneFlags,
+	SceneFlag,
 	WeightedChoice,
 	VueApp
 } from './_types.mjs';
@@ -73,20 +73,20 @@ new Vue(/** @type {!VueApp} */ ({
 				const scenes = demoResolveScenes(v.scenes);
 
 				for (let i = 0; i < scenes.length; ++i) {
-					if (SceneFlags.VariableDuration & scenes[i].flags) {
-						flags |= DemoFlags.VariableDuration;
+					if (SceneFlag.VariableDuration & scenes[i].flags) {
+						flags |= DemoFlag.VariableDuration;
 						break;
 					}
 				}
 
 				if (0 < v.useDefault) {
-					flags |= DemoFlags.DefaultChoice;
+					flags |= DemoFlag.DefaultChoice;
 				}
 				if (0 < v.useEntrance) {
-					flags |= DemoFlags.EntranceChoice;
+					flags |= DemoFlag.EntranceChoice;
 				}
 				if (0 < v.useFirst) {
-					flags |= DemoFlags.FirstChoice;
+					flags |= DemoFlag.FirstChoice;
 				}
 
 				out.push({
@@ -111,8 +111,8 @@ new Vue(/** @type {!VueApp} */ ({
 			[]
 		)
 			.sort((a, b) => {
-				let a_key = `${(AnimationFlags.DemoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
-				let b_key = `${(AnimationFlags.DemoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
+				let a_key = `${(AnimationFlag.DemoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
+				let b_key = `${(AnimationFlag.DemoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
 
 				return (a_key < b_key) ? -1 : 1;
 			}),
