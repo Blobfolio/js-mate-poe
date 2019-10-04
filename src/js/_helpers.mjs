@@ -113,8 +113,9 @@ export const demoResolveScene = function(scene) {
 
 	return /** @type {!Scene} */ ({
 		'start': out.start,
-		'from': out.from,
-		'to': out.to,
+		'x': out.x,
+		'y': out.y,
+		'duration': out.duration,
 		'repeat': out.repeat,
 		'frames': out.frames,
 		'sound': out.sound,
@@ -293,8 +294,8 @@ export const isScene = function(v) {
 	return 'object' === typeof v &&
 		null !== v &&
 		'start' in v && isScenePosition(v.start) &&
-		'from' in v && isScenePosition(v.from) &&
-		'to' in v && isScenePosition(v.to) &&
+		'number' === typeof v.x &&
+		'number' === typeof v.y &&
 		isAbsInt(v.duration) &&
 		'repeat' in v && isSceneRepeat(v.repeat) &&
 		'frames' in v && isFrameList(v.frames) &&

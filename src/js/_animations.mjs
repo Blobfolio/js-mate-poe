@@ -37,8 +37,8 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */
 			({
 				start: null,
-				from: [-2, 0],
-				to: [-2, 0],
+				x: -84,
+				y: 0,
 				duration: 6300,
 				repeat: [20, 0],
 				frames: [
@@ -83,8 +83,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 450,
 				repeat: null,
 				frames: [
@@ -98,8 +98,8 @@ export const ANIMATIONS = [
 
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 450,
 				repeat: null,
 				frames: [
@@ -130,8 +130,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 2700,
 				repeat: [2, 0],
 				frames: [
@@ -161,8 +161,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 1],
-				to: [0, 10],
+				x: 0,
+				y: 250,
 				duration: 1050,
 				repeat: [20, 0],
 				frames: [
@@ -187,8 +187,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 10],
-				to: [0, 10],
+				x: 0,
+				y: 330,
 				duration: 1320,
 				repeat: [10, 0],
 				frames: [
@@ -220,8 +220,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0],
-				to: [-10, 0],
+				x: -180,
+				y: 0,
 				duration: 1800,
 				repeat: [5, 0],
 				frames: [
@@ -253,8 +253,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [1, 0],
-				to: [10, 0],
+				x: 55,
+				y: 0,
 				duration: 1100,
 				repeat: null,
 				frames: [
@@ -294,8 +294,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 300,
 				repeat: null,
 				frames: [
@@ -308,14 +308,36 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, -2],
-				to: [0, 3],
-				duration: 500,
+				x: 0,
+				y: -6,
+				duration: 200,
 				repeat: null,
 				frames: [
 					131,
 					42,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: 0,
+				y: 0,
+				duration: 100,
+				repeat: null,
+				frames: [
 					132,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: 0,
+				y: 6,
+				duration: 200,
+				repeat: null,
+				frames: [
 					42,
 					49,
 				],
@@ -324,8 +346,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1600,
 				repeat: null,
 				frames: [
@@ -365,8 +387,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1000,
 				repeat: null,
 				frames: [
@@ -398,8 +420,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: (7 + repeat * 2) * 150,
 					repeat: [repeat, 5],
 					frames: [
@@ -417,8 +439,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1050,
 				repeat: null,
 				frames: [
@@ -449,8 +471,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1600,
 				repeat: [4, 11],
 				frames: [
@@ -486,8 +508,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1300,
 				repeat: [12, 0],
 				frames: [
@@ -516,8 +538,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: (11 + repeat * 2) * 200,
 					repeat: [repeat, 9],
 					frames: [
@@ -539,8 +561,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 2200,
 				repeat: null,
 				frames: [
@@ -578,8 +600,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: (8 + repeat * 2) * 200,
 					repeat: [repeat, 6],
 					frames: [
@@ -598,8 +620,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 600,
 				repeat: null,
 				frames: [
@@ -629,8 +651,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: (9 + repeat * 2) * 200,
 					repeat: [repeat, 7],
 					frames: [
@@ -650,8 +672,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1800,
 				repeat: null,
 				frames: [
@@ -687,8 +709,8 @@ export const ANIMATIONS = [
 						Poe.width,
 						Poe.height - 600,
 					],
-					from: [-4, 3],
-					to: [-4, 3],
+					x: -588,
+					y: 441,
 					duration: 4350,
 					repeat: [146, 0],
 					frames: [
@@ -700,8 +722,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 3],
-				to: [-4, 3],
+				x: -192,
+				y: 144,
 				duration: 1440,
 				repeat: null,
 				frames: [
@@ -776,8 +798,8 @@ export const ANIMATIONS = [
 						Poe.width - 800 + TILE_SIZE + 10,
 						Poe.height - TILE_SIZE,
 					],
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: 5160,
 					repeat: [171, 0],
 					frames: [
@@ -789,8 +811,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 2700,
 				repeat: [70, 19],
 				frames: [
@@ -834,9 +856,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, -8],
-				to: [-10, 10],
-				duration: 1500,
+				x: -50,
+				y: -40,
+				duration: 500,
 				repeat: null,
 				frames: [
 					76,
@@ -844,11 +866,33 @@ export const ANIMATIONS = [
 					30,
 					30,
 					30,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: -50,
+				y: 0,
+				duration: 500,
+				repeat: null,
+				frames: [
 					23,
 					23,
 					23,
 					23,
 					23,
+				],
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				x: -50,
+				y: 40,
+				duration: 1500,
+				repeat: null,
+				frames: [
 					24,
 					24,
 					24,
@@ -878,8 +922,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 7050,
 				repeat: [5, 5],
 				frames: [
@@ -915,8 +959,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 7050,
 				repeat: null,
 				frames: [
@@ -993,8 +1037,8 @@ export const ANIMATIONS = [
 						Poe.width + TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-10, 0],
-					to: [-10, 0],
+					x: -10 * (3 + repeat * 3),
+					y: 0,
 					duration: (3 + repeat * 3) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -1012,8 +1056,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [-6, 0],
-					to: [0, 0],
+					x: -3 * (2 + repeat * 2),
+					y: 0,
 					duration: (2 + repeat * 2) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -1026,8 +1070,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 7000,
 				repeat: null,
 				frames: [
@@ -1074,8 +1118,8 @@ export const ANIMATIONS = [
 						0 - TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [10, 0],
-					to: [10, 0],
+					x: 10 * (3 + repeat * 3),
+					y: 0,
 					duration: (3 + repeat * 3) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -1093,8 +1137,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [6, 0],
-					to: [0, 0],
+					x: 3 * (2 + repeat * 2),
+					y: 0,
 					duration: (2 + repeat * 2) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -1107,8 +1151,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 4500,
 				repeat: [9, 0],
 				frames: [
@@ -1133,8 +1177,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0],
-				to: [-10, 0],
+				x: -48,
+				y: 0,
 				duration: 1200,
 				repeat: null,
 				frames: [
@@ -1165,8 +1209,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0],
-				to: [-2, 0],
+				x: -60,
+				y: 0,
 				duration: 1500,
 				repeat: null,
 				frames: [
@@ -1203,8 +1247,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, -2],
-					to: [0, -2],
+					x: -2 * (4 + repeat * 2),
+					y: 0,
 					duration: (4 + repeat * 2) * 150,
 					repeat: [repeat, 2],
 					frames: [
@@ -1233,8 +1277,8 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */ (() => {
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [2, 0],
+					x: 3,
+					y: 0,
 					duration: 300,
 					repeat: null,
 					frames: [
@@ -1265,8 +1309,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [-2, 0],
-					to: [-2, 0],
+					x: -2 * (2 + repeat * 2),
+					y: 0,
 					duration: (2 + repeat * 2) * 150,
 					repeat: [repeat, 0],
 					frames: [
@@ -1293,8 +1337,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 400,
 				repeat: null,
 				frames: [
@@ -1323,8 +1367,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 2],
-					to: [0, 2],
+					x: 0,
+					y: 2 * (2 + repeat * 2),
 					duration: (2 + repeat * 2) * 150,
 					repeat: [repeat, 0],
 					frames: [
@@ -1351,8 +1395,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 900,
 				repeat: null,
 				frames: [
@@ -1382,8 +1426,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 2400,
 				repeat: null,
 				frames: [
@@ -1423,8 +1467,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1400,
 				repeat: null,
 				frames: [
@@ -1455,8 +1499,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0],
-				to: [-2, 0],
+				x: -20,
+				y: 0,
 				duration: 2000,
 				repeat: null,
 				frames: [
@@ -1490,8 +1534,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 0],
-				to: [0, 0],
+				x: -22,
+				y: 0,
 				duration: 1100,
 				repeat: null,
 				frames: [
@@ -1526,8 +1570,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 2400,
 				repeat: [2, 0],
 				frames: [
@@ -1545,8 +1589,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 600,
 				repeat: null,
 				frames: [
@@ -1576,8 +1620,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 450,
 				repeat: null,
 				frames: [
@@ -1590,8 +1634,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-8, 0],
-				to: [-8, 0],
+				x: -128,
+				y: 0,
 				duration: 800,
 				repeat: [1, 0],
 				frames: [
@@ -1609,8 +1653,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 450,
 				repeat: null,
 				frames: [
@@ -1637,8 +1681,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1600,
 				repeat: null,
 				frames: [
@@ -1670,8 +1714,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1200,
 				repeat: [3, 0],
 				frames: [
@@ -1700,8 +1744,8 @@ export const ANIMATIONS = [
 						Poe.width,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-2, 0],
-					to: [-2, 0],
+					x: -44,
+					y: 0,
 					duration: 1100,
 					repeat: [10, 0],
 					frames: [
@@ -1714,8 +1758,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1050,
 				repeat: [15, 5],
 				frames: [
@@ -1748,8 +1792,8 @@ export const ANIMATIONS = [
 						0 - TILE_SIZE,
 						TILE_SIZE * 2,
 					],
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: 2100,
 					repeat: [20, 0],
 					frames: [
@@ -1761,8 +1805,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [5, -1],
-				to: [5, -1],
+				x: 820,
+				y: -164,
 				duration: 1025,
 				repeat: [40, 0],
 				frames: [
@@ -1789,8 +1833,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 3400,
 				repeat: [11, 5],
 				frames: [
@@ -1810,8 +1854,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0],
-					to: [0, 0],
+					x: 0,
+					y: 0,
 					duration: (48 + repeat) * 25,
 					repeat: [repeat, 47],
 					frames: [
@@ -1884,8 +1928,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 4],
-				to: [0, 4],
+				x: 0,
+				y: 480,
 				duration: 3000,
 				repeat: [29, 0],
 				frames: [
@@ -1912,8 +1956,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1200,
 				repeat: [11, 0],
 				frames: [
@@ -1931,8 +1975,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [4, -1],
-					to: [4, -1],
+					x: 4 * (4 + repeat * 4),
+					y: -1 * (4 + repeat * 4),
 					duration: (4 + repeat * 4) * 25,
 					repeat: [repeat, 0],
 					frames: [
@@ -1961,8 +2005,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 7200,
 				repeat: [35, 7],
 				frames: [
@@ -2000,8 +2044,8 @@ export const ANIMATIONS = [
 						Poe.width + TILE_SIZE * 3,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-10, 0],
-					to: [-10, 0],
+					x: -10 * (3 + repeat * 3),
+					y: 0,
 					duration: (3 + repeat * 3) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -2035,8 +2079,8 @@ export const ANIMATIONS = [
 						Poe.width + TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-12, 0],
-					to: [-12, 0],
+					x: -12 * (4 + repeat * 4),
+					y: 0,
 					duration: (4 + repeat * 4) * 100,
 					repeat: [repeat, 0],
 					frames: [
@@ -2065,8 +2109,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 1400,
 				repeat: null,
 				frames: [
@@ -2108,8 +2152,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 5],
-				to: [0, 5],
+				x: 0,
+				y: 55,
 				duration: 440,
 				repeat: [10, 0],
 				frames: [
@@ -2134,8 +2178,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 200,
 				repeat: null,
 				frames: [
@@ -2146,8 +2190,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0],
-				to: [6, 0],
+				x: 6,
+				y: 0,
 				duration: 200,
 				repeat: null,
 				frames: [
@@ -2158,8 +2202,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0],
-				to: [0, 0],
+				x: 0,
+				y: 0,
 				duration: 200,
 				repeat: null,
 				frames: [
@@ -2170,8 +2214,8 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0],
-				to: [6, 0],
+				x: 6,
+				y: 0,
 				duration: 200,
 				repeat: null,
 				frames: [
@@ -2200,8 +2244,8 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [20, 0],
-				to: [0, 0],
+				x: 60,
+				y: 0,
 				duration: 600,
 				repeat: [3, 2],
 				frames: [
@@ -2458,16 +2502,10 @@ export const resolveSceneSteps = function(scenes) {
 		/** @const {number} */
 		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
 
-		/** @type {number} */
-		let last = 0;
-
 		// Now that we know how many steps this scene has, let's build them!
 		for (let j = 0; j < stepsLength; ++j) {
 			/** @const {number} */
-			const progress = (j + 1) / stepsLength;
-
-			/** @const {number} */
-			const time = scenes[i].duration * progress;
+			const progress = (j + 1) / stepsLength - j / stepsLength;
 
 			// What frame should we show?
 			/** @type {number} */
@@ -2491,16 +2529,15 @@ export const resolveSceneSteps = function(scenes) {
 			out[step] = /** @type {!Step} */ ({
 				step: step,
 				scene: i,
-				interval: time - last,
+				interval: scenes[i].duration * progress,
 				frame: frame,
-				x: scenes[i].from[0] + (scenes[i].to[0] - scenes[i].from[0]) * progress,
-				y: scenes[i].from[1] + (scenes[i].to[1] - scenes[i].from[1]) * progress,
+				x: scenes[i].x * progress,
+				y: scenes[i].y * progress,
 				sound: sound,
 				flip: !! ((SceneFlags.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
 				flags: scenes[i].flags,
 			});
 
-			last = time;
 			++step;
 		}
 	}

@@ -237,8 +237,8 @@ export var Animation;
  *
  * @typedef {{
 	start: ?ScenePosition,
-	from: !ScenePosition,
-	to: !ScenePosition,
+	x: number,
+	y: number,
 	duration: number,
 	repeat: ?SceneRepeat,
 	frames: !Array<number>,
