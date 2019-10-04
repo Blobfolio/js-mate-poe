@@ -4,7 +4,7 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS } from '../_animations.mjs';
+import { ANIMATIONS, sceneSpeed } from '../_animations.mjs';
 import { demoResolveScene } from '../_helpers.mjs';
 import { TILES_X, TILES_Y } from '../_media.mjs';
 import { Animation, Scene, VueComponent, VueProp } from '../_types.mjs';
@@ -117,7 +117,7 @@ export const poeSprite = {
 						out.push({
 							'id': `${v.id}_${i}`,
 							'name': name,
-							'speed': Math.floor(scene.from[2]),
+							'speed': sceneSpeed(scene),
 							'repeat': repeat,
 							'repeatFrom': repeatFrom,
 							'frames': scene.frames,

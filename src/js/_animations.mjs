@@ -2561,6 +2561,16 @@ export const resolveSceneSteps = function(scenes) {
 };
 
 /**
+ * Get Scene Speed
+ *
+ * @param {!Scene} scene Scene.
+ * @return {number} Speed.
+ */
+export const sceneSpeed = function(scene) {
+	return Math.round(scene.duration / sceneStepsLength(scene));
+};
+
+/**
  * Scene Slice Size
  *
  * Return the relative amount of progress to apply to transitions.
@@ -2603,6 +2613,25 @@ export const sceneStepSlice = function(step, steps, total, easing) {
 	}
 
 	return current * total - previous * total;
+};
+
+/**
+ * Count Steps in Scene
+ *
+ * @param {!Scene} scene Scene.
+ * @return {number} Steps.
+ */
+export const sceneStepsLength = function(scene) {
+	/** @const {number} */
+	const framesLength = scene.frames.length;
+
+	/** @const {number} */
+	const repeat = null !== scene.repeat ? scene.repeat[0] : 0;
+
+	/** @const {number} */
+	const repeatFrom = repeat ? scene.repeat[1] : 0;
+
+	return framesLength + (framesLength - repeatFrom) * repeat;
 };
 
 /**
