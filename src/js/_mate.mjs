@@ -8,7 +8,8 @@ import {
 	chooseAnimation,
 	DEFAULT_CHOICES,
 	ENTRANCE_CHOICES,
-	FIRST_CHOICES
+	FIRST_CHOICES,
+	resolveSceneSteps
 } from './_animations.mjs';
 import { IMAGE } from './_bin.mjs';
 import { xDirection, yDirection } from './_helpers.mjs';
@@ -21,9 +22,7 @@ import {
 	LogType,
 	MateFlags,
 	Playlist,
-	Scene,
 	SceneFlags,
-	Sound,
 	Step,
 	WeightedChoice
 } from './_types.mjs';
@@ -819,77 +818,7 @@ export const ChildMate = class {
 		}
 
 		delete this._steps;
-		this._steps = [];
-
-		/** @type {number} */
-		let step = 0;
-
-		/** @type {number} */
-		let last = 0 - this._animation.scenes[0].from[2];
-
-		// Loop through the scenes.
-		for (let i = 0; i < this._animation.scenes.length; ++i) {
-			/** @const {!Scene} */
-			const scene = /** @type {!Scene} */ (this._animation.scenes[i]);
-
-			/** @const {number} */
-			const framesLength = scene.frames.length;
-
-			/** @const {number} */
-			const repeat = null !== scene.repeat ? scene.repeat[0] : 0;
-
-			/** @const {number} */
-			const repeatFrom = repeat ? scene.repeat[1] : 0;
-
-			/** @const {number} */
-			const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
-
-			// Figure out what each slice should look like.
-			for (let j = 0; j < stepsLength; ++j) {
-				/** @const {number} */
-				const progress = j / stepsLength;
-
-				/** @const {number} */
-				const time = Math.floor(last + scene.from[2] + (scene.to[2] - scene.from[2]) * progress);
-
-				// What frame should we show?
-				/** @type {number} */
-				let frame = 0;
-				if (j < framesLength) {
-					frame = scene.frames[j];
-				}
-				else if (! repeatFrom) {
-					frame = scene.frames[j % framesLength];
-				}
-				else {
-					frame = scene.frames[repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
-				}
-
-				/** @type {?Sound} */
-				let sound = null;
-				if (null !== scene.sound && scene.sound[1] === j) {
-					sound = /** @type {!Sound} */ (scene.sound[0]);
-				}
-
-				this._steps[step] = /** @type {!Step} */ ({
-					step: step,
-					scene: i,
-					interval: time - last,
-					frame: frame,
-					x: scene.from[0] + (scene.to[0] - scene.from[0]) * progress,
-					y: scene.from[1] + (scene.to[1] - scene.from[1]) * progress,
-					sound: sound,
-					flip: !! ((SceneFlags.AutoFlip & scene.flags) && stepsLength - 1 === j),
-					flags: scene.flags,
-				});
-
-				++step;
-				last = time;
-			}
-		}
-
-		// Reverse the steps so we can pop() instead of shift().
-		this._steps = this._steps.reverse();
+		this._steps = resolveSceneSteps(this._animation.scenes);
 	}
 
 	/**

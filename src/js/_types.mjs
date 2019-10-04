@@ -239,6 +239,7 @@ export var Animation;
 	start: ?ScenePosition,
 	from: !ScenePosition,
 	to: !ScenePosition,
+	duration: number,
 	repeat: ?SceneRepeat,
 	frames: !Array<number>,
 	sound: ?SceneSound,
@@ -250,7 +251,7 @@ export var Scene;
 /**
  * Scene Position
  *
- * @typedef {!Array<number, number, ?number>}
+ * @typedef {!Array<number, number>}
  */
 export var ScenePosition;
 

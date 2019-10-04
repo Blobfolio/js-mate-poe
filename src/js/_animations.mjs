@@ -4,7 +4,7 @@
 
 import { isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
-import { TILE_SIZE } from './_media.mjs';
+import { BLANK_FRAME, TILE_SIZE } from './_media.mjs';
 import {
 	Animation,
 	AnimationFlags,
@@ -13,6 +13,7 @@ import {
 	SceneCB,
 	SceneFlags,
 	Sound,
+	Step,
 	WeightedChoice
 } from './_types.mjs';
 
@@ -36,8 +37,9 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */
 			({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-2, 0, 200],
+				from: [-2, 0],
+				to: [-2, 0],
+				duration: 6300,
 				repeat: [20, 0],
 				frames: [
 					2,
@@ -81,8 +83,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 450,
 				repeat: null,
 				frames: [
 					3,
@@ -95,8 +98,9 @@ export const ANIMATIONS = [
 
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 450,
 				repeat: null,
 				frames: [
 					10,
@@ -126,9 +130,10 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
-				repeat: null,
+				from: [0, 0],
+				to: [0, 0],
+				duration: 2700,
+				repeat: [2, 0],
 				frames: [
 					42,
 					43,
@@ -156,8 +161,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 1, 100],
-				to: [0, 10, 40],
+				from: [0, 1],
+				to: [0, 10],
+				duration: 1050,
 				repeat: [20, 0],
 				frames: [
 					133,
@@ -181,8 +187,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 10, 40],
-				to: [0, 10, 40],
+				from: [0, 10],
+				to: [0, 10],
+				duration: 1320,
 				repeat: [10, 0],
 				frames: [
 					46,
@@ -213,8 +220,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0, 100],
-				to: [-10, 0, 100],
+				from: [-10, 0],
+				to: [-10, 0],
+				duration: 1800,
 				repeat: [5, 0],
 				frames: [
 					5,
@@ -245,8 +253,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [1, 0, 100],
-				to: [10, 0, 100],
+				from: [1, 0],
+				to: [10, 0],
+				duration: 1100,
 				repeat: null,
 				frames: [
 					62,
@@ -285,8 +294,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 300,
 				repeat: null,
 				frames: [
 					42,
@@ -298,8 +308,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, -2, 100],
-				to: [0, 3, 100],
+				from: [0, -2],
+				to: [0, 3],
+				duration: 500,
 				repeat: null,
 				frames: [
 					131,
@@ -313,8 +324,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1600,
 				repeat: null,
 				frames: [
 					13,
@@ -353,8 +365,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 500],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1000,
 				repeat: null,
 				frames: [
 					48,
@@ -380,11 +393,15 @@ export const ANIMATIONS = [
 		name: 'Urinate',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(5 + Math.random() * 10);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 200],
-					to: [0, 0, 200],
-					repeat: [Math.floor(5 + Math.random() * 10), 5],
+					from: [0, 0],
+					to: [0, 0],
+					duration: (7 + repeat * 2) * 150,
+					repeat: [repeat, 5],
 					frames: [
 						3,
 						12,
@@ -400,8 +417,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1050,
 				repeat: null,
 				frames: [
 					104,
@@ -431,8 +449,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1600,
 				repeat: [4, 11],
 				frames: [
 					3,
@@ -467,8 +486,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 30],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1300,
 				repeat: [12, 0],
 				frames: [
 					50,
@@ -491,11 +511,15 @@ export const ANIMATIONS = [
 		name: 'Sleep',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(10 + Math.random() * 20);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 1000],
-					to: [0, 0, 200],
-					repeat: [Math.floor(10 + Math.random() * 20), 9],
+					from: [0, 0],
+					to: [0, 0],
+					duration: (11 + repeat * 2) * 200,
+					repeat: [repeat, 9],
 					frames: [
 						3,
 						107,
@@ -515,8 +539,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 2200,
 				repeat: null,
 				frames: [
 					0,
@@ -548,11 +573,15 @@ export const ANIMATIONS = [
 		name: 'Doze',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(20 + Math.random() * 10);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 200],
-					to: [0, 0, 200],
-					repeat: [Math.floor(20 + Math.random() * 10), 6],
+					from: [0, 0],
+					to: [0, 0],
+					duration: (8 + repeat * 2) * 200,
+					repeat: [repeat, 6],
 					frames: [
 						3,
 						6,
@@ -569,8 +598,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 600,
 				repeat: null,
 				frames: [
 					8,
@@ -594,11 +624,15 @@ export const ANIMATIONS = [
 		name: 'Bored Sleep',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(30 + Math.random() * 10);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 200],
-					to: [0, 0, 200],
-					repeat: [Math.floor(30 + Math.random() * 10), 7],
+					from: [0, 0],
+					to: [0, 0],
+					duration: (9 + repeat * 2) * 200,
+					repeat: [repeat, 7],
 					frames: [
 						3,
 						9,
@@ -616,8 +650,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1800,
 				repeat: null,
 				frames: [
 					35,
@@ -652,8 +687,9 @@ export const ANIMATIONS = [
 						Poe.width,
 						Poe.height - 600,
 					],
-					from: [-4, 3, 30],
-					to: [-4, 3, 30],
+					from: [-4, 3],
+					to: [-4, 3],
+					duration: 4350,
 					repeat: [146, 0],
 					frames: [
 						134,
@@ -664,8 +700,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 3, 30],
-				to: [-4, 3, 30],
+				from: [-4, 3],
+				to: [-4, 3],
+				duration: 1440,
 				repeat: null,
 				frames: [
 					135,
@@ -739,8 +776,9 @@ export const ANIMATIONS = [
 						Poe.width - 800 + TILE_SIZE + 10,
 						Poe.height - TILE_SIZE,
 					],
-					from: [0, 0, 30],
-					to: [0, 0, 30],
+					from: [0, 0],
+					to: [0, 0],
+					duration: 5160,
 					repeat: [171, 0],
 					frames: [
 						146,
@@ -751,8 +789,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 30],
-				to: [0, 0, 30],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 2700,
 				repeat: [70, 19],
 				frames: [
 					146,
@@ -795,8 +834,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, -8, 100],
-				to: [-10, 10, 100],
+				from: [-10, -8],
+				to: [-10, 10],
+				duration: 1500,
 				repeat: null,
 				frames: [
 					76,
@@ -838,8 +878,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 300],
-				to: [0, 0, 300],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 7050,
 				repeat: [5, 5],
 				frames: [
 					6,
@@ -874,8 +915,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 300],
-				to: [0, 0, 300],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 7050,
 				repeat: null,
 				frames: [
 					153,
@@ -922,9 +964,9 @@ export const ANIMATIONS = [
 					152,
 					152,
 					152,
-					174,
-					174,
-					174,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
 				],
 				sound: null,
 				flags: SceneFlags.ForceGravity,
@@ -943,14 +985,18 @@ export const ANIMATIONS = [
 		name: 'Black Sheep ',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor((Poe.width / 2) / 30 - 6);
+
 				return /** @type {!Scene} */ ({
 					start: [
 						Poe.width + TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-10, 0, 100],
-					to: [-10, 0, 100],
-					repeat: [Math.floor((Poe.width / 2) / 30 - 6), 0],
+					from: [-10, 0],
+					to: [-10, 0],
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						5,
 						4,
@@ -961,14 +1007,15 @@ export const ANIMATIONS = [
 				});
 			}),
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(25 + (Math.floor(Poe.width / 2) % 30) / 7);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [-6, 0, 100],
-					to: [0, 0, 100],
-					repeat: [
-						Math.floor(25 + (Math.floor(Poe.width / 2) % 30) / 7),
-						0,
-					],
+					from: [-6, 0],
+					to: [0, 0],
+					duration: (2 + repeat * 2) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						2,
 						3,
@@ -979,8 +1026,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 500],
-				to: [0, 0, 500],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 8500,
 				repeat: null,
 				frames: [
 					8,
@@ -1018,14 +1066,18 @@ export const ANIMATIONS = [
 		name: 'Black Sheep 👶',
 		scenes: [
 			/** @type {!Scene} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor((Poe.width / 2) / 30 - 6);
+
 				return /** @type {!Scene} */ ({
 					start: [
 						0 - TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [10, 0, 100],
-					to: [10, 0, 100],
-					repeat: [Math.floor((Poe.width / 2) / 30 - 6), 0],
+					from: [10, 0],
+					to: [10, 0],
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						155,
 						154,
@@ -1036,14 +1088,15 @@ export const ANIMATIONS = [
 				});
 			}),
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(24 + (Math.floor(Poe.width / 2) % 30) / 7);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [6, 0, 100],
-					to: [0, 0, 100],
-					repeat: [
-						Math.floor(24 + (Math.floor(Poe.width / 2) % 30) / 7),
-						0,
-					],
+					from: [6, 0],
+					to: [0, 0],
+					duration: (2 + repeat * 2) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						156,
 						157,
@@ -1054,8 +1107,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 500],
-				to: [0, 0, 500],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 500,
 				repeat: [9, 0],
 				frames: [
 					157,
@@ -1065,8 +1119,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 20],
-				to: [0, 0, 20],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 420,
 				repeat: [20, 0],
 				frames: [
 					157,
@@ -1090,8 +1145,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-10, 0, 100],
+				from: [-2, 0],
+				to: [-10, 0],
+				duration: 1200,
 				repeat: null,
 				frames: [
 					2,
@@ -1121,8 +1177,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-10, 0, 100],
-				to: [-2, 0, 200],
+				from: [-10, 0],
+				to: [-2, 0],
+				duration: 1500,
 				repeat: null,
 				frames: [
 					5,
@@ -1153,11 +1210,15 @@ export const ANIMATIONS = [
 		name: 'Climb Up',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.height / 2);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, -2, 150],
-					to: [0, -2, 150],
-					repeat: [Math.floor(Poe.height / 2), 2],
+					from: [0, -2],
+					to: [0, -2],
+					duration: (4 + repeat * 2) * 150,
+					repeat: [repeat, 2],
 					frames: [
 						31,
 						30,
@@ -1184,8 +1245,9 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */ (() => {
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 200],
-					to: [2, 0, 200],
+					from: [0, 0],
+					to: [2, 0],
+					duration: 300,
 					repeat: null,
 					frames: [
 						16,
@@ -1210,11 +1272,15 @@ export const ANIMATIONS = [
 		name: 'Walk Upside Down',
 		scenes: [
 			/** @type {!Scene} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 2);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [-2, 0, 150],
-					to: [-2, 0, 150],
-					repeat: [Math.floor(Poe.width / 2), 0],
+					from: [-2, 0],
+					to: [-2, 0],
+					duration: (2 + repeat * 2) * 150,
+					repeat: [repeat, 0],
 					frames: [
 						98,
 						97,
@@ -1239,8 +1305,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 800],
-				to: [0, 0, 800],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 400,
 				repeat: null,
 				frames: [
 					97,
@@ -1263,11 +1330,15 @@ export const ANIMATIONS = [
 		name: 'Climb Down',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.height / 2);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 2, 150],
-					to: [0, 2, 150],
-					repeat: [Math.floor(Poe.height / 2), 0],
+					from: [0, 2],
+					to: [0, 2],
+					duration: (2 + repeat * 2) * 150,
+					repeat: [repeat, 0],
 					frames: [
 						19,
 						20,
@@ -1292,8 +1363,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 900,
 				repeat: null,
 				frames: [
 					24,
@@ -1322,8 +1394,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 2400,
 				repeat: null,
 				frames: [
 					9,
@@ -1362,8 +1435,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1400,
 				repeat: null,
 				frames: [
 					3,
@@ -1393,8 +1467,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-2, 0, 200],
-				to: [-2, 0, 200],
+				from: [-2, 0],
+				to: [-2, 0],
+				duration: 2000,
 				repeat: null,
 				frames: [
 					86,
@@ -1427,8 +1502,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-4, 0, 50],
-				to: [0, 0, 200],
+				from: [-4, 0],
+				to: [0, 0],
+				duration: 1100,
 				repeat: null,
 				frames: [
 					24,
@@ -1462,8 +1538,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 2400,
 				repeat: [2, 0],
 				frames: [
 					169,
@@ -1480,8 +1557,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 600,
 				repeat: null,
 				frames: [
 					119,
@@ -1510,8 +1588,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 450,
 				repeat: null,
 				frames: [
 					9,
@@ -1523,8 +1602,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [-8, 0, 100],
-				to: [-8, 0, 100],
+				from: [-8, 0],
+				to: [-8, 0],
+				duration: 800,
 				repeat: [1, 0],
 				frames: [
 					10,
@@ -1541,8 +1621,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 450,
 				repeat: null,
 				frames: [
 					10,
@@ -1568,8 +1649,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1600,
 				repeat: null,
 				frames: [
 					108,
@@ -1600,8 +1682,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1200,
 				repeat: [3, 0],
 				frames: [
 					56,
@@ -1629,8 +1712,9 @@ export const ANIMATIONS = [
 						Poe.width,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-2, 0, 100],
-					to: [-2, 0, 100],
+					from: [-2, 0],
+					to: [-2, 0],
+					duration: 1100,
 					repeat: [10, 0],
 					frames: [
 						2,
@@ -1642,8 +1726,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 50],
-				to: [0, 0, 50],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1050,
 				repeat: [15, 5],
 				frames: [
 					3,
@@ -1675,8 +1760,9 @@ export const ANIMATIONS = [
 						0 - TILE_SIZE,
 						TILE_SIZE * 2,
 					],
-					from: [0, 0, 100],
-					to: [0, 0, 100],
+					from: [0, 0],
+					to: [0, 0],
+					duration: 2100,
 					repeat: [20, 0],
 					frames: [
 						158,
@@ -1687,8 +1773,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [5, -1, 25],
-				to: [5, -1, 25],
+				from: [5, -1],
+				to: [5, -1],
+				duration: 1025,
 				repeat: [40, 0],
 				frames: [
 					158,
@@ -1714,8 +1801,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 3400,
 				repeat: [11, 5],
 				frames: [
 					9,
@@ -1729,11 +1817,15 @@ export const ANIMATIONS = [
 				flags: SceneFlags.ForceGravity,
 			}),
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 4);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [0, 0, 25],
-					to: [0, 0, 25],
-					repeat: [Math.floor(Poe.width / 4), 47],
+					from: [0, 0],
+					to: [0, 0],
+					duration: (48 + repeat) * 25,
+					repeat: [repeat, 47],
 					frames: [
 						34,
 						34,
@@ -1741,48 +1833,48 @@ export const ANIMATIONS = [
 						34,
 						34,
 						34,
-						175,
+						BLANK_FRAME,
 						34,
-						175,
+						BLANK_FRAME,
 						86,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
-						175,
+						BLANK_FRAME,
+						BLANK_FRAME,
 						34,
-						175,
+						BLANK_FRAME,
 						86,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
-						175,
+						BLANK_FRAME,
+						BLANK_FRAME,
 						34,
-						175,
+						BLANK_FRAME,
 						86,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
-						175,
+						BLANK_FRAME,
+						BLANK_FRAME,
 						34,
-						175,
+						BLANK_FRAME,
 						86,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 						86,
-						175,
+						BLANK_FRAME,
 					],
 					sound: null,
 					flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
@@ -1804,8 +1896,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 4, 25],
-				to: [0, 4, 25],
+				from: [0, 4],
+				to: [0, 4],
+				duration: 3400,
 				repeat: [29, 0],
 				frames: [
 					158,
@@ -1831,8 +1924,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 25],
-				to: [0, 0, 25],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1200,
 				repeat: [11, 0],
 				frames: [
 					162,
@@ -1844,11 +1938,15 @@ export const ANIMATIONS = [
 				flags: SceneFlags.IgnoreEdges,
 			}),
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 16);
+
 				return /** @type {!Scene} */ ({
 					start: null,
-					from: [4, -1, 25],
-					to: [4, -1, 25],
-					repeat: [Math.floor(Poe.width / 16), 0],
+					from: [4, -1],
+					to: [4, -1],
+					duration: (4 + repeat * 4) * 25,
+					repeat: [repeat, 0],
 					frames: [
 						158,
 						159,
@@ -1875,17 +1973,18 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 25],
-				to: [0, 0, 25],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 7200,
 				repeat: [35, 7],
 				frames: [
-					175,
-					175,
-					175,
-					175,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
+					BLANK_FRAME,
 					172,
 					172,
-					175,
+					BLANK_FRAME,
 					172,
 				],
 				sound: null,
@@ -1905,14 +2004,18 @@ export const ANIMATIONS = [
 		name: 'Chasing a Martian!',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 2 / 30);
+
 				return /** @type {!Scene} */ ({
 					start: [
 						Poe.width + TILE_SIZE * 3,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-10, 0, 100],
-					to: [-10, 0, 100],
-					repeat: [Math.floor(Poe.width / 2 / 30), 0],
+					from: [-10, 0],
+					to: [-10, 0],
+					duration: (3 + repeat * 3) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						5,
 						4,
@@ -1936,14 +2039,18 @@ export const ANIMATIONS = [
 		name: 'Chasing a Martian! 👶',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Poe.width / 48 + 4);
+
 				return /** @type {!Scene} */ ({
 					start: [
 						Poe.width + TILE_SIZE,
 						Poe.height - TILE_SIZE,
 					],
-					from: [-12, 0, 100],
-					to: [-12, 0, 100],
-					repeat: [Math.floor(Poe.width / 48 + 4), 0],
+					from: [-12, 0],
+					to: [-12, 0],
+					duration: (4 + repeat * 4) * 100,
+					repeat: [repeat, 0],
 					frames: [
 						166,
 						167,
@@ -1970,8 +2077,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 100],
-				to: [0, 0, 100],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 1400,
 				repeat: null,
 				frames: [
 					3,
@@ -2012,8 +2120,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 5, 40],
-				to: [0, 5, 40],
+				from: [0, 5],
+				to: [0, 5],
+				duration: 440,
 				repeat: [10, 0],
 				frames: [
 					29,
@@ -2037,8 +2146,9 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 200,
 				repeat: null,
 				frames: [
 					52,
@@ -2048,8 +2158,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0, 200],
-				to: [6, 0, 200],
+				from: [6, 0],
+				to: [6, 0],
+				duration: 200,
 				repeat: null,
 				frames: [
 					53,
@@ -2059,8 +2170,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [0, 0, 200],
-				to: [0, 0, 200],
+				from: [0, 0],
+				to: [0, 0],
+				duration: 200,
 				repeat: null,
 				frames: [
 					52,
@@ -2070,8 +2182,9 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [6, 0, 200],
-				to: [6, 0, 200],
+				from: [6, 0],
+				to: [6, 0],
+				duration: 200,
 				repeat: null,
 				frames: [
 					53,
@@ -2099,12 +2212,13 @@ export const ANIMATIONS = [
 		scenes: [
 			/** @type {!Scene} */ ({
 				start: null,
-				from: [20, 0, 100],
-				to: [0, 0, 100],
+				from: [20, 0],
+				to: [0, 0],
+				duration: 600,
 				repeat: [3, 2],
 				frames: [
-					175,
-					175,
+					BLANK_FRAME,
+					BLANK_FRAME,
 					109,
 				],
 				sound: null,
@@ -2327,6 +2441,83 @@ export const resolveScenes = function(scenes) {
 	}
 
 	return out;
+};
+
+/**
+ * Resolve Scene Steps
+ *
+ * @param {Array<!Scene>} scenes Scenes.
+ * @return {Array<!Step>} Steps.
+ */
+export const resolveSceneSteps = function(scenes) {
+	/** @type {Array<!Step>} */
+	let out = [];
+
+	/** @type {number} */
+	let step = 0;
+
+	// Loop through the scenes.
+	for (let i = 0; i < scenes.length; ++i) {
+		/** @const {number} */
+		const framesLength = scenes[i].frames.length;
+
+		/** @const {number} */
+		const repeat = null !== scenes[i].repeat ? scenes[i].repeat[0] : 0;
+
+		/** @const {number} */
+		const repeatFrom = repeat ? scenes[i].repeat[1] : 0;
+
+		/** @const {number} */
+		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
+
+		/** @type {number} */
+		let last = 0;
+
+		// Now that we know how many steps this scene has, let's build them!
+		for (let j = 0; j < stepsLength; ++j) {
+			/** @const {number} */
+			const progress = (j + 1) / stepsLength;
+
+			/** @const {number} */
+			const time = scenes[i].duration * progress;
+
+			// What frame should we show?
+			/** @type {number} */
+			let frame = 0;
+			if (j < framesLength) {
+				frame = scenes[i].frames[j];
+			}
+			else if (! repeatFrom) {
+				frame = scenes[i].frames[j % framesLength];
+			}
+			else {
+				frame = scenes[i].frames[repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
+			}
+
+			/** @type {?Sound} */
+			let sound = null;
+			if (null !== scenes[i].sound && scenes[i].sound[1] === j) {
+				sound = /** @type {!Sound} */ (scenes[i].sound[0]);
+			}
+
+			out[step] = /** @type {!Step} */ ({
+				step: step,
+				scene: i,
+				interval: time - last,
+				frame: frame,
+				x: scenes[i].from[0] + (scenes[i].to[0] - scenes[i].from[0]) * progress,
+				y: scenes[i].from[1] + (scenes[i].to[1] - scenes[i].from[1]) * progress,
+				sound: sound,
+				flip: !! ((SceneFlags.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
+				flags: scenes[i].flags,
+			});
+
+			last = time;
+			++step;
+		}
+	}
+
+	return out.reverse();
 };
 
 /**

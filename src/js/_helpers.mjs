@@ -295,6 +295,7 @@ export const isScene = function(v) {
 		'start' in v && isScenePosition(v.start) &&
 		'from' in v && isScenePosition(v.from) &&
 		'to' in v && isScenePosition(v.to) &&
+		isAbsInt(v.duration) &&
 		'repeat' in v && isSceneRepeat(v.repeat) &&
 		'frames' in v && isFrameList(v.frames) &&
 		'sound' in v && isSceneSound(v.sound) &&
@@ -333,11 +334,9 @@ export const isScenePosition = function(v) {
 	}
 
 	return Array.isArray(v) &&
-		2 <= v.length &&
-		3 >= v.length &&
+		2 === v.length &&
 		'number' === typeof v[0] &&
-		'number' === typeof v[1] &&
-		('undefined' === typeof v[2] || 'number' === typeof v[2]);
+		'number' === typeof v[1];
 };
 
 /**
