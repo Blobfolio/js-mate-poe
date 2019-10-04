@@ -157,7 +157,7 @@ export const demoResolveScenes = function(scenes) {
  * @return {number} Value.
  */
 export const ease = function(v) {
-	return 0.5 > v ? 4 * v * v * v : (v - 1) * (2 * v - 2) * (2 * v - 2) + 1;
+	return 0.5 > v ? 2 * v * v : -1 + (4 - 2 * v) * v;
 };
 
 /**
@@ -167,7 +167,7 @@ export const ease = function(v) {
  * @return {number} Value.
  */
 export const easeIn = function(v) {
-	return v * v * v;
+	return v * v;
 };
 
 /**
@@ -177,7 +177,7 @@ export const easeIn = function(v) {
  * @return {number} Value.
  */
 export const easeOut = function(v) {
-	return (--v) * v * v + 1;
+	return v * (2 - v);
 };
 
 
