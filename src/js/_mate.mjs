@@ -1028,18 +1028,19 @@ export const ChildMate = class {
 	 * @return {void} Nothing.
 	 */
 	tick(now) {
+		this._raf = null;
+
 		// There's nothing to tick.
 		if (
 			null === this._el ||
 			null === this._animation ||
 			! this._steps.length
 		) {
-			this._raf = null;
 			return;
 		}
 
 		// Queue up the next tick prematurely to avoid overlap.
-		this._raf = requestAnimationFrame((n) => this.tick(n));
+		this.maybeTick();
 
 		if (this._nextTick <= now) {
 			/** @const {?boolean} */
