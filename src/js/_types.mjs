@@ -73,9 +73,11 @@ export const SceneFlags = {
 	// Ease Out.
 	EaseOut: 16,
 	// Sprite should be at the bottom of the page.
-	ForceGravity: 4,
+	ForceGravity: 32,
 	// Edges don't need to trigger edge sequences.
-	IgnoreEdges: 8,
+	IgnoreEdges: 64,
+	// Variable duration.
+	VariableDuration: 128,
 };
 
 /**
