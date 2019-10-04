@@ -4,9 +4,11 @@
 
 /* eslint-disable quote-props */
 import {
-	Flags,
+	AnimationFlags,
+	DemoFlags,
 	Playlist,
 	Scene,
+	SceneFlags,
 	Step,
 	VueComponent,
 	VueProp
@@ -168,7 +170,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'isPlayable': function() {
-			return !! (Flags.DemoPlay & this['flags']);
+			return !! (AnimationFlags.DemoPlay & this['flags']);
 		},
 
 		/**
@@ -195,7 +197,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'variableDuration': function() {
-			return !! (Flags.VariableDuration & this['flags']);
+			return !! (DemoFlags.VariableDuration & this['flags']);
 		},
 
 		/**
@@ -375,7 +377,7 @@ export const poeAnimation = {
 						'x': scene['from'][0] + xDiff * progress,
 						'y': scene['from'][1] + yDiff * progress,
 						'sound': null,
-						'flip': !! ((Flags.AutoFlip & scene['flags']) && stepsLength - 1 === j),
+						'flip': !! ((SceneFlags.AutoFlip & scene['flags']) && stepsLength - 1 === j),
 						'flags': scene['flags'],
 					}));
 
@@ -392,7 +394,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'defaultChoice': function() {
-			return !! (Flags.DefaultChoice & this['flags']);
+			return !! (DemoFlags.DefaultChoice & this['flags']);
 		},
 
 		/**
@@ -401,7 +403,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'entranceChoice': function() {
-			return !! (Flags.EntranceChoice & this['flags']);
+			return !! (DemoFlags.EntranceChoice & this['flags']);
 		},
 
 		/**
@@ -410,7 +412,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'firstChoice': function() {
-			return !! (Flags.FirstChoice & this['flags']);
+			return !! (DemoFlags.FirstChoice & this['flags']);
 		},
 	},
 

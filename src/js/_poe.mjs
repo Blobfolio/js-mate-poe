@@ -6,7 +6,7 @@ import { ASCII, NAME, REPO, VERSION } from './_about.mjs';
 import { CSS } from './_css.mjs';
 import { zeroPad } from './_helpers.mjs';
 import { ChildMate, Mate } from './_mate.mjs';
-import { Flags, LogType, Playlist } from './_types.mjs';
+import { LogType, Playlist, PoeFlags } from './_types.mjs';
 
 
 
@@ -25,7 +25,7 @@ import { Flags, LogType, Playlist } from './_types.mjs';
  */
 export const Poe = {
 	/** @private {number} */
-	_flags: Flags.MakeNoise,
+	_flags: PoeFlags.MakeNoise,
 	/** @private {?Mate} */
 	_primary: null,
 	/** @private {Array<ChildMate>} */
@@ -245,7 +245,7 @@ export const Poe = {
 	 * @public
 	 */
 	get audio() {
-		return !! (Flags.MakeNoise & Poe._flags);
+		return !! (PoeFlags.MakeNoise & Poe._flags);
 	},
 
 	/**
@@ -260,11 +260,11 @@ export const Poe = {
 	set audio(v) {
 		// No flip.
 		if (! v) {
-			Poe._flags &= ~Flags.MakeNoise;
+			Poe._flags &= ~PoeFlags.MakeNoise;
 		}
 		// Yes flip.
 		else {
-			Poe._flags |= Flags.MakeNoise;
+			Poe._flags |= PoeFlags.MakeNoise;
 		}
 	},
 
@@ -275,7 +275,7 @@ export const Poe = {
 	 * @public
 	 */
 	get debug() {
-		return !! (Flags.Debug & Poe._flags);
+		return !! (PoeFlags.Debug & Poe._flags);
 	},
 
 	/**
@@ -290,11 +290,11 @@ export const Poe = {
 	set debug(v) {
 		// No flip.
 		if (! v) {
-			Poe._flags &= ~Flags.Debug;
+			Poe._flags &= ~PoeFlags.Debug;
 		}
 		// Yes flip.
 		else {
-			Poe._flags |= Flags.Debug;
+			Poe._flags |= PoeFlags.Debug;
 		}
 	},
 
@@ -408,8 +408,8 @@ export const Poe = {
 	 * @return {void} Nothing.
 	 */
 	audioWarning() {
-		if (! (Flags.AudioWarned & Poe._flags)) {
-			Poe._flags |= Flags.AudioWarned;
+		if (! (PoeFlags.AudioWarned & Poe._flags)) {
+			Poe._flags |= PoeFlags.AudioWarned;
 
 			Poe.log(
 				'Hint: try clicking Poe with your mouse.',

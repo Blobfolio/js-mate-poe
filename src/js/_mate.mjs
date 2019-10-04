@@ -16,11 +16,13 @@ import { makeNoise, TILE_SIZE } from './_media.mjs';
 import { Poe } from './_poe.mjs';
 import {
 	Animation,
+	AnimationFlags,
 	Direction,
-	Flags,
 	LogType,
+	MateFlags,
 	Playlist,
 	Scene,
+	SceneFlags,
 	Sound,
 	Step,
 	WeightedChoice
@@ -141,7 +143,7 @@ export const ChildMate = class {
 		case Playlist.FlowerChild:
 			setup = [
 				Playlist.FlowerChild,
-				(Flags.IsFlipped & this._flags) ?
+				(MateFlags.IsFlipped & this._flags) ?
 					this._x + TILE_SIZE * 0.9 :
 					this._x - TILE_SIZE * 0.9,
 				this._y,
@@ -237,7 +239,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get behind() {
-		return !! (Flags.IsBehind & this._flags);
+		return !! (MateFlags.IsBehind & this._flags);
 	}
 
 	/**
@@ -249,11 +251,11 @@ export const ChildMate = class {
 	set behind(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.IsBehind;
+			this._flags &= ~MateFlags.IsBehind;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.IsBehind;
+			this._flags |= MateFlags.IsBehind;
 		}
 	}
 
@@ -263,7 +265,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get bottomSide() {
-		return !! (Flags.BottomSide & this._flags);
+		return !! (MateFlags.BottomSide & this._flags);
 	}
 
 	/**
@@ -275,11 +277,11 @@ export const ChildMate = class {
 	set bottomSide(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.BottomSide;
+			this._flags &= ~MateFlags.BottomSide;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.BottomSide;
+			this._flags |= MateFlags.BottomSide;
 		}
 	}
 
@@ -289,7 +291,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get dragging() {
-		return !! (Flags.IsDragging & this._flags);
+		return !! (MateFlags.IsDragging & this._flags);
 	}
 
 	/**
@@ -301,11 +303,11 @@ export const ChildMate = class {
 	set dragging(v) {
 		// No flip.
 		if (! v) {
-			this._flags &= ~Flags.IsDragging;
+			this._flags &= ~MateFlags.IsDragging;
 		}
 		// Yes flip.
 		else {
-			this._flags |= Flags.IsDragging;
+			this._flags |= MateFlags.IsDragging;
 		}
 	}
 
@@ -397,7 +399,7 @@ export const ChildMate = class {
 		}
 
 		// Flipped?
-		if (Flags.IsFlipped & this._flags) {
+		if (MateFlags.IsFlipped & this._flags) {
 			out += ' rotateY(180deg)';
 		}
 
@@ -410,7 +412,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get flipped() {
-		return !! (Flags.IsFlipped & this._flags);
+		return !! (MateFlags.IsFlipped & this._flags);
 	}
 
 	/**
@@ -422,11 +424,11 @@ export const ChildMate = class {
 	set flipped(v) {
 		// No flip.
 		if (! v) {
-			this._flags &= ~Flags.IsFlipped;
+			this._flags &= ~MateFlags.IsFlipped;
 		}
 		// Yes flip.
 		else {
-			this._flags |= Flags.IsFlipped;
+			this._flags |= MateFlags.IsFlipped;
 		}
 	}
 
@@ -475,7 +477,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get leftSide() {
-		return !! (Flags.LeftSide & this._flags);
+		return !! (MateFlags.LeftSide & this._flags);
 	}
 
 	/**
@@ -487,11 +489,11 @@ export const ChildMate = class {
 	set leftSide(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.LeftSide;
+			this._flags &= ~MateFlags.LeftSide;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.LeftSide;
+			this._flags |= MateFlags.LeftSide;
 		}
 	}
 
@@ -510,7 +512,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get mayExit() {
-		return !! (Flags.MayExit & this._flags);
+		return !! (MateFlags.MayExit & this._flags);
 	}
 
 	/**
@@ -522,11 +524,11 @@ export const ChildMate = class {
 	set mayExit(v) {
 		// No flip.
 		if (! v) {
-			this._flags &= ~Flags.MayExit;
+			this._flags &= ~MateFlags.MayExit;
 		}
 		// Yes flip.
 		else {
-			this._flags |= Flags.MayExit;
+			this._flags |= MateFlags.MayExit;
 		}
 	}
 
@@ -536,7 +538,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get onFloor() {
-		return !! (Flags.OnFloor & this._flags);
+		return !! (MateFlags.OnFloor & this._flags);
 	}
 
 	/**
@@ -548,11 +550,11 @@ export const ChildMate = class {
 	set onFloor(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.OnFloor;
+			this._flags &= ~MateFlags.OnFloor;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.OnFloor;
+			this._flags |= MateFlags.OnFloor;
 		}
 	}
 
@@ -562,7 +564,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get rightSide() {
-		return !! (Flags.RightSide & this._flags);
+		return !! (MateFlags.RightSide & this._flags);
 	}
 
 	/**
@@ -574,11 +576,11 @@ export const ChildMate = class {
 	set rightSide(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.RightSide;
+			this._flags &= ~MateFlags.RightSide;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.RightSide;
+			this._flags |= MateFlags.RightSide;
 		}
 	}
 
@@ -588,7 +590,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get topSide() {
-		return !! (Flags.TopSide & this._flags);
+		return !! (MateFlags.TopSide & this._flags);
 	}
 
 	/**
@@ -600,11 +602,11 @@ export const ChildMate = class {
 	set topSide(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.TopSide;
+			this._flags &= ~MateFlags.TopSide;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.TopSide;
+			this._flags |= MateFlags.TopSide;
 		}
 	}
 
@@ -614,7 +616,7 @@ export const ChildMate = class {
 	 * @return {boolean} True/false.
 	 */
 	get visible() {
-		return !! (Flags.IsVisible & this._flags);
+		return !! (MateFlags.IsVisible & this._flags);
 	}
 
 	/**
@@ -626,11 +628,11 @@ export const ChildMate = class {
 	set visible(v) {
 		// Not visible.
 		if (! v) {
-			this._flags &= ~Flags.IsVisible;
+			this._flags &= ~MateFlags.IsVisible;
 		}
 		// Yes visible.
 		else {
-			this._flags |= Flags.IsVisible;
+			this._flags |= MateFlags.IsVisible;
 		}
 	}
 
@@ -675,7 +677,7 @@ export const ChildMate = class {
 		if (
 			(null === this._animation) ||
 			(animationId !== this._animation.id) ||
-			! (Flags.AllowExit & this._animation.scenes[0].flags)
+			! (SceneFlags.AllowExit & this._animation.scenes[0].flags)
 		) {
 			this.mayExit = false;
 		}
@@ -693,7 +695,7 @@ export const ChildMate = class {
 
 		// Allow off-screen exits?
 		if (
-			(Flags.AllowExit & this._animation.scenes[0].flags) &&
+			(SceneFlags.AllowExit & this._animation.scenes[0].flags) &&
 			! this.mayExit &&
 			5 === Math.floor(Math.random() * 10)
 		) {
@@ -701,7 +703,7 @@ export const ChildMate = class {
 		}
 
 		// Stack behind?
-		this.behind = !! (Flags.StackBehind & this._animation.flags);
+		this.behind = !! (AnimationFlags.StackBehind & this._animation.flags);
 
 		// Set the starting position.
 		this.setAnimationStart(x, y);
@@ -726,7 +728,7 @@ export const ChildMate = class {
 	checkAnimation() {
 		if (
 			null === this._animation ||
-			(Flags.NoChildren & this._animation.flags)
+			(AnimationFlags.NoChildren & this._animation.flags)
 		) {
 			this.stop();
 			return false;
@@ -758,7 +760,7 @@ export const ChildMate = class {
 				this._animation.scenes[0].start[1],
 				true
 			);
-			this._flags &= ~Flags.IsFlipped;
+			this._flags &= ~MateFlags.IsFlipped;
 		}
 	}
 
@@ -877,7 +879,7 @@ export const ChildMate = class {
 					x: scene.from[0] + (scene.to[0] - scene.from[0]) * progress,
 					y: scene.from[1] + (scene.to[1] - scene.from[1]) * progress,
 					sound: sound,
-					flip: !! ((Flags.AutoFlip & scene.flags) && stepsLength - 1 === j),
+					flip: !! ((SceneFlags.AutoFlip & scene.flags) && stepsLength - 1 === j),
 					flags: scene.flags,
 				});
 
@@ -1194,13 +1196,13 @@ export const ChildMate = class {
 
 		// Gravity.
 		/** @const {boolean} */
-		const gravity = !! (Flags.ForceGravity & step.flags);
+		const gravity = !! (SceneFlags.ForceGravity & step.flags);
 		if (gravity && ! this.onFloor && this.checkGravity()) {
 			return true;
 		}
 
 		// Edge checks.
-		if (! this.dragging && ! (Flags.IgnoreEdges & step.flags)) {
+		if (! this.dragging && ! (SceneFlags.IgnoreEdges & step.flags)) {
 			if (this.leftSide) {
 				if (this.checkLeft(xDirection(x))) {
 					return true;
@@ -1369,10 +1371,10 @@ export const Mate = class extends ChildMate {
 	 */
 	setupEvents() {
 		// Only do this once.
-		if (Flags.IsBound & this._flags) {
+		if (MateFlags.IsBound & this._flags) {
 			return;
 		}
-		this._flags |= Flags.IsBound;
+		this._flags |= MateFlags.IsBound;
 
 		this._events['contextmenu'] = (/** @type {Event} */ e) => { e.preventDefault(); };
 		this._events['mousedown'] = (/** @type {!MouseEvent} */ e) => this.onDragStart(e);
@@ -1469,7 +1471,7 @@ export const Mate = class extends ChildMate {
 	checkAnimation() {
 		if (
 			null === this._animation ||
-			(Flags.NoParents & this._animation.flags)
+			(AnimationFlags.NoParents & this._animation.flags)
 		) {
 			// Primary mates cannot be unset in this way.
 			/** @const {?Event} */
@@ -1482,7 +1484,7 @@ export const Mate = class extends ChildMate {
 		}
 
 		// Kill children if falling.
-		if (Flags.FallingAnimation & this._animation.flags) {
+		if (AnimationFlags.FallingAnimation & this._animation.flags) {
 			// If we are totally off-screen, let's move it in-screen or it'll go on a while.
 			if (0 - TILE_SIZE >= this._x) {
 				this._x = 0;
@@ -1667,10 +1669,10 @@ export const Mate = class extends ChildMate {
 	 */
 	removeEvents() {
 		// Nothing bound, nothing to lose.
-		if (! (Flags.IsBound & this._flags)) {
+		if (! (MateFlags.IsBound & this._flags)) {
 			return;
 		}
-		this._flags &= ~Flags.IsBound;
+		this._flags &= ~MateFlags.IsBound;
 
 		/** @const {!Array<string>} */
 		const keys = Object.keys(/** @type {!Object} */ (this._events));
@@ -1768,7 +1770,7 @@ export const Mate = class extends ChildMate {
 		// Check gravity.
 		if (
 			this._steps.length &&
-			(Flags.ForceGravity & this._steps[this._steps.length - 1].flags) &&
+			(SceneFlags.ForceGravity & this._steps[this._steps.length - 1].flags) &&
 			Poe.height - TILE_SIZE !== this._y
 		) {
 			this.setPosition(this._x, Poe.height - TILE_SIZE, true);

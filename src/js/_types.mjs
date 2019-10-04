@@ -13,38 +13,73 @@
  *
  * @enum {number}
  */
-export const Flags = {
-	// Animation: OK to manually play during demo.
+export const AnimationFlags = {
+	// OK to manually play during demo.
 	DemoPlay: 1,
-	// Animation: Not for children.
+	// Not for children.
 	NoChildren: 2,
-	// Animation: Not for parents.
+	// Not for parents.
 	NoParents: 4,
-	// Animation: Falling animation.
+	// Falling animation.
 	FallingAnimation: 8,
-	// Animation: Stack behind other frames.
+	// Stack behind other frames.
 	StackBehind: 16,
+};
 
-	// Demo: Default Choice.
+/**
+ * Demo Flags
+ *
+ * @enum {number}
+ */
+export const DemoFlags = {
+	// Default Choice.
 	DefaultChoice: 1,
-	// Demo: Entrance Choice.
+	// Entrance Choice.
 	EntranceChoice: 2,
-	// Demo: First Choice.
+	// First Choice.
 	FirstChoice: 4,
-	// Demo: Variable Duration.
+	// Variable Duration.
 	VariableDuration: 8,
+};
 
-	// Scene: Allow exit.
+/**
+ * Poe Flags
+ *
+ * @enum {number}
+ */
+export const PoeFlags = {
+	// Warned about broken auto-play audio.
+	AudioWarned: 1,
+	// Debug.
+	Debug: 2,
+	// Play Audio.
+	MakeNoise: 4,
+};
+
+/**
+ * Scene Flags
+ *
+ * @enum {number}
+ */
+export const SceneFlags = {
+	// Allow exit.
 	AllowExit: 1,
-	// Scene: Flip after.
+	// Flip after.
 	AutoFlip: 2,
-	// Scene: Sprite should be at the bottom of the page.
+	// Sprite should be at the bottom of the page.
 	ForceGravity: 4,
-	// Scene: Edges don't need to trigger edge sequences.
+	// Edges don't need to trigger edge sequences.
 	IgnoreEdges: 8,
+};
 
-	// Mate: Mate may exit during current scene (randomly decided).
-	MayExit: 1,
+/**
+ * Mate Flags
+ *
+ * @enum {number}
+ */
+export const MateFlags = {
+	// Mate: Left side.
+	BottomSide: 1,
 	// Mate: Mate should appear behind other mates.
 	IsBehind: 2,
 	// Mate: Event bindings are set.
@@ -56,25 +91,15 @@ export const Flags = {
 	// Mate: Is visible.
 	IsVisible: 32,
 	// Mate: Left side.
-	TopSide: 64,
-	// Mate: Left side.
-	RightSide: 128,
-	// Mate: Left side.
-	BottomSide: 256,
-	// Mate: Left side.
-	LeftSide: 512,
+	LeftSide: 64,
+	// Mate: Mate may exit during current scene (randomly decided).
+	MayExit: 128,
 	// Mate: Floor.
-	OnFloor: 1024,
-
-	// Poe: Warned about broken auto-play audio.
-	AudioWarned: 1,
-	// Poe: Debug.
-	Debug: 2,
-	// Poe: Play Audio.
-	MakeNoise: 4,
-
-	// Position: Absolute.
-	Absolute: 1,
+	OnFloor: 256,
+	// Mate: Left side.
+	RightSide: 512,
+	// Mate: Left side.
+	TopSide: 1024,
 };
 
 /**
