@@ -147,6 +147,41 @@ export const demoResolveScenes = function(scenes) {
 
 
 // ---------------------------------------------------------------------
+// Easing
+// ---------------------------------------------------------------------
+
+/**
+ * Ease In/Out (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const ease = function(v) {
+	return 0.5 > v ? 4 * v * v * v : (v - 1) * (2 * v - 2) * (2 * v - 2) + 1;
+};
+
+/**
+ * Ease In (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const easeIn = function(v) {
+	return v * v * v;
+};
+
+/**
+ * Ease Out (Cubic)
+ *
+ * @param {number} v Value.
+ * @return {number} Value.
+ */
+export const easeOut = function(v) {
+	return (--v) * v * v + 1;
+};
+
+
+// ---------------------------------------------------------------------
 // Enum Types
 // ---------------------------------------------------------------------
 

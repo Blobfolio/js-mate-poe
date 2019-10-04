@@ -66,6 +66,12 @@ export const SceneFlags = {
 	AllowExit: 1,
 	// Flip after.
 	AutoFlip: 2,
+	// Ease.
+	Ease: 4,
+	// Ease In.
+	EaseIn: 8,
+	// Ease Out.
+	EaseOut: 16,
 	// Sprite should be at the bottom of the page.
 	ForceGravity: 4,
 	// Edges don't need to trigger edge sequences.
