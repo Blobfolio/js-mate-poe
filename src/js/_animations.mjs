@@ -542,7 +542,7 @@ export const ANIMATIONS = [
 					start: null,
 					x: 0,
 					y: 0,
-					duration: (11 + repeat * 2) * 200,
+					duration: (11 + repeat * 2) * 300,
 					repeat: [repeat, 9],
 					frames: [
 						3,
@@ -565,7 +565,7 @@ export const ANIMATIONS = [
 				start: null,
 				x: 0,
 				y: 0,
-				duration: 2200,
+				duration: 3300,
 				repeat: null,
 				frames: [
 					0,
