@@ -2,7 +2,7 @@
  * @file Animations
  */
 
-import { isAbsInt } from './_helpers.mjs';
+import { ease, easeIn, easeOut, isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
 import { BLANK_FRAME, TILE_SIZE } from './_media.mjs';
 import {
@@ -34,8 +34,7 @@ export const ANIMATIONS = [
 		name: 'Walk',
 		/** @type {Array<!Scene>} */
 		scenes: [
-			/** @type {!Scene} */
-			({
+			/** @type {!Scene} */ ({
 				start: null,
 				x: -84,
 				y: 0,
@@ -58,7 +57,7 @@ export const ANIMATIONS = [
 		edge: [
 			[Playlist.Rotate, 5],
 			[Playlist.Scoot, 1],
-			[Playlist.ClimbUp, 1],
+			[Playlist.ClimbUp, 5],
 		],
 		/** @type {Array<WeightedChoice>} */
 		next: [
@@ -434,7 +433,7 @@ export const ANIMATIONS = [
 						106,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -556,7 +555,7 @@ export const ANIMATIONS = [
 						1,
 					],
 					sound: [Sound.Yawn, 1],
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -615,7 +614,7 @@ export const ANIMATIONS = [
 						8,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -667,7 +666,7 @@ export const ANIMATIONS = [
 						36,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -857,8 +856,8 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */ ({
 				start: null,
 				x: -50,
-				y: -40,
-				duration: 500,
+				y: -30,
+				duration: 400,
 				repeat: null,
 				frames: [
 					76,
@@ -872,13 +871,11 @@ export const ANIMATIONS = [
 			}),
 			/** @type {!Scene} */ ({
 				start: null,
-				x: -50,
+				x: -30,
 				y: 0,
-				duration: 500,
+				duration: 200,
 				repeat: null,
 				frames: [
-					23,
-					23,
 					23,
 					23,
 					23,
@@ -889,8 +886,8 @@ export const ANIMATIONS = [
 			/** @type {!Scene} */ ({
 				start: null,
 				x: -50,
-				y: 40,
-				duration: 1500,
+				y: 30,
+				duration: 400,
 				repeat: null,
 				frames: [
 					24,
@@ -1047,7 +1044,7 @@ export const ANIMATIONS = [
 						4,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!SceneCB} */ (() => {
@@ -1065,7 +1062,7 @@ export const ANIMATIONS = [
 						3,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.EaseOut | SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -1146,7 +1143,7 @@ export const ANIMATIONS = [
 						157,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity,
+					flags: SceneFlags.EaseOut | SceneFlags.ForceGravity | SceneFlags.VariableDuration,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -1247,8 +1244,8 @@ export const ANIMATIONS = [
 
 				return /** @type {!Scene} */ ({
 					start: null,
-					x: -2 * (4 + repeat * 2),
-					y: 0,
+					x: 0,
+					y: -2 * (4 + repeat * 2),
 					duration: (4 + repeat * 2) * 150,
 					repeat: [repeat, 2],
 					frames: [
@@ -1258,7 +1255,7 @@ export const ANIMATIONS = [
 						16,
 					],
 					sound: null,
-					flags: 0,
+					flags: SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -1376,7 +1373,7 @@ export const ANIMATIONS = [
 						20,
 					],
 					sound: null,
-					flags: 0,
+					flags: SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -1909,7 +1906,7 @@ export const ANIMATIONS = [
 						BLANK_FRAME,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
+					flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -1986,7 +1983,7 @@ export const ANIMATIONS = [
 						161,
 					],
 					sound: null,
-					flags: SceneFlags.IgnoreEdges,
+					flags: SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -2054,7 +2051,7 @@ export const ANIMATIONS = [
 						4,
 					],
 					sound: null,
-					flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
+					flags: SceneFlags.ForceGravity | SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -2090,7 +2087,7 @@ export const ANIMATIONS = [
 						168,
 					],
 					sound: null,
-					flags: SceneFlags.AllowExit | SceneFlags.ForceGravity | SceneFlags.IgnoreEdges,
+					flags: SceneFlags.AllowExit | SceneFlags.ForceGravity | SceneFlags.IgnoreEdges | SceneFlags.VariableDuration,
 				});
 			}),
 		],
@@ -2412,8 +2409,7 @@ export const chooseAnimation = function(choices) {
 		return null;
 	}
 	else if ('number' === typeof choices) {
-		choices = /** @type {!Playlist} */ (parseInt(choices, 10) || 0);
-		return verifyAnimationId(choices) ? choices : null;
+		return choices;
 	}
 
 	/** @type {Array<Playlist>} */
@@ -2421,13 +2417,8 @@ export const chooseAnimation = function(choices) {
 
 	// Loop and build.
 	for (let i = 0; i < choices.length; ++i) {
-		if (
-			isAbsInt(choices[i][1]) &&
-			verifyAnimationId(choices[i][0])
-		) {
-			for (let j = 0; j < choices[i][1]; ++j) {
-				out.push(choices[i][0]);
-			}
+		for (let j = 0; j < choices[i][1]; ++j) {
+			out.push(choices[i][0]);
 		}
 	}
 
@@ -2502,11 +2493,20 @@ export const resolveSceneSteps = function(scenes) {
 		/** @const {number} */
 		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
 
+		/** @type {number|!SceneFlags} */
+		let easing = 0;
+		if (SceneFlags.EaseOut & scenes[i].flags) {
+			easing = SceneFlags.EaseOut;
+		}
+		else if (SceneFlags.EaseIn & scenes[i].flags) {
+			easing = SceneFlags.EaseIn;
+		}
+		else if (SceneFlags.Ease & scenes[i].flags) {
+			easing = SceneFlags.Ease;
+		}
+
 		// Now that we know how many steps this scene has, let's build them!
 		for (let j = 0; j < stepsLength; ++j) {
-			/** @const {number} */
-			const progress = (j + 1) / stepsLength - j / stepsLength;
-
 			// What frame should we show?
 			/** @type {number} */
 			let frame = 0;
@@ -2529,10 +2529,25 @@ export const resolveSceneSteps = function(scenes) {
 			out[step] = /** @type {!Step} */ ({
 				step: step,
 				scene: i,
-				interval: scenes[i].duration * progress,
+				interval: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].duration,
+					0
+				),
 				frame: frame,
-				x: scenes[i].x * progress,
-				y: scenes[i].y * progress,
+				x: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].x,
+					easing
+				),
+				y: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].y,
+					easing
+				),
 				sound: sound,
 				flip: !! ((SceneFlags.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
 				flags: scenes[i].flags,
@@ -2543,6 +2558,51 @@ export const resolveSceneSteps = function(scenes) {
 	}
 
 	return out.reverse();
+};
+
+/**
+ * Scene Slice Size
+ *
+ * Return the relative amount of progress to apply to transitions.
+ *
+ * @param {number} step Current step.
+ * @param {number} steps Steps.
+ * @param {number} total Total.
+ * @param {number|!SceneFlags} easing Easing.
+ * @return {number} Percentage slice.
+ */
+export const sceneStepSlice = function(step, steps, total, easing) {
+	if (0 >= step || 0 >= steps || ! total) {
+		return 0;
+	}
+
+	// Make sure we don't go over 100%.
+	if (step > steps) {
+		step = steps;
+	}
+
+	/** @type {number} */
+	let current = step / steps;
+
+	/** @type {number} */
+	let previous = (step - 1) / steps;
+
+	switch (easing) {
+	case SceneFlags.EaseOut:
+		current = easeOut(current);
+		previous = previous ? easeOut(previous) : 0;
+		break;
+	case SceneFlags.EaseIn:
+		current = easeIn(current);
+		previous = previous ? easeIn(previous) : 0;
+		break;
+	case SceneFlags.Ease:
+		current = ease(current);
+		previous = previous ? ease(previous) : 0;
+		break;
+	}
+
+	return current * total - previous * total;
 };
 
 /**
