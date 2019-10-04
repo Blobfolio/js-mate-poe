@@ -1087,20 +1087,14 @@ export const ChildMate = class {
 			makeNoise(step.sound);
 		}
 
-		/** @type {number} */
-		let x = step.x;
-
-		/** @type {number} */
-		const y = step.y;
-
-		if (x || y) {
+		if (step.x || step.y) {
 			// Flip the X if we need to.
 			if (this.flipped) {
-				x = 0 - x;
+				step.x = 0 - step.x;
 			}
 
 			// Move it along.
-			this.setPosition(x, y);
+			this.setPosition(step.x, step.y);
 		}
 
 		// The animation is over.
@@ -1125,6 +1119,11 @@ export const ChildMate = class {
 			this.flipped = ! this.flipped;
 		}
 
+		// We don't need to check anything else if we're dragging.
+		if (this.dragging) {
+			return true;
+		}
+
 		// Gravity.
 		/** @const {boolean} */
 		const gravity = !! (SceneFlag.ForceGravity & step.flags);
@@ -1133,26 +1132,26 @@ export const ChildMate = class {
 		}
 
 		// Edge checks.
-		if (! this.dragging && ! (SceneFlag.IgnoreEdges & step.flags)) {
+		if (! (SceneFlag.IgnoreEdges & step.flags)) {
 			if (this.leftSide) {
-				if (this.checkLeft(xDirection(x))) {
+				if (this.checkLeft(xDirection(step.x))) {
 					return true;
 				}
 			}
 			else if (this.rightSide) {
-				if (this.checkRight(xDirection(x))) {
+				if (this.checkRight(xDirection(step.x))) {
 					return true;
 				}
 			}
 
 			if (this.topSide) {
-				if (this.checkTop(yDirection(y))) {
+				if (this.checkTop(yDirection(step.y))) {
 					return true;
 				}
 			}
 			// If the problem with the bottom was gravity, it's fixed.
 			else if (! gravity && this.bottomSide) {
-				if (this.checkBottom(yDirection(y))) {
+				if (this.checkBottom(yDirection(step.y))) {
 					return true;
 				}
 			}
