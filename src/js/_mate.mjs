@@ -311,101 +311,6 @@ export const ChildMate = class {
 	}
 
 	/**
-	 * Element Class(es)
-	 *
-	 * @return {string} Class.
-	 */
-	get elClass() {
-		return this._elClass;
-	}
-
-	/**
-	 * Set Element Class(es)
-	 *
-	 * @param {string} v Classes.
-	 * @return {void} Nothing.
-	 */
-	set elClass(v) {
-		this._elClass = v;
-		if (null !== this._el) {
-			this._el.className = v;
-		}
-	}
-
-	/**
-	 * Calculate Element Class(es)
-	 *
-	 * @return {string} Class.
-	 */
-	calculateElClass() {
-		/** @type {string} */
-		let out = this.baseClass;
-
-		// If there is no animation, we're done.
-		if (null === this._animation) {
-			out += ' is-disabled';
-			return out;
-		}
-
-		// Dragging?
-		if (this.dragging) {
-			out += ' is-dragging';
-			return out;
-		}
-
-		// Behind?
-		if (this.behind) {
-			out += ' is-behind';
-		}
-
-		return out;
-	}
-
-	/**
-	 * Element Transform Style
-	 *
-	 * @return {string} Style.
-	 */
-	get elStyleTransform() {
-		return this._elStyleTransform;
-	}
-
-	/**
-	 * Set Element Transform Style
-	 *
-	 * @param {string} v Style.
-	 * @return {void} Nothing.
-	 */
-	set elStyleTransform(v) {
-		this._elStyleTransform = v;
-		if (null !== this._el) {
-			this._el.style.transform = v;
-		}
-	}
-
-	/**
-	 * Calculate Element Transform Style
-	 *
-	 * @return {string} Style.
-	 */
-	calculateElStyleTransform() {
-		/** @type {string} */
-		let out = '';
-
-		// Position first.
-		if (this._x || this._y) {
-			out += `translate3d(${this._x}px, ${this._y}px, 0)`;
-		}
-
-		// Flipped?
-		if (MateFlag.IsFlipped & this._flags) {
-			out += ' rotateY(180deg)';
-		}
-
-		return out;
-	}
-
-	/**
 	 * Flip
 	 *
 	 * @return {boolean} True/false.
@@ -429,45 +334,6 @@ export const ChildMate = class {
 		else {
 			this._flags |= MateFlag.IsFlipped;
 		}
-	}
-
-	/**
-	 * Image Class(es)
-	 *
-	 * @return {string} Class.
-	 */
-	get imgClass() {
-		return this._imgClass;
-	}
-
-	/**
-	 * Set Image Class(es)
-	 *
-	 * @param {string} v Style.
-	 * @return {void} Nothing.
-	 */
-	set imgClass(v) {
-		this._imgClass = v;
-		if (null !== this._el) {
-			this._el.children[0].className = v;
-		}
-	}
-
-	/**
-	 * Calculate Image Class(es)
-	 *
-	 * @return {string} Style.
-	 */
-	calculateImgClass() {
-		/** @type {string} */
-		let out = 'poe-img';
-
-		// If there is no animation, we're done.
-		if (0 < this._frame) {
-			out += ' poe-f' + this._frame;
-		}
-
-		return out;
 	}
 
 	/**
@@ -1166,26 +1032,55 @@ export const ChildMate = class {
 			return;
 		}
 
-		// Start with the element class. This won't change as frequently.
+		// Start with the main element.
 
 		/** @type {string} */
-		let value = this.calculateElClass();
+		let value = this.baseClass;
+		if (null === this._animation) {
+			value += ' is-disabled';
+		}
+		else if (this.dragging) {
+			value += ' is-dragging';
+		}
+		else if (this.behind) {
+			value += ' is-behind';
+		}
+
+		// Update it!
 		if (value !== this._elClass) {
-			this.elClass = value;
+			this._elClass = value;
+			this._el.className = value;
 		}
 
-		// Style transforms?
-		value = this.calculateElStyleTransform();
+		// Now style transforms.
+		if (this._x || this._y) {
+			value = `translate3d(${this._x}px, ${this._y}px, 0)`;
+			if (this.flipped) {
+				value += ' rotateY(180deg)';
+			}
+		}
+		else if (this.flipped) {
+			value = 'rotateY(180deg)';
+		}
+		else {
+			value = '';
+		}
+
+		// Update it!
 		if (value !== this._elStyleTransform) {
-			this.elStyleTransform = value;
+			this._elStyleTransform = value;
+			this._el.style.transform = value;
 		}
 
-		// The image class?
-		value = this.calculateImgClass();
+		// And finally the image class.
+		value = `poe-img poe-f${this._frame}`;
 		if (value !== this._imgClass) {
-			this.imgClass = value;
+			this._imgClass = value;
+			this._el.children[0].className = value;
 		}
 	}
+
+
 
 	// -----------------------------------------------------------------
 	// Callback Handlers
