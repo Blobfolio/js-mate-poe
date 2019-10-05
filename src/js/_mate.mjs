@@ -352,7 +352,7 @@ export const ChildMate = class {
 		if (
 			(SceneFlag.AllowExit & this._animation.scenes[0].flags) &&
 			! (MateFlag.MayExit & this._flags) &&
-			1 === Math.floor(Math.random() * 2)
+			5 === Math.floor(Math.random() * 10)
 		) {
 			// Turn on.
 			this._flags |= MateFlag.MayExit;
