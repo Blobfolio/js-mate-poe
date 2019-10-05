@@ -121,6 +121,27 @@ console.log(Poe.audio); // true
 ```
 
 
+&nbsp;
+### Playback Speed
+
+The playback animation speed can be adjusted up or down to either slow or speed up the action.
+
+**Example:**
+```js
+// The default speed is 1.
+console.log(Poe.speed); // 1
+
+// A fractional value between 0 and 1 slows things down.
+Poe.speed = 0.5; // Half speed!
+
+// A value greater than 1 speeds things up.
+Poe.speed = 2; // Double speed!
+
+// And back to the default.
+Poe.speed = 1;
+```
+
+
 
 &nbsp;
 ## Building
