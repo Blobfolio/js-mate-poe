@@ -924,7 +924,7 @@ export const ANIMATIONS = [
 				start: null,
 				x: 0,
 				y: 0,
-				duration: 7050,
+				duration: 9000,
 				repeat: [5, 5],
 				frames: [
 					6,
@@ -961,7 +961,7 @@ export const ANIMATIONS = [
 				start: null,
 				x: 0,
 				y: 0,
-				duration: 7050,
+				duration: 9000,
 				repeat: null,
 				frames: [
 					153,
