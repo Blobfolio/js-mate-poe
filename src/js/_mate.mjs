@@ -1342,12 +1342,24 @@ export const Mate = class extends ChildMate {
 		/** @type {null|!Playlist|!Array<WeightedChoice>} */
 		let choices = null;
 
-		if (! this.visible) {
+		// If we aren't visible, do an entrance animation.
+		if (! (MateFlag.IsVisible & this._flags)) {
 			choices = ENTRANCE_CHOICES;
 		}
+		// Repeat the current animation if we're halfway out the door exiting.
+		else if (
+			(MateFlag.MayExit & this._flags) &&
+			null !== this._animation &&
+			(0 > this._x || Poe.width - TILE_SIZE < this._x)
+		) {
+			this.setAnimation(this._animation.id);
+			return;
+		}
+		// If we have a valid next, use that.
 		else if (null !== this._animation && null !== this._animation.next) {
 			choices = this._animation.next;
 		}
+		// Otherwise pull from the default pool.
 		else {
 			choices = DEFAULT_CHOICES;
 		}
