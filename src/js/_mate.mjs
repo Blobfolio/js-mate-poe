@@ -2,6 +2,7 @@
  * @file Mates!
  */
 
+/* global Generator */
 import { NAME } from './_about.mjs';
 import {
 	animation,
@@ -9,7 +10,7 @@ import {
 	DEFAULT_CHOICES,
 	ENTRANCE_CHOICES,
 	FIRST_CHOICES,
-	resolveSceneSteps
+	generateSceneSteps
 } from './_animations.mjs';
 import { IMAGE } from './_bin.mjs';
 import { xDirection, yDirection } from './_helpers.mjs';
@@ -72,8 +73,11 @@ export const ChildMate = class {
 		/** @private {?number} */
 		this._raf = null;
 
-		/** @private {Array<Step>} */
-		this._steps = [];
+		/** @private {?Generator} */
+		this._steps = null;
+
+		/** @private {?Object} */
+		this._step = null;
 
 		/** @private {string} */
 		this._elClass = '';
@@ -518,9 +522,12 @@ export const ChildMate = class {
 			this._animation = null;
 		}
 
-		if (this._steps.length) {
+		if (null !== this._steps) {
 			delete this._steps;
-			this._steps = [];
+			this._steps = null;
+
+			delete this._step;
+			this._step = null;
 		}
 	}
 
@@ -684,7 +691,9 @@ export const ChildMate = class {
 		}
 
 		delete this._steps;
-		this._steps = resolveSceneSteps(this._animation.scenes);
+		this._steps = generateSceneSteps(this._animation.scenes);
+		delete this._step;
+		this._step = null;
 	}
 
 	/**
@@ -900,7 +909,7 @@ export const ChildMate = class {
 		if (
 			null === this._el ||
 			null === this._animation ||
-			! this._steps.length
+			null === this._steps
 		) {
 			return;
 		}
@@ -932,8 +941,11 @@ export const ChildMate = class {
 			return false;
 		}
 
+		/** @const {!Object} */
+		const next = this._steps.next();
+
 		/** @const {Step} */
-		const step = this._steps.pop();
+		const step = next.value;
 
 		/** @const {number} */
 		const interval = step.interval / Poe.speed;
@@ -960,7 +972,7 @@ export const ChildMate = class {
 		}
 
 		// The animation is over.
-		if (! this._steps.length) {
+		if (next.done) {
 			this.cancelTick();
 
 			// Should we flip it?
@@ -1589,8 +1601,8 @@ export const Mate = class extends ChildMate {
 
 		// Check gravity.
 		if (
-			this._steps.length &&
-			(SceneFlag.ForceGravity & this._steps[this._steps.length - 1].flags) &&
+			null !== this._step &&
+			(SceneFlag.ForceGravity & this._step.flags) &&
 			Poe.height - TILE_SIZE !== this._y
 		) {
 			this.setPosition(this._x, Poe.height - TILE_SIZE, true);

@@ -2,6 +2,7 @@
  * @file Animations
  */
 
+/* global Generator */
 import { ease, easeIn, easeOut, isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
 import { BLANK_FRAME, TILE_SIZE } from './_media.mjs';
@@ -2560,6 +2561,103 @@ export const resolveSceneSteps = function(scenes) {
 	}
 
 	return out.reverse();
+};
+
+/**
+ * Scene Step Generator
+ *
+ * @param {Array<!Scene>} scenes Scenes.
+ * @return {Generator} Generator.
+ */
+export const generateSceneSteps = function* (scenes) {
+	/** @type {number} */
+	let step = 0;
+
+	// Loop through the scenes.
+	for (let i = 0; i < scenes.length; ++i) {
+		/** @const {number} */
+		const framesLength = scenes[i].frames.length;
+
+		/** @const {number} */
+		const repeat = null !== scenes[i].repeat ? scenes[i].repeat[0] : 0;
+
+		/** @const {number} */
+		const repeatFrom = repeat ? scenes[i].repeat[1] : 0;
+
+		/** @const {number} */
+		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
+
+		/** @type {number|!SceneFlag} */
+		let easing = 0;
+		if (SceneFlag.EaseOut & scenes[i].flags) {
+			easing = SceneFlag.EaseOut;
+		}
+		else if (SceneFlag.EaseIn & scenes[i].flags) {
+			easing = SceneFlag.EaseIn;
+		}
+		else if (SceneFlag.Ease & scenes[i].flags) {
+			easing = SceneFlag.Ease;
+		}
+
+		// Now that we know how many steps this scene has, let's build them!
+		for (let j = 0; j < stepsLength; ++j) {
+			// What frame should we show?
+			/** @type {number} */
+			let frame = 0;
+			if (j < framesLength) {
+				frame = scenes[i].frames[j];
+			}
+			else if (! repeatFrom) {
+				frame = scenes[i].frames[j % framesLength];
+			}
+			else {
+				frame = scenes[i].frames[repeatFrom + (j - repeatFrom) % (framesLength - repeatFrom)];
+			}
+
+			/** @type {?Sound} */
+			let sound = null;
+			if (null !== scenes[i].sound && scenes[i].sound[1] === j) {
+				sound = /** @type {!Sound} */ (scenes[i].sound[0]);
+			}
+
+			/** @const {!Step} */
+			const out = /** @type {!Step} */ ({
+				step: step,
+				scene: i,
+				interval: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].duration,
+					0
+				),
+				frame: frame,
+				x: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].x,
+					easing
+				),
+				y: sceneStepSlice(
+					(j + 1),
+					stepsLength,
+					scenes[i].y,
+					easing
+				),
+				sound: sound,
+				flip: !! ((SceneFlag.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
+				flags: scenes[i].flags,
+			});
+			++step;
+
+			// Keep going!
+			if (i + 1 < scenes.length || j + 1 < stepsLength) {
+				yield out;
+			}
+			else {
+				return out;
+			}
+		}
+	}
 };
 
 /**
