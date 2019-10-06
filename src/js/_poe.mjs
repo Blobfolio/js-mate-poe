@@ -3,6 +3,7 @@
  */
 
 import { ASCII, NAME, REPO, VERSION } from './_about.mjs';
+import { image2x } from './_bin.mjs';
 import { CSS } from './_css.mjs';
 import { zeroPad } from './_helpers.mjs';
 import { ChildMate, Mate } from './_mate.mjs';
@@ -34,6 +35,8 @@ export const Poe = {
 	_length: 0,
 	/** @private {number} */
 	_speed: 1,
+	/** @public {?string} */
+	_sprite: null,
 	/** @private {number} */
 	_width: 0,
 	/** @private {number} */
@@ -52,10 +55,10 @@ export const Poe = {
 	/**
 	 * Start!
 	 *
-	 * @return {void} Nothing.
+	 * @return {!Promise} Nothing.
 	 * @public
 	 */
-	start() {
+	async start() {
 		// There can be only one!
 		if (null !== Poe._primary) {
 			return;
@@ -63,6 +66,12 @@ export const Poe = {
 
 		// Run a few generic initialization tasks.
 		Poe.setup();
+
+		// We need to load the image sprite into memory. Mates will use this value for their image elements.
+		if (null === Poe._sprite) {
+			/* eslint-disable-next-line */
+			Poe._sprite = URL.createObjectURL(await image2x());
+		}
 
 		// Start the primary mate!
 		requestAnimationFrame(() => {
@@ -77,6 +86,8 @@ export const Poe = {
 				Poe.log('Sheep happens!', LogType.Log);
 			}
 		});
+
+		return Promise.resolve();
 	},
 
 	/**

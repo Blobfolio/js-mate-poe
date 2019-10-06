@@ -12,7 +12,6 @@ import {
 	FIRST_CHOICES,
 	generateSceneSteps
 } from './_animations.mjs';
-import { IMAGE } from './_bin.mjs';
 import { xDirection, yDirection } from './_helpers.mjs';
 import { makeNoise, TILE_SIZE } from './_media.mjs';
 import { Poe } from './_poe.mjs';
@@ -108,9 +107,9 @@ export const ChildMate = class {
 		this._el.setAttribute('aria-hidden', 'true');
 		this._el.setAttribute('data-mate-id', this._mateId);
 
-		/** @type {HTMLImageElement} */
-		let img = /** @type {HTMLImageElement} */ (document.createElement('IMG'));
-		img.src = IMAGE;
+		/** @const {!Image} */
+		const img = new Image();
+		img.src = Poe._sprite;
 		img.alt = NAME;
 		img.className = 'poe-img';
 		this._el.appendChild(img);

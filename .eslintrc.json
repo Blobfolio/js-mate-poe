@@ -15,9 +15,10 @@
     "settings": {
         "jsdoc": {
             "tagNamePreference": {
-                "returns": "return",
-                "constant": "const",
                 "class": "constructor",
+                "constant": "const",
+                "noinline": "noinline",
+                "returns": "return",
                 "suppress": "suppress"
             },
             "preferredTypes": {
