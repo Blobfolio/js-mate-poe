@@ -2588,17 +2588,20 @@ export const sceneStepProgress = function(steps, total, easing) {
 		return out;
 	}
 
-	/** @type {number} */
-	let last = 0;
-
 	// If there is no easing, we can save a lot of headache.
 	if (SceneFlag.EaseOut !== easing && SceneFlag.EaseIn !== easing) {
 		out.fill(1 / steps * total);
 		return out;
 	}
 
+	/** @const {number} */
+	const cap = 0.5;
+
 	/** @type {number} */
-	let new_total = 0;
+	let last = 0;
+
+	/** @type {number} */
+	let newTotal = 0;
 
 	/** @const {boolean} */
 	const positive = 0 <= total;
@@ -2606,18 +2609,19 @@ export const sceneStepProgress = function(steps, total, easing) {
 	/** @type {number} */
 	let maxBig = 0;
 
+	// Loop to calculate the raw easings.
 	for (let i = 1; i <= steps; ++i) {
 		let current = Math.floor(easeOut(i / steps) * total * 100) / 100 - last;
 		if (positive) {
-			if (0.5 > current) {
-				current = 0.5;
+			if (cap > current) {
+				current = cap;
 			}
 			else {
 				maxBig = i;
 			}
 		}
-		else if (-0.5 < current) {
-			current = -0.5;
+		else if (0 - cap < current) {
+			current = 0 - cap;
 		}
 		else {
 			maxBig = 1;
@@ -2625,16 +2629,16 @@ export const sceneStepProgress = function(steps, total, easing) {
 
 		out[i - 1] = current;
 		last += current;
-		new_total += current;
+		newTotal += current;
 	}
 
-	// Now see if our capping has caused an increase that we need to fix.
+	// If our capping changed the total, we need to loop again to spread the difference between the larger steps.
 	if (
-		(positive && new_total > total) ||
-		(! positive && new_total < total)
+		(positive && newTotal > total) ||
+		(! positive && newTotal < total)
 	) {
 		/** @type {number} */
-		let difference = new_total - total;
+		let difference = newTotal - total;
 
 		/** @type {number} */
 		let pool = 0;
@@ -2644,29 +2648,32 @@ export const sceneStepProgress = function(steps, total, easing) {
 
 		for (let i = 0; i < out.length; ++i) {
 			// We can't subtract from the caps.
-			if (0.5 >= out[i]) {
+			if (i + 1 >= maxBig) {
 				break;
 			}
 
+			/** @const {number} */
 			const chunk = (out[i] / pool) * difference;
 			out[i] -= chunk;
 			difference -= chunk;
-			if (0 >= difference) {
+
+			// If we're out of difference, we're done!
+			if (! difference) {
 				break;
 			}
 		}
 
 		// There might be a rounding error to consider.
-		new_total = 0;
+		newTotal = 0;
 		for (let i = 0; i < out.length; ++i) {
-			new_total += out[i];
+			newTotal += out[i];
 		}
 
 		if (
-			(positive && new_total > total) ||
-			(! positive && new_total < total)
+			(positive && newTotal > total) ||
+			(! positive && newTotal < total)
 		) {
-			out[0] -= (new_total - total);
+			out[0] -= (newTotal - total);
 		}
 	}
 
