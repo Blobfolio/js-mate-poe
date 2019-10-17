@@ -3,7 +3,7 @@
  */
 
 /* global Generator */
-import { ease, easeIn, easeOut, isAbsInt } from './_helpers.mjs';
+import { easeOut, isAbsInt } from './_helpers.mjs';
 import { Poe } from './_poe.mjs';
 import { BLANK_FRAME, TILE_SIZE } from './_media.mjs';
 import {
@@ -2489,17 +2489,25 @@ export const generateSceneSteps = function* (scenes) {
 		/** @const {number} */
 		const stepsLength = framesLength + (framesLength - repeatFrom) * repeat;
 
-		/** @type {number|!SceneFlag} */
-		let easing = 0;
+		/** @type {?Array<number>} */
+		let xMovement = null;
+		let yMovement = null;
+
 		if (SceneFlag.EaseOut & scenes[i].flags) {
-			easing = SceneFlag.EaseOut;
+			xMovement = sceneStepProgress(stepsLength, scenes[i].x, SceneFlag.EaseOut);
+			yMovement = sceneStepProgress(stepsLength, scenes[i].y, SceneFlag.EaseOut);
 		}
 		else if (SceneFlag.EaseIn & scenes[i].flags) {
-			easing = SceneFlag.EaseIn;
+			xMovement = sceneStepProgress(stepsLength, scenes[i].x, SceneFlag.EaseIn);
+			yMovement = sceneStepProgress(stepsLength, scenes[i].y, SceneFlag.EaseIn);
 		}
-		else if (SceneFlag.Ease & scenes[i].flags) {
-			easing = SceneFlag.Ease;
+		else {
+			xMovement = sceneStepProgress(stepsLength, scenes[i].x, 0);
+			yMovement = sceneStepProgress(stepsLength, scenes[i].y, 0);
 		}
+
+		/** @const {number} */
+		const durationSlice = 1 / stepsLength * scenes[i].duration;
 
 		// Now that we know how many steps this scene has, let's build them!
 		for (let j = 0; j < stepsLength; ++j) {
@@ -2526,25 +2534,10 @@ export const generateSceneSteps = function* (scenes) {
 			const out = /** @type {!Step} */ ({
 				step: step,
 				scene: i,
-				interval: sceneStepSlice(
-					(j + 1),
-					stepsLength,
-					scenes[i].duration,
-					0
-				),
+				interval: durationSlice,
 				frame: frame,
-				x: sceneStepSlice(
-					(j + 1),
-					stepsLength,
-					scenes[i].x,
-					easing
-				),
-				y: sceneStepSlice(
-					(j + 1),
-					stepsLength,
-					scenes[i].y,
-					easing
-				),
+				x: null !== xMovement ? xMovement[j] : 0,
+				y: null !== yMovement ? yMovement[j] : 0,
 				sound: sound,
 				flip: !! ((SceneFlag.AutoFlip & scenes[i].flags) && stepsLength - 1 === j),
 				flags: scenes[i].flags,
@@ -2573,48 +2566,116 @@ export const sceneSpeed = function(scene) {
 };
 
 /**
- * Scene Slice Size
+ * Scene Step Progression
  *
- * Return the relative amount of progress to apply to transitions.
+ * Easing is nice and all, but moving a sprite .00000001 pixels doesn't
+ * quite look right. This method caps lower movements at half a pixel
+ * and tweaks the larger values as needed to hopefully arrive at the
+ * same total.
  *
- * @param {number} step Current step.
  * @param {number} steps Steps.
  * @param {number} total Total.
  * @param {number|!SceneFlag} easing Easing.
- * @return {number} Percentage slice.
+ * @return {Array<number>} Progress pool.
  */
-export const sceneStepSlice = function(step, steps, total, easing) {
-	if (0 >= step || 0 >= steps || ! total) {
-		return 0;
-	}
+export const sceneStepProgress = function(steps, total, easing) {
+	/** @type {Array} */
+	let out = new Array(steps);
 
-	// Make sure we don't go over 100%.
-	if (step > steps) {
-		step = steps;
+	// If there is no total, we can just return a bunch of zeroes.
+	if (! total) {
+		out.fill(0);
+		return out;
 	}
 
 	/** @type {number} */
-	let current = step / steps;
+	let last = 0;
 
-	/** @type {number} */
-	let previous = (step - 1) / steps;
-
-	switch (easing) {
-	case SceneFlag.EaseOut:
-		current = easeOut(current);
-		previous = previous ? easeOut(previous) : 0;
-		break;
-	case SceneFlag.EaseIn:
-		current = easeIn(current);
-		previous = previous ? easeIn(previous) : 0;
-		break;
-	case SceneFlag.Ease:
-		current = ease(current);
-		previous = previous ? ease(previous) : 0;
-		break;
+	// If there is no easing, we can save a lot of headache.
+	if (SceneFlag.EaseOut !== easing && SceneFlag.EaseIn !== easing) {
+		out.fill(1 / steps * total);
+		return out;
 	}
 
-	return current * total - previous * total;
+	/** @type {number} */
+	let new_total = 0;
+
+	/** @const {boolean} */
+	const positive = 0 <= total;
+
+	/** @type {number} */
+	let maxBig = 0;
+
+	for (let i = 1; i <= steps; ++i) {
+		let current = Math.floor(easeOut(i / steps) * total * 100) / 100 - last;
+		if (positive) {
+			if (0.5 > current) {
+				current = 0.5;
+			}
+			else {
+				maxBig = i;
+			}
+		}
+		else if (-0.5 < current) {
+			current = -0.5;
+		}
+		else {
+			maxBig = 1;
+		}
+
+		out[i - 1] = current;
+		last += current;
+		new_total += current;
+	}
+
+	// Now see if our capping has caused an increase that we need to fix.
+	if (
+		(positive && new_total > total) ||
+		(! positive && new_total < total)
+	) {
+		/** @type {number} */
+		let difference = new_total - total;
+
+		/** @type {number} */
+		let pool = 0;
+		for (let i = 0; i < maxBig; ++i) {
+			pool += out[maxBig];
+		}
+
+		for (let i = 0; i < out.length; ++i) {
+			// We can't subtract from the caps.
+			if (0.5 >= out[i]) {
+				break;
+			}
+
+			const chunk = (out[i] / pool) * difference;
+			out[i] -= chunk;
+			difference -= chunk;
+			if (0 >= difference) {
+				break;
+			}
+		}
+
+		// There might be a rounding error to consider.
+		new_total = 0;
+		for (let i = 0; i < out.length; ++i) {
+			new_total += out[i];
+		}
+
+		if (
+			(positive && new_total > total) ||
+			(! positive && new_total < total)
+		) {
+			out[0] -= (new_total - total);
+		}
+	}
+
+	// If we're easing in, we need to flip the array.
+	if (SceneFlag.EaseIn === easing) {
+		out.reverse();
+	}
+
+	return out;
 };
 
 /**
