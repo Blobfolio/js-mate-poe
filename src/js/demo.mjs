@@ -18,7 +18,6 @@ import {
 	DemoFlag,
 	Playlist,
 	Scene,
-	SceneFlag,
 	WeightedChoice,
 	VueApp
 } from './_types.mjs';
@@ -70,14 +69,7 @@ new Vue(/** @type {!VueApp} */ ({
 				let flags = v.flags;
 
 				/** @const {Array<!Scene>} */
-				const scenes = demoResolveScenes(v.scenes);
-
-				for (let i = 0; i < scenes.length; ++i) {
-					if (SceneFlag.VariableDuration & scenes[i].flags) {
-						flags |= DemoFlag.VariableDuration;
-						break;
-					}
-				}
+				const scenes = /** @type {!Array<!Scene>} */ (demoResolveScenes(v.scenes));
 
 				if (0 < v.useDefault) {
 					flags |= DemoFlag.DefaultChoice;
@@ -95,7 +87,7 @@ new Vue(/** @type {!VueApp} */ ({
 					/** @type {string} */
 					'name': v.name,
 					/** @type {!Array<!Scene>} */
-					'scenes': scenes,
+					'scenes': /** @type {!Array<!Scene>} */ (scenes),
 					/** @type {number} */
 					'flags': flags,
 					/** @type {number} */

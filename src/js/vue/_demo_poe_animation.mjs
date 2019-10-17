@@ -195,7 +195,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'variableDuration': function() {
-			return !! (DemoFlag.VariableDuration & this['flags']);
+			return !! (AnimationFlag.VariableDuration & this['flags']);
 		},
 
 		/**

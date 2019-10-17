@@ -24,6 +24,8 @@ export const AnimationFlag = {
 	FallingAnimation: 8,
 	// Stack behind other frames.
 	StackBehind: 16,
+	// Variable duration.
+	VariableDuration: 32,
 };
 
 /**
@@ -33,13 +35,11 @@ export const AnimationFlag = {
  */
 export const DemoFlag = {
 	// Default Choice.
-	DefaultChoice: 1,
+	DefaultChoice: 64,
 	// Entrance Choice.
-	EntranceChoice: 2,
+	EntranceChoice: 128,
 	// First Choice.
-	FirstChoice: 4,
-	// Variable Duration.
-	VariableDuration: 8,
+	FirstChoice: 256,
 };
 
 /**
@@ -106,8 +106,6 @@ export const SceneFlag = {
 	ForceGravity: 32,
 	// Edges don't need to trigger edge sequences.
 	IgnoreEdges: 64,
-	// Variable duration.
-	VariableDuration: 128,
 };
 
 /**

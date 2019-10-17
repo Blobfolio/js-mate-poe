@@ -437,7 +437,7 @@ export const ANIMATIONS = [
 						106,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -462,7 +462,7 @@ export const ANIMATIONS = [
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -559,7 +559,7 @@ export const ANIMATIONS = [
 						1,
 					],
 					sound: [Sound.Yawn, 1],
-					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -588,7 +588,7 @@ export const ANIMATIONS = [
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -618,7 +618,7 @@ export const ANIMATIONS = [
 						8,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -639,7 +639,7 @@ export const ANIMATIONS = [
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -670,7 +670,7 @@ export const ANIMATIONS = [
 						36,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -697,7 +697,7 @@ export const ANIMATIONS = [
 		useDefault: 1,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -809,7 +809,7 @@ export const ANIMATIONS = [
 						146,
 					],
 					sound: null,
-					flags: 0,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -1026,7 +1026,7 @@ export const ANIMATIONS = [
 	},
 	{
 		id: Playlist.BlackSheep,
-		name: 'Black Sheep ',
+		name: 'Black Sheep',
 		scenes: [
 			/** @type {!SceneCB} */ (() => {
 				/** @const {number} */
@@ -1047,7 +1047,7 @@ export const ANIMATIONS = [
 						4,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!SceneCB} */ (() => {
@@ -1065,7 +1065,7 @@ export const ANIMATIONS = [
 						3,
 					],
 					sound: null,
-					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -1100,7 +1100,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: Playlist.BlackSheepChild,
 		edge: null,
 		next: Playlist.Walk,
@@ -1146,7 +1146,7 @@ export const ANIMATIONS = [
 						157,
 					],
 					sound: null,
-					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity | SceneFlag.VariableDuration,
+					flags: SceneFlag.EaseOut | SceneFlag.ForceGravity,
 				});
 			}),
 			/** @type {!Scene} */ ({
@@ -1165,7 +1165,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoParents,
+		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1258,14 +1258,14 @@ export const ANIMATIONS = [
 						16,
 					],
 					sound: null,
-					flags: SceneFlag.VariableDuration,
+					flags: 0,
 				});
 			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoChildren,
+		flags: AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: Playlist.ReachCeiling,
 		next: Playlist.ClimbUp,
@@ -1376,14 +1376,14 @@ export const ANIMATIONS = [
 						20,
 					],
 					sound: null,
-					flags: SceneFlag.VariableDuration,
+					flags: 0,
 				});
 			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoChildren,
+		flags: AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: Playlist.ReachFloor,
 		next: Playlist.ClimbDown,
@@ -1909,7 +1909,7 @@ export const ANIMATIONS = [
 						BLANK_FRAME,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges,
 				});
 			}),
 		],
@@ -1945,7 +1945,7 @@ export const ANIMATIONS = [
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoParents,
+		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: Playlist.AbductionBeamingChild,
@@ -1986,14 +1986,14 @@ export const ANIMATIONS = [
 						161,
 					],
 					sound: null,
-					flags: SceneFlag.EaseIn | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+					flags: SceneFlag.EaseIn | SceneFlag.IgnoreEdges,
 				});
 			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoParents,
+		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: Playlist.AbductionBeamChild,
 		edge: null,
 		next: null,
@@ -2054,14 +2054,14 @@ export const ANIMATIONS = [
 						4,
 					],
 					sound: null,
-					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+					flags: SceneFlag.ForceGravity | SceneFlag.IgnoreEdges,
 				});
 			}),
 		],
 		useDefault: 0,
 		useEntrance: 1,
 		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: Playlist.ChasingAMartianChild,
 		edge: null,
 		next: Playlist.Bleat,
@@ -2090,14 +2090,14 @@ export const ANIMATIONS = [
 						168,
 					],
 					sound: null,
-					flags: SceneFlag.AllowExit | SceneFlag.ForceGravity | SceneFlag.IgnoreEdges | SceneFlag.VariableDuration,
+					flags: SceneFlag.AllowExit | SceneFlag.ForceGravity | SceneFlag.IgnoreEdges,
 				});
 			}),
 		],
 		useDefault: 0,
 		useEntrance: 0,
 		useFirst: 0,
-		flags: AnimationFlag.NoParents,
+		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
