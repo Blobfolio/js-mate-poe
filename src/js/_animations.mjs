@@ -117,11 +117,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		/** @type {Array<WeightedChoice>} */
-		next: [
-			[Playlist.Walk, 10],
-			[Playlist.Eat, 1],
-		],
+		next: null,
 	},
 	{
 		id: Playlist.Drag,
@@ -381,7 +377,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Splat,
@@ -411,7 +407,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Urinate,
@@ -465,7 +461,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.PlayDead,
@@ -502,7 +498,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Scream,
@@ -591,7 +587,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Doze,
@@ -642,7 +638,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.BoredSleep,
@@ -700,7 +696,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.BathDive,
@@ -950,7 +946,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.FlowerChild,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.FlowerChild,
@@ -1103,7 +1099,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: Playlist.BlackSheepChild,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.BlackSheepChild,
@@ -1458,7 +1454,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Bleat,
@@ -1490,7 +1486,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Handstand,
@@ -1525,7 +1521,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Slide,
@@ -1705,7 +1701,7 @@ export const ANIMATIONS = [
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.SneezeShadow,
 		edge: null,
-		next: Playlist.Walk,
+		next: null,
 	},
 	{
 		id: Playlist.Scratch,
