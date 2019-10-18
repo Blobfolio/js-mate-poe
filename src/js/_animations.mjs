@@ -2462,15 +2462,11 @@ export const sceneStepProgress = function(steps, total, easing) {
 		/** @type {number} */
 		let pool = 0;
 		for (let i = 0; i < maxBig; ++i) {
-			pool += out[maxBig];
+			pool += out[i];
 		}
 
-		for (let i = 0; i < out.length; ++i) {
-			// We can't subtract from the caps.
-			if (i + 1 >= maxBig) {
-				break;
-			}
-
+		// Loop again to spread the difference among the largest steps.
+		for (let i = 0; i < maxBig; ++i) {
 			/** @const {number} */
 			const chunk = (out[i] / pool) * difference;
 			out[i] -= chunk;
@@ -2482,12 +2478,13 @@ export const sceneStepProgress = function(steps, total, easing) {
 			}
 		}
 
-		// There might be a rounding error to consider.
+		// Count up the totals again.
 		newTotal = 0;
 		for (let i = 0; i < out.length; ++i) {
 			newTotal += out[i];
 		}
 
+		// If we're still off, it is probably a precision error. We can just subtract the pennies from the first entry.
 		if (
 			(positive && newTotal > total) ||
 			(! positive && newTotal < total)
