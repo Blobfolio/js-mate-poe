@@ -15,7 +15,6 @@ import { poeSprite } from './vue/_demo_poe_sprite.mjs';
 import {
 	Animation,
 	AnimationFlag,
-	DemoFlag,
 	Playlist,
 	Scene,
 	WeightedChoice,
@@ -70,16 +69,6 @@ new Vue(/** @type {!VueApp} */ ({
 
 				/** @const {Array<!Scene>} */
 				const scenes = /** @type {!Array<!Scene>} */ (demoResolveScenes(v.scenes));
-
-				if (0 < v.useDefault) {
-					flags |= DemoFlag.DefaultChoice;
-				}
-				if (0 < v.useEntrance) {
-					flags |= DemoFlag.EntranceChoice;
-				}
-				if (0 < v.useFirst) {
-					flags |= DemoFlag.FirstChoice;
-				}
 
 				out.push({
 					/** @type {!Playlist} */

@@ -26,14 +26,6 @@ export const AnimationFlag = {
 	StackBehind: 16,
 	// Variable duration.
 	VariableDuration: 32,
-};
-
-/**
- * Demo Flags
- *
- * @enum {number}
- */
-export const DemoFlag = {
 	// Default Choice.
 	DefaultChoice: 64,
 	// Entrance Choice.
@@ -227,9 +219,6 @@ export var SceneCB;
 	id: !Playlist,
 	name: string,
 	scenes: !Array<(!Scene|!SceneCB)>,
-	useDefault: number,
-	useEntrance: number,
-	useFirst: number,
 	flags: number,
 	childId: ?Playlist,
 	edge: (null|!Playlist|!Array<WeightedChoice>),

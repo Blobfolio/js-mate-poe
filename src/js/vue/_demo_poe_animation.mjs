@@ -6,7 +6,6 @@
 import { sceneSpeed } from '../_animations.mjs';
 import {
 	AnimationFlag,
-	DemoFlag,
 	Playlist,
 	VueComponent,
 	VueProp
@@ -296,7 +295,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'defaultChoice': function() {
-			return !! (DemoFlag.DefaultChoice & this['flags']);
+			return !! (AnimationFlag.DefaultChoice & this['flags']);
 		},
 
 		/**
@@ -305,7 +304,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'entranceChoice': function() {
-			return !! (DemoFlag.EntranceChoice & this['flags']);
+			return !! (AnimationFlag.EntranceChoice & this['flags']);
 		},
 
 		/**
@@ -314,7 +313,7 @@ export const poeAnimation = {
 		 * @return {boolean} True/false.
 		 */
 		'firstChoice': function() {
-			return !! (DemoFlag.FirstChoice & this['flags']);
+			return !! (AnimationFlag.FirstChoice & this['flags']);
 		},
 	},
 

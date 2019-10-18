@@ -253,9 +253,6 @@ export const isAnimation = function(v) {
 		'id' in v && isPlaylist(v.id) &&
 		'string' === typeof v.name &&
 		'scenes' in v && isSceneList(v.scenes) &&
-		isUInt(v.useDefault) &&
-		isUInt(v.useFirst) &&
-		isUInt(v.useEntrance) &&
 		isUInt(v.flags) &&
 		'childId' in v &&
 		(null === v.childId || isPlaylist(v.childId)) &&

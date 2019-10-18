@@ -49,10 +49,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		/** @type {Array<WeightedChoice>} */
 		edge: [
@@ -111,10 +108,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -142,9 +136,6 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -168,10 +159,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.EaseIn,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 10,
-		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		edge: Playlist.Bounce,
 		next: Playlist.GraspingFall,
@@ -199,9 +187,6 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		/** @type {Array<WeightedChoice>} */
@@ -232,10 +217,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
 		/** @type {Array<WeightedChoice>} */
@@ -273,9 +255,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity | SceneFlag.EaseOut,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -371,9 +350,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -401,9 +377,6 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -455,10 +428,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
@@ -492,10 +462,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -519,10 +486,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Run,
@@ -581,10 +545,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
@@ -632,10 +593,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
@@ -690,10 +648,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
 		next: null,
@@ -779,10 +734,7 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.BathDiveChild,
 		edge: Playlist.BathCoolDown,
 		next: Playlist.BathCoolDown,
@@ -840,9 +792,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
@@ -899,10 +848,7 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.WallSlide,
 		/** @type {Array<WeightedChoice>} */
@@ -940,10 +886,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.FlowerChild,
 		edge: null,
 		next: null,
@@ -1012,9 +955,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
@@ -1093,10 +1033,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: Playlist.BlackSheepChild,
 		edge: null,
 		next: null,
@@ -1158,9 +1095,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
@@ -1191,10 +1125,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
 		next: Playlist.Run,
@@ -1225,9 +1156,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.Boing,
@@ -1258,9 +1186,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: Playlist.ReachCeiling,
@@ -1287,9 +1212,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -1318,9 +1240,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: Playlist.ReachSide,
@@ -1345,9 +1264,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.AutoFlip,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -1376,9 +1292,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: Playlist.ReachFloor,
@@ -1407,9 +1320,6 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -1448,10 +1358,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1480,10 +1387,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1515,10 +1419,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1551,9 +1452,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -1601,9 +1499,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
@@ -1662,10 +1557,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: Playlist.Walk,
@@ -1695,10 +1587,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.SneezeShadow,
 		edge: null,
 		next: null,
@@ -1722,10 +1611,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: null,
@@ -1770,10 +1656,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.StargazeChild,
 		edge: null,
 		next: Playlist.Scream,
@@ -1815,9 +1698,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.IgnoreEdges,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
@@ -1909,10 +1789,7 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: Playlist.AbductionChild,
 		edge: null,
 		next: Playlist.ChasingAMartian,
@@ -1938,9 +1815,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.IgnoreEdges | SceneFlag.EaseOut,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
@@ -1986,9 +1860,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: Playlist.AbductionBeamChild,
 		edge: null,
@@ -2019,9 +1890,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.IgnoreEdges,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents,
 		childId: null,
 		edge: null,
@@ -2054,10 +1922,7 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 1,
-		useFirst: 1,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren | AnimationFlag.VariableDuration,
 		childId: Playlist.ChasingAMartianChild,
 		edge: null,
 		next: Playlist.Bleat,
@@ -2090,9 +1955,6 @@ export const ANIMATIONS = [
 				});
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents | AnimationFlag.VariableDuration,
 		childId: null,
 		edge: null,
@@ -2129,10 +1991,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		/** @type {Array<WeightedChoice>} */
@@ -2159,9 +2018,6 @@ export const ANIMATIONS = [
 				flags: 0,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoChildren | AnimationFlag.FallingAnimation,
 		childId: null,
 		edge: Playlist.Rotate,
@@ -2221,10 +2077,7 @@ export const ANIMATIONS = [
 				flags: SceneFlag.ForceGravity,
 			}),
 		],
-		useDefault: 1,
-		useEntrance: 0,
-		useFirst: 0,
-		flags: AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
+		flags: AnimationFlag.DefaultChoice | AnimationFlag.DemoPlay | AnimationFlag.NoChildren,
 		childId: null,
 		edge: null,
 		next: [
@@ -2253,9 +2106,6 @@ export const ANIMATIONS = [
 				flags: SceneFlag.AllowExit | SceneFlag.ForceGravity | SceneFlag.IgnoreEdges,
 			}),
 		],
-		useDefault: 0,
-		useEntrance: 0,
-		useFirst: 0,
 		flags: AnimationFlag.NoParents | AnimationFlag.StackBehind,
 		childId: null,
 		edge: null,
@@ -2298,69 +2148,55 @@ export const CHILD_ANIMATIONS = ANIMATIONS.reduce(
  *
  * @const {Array<WeightedChoice>}
  */
-export const DEFAULT_CHOICES = ANIMATIONS.reduce(
-	/**
-	 * Collect Animations
-	 *
-	 * @param {Array<WeightedChoice>} out Collection.
-	 * @param {Animation} v Animation.
-	 * @return {Array<WeightedChoice>} Collection.
-	 */
-	(out, v) => {
-		if (0 < v.useDefault) {
-			out.push([v.id, v.useDefault]);
-		}
-
-		return out;
-	},
-	[]
-);
+export const DEFAULT_CHOICES = [
+	[Playlist.Walk, 10],
+	[Playlist.Beg, 2],
+	[Playlist.BeginRun, 2],
+	[Playlist.Eat, 2],
+	[Playlist.Handstand, 2],
+	[Playlist.Roll, 2],
+	[Playlist.Scratch, 2],
+	[Playlist.Spin, 2],
+	[Playlist.Abduction, 1],
+	[Playlist.Bleat, 1],
+	[Playlist.BoredSleep, 1],
+	[Playlist.Doze, 1],
+	[Playlist.Jump, 1],
+	[Playlist.PlayDead, 1],
+	[Playlist.Rotate, 1],
+	[Playlist.Run, 1],
+	[Playlist.Scoot, 1],
+	[Playlist.Scream, 1],
+	[Playlist.Sleep, 1],
+	[Playlist.Sneeze, 1],
+	[Playlist.Urinate, 1],
+];
 
 /**
  * Entrance Choices
  *
  * @const {Array<WeightedChoice>}
  */
-export const ENTRANCE_CHOICES = ANIMATIONS.reduce(
-	/**
-	 * Collect Animations
-	 *
-	 * @param {Array<WeightedChoice>} out Collection.
-	 * @param {Animation} v Animation.
-	 * @return {Array<WeightedChoice>} Collection.
-	 */
-	(out, v) => {
-		if (0 < v.useEntrance) {
-			out.push([v.id, v.useEntrance]);
-		}
-
-		return out;
-	},
-	[]
-);
+export const ENTRANCE_CHOICES = [
+	[Playlist.BathDive, 1],
+	[Playlist.BlackSheep, 1],
+	[Playlist.ChasingAMartian, 1],
+	[Playlist.Fall, 1],
+	[Playlist.Stargaze, 1],
+];
 
 /**
  * First Choices
  *
  * @const {Array<WeightedChoice>}
  */
-export const FIRST_CHOICES = ANIMATIONS.reduce(
-	/**
-	 * Collect Animations
-	 *
-	 * @param {Array<WeightedChoice>} out Collection.
-	 * @param {Animation} v Animation.
-	 * @return {Array<WeightedChoice>} Collection.
-	 */
-	(out, v) => {
-		if (0 < v.useFirst) {
-			out.push([v.id, v.useFirst]);
-		}
-
-		return out;
-	},
-	[]
-);
+export const FIRST_CHOICES = [
+	[Playlist.Fall, 10],
+	[Playlist.BathDive, 1],
+	[Playlist.BlackSheep, 1],
+	[Playlist.ChasingAMartian, 1],
+	[Playlist.Stargaze, 1],
+];
 
 
 
@@ -2387,9 +2223,6 @@ export const animation = function(id) {
 		id: v.id,
 		name: v.name,
 		scenes: /** @type {Array<!Scene>} */ (resolveScenes(v.scenes)),
-		useDefault: v.useDefault,
-		useEntrance: v.useEntrance,
-		useFirst: v.useFirst,
 		flags: v.flags,
 		childId: v.childId,
 		edge: v.edge,
