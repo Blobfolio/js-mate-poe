@@ -2230,25 +2230,28 @@ export const chooseAnimation = function(choices) {
 		return choices;
 	}
 
-	/** @type {Array<Playlist>} */
-	let out = [];
-
-	// Loop and build.
+	// First pass: calculate the total.
+	/** @type {number} */
+	let total = 1;
 	for (let i = 0; i < choices.length; ++i) {
-		for (let j = 0; j < choices[i][1]; ++j) {
-			out.push(choices[i][0]);
+		total += choices[i][1];
+	}
+
+	// Pick a random value.
+	/** @const {number} */
+	let threshold = Math.floor(Math.random() * total);
+
+	// Loop again to see where this gets us.
+	total = 0;
+	for (let i = 0; i < choices.length; ++i) {
+		total += choices[i][1];
+		if (total >= threshold) {
+			return choices[i][0];
 		}
 	}
 
-	// What we got?
-	if (! out.length) {
-		return null;
-	}
-	else if (1 === out.length) {
-		return out[0];
-	}
-
-	return out[Math.floor(Math.random() * out.length)];
+	// This should never trigger.
+	return null;
 };
 
 /**
