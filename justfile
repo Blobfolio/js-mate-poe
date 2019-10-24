@@ -199,7 +199,7 @@ test_dir  := base_dir + "/test"
 
 	# Vue JS.
 	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
-	wget -q -O "{{ demo_dir }}/assets/vue.min.js" "https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.js"
+	wget -q -O "{{ demo_dir }}/assets/vue.min.js" "https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.min.js"
 
 
 
