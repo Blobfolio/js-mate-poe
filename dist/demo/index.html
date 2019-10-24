@@ -65,7 +65,7 @@
 				<poe-animation
 					v-for="item in animations"
 					:key="'animation-' + item.id"
-					v-bind="item"
+					:id="item.id"
 				></poe-animation>
 			</div>
 		</div>
@@ -83,14 +83,11 @@
 
 	<div id="fader"></div>
 
-	<script src="../js-mate-poe.min.js?ver=14"></script>
-	<script src="assets/vue.min.js?ver=14"></script>
-	<script src="assets/demo.min.js?ver=14"></script>
+	<script src="../js-mate-poe.min.js?ver=15"></script>
+	<script src="assets/vue.min.js?ver=15"></script>
+	<script src="assets/demo.min.js?ver=15"></script>
 	<script>
 		(function() {
-			// Enable extra console output for demo-purposes.
-			Poe.debug = true;
-
 			// Start it!
 			window.addEventListener('load', Poe.start, { once: true });
 		})();

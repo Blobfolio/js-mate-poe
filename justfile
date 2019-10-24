@@ -38,7 +38,10 @@ test_dir  := base_dir + "/test"
 # Run unit tests.
 @test: _check_dependencies
 	just _header "Unit tests!"
-	npx karma start --single-run --browsers ChromeHeadless "{{ base_dir }}/karma.conf.js"
+	npx karma start \
+		--single-run \
+		--browsers ChromeHeadless \
+		"{{ base_dir }}/karma.conf.js"
 	just _notify "Unit tests are looking good!"
 
 
@@ -66,8 +69,8 @@ test_dir  := base_dir + "/test"
 @_watch_js:
 	just _eslint
 
-	just _google-closure-compiler "{{ src_dir }}/js/js-mate-poe.mjs" "{{ dist_dir }}/js-mate-poe.min.js"
-	just _google-closure-compiler "{{ src_dir }}/js/demo.mjs" "{{ demo_dir }}/assets/demo.min.js"
+	just _compile-js-mate-poe
+	just _compile-demo
 
 	just _brotli "{{ dist_dir }}" "js"
 	just _gzip "{{ dist_dir }}" "js"
@@ -101,13 +104,13 @@ test_dir  := base_dir + "/test"
 	[ -f "{{ src_dir }}/css/js-mate-poe.css" ] || just _die "Missing js-mate-poe.css."
 
 	# Start it.
-	cp -a "{{ src_dir }}/skel/_css.mjs" "{{ src_dir }}/skel/css.tmp"
+	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ src_dir }}/skel/css.tmp"
 
 	# The main CSS.
-	echo "export const CSS = '$( cat "{{ src_dir }}/css/js-mate-poe.css" )';" >> "{{ src_dir }}/skel/css.tmp"
+	echo "export const CssUrl = URL.createObjectURL(new Blob(['$( cat "{{ src_dir }}/css/js-mate-poe.css" )'], {type: 'text/css'}));" >> "{{ src_dir }}/skel/css.tmp"
 
 	# Move the file to its normal place!
-	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/_css.mjs"
+	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/js-mate-poe/css.url.mjs"
 
 
 ##          ##
@@ -119,8 +122,7 @@ test_dir  := base_dir + "/test"
 	just _header "Linting Javascript."
 	npx eslint \
 		--color \
-		"{{ src_dir }}/js"/*.mjs \
-		"{{ src_dir }}/js/vue"/*.mjs \
+		"{{ src_dir }}/js"/**/*.mjs \
 		"{{ test_dir }}"/*.js
 
 
@@ -130,28 +132,27 @@ test_dir  := base_dir + "/test"
 	npx eslint \
 		--color \
 		--fix \
-		"{{ src_dir }}/js"/*.mjs \
-		"{{ src_dir }}/js/vue"/*.mjs \
+		"{{ src_dir }}/js"/**/*.mjs \
 		"{{ test_dir }}"/*.js || true
 
 
-# Closure Compiler.
-@_google-closure-compiler IN OUT:
-	just _header "Compiling $( basename "{{ IN }}" )."
+# Compile JS Mate Poe.
+@_compile-js-mate-poe:
+	just _header "Compiling JS Mate Poe"
 
 	npx google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
 		--language_out STABLE \
-		--externs "{{ src_dir }}/js/_externs.js" \
-		--js "{{ src_dir }}/js"/*.mjs \
-		--js "{{ src_dir }}/js/vue"/*.mjs \
-		--js_output_file "{{ OUT }}" \
-		--jscomp_off globalThis \
+		--js "{{ src_dir }}/js/core.mjs" \
+		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/js-mate-poe/**.mjs" \
+		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
 		--jscomp_off unknownDefines \
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
-		--entry_point "{{ IN }}" \
+		--dependency_mode PRUNE \
+		--entry_point "{{ src_dir }}/js/js-mate-poe/app.mjs" \
 		--browser_featureset_year 2019 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
@@ -159,9 +160,37 @@ test_dir  := base_dir + "/test"
 		--use_types_for_optimization \
 		--warning_level VERBOSE
 
-	# Generate a truly final version.
-	cat "{{ src_dir }}/skel/js-mate-poe.min.js" "{{ OUT }}" > "{{ src_dir }}/js/tmp.js"
-	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
+	cat "{{ src_dir }}/skel/header.min.js" "{{ dist_dir }}/js-mate-poe.min.js" > "{{ src_dir }}/js/tmp.js"
+	mv "{{ src_dir }}/js/tmp.js" "{{ dist_dir }}/js-mate-poe.min.js"
+
+
+# Compile JS Mate Poe Demo.
+@_compile-demo:
+	just _header "Compiling JS Mate Poe Demo"
+
+	npx google-closure-compiler \
+		--env BROWSER \
+		--language_in STABLE \
+		--language_out ECMASCRIPT5_STRICT \
+		--externs "{{ src_dir }}/js/demo/externs.js" \
+		--js "{{ src_dir }}/js/core.mjs" \
+		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/demo/**.mjs" \
+		--js_output_file "{{ demo_dir }}/assets/demo.min.js" \
+		--jscomp_off globalThis \
+		--jscomp_off unknownDefines \
+		--assume_function_wrapper \
+		--compilation_level ADVANCED \
+		--entry_point "{{ src_dir }}/js/demo/app.mjs" \
+		--browser_featureset_year 2019 \
+		--isolation_mode IIFE \
+		--module_resolution BROWSER \
+		--strict_mode_input \
+		--use_types_for_optimization \
+		--warning_level VERBOSE
+
+	cat "{{ src_dir }}/skel/header.min.js" "{{ demo_dir }}/assets/demo.min.js" > "{{ src_dir }}/js/tmp.js"
+	mv "{{ src_dir }}/js/tmp.js" "{{ demo_dir }}/assets/demo.min.js"
 
 
 # Pull JS Chain.

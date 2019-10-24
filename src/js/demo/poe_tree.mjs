@@ -1,39 +1,39 @@
 /**
- * @file Component: Poe Animation
+ * @file Component: Poe Tree
  */
 
 /* eslint-disable quote-props */
-import { VueComponent, VueProp } from '../_types.mjs';
+import { VueComponent, VueProp } from './vue.mjs';
 
 
 
 /**
  * Component: Poe Animation
  *
- * @const {VueComponent}
+ * @const {!VueComponent}
  */
-export const poeTree = {
-	/** @type {Object} */
+export const PoeTree = {
+	/** @type {!Object} */
 	'props': {
-		/** @type {VueProp} */
+		/** @type {!VueProp} */
 		'trunk': {
 			'type': String,
 			'required': true,
 		},
 
-		/** @type {VueProp} */
+		/** @type {!VueProp} */
 		'values': {
 			'type': Array,
 			'required': true,
 		},
 	},
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'computed': {
 		/**
 		 * Branches
 		 *
-		 * @return {Array<Object>} Branches.
+		 * @return {!Array<!Object>} Branches.
 		 */
 		'branches': function() {
 			let out = [];

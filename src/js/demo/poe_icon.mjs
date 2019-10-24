@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable quote-props */
-import { VueComponent, VueProp } from '../_types.mjs';
+import { VueComponent, VueProp } from './vue.mjs';
 
 
 
@@ -12,13 +12,13 @@ import { VueComponent, VueProp } from '../_types.mjs';
  *
  * @const {VueComponent}
  */
-export const poeIcon = {
+export const PoeIcon = {
 	/** @type {boolean} */
 	'functional': true,
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'props': {
-		/** @type {VueProp} */
+		/** @type {!VueProp} */
 		'icon': {
 			'type': String,
 			'required': true,
@@ -28,9 +28,9 @@ export const poeIcon = {
 	/**
 	 * Render
 	 *
-	 * @param {Function} h Callback.
-	 * @param {Object} context Context.
-	 * @return {Element} Element.
+	 * @param {!Function} h Callback.
+	 * @param {!Object} context Context.
+	 * @return {!Element} Element.
 	 */
 	'render': function(h, context) {
 		// We need to add some classes.

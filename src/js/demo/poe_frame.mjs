@@ -3,30 +3,30 @@
  */
 
 /* eslint-disable quote-props */
-import { TILES_X, TILES_Y } from '../_media.mjs';
-import { VueComponent, VueProp } from '../_types.mjs';
+import { SpriteInfo } from '../core.mjs';
+import { VueComponent, VueProp } from './vue.mjs';
 
 
 
 /**
  * Component: Poe Frame
  *
- * @const {VueComponent}
+ * @const {!VueComponent}
  */
-export const poeFrame = {
+export const PoeFrame = {
 	/** @type {boolean} */
 	'functional': true,
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'props': {
-		/** @type {VueProp} */
+		/** @type {!VueProp} */
 		'frame': {
 			'type': Number,
 			'required': false,
 			'default': 0,
 		},
 
-		/** @type {VueProp} */
+		/** @type {!VueProp} */
 		'repeat': {
 			'type': Boolean,
 			'required': false,
@@ -37,17 +37,17 @@ export const poeFrame = {
 	/**
 	 * Render
 	 *
-	 * @param {Function} h Callback.
-	 * @param {Object} context Context.
-	 * @return {Element} Element.
+	 * @param {!Function} h Callback.
+	 * @param {!Object} context Context.
+	 * @return {!Element} Element.
 	 */
 	'render': function(h, context) {
 		// The frame must be in range.
 		if (
 			0 > context['props']['frame'] ||
-			TILES_X * TILES_Y < context['props']['frame']
+			SpriteInfo.EmptyTile < context['props']['frame']
 		) {
-			context['props']['frame'] = 0;
+			context['props']['frame'] = SpriteInfo.EmptyTile;
 		}
 
 		// We need to add some classes.

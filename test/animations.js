@@ -6,126 +6,161 @@
 /* global describe */
 /* global it */
 import {
-	ANIMATIONS,
-	DEFAULT_CHOICES,
-	ENTRANCE_CHOICES,
-	FIRST_CHOICES,
-	MAX_ANIMATION_ID
-} from '../src/js/_animations.mjs';
-import { isAnimation } from '../src/js/_helpers.mjs';
-import { AnimationFlag, Playlist } from '../src/js/_types.mjs';
+	AnimationFlag,
+	AnimationList,
+	ChoiceList,
+	DefaultList,
+	EntranceList,
+	FirstList,
+	Playlist,
+	SceneList
+} from '../src/js/core.mjs';
 
 
 
-// Keep track of reachable animations.
-/** @type {Set<!Playlist>} */
-let reachable = new Set([Playlist.Drag]);
+(function() {
+	// Keep track of cross-references.
+	let reachable = new Set([Playlist.Drag]);
+	let defaults = new Set([...DefaultList]);
+	let entrances = new Set([...EntranceList]);
+	let firsts = new Set([...FirstList]);
 
 
 
-describe('Animation Definitions', () => {
-	// Rebuild choices as sets for easier management.
-	let defaults = DEFAULT_CHOICES.reduce((out, v) => {
-		out.add(v[0]);
-		return out;
-	}, new Set());
-
-	let entrances = ENTRANCE_CHOICES.reduce((out, v) => {
-		out.add(v[0]);
-		return out;
-	}, new Set());
-
-	let firsts = FIRST_CHOICES.reduce((out, v) => {
-		out.add(v[0]);
-		return out;
-	}, new Set());
-
-	// Run through the animations to validate pathways, etc.
-	for (let i = 0; i < MAX_ANIMATION_ID; ++i) {
-		it(
-			`${ANIMATIONS[i].name} has a valid structure.`,
-			() => assert.isTrue(isAnimation(ANIMATIONS[i]))
-		);
-
-		it(
-			`ID for ${ANIMATIONS[i].name} is in correct position.`,
-			() => assert.strictEqual(i + 1, ANIMATIONS[i].id)
-		);
-
-		// Default choice.
-		if (AnimationFlag.DefaultChoice & ANIMATIONS[i].flags) {
-			it(
-				`Default choice is set for ${ANIMATIONS[i].name}.`,
-				() => assert.isTrue(defaults.has(ANIMATIONS[i].id))
+	// Start by looping the main animation list.
+	for (let i = 0; i < AnimationList.length; ++i) {
+		describe(`Animation #${i}`, () => {
+			// Take a look at the general structure. It should be fine,
+			// but Closure Compiler sometimes ignores deep type checks.
+			it('id is defined', () =>
+				assert.isNumber(AnimationList[i].id) &&
+				assert.strictEqual(AnimationList[i].id - 1, i)
 			);
-			reachable.add(ANIMATIONS[i].id);
-		}
-
-		// Entrance choice
-		if (AnimationFlag.EntranceChoice & ANIMATIONS[i].flags) {
-			it(
-				`Entrance choice is set for ${ANIMATIONS[i].name}.`,
-				() => assert.isTrue(entrances.has(ANIMATIONS[i].id))
+			it('name is defined', () =>
+				assert.isString(AnimationList[i].name) &&
+				assert.isAbove(AnimationList[i].name.length, 0)
 			);
-			reachable.add(ANIMATIONS[i].id);
-		}
-
-		// First choice
-		if (AnimationFlag.FirstChoice & ANIMATIONS[i].flags) {
-			it(
-				`First choice is set for ${ANIMATIONS[i].name}.`,
-				() => assert.isTrue(firsts.has(ANIMATIONS[i].id))
+			it('scenes are defined', () =>
+				assert.isObject(AnimationList[i].scenes) &&
+				assert.isTrue(AnimationList[i].scenes instanceof SceneList)
 			);
-			reachable.add(ANIMATIONS[i].id);
-		}
+			it('flags are defined', () =>
+				assert.isNumber(AnimationList[i].flags) &&
+				assert.isAtLeast(AnimationList[i].flags, 0)
+			);
+			it('childId is defined', () =>
+				assert.isTrue('undefined' !== AnimationList[i].childId) &&
+				(
+					assert.isNull(AnimationList[i].childId) ||
+					assert.isNumber(AnimationList[i].childId)
+				)
+			);
+			it('edge is defined', () =>
+				assert.isTrue('undefined' !== AnimationList[i].edge) &&
+				(
+					assert.isNull(AnimationList[i].edge) ||
+					assert.isNumber(AnimationList[i].edge) ||
+					assert.isTrue(AnimationList[i].edge instanceof ChoiceList)
+				)
+			);
+			it('next is defined', () =>
+				assert.isTrue('undefined' !== AnimationList[i].next) &&
+				(
+					assert.isNull(AnimationList[i].next) ||
+					assert.isNumber(AnimationList[i].next) ||
+					assert.isTrue(AnimationList[i].next instanceof ChoiceList)
+				)
+			);
 
-		// Children are implicitly reachable.
-		if (null !== ANIMATIONS[i].childId) {
-			reachable.add(ANIMATIONS[i].childId);
-		}
+			// Check cross references with lists.
+			it('default cross reference checks', () => {
+				assert.strictEqual(
+					!! (AnimationFlag.DefaultChoice & AnimationList[i].flags),
+					defaults.has(AnimationList[i].id)
+				);
+			});
 
-		// Add edges and nexts.
-		for (let j of ['edge', 'next']) {
-			if ('number' === typeof ANIMATIONS[i][j]) {
-				reachable.add(ANIMATIONS[i][j]);
+			it('entrance cross reference checks', () => {
+				assert.strictEqual(
+					!! (AnimationFlag.EntranceChoice & AnimationList[i].flags),
+					entrances.has(AnimationList[i].id)
+				);
+			});
+
+			it('first cross reference checks', () => {
+				assert.strictEqual(
+					!! (AnimationFlag.FirstChoice & AnimationList[i].flags),
+					firsts.has(AnimationList[i].id)
+				);
+			});
+
+			// Set reachability.
+			if (AnimationFlag.DefaultChoice & AnimationList[i].flags) {
+				reachable.add(AnimationList[i].id);
 			}
-			else if (null !== ANIMATIONS[i][j]) {
-				for (let k = 0; k < ANIMATIONS[i][j].length; ++k) {
-					reachable.add(ANIMATIONS[i][j][k][0]);
+			else if (AnimationFlag.EntranceChoice & AnimationList[i].flags) {
+				reachable.add(AnimationList[i].id);
+			}
+			else if (AnimationFlag.FirstChoice & AnimationList[i].flags) {
+				reachable.add(AnimationList[i].id);
+			}
+		});
+	}
+
+	// Re-check defaults, etc., to ensure their members are cross-flagged.
+	describe('Default, etc., Flag Cross-References', () => {
+		for (let i of defaults.entries()) {
+			it('default flag set', () =>
+				assert.isAbove((AnimationFlag.DefaultChoice & AnimationList[i[0] - 1].flags), 0)
+			);
+		}
+		for (let i of entrances.entries()) {
+			it('entrance flag set', () =>
+				assert.isAbove((AnimationFlag.EntranceChoice & AnimationList[i[0] - 1].flags), 0)
+			);
+		}
+		for (let i of firsts.entries()) {
+			it('first flag set', () =>
+				assert.isAbove((AnimationFlag.FirstChoice & AnimationList[i[0] - 1].flags), 0)
+			);
+		}
+	});
+
+	// Every animation should be reachable.
+	describe('Default, etc., Flag Cross-References', () => {
+		// Before we get started, let's add the links from all reachable
+		// animations to the master list of reachability.
+		for (let i of reachable.entries()) {
+			if (null !== AnimationList[i[0] - 1].childId) {
+				reachable.add(AnimationList[i[0] - 1].childId);
+			}
+
+			if ('number' === typeof AnimationList[i[0] - 1].edge) {
+				reachable.add(AnimationList[i[0] - 1].edge);
+			}
+			else if (null !== AnimationList[i[0] - 1].edge) {
+				let tmp = [...AnimationList[i[0] - 1].edge];
+				for (let i = 0; i < tmp.length; ++i) {
+					reachable.add(tmp[i]);
+				}
+			}
+
+			if ('number' === typeof AnimationList[i[0] - 1].next) {
+				reachable.add(AnimationList[i[0] - 1].next);
+			}
+			else if (null !== AnimationList[i[0] - 1].next) {
+				let tmp = [...AnimationList[i[0] - 1].next];
+				for (let i = 0; i < tmp.length; ++i) {
+					reachable.add(tmp[i]);
 				}
 			}
 		}
-	}
 
-	// Test our defaults, etc., again from the other direction.
-	defaults.forEach(v => {
-		it(
-			'Reverse default set.',
-			() => assert.isFalse(! (AnimationFlag.DefaultChoice & ANIMATIONS[v - 1].flags))
-		);
+		// Loop again to make sure the animations exist.
+		for (let i of reachable.entries()) {
+			it(`animination #${i} is reachable`, () =>
+				assert.isTrue('undefined' !== typeof AnimationList[i[0] - 1])
+			);
+		}
 	});
-
-	entrances.forEach(v => {
-		it(
-			'Reverse entrance set.',
-			() => assert.isFalse(! (AnimationFlag.EntranceChoice & ANIMATIONS[v - 1].flags))
-		);
-	});
-
-	firsts.forEach(v => {
-		it(
-			'Reverse first set.',
-			() => assert.isFalse(! (AnimationFlag.FirstChoice & ANIMATIONS[v - 1].flags))
-		);
-	});
-});
-
-describe('Animation Reachability', () => {
-	// Run through the animations to validate pathways, etc.
-	for (let i = 0; i < MAX_ANIMATION_ID; ++i) {
-		it(
-			`${ANIMATIONS[i].name} is reachable.`,
-			() => assert.isTrue(reachable.has(ANIMATIONS[i].id))
-		);
-	}
-});
+})();
