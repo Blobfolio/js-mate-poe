@@ -15,57 +15,16 @@ import { VueComponent, VueProp } from './vue.mjs';
 
 
 /**
- * Sanitize Frame
+ * Poe Sprite Limits
  *
- * @param {number} frame Frame.
- * @return {number} Frame.
+ * @enum {number}
  */
-const sanitizeFrame = function(frame) {
-	frame = parseInt(frame, 10) || 0;
-	if (0 > frame) {
-		return 0;
-	}
-	else if (SpriteInfo.EmptyTile < frame) {
-		return SpriteInfo.EmptyTile;
-	}
-
-	return frame;
+const PoeSpriteLimits = {
+	repeatMin: 0,
+	repeatMax: 99,
+	speedMin: 10,
+	speedMax: 9999,
 };
-
-/**
- * Minimum Repeat
- *
- * @const {number}
- */
-const repeatMin = 0;
-
-/**
- * Maximum Repeat
- *
- * @const {number}
- */
-const repeatMax = 99;
-
-/**
- * Minimum Speed
- *
- * @const {number}
- */
-const speedMin = 10;
-
-/**
- * Maximum Speed
- *
- * @const {number}
- */
-const speedMax = 9999;
-
-/**
- * Timeout
- *
- * @type {?number}
- */
-let _timeout = null;
 
 /**
  * Sprite Sequence
@@ -114,8 +73,8 @@ export const PoeSprite = {
 					for (let i = 0; i < scenes.length; ++i) {
 						/** @type {!number} */
 						let repeat = scenes[i].frames.repeat;
-						if (repeatMax < repeat) {
-							repeat = repeatMax;
+						if (PoeSpriteLimits.repeatMax < repeat) {
+							repeat = PoeSpriteLimits.repeatMax;
 						}
 
 						/** @type {number} */
@@ -162,6 +121,8 @@ export const PoeSprite = {
 			'speed': 200,
 			/** @type {number} */
 			'tick': -1,
+			/** @type {?number} */
+			'timeout': null,
 		};
 	},
 
@@ -177,7 +138,16 @@ export const PoeSprite = {
 		 * @return {void} Nothing.
 		 */
 		'addFrame': function(frame) {
-			this['frames'].push(sanitizeFrame(frame));
+			frame = parseInt(frame, 10) || 0;
+			if (0 > frame) {
+				this['frames'].push(0);
+			}
+			else if (SpriteInfo.EmptyTile < frame) {
+				this['frames'].push(SpriteInfo.EmptyTile);
+			}
+			else {
+				this['frames'].push(frame);
+			}
 		},
 
 		/**
@@ -239,7 +209,7 @@ export const PoeSprite = {
 		 * @return {void} Nothing.
 		 */
 		'tickCycle': function() {
-			_timeout = null;
+			this['timeout'] = null;
 
 			// No change needed.
 			if (0 > this['tick'] || 2 > this['playlist'].length) {
@@ -257,8 +227,8 @@ export const PoeSprite = {
 			// Bump the frame as needed.
 			Vue.nextTick(() => {
 				this['tick'] = tick;
-				_timeout = setTimeout(() => {
-					_timeout = null;
+				this['timeout'] = setTimeout(() => {
+					this['timeout'] = null;
 					this['tickCycle']();
 				}, this['speed']);
 			});
@@ -277,31 +247,31 @@ export const PoeSprite = {
 			let out = [];
 
 			// Speed.
-			if (speedMin > this['speed']) {
-				out.push(`Speed must be at least ${speedMin}ms.`);
+			if (PoeSpriteLimits.speedMin > this['speed']) {
+				out.push(`Speed must be at least ${PoeSpriteLimits.speedMin}ms.`);
 			}
-			else if (speedMax < this['speed']) {
-				out.push(`Speed cannot exceed ${speedMax}ms.`);
+			else if (PoeSpriteLimits.speedMax < this['speed']) {
+				out.push(`Speed cannot exceed ${PoeSpriteLimits.speedMax}ms.`);
 			}
 
 			// Repeat.
-			if (repeatMin > this['repeat']) {
-				out.push(`Repeat must be at least ${repeatMin}.`);
+			if (PoeSpriteLimits.repeatMin > this['repeat']) {
+				out.push(`Repeat must be at least ${PoeSpriteLimits.repeatMin}.`);
 
 				// Check repeat from only if we're repeating.
 
 				/** @type {number} */
 				const fromMax = this['frames'].length ? this['frames'].length - 1 : 0;
 
-				if (repeatMin > this['repeatFrom']) {
-					out.push(`Repeat From must be at least ${repeatMin}.`);
+				if (PoeSpriteLimits.repeatMin > this['repeatFrom']) {
+					out.push(`Repeat From must be at least ${PoeSpriteLimits.repeatMin}.`);
 				}
 				else if (fromMax < this['repeatFrom']) {
 					out.push(`Repeat From cannot exceed ${fromMax}.`);
 				}
 			}
-			else if (repeatMax < this['repeat']) {
-				out.push(`Repeat cannot exceed ${repeatMax}.`);
+			else if (PoeSpriteLimits.repeatMax < this['repeat']) {
+				out.push(`Repeat cannot exceed ${PoeSpriteLimits.repeatMax}.`);
 			}
 
 			return out.length ? out : false;
@@ -367,9 +337,9 @@ export const PoeSprite = {
 		 */
 		'playlist': function() {
 			// Clear any existing animations.
-			if (_timeout) {
-				clearTimeout(_timeout);
-				_timeout = null;
+			if (this['timeout']) {
+				clearTimeout(this['timeout']);
+				this['timeout'] = null;
 			}
 
 			if (! this['playlist'].length) {
@@ -413,12 +383,12 @@ export const PoeSprite = {
 		'repeat': function(v) {
 			if (
 				('number' !== typeof v) ||
-				repeatMin > v
+				PoeSpriteLimits.repeatMin > v
 			) {
-				this['repeat'] = repeatMin;
+				this['repeat'] = PoeSpriteLimits.repeatMin;
 			}
-			else if (repeatMax < v) {
-				this['repeat'] = repeatMax;
+			else if (PoeSpriteLimits.repeatMax < v) {
+				this['repeat'] = PoeSpriteLimits.repeatMax;
 			}
 		},
 
@@ -432,9 +402,9 @@ export const PoeSprite = {
 			if (
 				! this['repeat'] ||
 				('number' !== typeof v) ||
-				repeatMin > v
+				PoeSpriteLimits.repeatMin > v
 			) {
-				this['repeatFrom'] = repeatMin;
+				this['repeatFrom'] = PoeSpriteLimits.repeatMin;
 			}
 			else if (this['frames'].length <= v) {
 				this['repeatFrom'] = this['frames'].length - 1;
@@ -478,8 +448,8 @@ export const PoeSprite = {
 						<label for="playground-speed" class="accent is-required">Speed</label>
 						<input
 							id="playground-speed"
-							max="${speedMax}"
-							min="${speedMin}"
+							max="${PoeSpriteLimits.speedMax}"
+							min="${PoeSpriteLimits.speedMin}"
 							step="1"
 							type="number"
 							v-model.number="speed"
@@ -493,8 +463,8 @@ export const PoeSprite = {
 						<label for="playground-repeat" class="accent">Repeat</label>
 						<input
 							id="playground-repeat"
-							max="${repeatMax}"
-							min="${repeatMin}"
+							max="${PoeSpriteLimits.repeatMax}"
+							min="${PoeSpriteLimits.repeatMin}"
 							step="1"
 							type="number"
 							v-model.number="repeat"
@@ -509,7 +479,7 @@ export const PoeSprite = {
 						<input
 							id="playground-repeat-from"
 							:max="frames.length ? frames.length - 1 : 0"
-							min="${repeatMin}"
+							min="${PoeSpriteLimits.repeatMin}"
 							step="1"
 							type="number"
 							v-model.number="repeatFrom"
