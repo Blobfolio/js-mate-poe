@@ -171,7 +171,7 @@ test_dir  := base_dir + "/test"
 	npx google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--language_out ECMASCRIPT5_STRICT \
+		--language_out STABLE \
 		--externs "{{ src_dir }}/js/demo/externs.js" \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
