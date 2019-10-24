@@ -1,99 +1,120 @@
 /**
- * @file The Demo!
+ * @file JS Mate Poe: Vue Demo
  */
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { NAME, VERSION } from './_about.mjs';
-import { ANIMATIONS } from './_animations.mjs';
-import { demoResolveScenes, standardizeChoices } from './_helpers.mjs';
-import { poeAnimation } from './vue/_demo_poe_animation.mjs';
-import { poeFrame } from './vue/_demo_poe_frame.mjs';
-import { poeIcon } from './vue/_demo_poe_icon.mjs';
-import { poeTree } from './vue/_demo_poe_tree.mjs';
-import { poeSprite } from './vue/_demo_poe_sprite.mjs';
 import {
 	Animation,
 	AnimationFlag,
+	AnimationList,
+	AsciiArt,
+	ChoiceList,
+	LogKind,
+	LogMsg,
 	Playlist,
-	Scene,
-	WeightedChoice,
-	VueApp
-} from './_types.mjs';
+	SceneList,
+	standardizeChoices,
+	Universe
+} from '../core.mjs';
+import { PoeAnimation } from './poe_animation.mjs';
+import { PoeFrame } from './poe_frame.mjs';
+import { PoeIcon } from './poe_icon.mjs';
+import { PoeSprite } from './poe_sprite.mjs';
+import { PoeTree } from './poe_tree.mjs';
+import { VueApp } from './vue.mjs';
 
 
 
 // ---------------------------------------------------------------------
-// Helpers
+// Universe Overloads
+// ---------------------------------------------------------------------
+
+Universe.random = function(max) {
+	return Math.floor(Math.random() * max);
+};
+
+Universe.now = function() {
+	return performance.now();
+};
+
+Universe.log = function(msg, type) {
+	switch (type) {
+	case LogKind.Error:
+		console.error(msg);
+		break;
+
+	case LogKind.Warning:
+		console.warn(msg);
+		break;
+
+	case LogKind.Notice:
+		/* eslint-disable-next-line */
+		console.log(msg);
+		break;
+
+	case LogKind.Info:
+		console.info(msg);
+		break;
+	}
+};
+
+
+
+// ---------------------------------------------------------------------
+// Vue
 // ---------------------------------------------------------------------
 
 /** @type {boolean} */
-let mounted = false;
+let _mounted = false;
 
+Vue.component('poe-animation', PoeAnimation);
+Vue.component('poe-frame', PoeFrame);
+Vue.component('poe-icon', PoeIcon);
+Vue.component('poe-sprite', PoeSprite);
+Vue.component('poe-tree', PoeTree);
 
-
-// ---------------------------------------------------------------------
-// Vue!
-// ---------------------------------------------------------------------
-
-// Register components.
-Vue.component('poe-animation', poeAnimation);
-Vue.component('poe-frame', poeFrame);
-Vue.component('poe-icon', poeIcon);
-Vue.component('poe-sprite', poeSprite);
-Vue.component('poe-tree', poeTree);
-
-// Get Vue going!
 new Vue(/** @type {!VueApp} */ ({
 	/** @type {string} */
 	'el': '#app',
 
 	/** @type {Object} */
 	'data': {
-		'name': NAME,
-		'version': VERSION,
-
-		'animations': ANIMATIONS.reduce(
+		'name': LogMsg.Name,
+		'version': LogMsg.Version,
+		'animations': AnimationList.reduce(
 			/**
 			 * Collection
 			 *
-			 * @param {Array} out Collection.
-			 * @param {Animation} v Animation.
-			 * @return {Array} Collection.
+			 * @param {!Array<!Animation>} out Collection.
+			 * @param {!Animation} v Animation.
+			 * @return {!Array<!Animation>} Collection.
 			 */
 			(out, v) => {
-				// Test variable duration before we set the info.
-
-				/** @type {number} */
-				let flags = v.flags;
-
-				/** @const {Array<!Scene>} */
-				const scenes = /** @type {!Array<!Scene>} */ (demoResolveScenes(v.scenes));
-
-				out.push({
+				out.push(/** @type {!Animation} */ ({
 					/** @type {!Playlist} */
 					'id': v.id,
 					/** @type {string} */
 					'name': v.name,
-					/** @type {!Array<!Scene>} */
-					'scenes': /** @type {!Array<!Scene>} */ (scenes),
+					/** @type {!SceneList} */
+					'scenes': v.scenes,
 					/** @type {number} */
-					'flags': flags,
+					'flags': v.flags,
 					/** @type {number} */
 					'childId': (null === v.childId) ? 0 : v.childId,
-					/** @type {?Array<WeightedChoice>} */
+					/** @type {?ChoiceList} */
 					'edge': standardizeChoices(v.edge),
-					/** @type {?Array<WeightedChoice>} */
+					/** @type {?ChoiceList} */
 					'next': standardizeChoices(v.next),
-				});
+				}));
 
 				return out;
 			},
 			[]
 		)
 			.sort((a, b) => {
-				let a_key = `${(AnimationFlag.DemoPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
-				let b_key = `${(AnimationFlag.DemoPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
+				let a_key = `${(AnimationFlag.DirectPlay & a['flags']) ? '0_' : '1_'}${a['name']}`;
+				let b_key = `${(AnimationFlag.DirectPlay & b['flags']) ? '0_' : '1_'}${b['name']}`;
 
 				return (a_key < b_key) ? -1 : 1;
 			}),
@@ -119,8 +140,22 @@ new Vue(/** @type {!VueApp} */ ({
 	 * @return {void} Nothing.
 	 */
 	'mounted': function() {
-		if (! mounted) {
-			mounted = false;
+		if (! _mounted) {
+			_mounted = true;
+
+			// Set the canvas size.
+			Universe.height = parseInt(window.innerHeight, 10) || 1024;
+			Universe.width = parseInt(window.innerWidth, 10) || 768;
+
+			// Print something fun to the console.
+			/* eslint-disable-next-line */
+			console.info(`%c${AsciiArt}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
+
+			/* eslint-disable-next-line */
+			console.info(`%c${LogMsg.Name}: %c${LogMsg.Version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
+
+			/* eslint-disable-next-line */
+			console.info(`%c${LogMsg.URL}`, 'color:#e67e22;text-decoration:underline;');
 		}
 	},
 
@@ -191,7 +226,7 @@ new Vue(/** @type {!VueApp} */ ({
 				out[v['id']] = {
 					'id': v['id'],
 					'name': v['name'],
-					'frame': v['scenes'][0]['frames'][0],
+					'frame': v['scenes'].frame,
 				};
 
 				return out;

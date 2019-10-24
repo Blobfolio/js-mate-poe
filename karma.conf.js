@@ -15,14 +15,24 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        { pattern: 'src/js/*.mjs', type: 'module' },
+        { pattern: 'src/js/core/def.mjs', type: 'module' },
+        { pattern: 'src/js/core/choicelist.mjs', type: 'module' },
+        { pattern: 'src/js/core/framelist.mjs', type: 'module' },
+        { pattern: 'src/js/core/mate.mjs', type: 'module' },
+        { pattern: 'src/js/core/position.mjs', type: 'module' },
+        { pattern: 'src/js/core/scenelist.mjs', type: 'module' },
+        { pattern: 'src/js/core/easing.mjs', type: 'module' },
+        { pattern: 'src/js/core/standardize_choices.mjs', type: 'module' },
+        { pattern: 'src/js/core/base64_to_blob.mjs', type: 'module' },
+        { pattern: 'src/js/core/assets.mjs', type: 'module' },
+        { pattern: 'src/js/core/animations.mjs', type: 'module' },
+        { pattern: 'src/js/core.mjs', type: 'module' },
 	    { pattern: 'test/*.js', type: 'module' },
     ],
 
 
     // list of files / patterns to exclude
     exclude: [
-        'src/js/demo.mjs',
     ],
 
 
@@ -66,6 +76,8 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+
+    captureConsole: true
   })
 }

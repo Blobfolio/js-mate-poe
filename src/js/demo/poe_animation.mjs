@@ -3,13 +3,14 @@
  */
 
 /* eslint-disable quote-props */
-import { sceneSpeed } from '../_animations.mjs';
 import {
+	Animation,
 	AnimationFlag,
+	Choice,
 	Playlist,
-	VueComponent,
-	VueProp
-} from '../_types.mjs';
+	Scene
+} from '../core.mjs';
+import { VueComponent, VueProp } from './vue.mjs';
 
 
 
@@ -18,11 +19,11 @@ import {
  *
  * @const {VueComponent}
  */
-export const poeAnimation = {
+export const PoeAnimation = {
 	/**
 	 * Data
 	 *
-	 * @return {Object} Data.
+	 * @return {!Object} Data.
 	 */
 	'data': function() {
 		return {
@@ -30,56 +31,16 @@ export const poeAnimation = {
 		};
 	},
 
-	/** @type {Object<string, VueProp>} */
+	/** @type {!Object<string, !VueProp>} */
 	'props': {
 		/** @type {VueProp} */
 		'id': {
 			'type': Number,
 			'required': true,
 		},
-
-		/** @type {VueProp} */
-		'name': {
-			'type': String,
-			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'scenes': {
-			'type': [Array],
-			'required': true,
-		},
-
-		/** @type {VueProp} */
-		'flags': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'childId': {
-			'type': Number,
-			'required': false,
-			'default': 0,
-		},
-
-		/** @type {VueProp} */
-		'edge': {
-			'type': [Array, null],
-			'required': false,
-			'default': null,
-		},
-
-		/** @type {VueProp} */
-		'next': {
-			'type': [Array, null],
-			'required': false,
-			'default': null,
-		},
 	},
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'methods': {
 		/**
 		 * Play Animation
@@ -92,109 +53,33 @@ export const poeAnimation = {
 		},
 	},
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'computed': {
 		/**
-		 * Has Audio?
+		 * Animation
 		 *
-		 * @return {boolean} True/false.
+		 * @return {!Animation} Animation.
 		 */
-		'hasSound': function() {
-			for (let i = 0; i < this['scenes'].length; ++i) {
-				if (null !== this['scenes'][i]['sound']) {
-					return true;
-				}
-			}
-
-			return false;
+		'animation': function() {
+			return this['$root']['animations'].find((v) => this['id'] === v['id']);
 		},
 
 		/**
-		 * Has Child?
+		 * Child ID
 		 *
-		 * @return {boolean} True/false.
+		 * @return {?Playlist} Name.
 		 */
-		'hasChild': function() {
-			return 0 < this['childId'];
+		'childId': function() {
+			return this['animation']['childId'];
 		},
 
 		/**
-		 * Has Edge?
+		 * Default Choice
 		 *
 		 * @return {boolean} True/false.
 		 */
-		'hasEdge': function() {
-			return null !== this['edge'] && 0 < this['edge'].length;
-		},
-
-		/**
-		 * Has Next?
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'hasNext': function() {
-			return null !== this['next'] && 0 < this['next'].length;
-		},
-
-		/**
-		 * Has a Tree of Animations?
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'hasTree': function() {
-			return this['hasChild'] || this['hasEdge'] || this['hasNext'];
-		},
-
-		/**
-		 * Is Dependent?
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'isDependent': function() {
-			// Dragging and falling are special.
-			if (Playlist.Drag === this['id'] || Playlist.Fall === this['id']) {
-				return true;
-			}
-
-			return ! this['defaultChoice'] &&
-				! this['firstChoice'] &&
-				! this['entranceChoice'];
-		},
-
-		/**
-		 * Is Playable?
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'isPlayable': function() {
-			return !! (AnimationFlag.DemoPlay & this['flags']);
-		},
-
-		/**
-		 * Is Repeatable?
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'isRepeated': function() {
-			/** @type {number} */
-			const framesLength = this['frames'].length;
-
-			for (let i = 0; i < framesLength; ++i) {
-				if (this['frames'][i].repeat) {
-					return true;
-				}
-			}
-
-			return false;
-		},
-
-		/**
-		 * Variable Duration
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'variableDuration': function() {
-			return !! (AnimationFlag.VariableDuration & this['flags']);
+		'defaultChoice': function() {
+			return !! (AnimationFlag.DefaultChoice & this['flags']);
 		},
 
 		/**
@@ -224,78 +109,16 @@ export const poeAnimation = {
 		},
 
 		/**
-		 * Frames
+		 * Edge
 		 *
-		 * @return {Array} Frames.
+		 * @return {?Array<!Choice>} Name.
 		 */
-		'frames': function() {
-			/** @type {Array} */
-			let out = [];
-
-			// Loop the scenes.
-			for (let i = 0; i < this['scenes'].length; ++i) {
-				/** @type {boolean} */
-				const repeat = null !== this['scenes'][i]['repeat'];
-
-				/** @type {number} */
-				const repeatFrom = repeat ? this['scenes'][i]['repeat'][1] : 0;
-
-				for (let j = 0; j < this['scenes'][i]['frames'].length; ++j) {
-					out.push({
-						'id': this['scenes'][i]['frames'][j],
-						'repeat': repeat && j >= repeatFrom,
-						'flipped': false,
-					});
-				}
+		'edge': function() {
+			if (null === this['animation']['edge']) {
+				return null;
 			}
 
-			return out;
-		},
-
-		/**
-		 * Speed
-		 *
-		 * @return {string} Speed.
-		 */
-		'speed': function() {
-			/** @type {number} */
-			let min = 9999999999;
-
-			/** @type {number} */
-			let max = 0;
-
-			for (let i = 0; i < this['scenes'].length; ++i) {
-				/** @const {number} */
-				const speed = sceneSpeed(this['scenes'][i]);
-
-				if (speed < min) {
-					min = speed;
-				}
-				if (speed > max) {
-					max = speed;
-				}
-			}
-
-			/** @type {string} */
-			const start = `${min}ms`;
-
-			/** @type {string} */
-			const end = `${max}ms`;
-
-			if (start === end) {
-				return start;
-			}
-
-			return `${start} – ${end}`;
-		},
-
-		/**
-		 * Default Choice
-		 *
-		 * @return {boolean} True/false.
-		 */
-		'defaultChoice': function() {
-			return !! (AnimationFlag.DefaultChoice & this['flags']);
+			return this['animation']['edge'].raw;
 		},
 
 		/**
@@ -315,6 +138,219 @@ export const poeAnimation = {
 		'firstChoice': function() {
 			return !! (AnimationFlag.FirstChoice & this['flags']);
 		},
+
+		/**
+		 * Flags
+		 *
+		 * @return {number} Flags.
+		 */
+		'flags': function() {
+			return this['animation']['flags'];
+		},
+
+		/**
+		 * Frames
+		 *
+		 * @return {!Array} Frames.
+		 */
+		'frames': function() {
+			/** @type {!Array} */
+			let out = [];
+
+			// Loop the scenes.
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				/** @type {!Array<number>} */
+				const frames = this['scenes'][i]['frames'].frames;
+
+				/** @type {boolean} */
+				const repeat = 0 < this['scenes'][i]['frames'].repeat;
+
+				/** @type {number} */
+				const repeatFrom = this['scenes'][i]['frames'].repeatFrom;
+
+				for (let j = 0; j < frames.length; ++j) {
+					out.push({
+						'id': frames[j],
+						'repeat': repeat && j >= repeatFrom,
+						'flipped': false,
+					});
+				}
+			}
+
+			return out;
+		},
+
+		/**
+		 * Has Child?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasChild': function() {
+			return 0 < this['childId'];
+		},
+
+		/**
+		 * Has Edge?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasEdge': function() {
+			return null !== this['edge'];
+		},
+
+		/**
+		 * Has Next?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasNext': function() {
+			return null !== this['next'];
+		},
+
+		/**
+		 * Has Repeat?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasRepeat': function() {
+			for (let i = 0; i < this['frames'].length; ++i) {
+				if (this['frames'][i]['repeat']) {
+					return true;
+				}
+			}
+
+			return false;
+		},
+
+		/**
+		 * Has Audio?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasSound': function() {
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				if (null !== this['scenes'][i]['sound']) {
+					return true;
+				}
+			}
+
+			return false;
+		},
+
+		/**
+		 * Has a Tree of Animations?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'hasTree': function() {
+			return this['hasChild'] || this['hasEdge'] || this['hasNext'];
+		},
+
+		/**
+		 * Is Dependent?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'isDependent': function() {
+			// Dragging and falling are special.
+			if (Playlist.Drag === this['id'] || Playlist.Fall === this['id']) {
+				return true;
+			}
+
+			return ! this['defaultChoice'] &&
+				! this['entranceChoice'] &&
+				! this['firstChoice'];
+		},
+
+		/**
+		 * Is Playable?
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'isPlayable': function() {
+			return !! (AnimationFlag.DirectPlay & this['flags']);
+		},
+
+		/**
+		 * Name
+		 *
+		 * @return {string} Name.
+		 */
+		'name': function() {
+			return this['animation']['name'];
+		},
+
+		/**
+		 * Next
+		 *
+		 * @return {?Array<!Choice>} Name.
+		 */
+		'next': function() {
+			if (null === this['animation']['next']) {
+				return null;
+			}
+
+			return this['animation']['next'].raw;
+		},
+
+		/**
+		 * Scenes
+		 *
+		 * @return {!Array<!Scene>} Scenes.
+		 */
+		'scenes': function() {
+			return this['animation']['scenes'].resolve();
+		},
+
+		/**
+		 * Speed
+		 *
+		 * @return {string} Speed.
+		 */
+		'speed': function() {
+			/** @type {number} */
+			let min = 9999999999;
+
+			/** @type {number} */
+			let max = 0;
+
+			for (let i = 0; i < this['scenes'].length; ++i) {
+				/** @const {number} */
+				const speed = Math.floor(this['scenes'][i]['duration'] / this['scenes'][i]['frames'].size);
+
+				// Some of our variable animations might get screwy.
+				if (0 < speed) {
+					if (speed < min) {
+						min = speed;
+					}
+					if (speed > max) {
+						max = speed;
+					}
+				}
+			}
+
+			/** @type {string} */
+			const start = `${min}ms`;
+
+			/** @type {string} */
+			const end = `${max}ms`;
+
+			if (start === end) {
+				return start;
+			}
+
+			return `${start} – ${end}`;
+		},
+
+		/**
+		 * Variable Duration
+		 *
+		 * @return {boolean} True/false.
+		 */
+		'variableDuration': function() {
+			return !! (AnimationFlag.VariableDuration & this['flags']);
+		},
+
 	},
 
 	/** @type {string} */
@@ -403,7 +439,7 @@ export const poeAnimation = {
 
 			<div
 				class="frames-list"
-				:class="{ 'is-repeatable' : isRepeated > 0 }"
+				:class="{ 'is-repeatable' : hasRepeat }"
 			>
 				<poe-frame
 					v-for="(f, index) in frames"

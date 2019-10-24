@@ -4,10 +4,13 @@
 
 /* global Vue */
 /* eslint-disable quote-props */
-import { ANIMATIONS, sceneSpeed } from '../_animations.mjs';
-import { demoResolveScene } from '../_helpers.mjs';
-import { TILES_X, TILES_Y } from '../_media.mjs';
-import { Animation, Scene, VueComponent, VueProp } from '../_types.mjs';
+import {
+	Animation,
+	AnimationList,
+	Scene,
+	SpriteInfo
+} from '../core.mjs';
+import { VueComponent, VueProp } from './vue.mjs';
 
 
 
@@ -18,15 +21,12 @@ import { Animation, Scene, VueComponent, VueProp } from '../_types.mjs';
  * @return {number} Frame.
  */
 const sanitizeFrame = function(frame) {
-	/** @type {number} */
-	const max = TILES_X * TILES_Y;
-
 	frame = parseInt(frame, 10) || 0;
 	if (0 > frame) {
 		return 0;
 	}
-	else if (max < frame) {
-		return max;
+	else if (SpriteInfo.EmptyTile < frame) {
+		return SpriteInfo.EmptyTile;
 	}
 
 	return frame;
@@ -68,45 +68,58 @@ const speedMax = 9999;
 let _timeout = null;
 
 /**
+ * Sprite Sequence
+ *
+ * @typedef {{
+	id: string,
+	name: string,
+	speed: number,
+	repeat: number,
+	repeatFrom: number,
+	frames: !Array<number>
+ * }}
+ */
+var SpriteSequence;
+
+/**
  * Component: Poe Sprite
  *
- * @const {VueComponent}
+ * @const {!VueComponent}
  */
-export const poeSprite = {
+export const PoeSprite = {
 	/**
 	 * Data
 	 *
-	 * @return {Object} Data.
+	 * @return {!Object} Data.
 	 */
 	'data': function() {
 		return {
-			/** @type {Array<number>} */
+			/** @type {!Array<number>} */
 			'frames': [],
 			/** @type {number} */
 			'preset': -1,
-			/** @type {Array} */
-			'presets': ANIMATIONS.reduce(
+			'presets': AnimationList.reduce(
 				/**
 				 * Presets
 				 *
-				 * @param {Array} out Collection.
-				 * @param {Animation} v Value.
-				 * @return {Array} Collection.
+				 * @param {!Array<!SpriteSequence>} out Collection.
+				 * @param {!Animation} v Animation.
+				 * @return {!Array<!SpriteSequence>} Collection.
 				 */
 				(out, v) => {
 					// Do it by scene.
-					for (let i = 0; i < v.scenes.length; ++i) {
-						/** @const {!Scene} */
-						const scene = demoResolveScene(v.scenes[i]);
+					/** @const {!Array<!Scene>} */
+					const scenes = v.scenes.resolve();
 
+					for (let i = 0; i < scenes.length; ++i) {
 						/** @type {!number} */
-						let repeat = (null === scene.repeat) ? 0 : Math.floor(scene.repeat[0]);
+						let repeat = scenes[i].frames.repeat;
 						if (repeatMax < repeat) {
 							repeat = repeatMax;
 						}
 
 						/** @type {number} */
-						const repeatFrom = repeat ? Math.floor(scene.repeat[1]) : 0;
+						const repeatFrom = repeat ? scenes[i].frames.repeatFrom : 0;
 
 						/** @type {string} */
 						let name = v.name;
@@ -114,14 +127,14 @@ export const poeSprite = {
 							name += ` (#${i + 1})`;
 						}
 
-						out.push({
+						out.push(/** @type {!SpriteSequence} */ ({
 							'id': `${v.id}_${i}`,
 							'name': name,
-							'speed': sceneSpeed(scene),
+							'speed': Math.floor(scenes[i].duration / scenes[i].frames.size),
 							'repeat': repeat,
 							'repeatFrom': repeatFrom,
-							'frames': scene.frames,
-						});
+							'frames': scenes[i].frames.frames,
+						}));
 					}
 
 					return out;
@@ -152,10 +165,10 @@ export const poeSprite = {
 		};
 	},
 
-	/** @type {Object<string, VueProp>} */
+	/** @type {!Object<string, !VueProp>} */
 	'props': {},
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'methods': {
 		/**
 		 * Add Frame
@@ -252,15 +265,15 @@ export const poeSprite = {
 		},
 	},
 
-	/** @type {Object} */
+	/** @type {!Object} */
 	'computed': {
 		/**
 		 * Settings Errors
 		 *
-		 * @return {(boolean|Array<string>)} Errors or false.
+		 * @return {(boolean|!Array<string>)} Errors or false.
 		 */
 		'errors': function() {
-			/** @type {Array<string>} */
+			/** @type {!Array<string>} */
 			let out = [];
 
 			// Speed.
@@ -434,7 +447,7 @@ export const poeSprite = {
 		<div class="sprite-wrapper">
 			<div class="sprite">
 				<div
-					v-for="f in ${TILES_X * TILES_Y}"
+					v-for="f in ${SpriteInfo.XTiles * SpriteInfo.YTiles}"
 					class="sprite-frame"
 					:data-frame="'#' + (f - 1)"
 				>
