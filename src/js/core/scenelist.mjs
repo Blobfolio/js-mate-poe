@@ -1,7 +1,5 @@
 /**
  * @file Scene List
- *
- * @todo Unit Tests.
  */
 
 /* global Generator */

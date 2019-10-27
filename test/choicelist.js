@@ -30,21 +30,20 @@ import {
 	};
 
 	describe('ChoiceList', () => {
-		it('choosing', () => {
-			let test = new Set();
-			for (let i = 0; 20 > i; ++i) {
-				test.add(list.choose());
-			}
+		let test = new Set();
+		for (let i = 0; 20 > i; ++i) {
+			test.add(list.choose());
+		}
 
-			// We should be able to pull at least two random choices
-			// after 20 tries, entropy or no. Haha.
-			assert.isAbove(test.size, 1);
+		// After 20 runs we should have at least two random selections.
+		it('Random choices', () => assert.isAbove(test.size, 1));
 
-			// And those entries should be animations.
-			for (let i of test) {
-				assert.isNumber(i) &&
-				assert.isTrue('undefined' !== typeof AnimationList[i - 1]);
-			}
-		});
+		// And all of the entries should be animations.
+		for (let i of test) {
+			it('Valid choice', () => {
+				assert.isNumber(i);
+				assert.isObject(AnimationList[i - 1]);
+			});
+		}
 	});
 })();
