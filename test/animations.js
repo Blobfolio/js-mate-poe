@@ -29,6 +29,45 @@ import {
 	// The MaxPlaylist constant should match the number of animations.
 	it('Playlist length', () => assert.strictEqual(AnimationList.length, MaxPlaylist));
 
+	// Some animations have hard-coded behaviors; they must exist!
+	it('Playlist.None exists', () => assert.strictEqual(Playlist.None, 0));
+	it('Playlist.AbductionBeamChild exists', () => {
+		assert.isNumber(Playlist.AbductionBeamChild);
+		assert.isDefined(AnimationList[Playlist.AbductionBeamChild - 1]);
+	});
+	it('Playlist.AbductionChild exists', () => {
+		assert.isNumber(Playlist.AbductionChild);
+		assert.isDefined(AnimationList[Playlist.AbductionChild - 1]);
+	});
+	it('Playlist.ClimbDown exists', () => {
+		assert.isNumber(Playlist.ClimbDown);
+		assert.isDefined(AnimationList[Playlist.ClimbDown - 1]);
+	});
+	it('Playlist.ClimbUp exists', () => {
+		assert.isNumber(Playlist.ClimbUp);
+		assert.isDefined(AnimationList[Playlist.ClimbUp - 1]);
+	});
+	it('Playlist.Drag exists', () => {
+		assert.isNumber(Playlist.Drag);
+		assert.isDefined(AnimationList[Playlist.Drag - 1]);
+	});
+	it('Playlist.Fall exists', () => {
+		assert.isNumber(Playlist.Fall);
+		assert.isDefined(AnimationList[Playlist.Fall - 1]);
+	});
+	it('Playlist.FlowerChild exists', () => {
+		assert.isNumber(Playlist.FlowerChild);
+		assert.isDefined(AnimationList[Playlist.FlowerChild - 1]);
+	});
+	it('Playlist.SneezeShadow exists', () => {
+		assert.isNumber(Playlist.SneezeShadow);
+		assert.isDefined(AnimationList[Playlist.SneezeShadow - 1]);
+	});
+	it('Playlist.Walk exists', () => {
+		assert.isNumber(Playlist.Walk);
+		assert.isDefined(AnimationList[Playlist.Walk - 1]);
+	});
+
 	// Start by looping the main animation list.
 	for (let i = 0; i < AnimationList.length; ++i) {
 		describe(`Animation #${i}`, () => {
