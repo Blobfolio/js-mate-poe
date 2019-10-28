@@ -21,7 +21,7 @@ import {
  *
  * @const {number}
  */
-export const MaxPlaylist = 50;
+export const MaxPlaylist = 52;
 
 
 
@@ -45,8 +45,10 @@ export const AnimationFlag = {
 	FirstChoice: 128,
 	Flip: 256,
 	PrimaryMates: 512,
-	SecondaryMates: 1024,
-	VariableDuration: 2048,
+	ReverseX: 1024,
+	ReverseY: 2048,
+	SecondaryMates: 4096,
+	VariableDuration: 8192,
 };
 
 /**
@@ -63,7 +65,9 @@ export const MateFlag = {
 	FlippedY: 16,
 	MayExit: 32,
 	Primary: 64,
-	Secondary: 128,
+	ReverseX: 128,
+	ReverseY: 256,
+	Secondary: 512,
 };
 
 /**
@@ -179,8 +183,8 @@ export const Playlist = {
 	Jump: 18,
 	Eat: 19,
 	FlowerChild: 20,
-	BlackSheep: 21,
-	BlackSheepChild: 22,
+	BlackSheepRomance: 21,
+	BlackSheepRomanceChild: 22,
 	BeginRun: 23,
 	RunEnd: 24,
 	ClimbUp: 25,
@@ -209,6 +213,8 @@ export const Playlist = {
 	WallSlide: 48,
 	Scoot: 49,
 	SneezeShadow: 50,
+	BlackSheepChase: 51,
+	BlackSheepChaseChild: 52,
 };
 
 /**

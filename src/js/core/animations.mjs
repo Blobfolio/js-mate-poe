@@ -827,7 +827,7 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						Universe.width - 800 + SpriteInfo.TileSize + 10,
+						Universe.width - 800 + Universe.tileSize + 10,
 						Universe.maxY
 					),
 					move: null,
@@ -1066,8 +1066,8 @@ export const AnimationList = [
 		next: null,
 	}),
 	/** @type {!Animation} */ ({
-		id: Playlist.BlackSheep,
-		name: 'Black Sheep',
+		id: Playlist.BlackSheepRomance,
+		name: 'Black Sheep Romance',
 		scenes: new SceneList([
 			/** @type {!SceneCb} */ (() => {
 				/** @const {number} */
@@ -1076,7 +1076,7 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						Universe.width + SpriteInfo.TileSize,
+						Universe.width + Universe.tileSize,
 						Universe.maxY
 					),
 					/** @type {!Position} */
@@ -1151,13 +1151,13 @@ export const AnimationList = [
 			}),
 		]),
 		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DirectPlay | AnimationFlag.PrimaryMates | AnimationFlag.VariableDuration,
-		childId: Playlist.BlackSheepChild,
+		childId: Playlist.BlackSheepRomanceChild,
 		edge: null,
 		next: null,
 	}),
 	/** @type {!Animation} */ ({
-		id: Playlist.BlackSheepChild,
-		name: 'Black Sheep 👶',
+		id: Playlist.BlackSheepRomanceChild,
+		name: 'Black Sheep Romance 👶',
 		scenes: new SceneList([
 			/** @type {!Scene} */ (() => {
 				/** @const {number} */
@@ -1166,7 +1166,7 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						0 - SpriteInfo.TileSize,
+						0 - Universe.tileSize,
 						Universe.maxY
 					),
 					/** @type {!Position} */
@@ -1860,8 +1860,8 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						0 - SpriteInfo.TileSize,
-						SpriteInfo.TileSize * 2
+						0 - Universe.tileSize,
+						Universe.tileSize * 2
 					),
 					move: null,
 					duration: 1100,
@@ -2008,7 +2008,7 @@ export const AnimationList = [
 				start: null,
 				/** @type {!Position} */
 				move: new Position(0, 480),
-				duration: 2000,
+				duration: 2100,
 				/** @type {!FrameList} */
 				frames: new FrameList(
 					[
@@ -2128,7 +2128,7 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						Universe.width + SpriteInfo.TileSize * 3,
+						Universe.width + Universe.tileSize * 3,
 						Universe.maxY
 					),
 					/** @type {!Position} */
@@ -2165,7 +2165,7 @@ export const AnimationList = [
 				return /** @type {!Scene} */ ({
 					/** @type {!Position} */
 					start: new Position(
-						Universe.width + SpriteInfo.TileSize,
+						Universe.width + Universe.tileSize,
 						Universe.maxY
 					),
 					/** @type {!Position} */
@@ -2369,6 +2369,107 @@ export const AnimationList = [
 		edge: null,
 		next: null,
 	}),
+	/** @type {!Animation} */ ({
+		id: Playlist.BlackSheepChase,
+		name: 'Black Sheep Chase',
+		scenes: new SceneList([
+			/** @type {!SceneCb} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Universe.width / 30 + Universe.tileSize * 5 / 30);
+
+				return /** @type {!Scene} */ ({
+					/** @type {!Position} */
+					start: new Position(
+						Universe.width + Universe.tileSize * 3,
+						Universe.maxY
+					),
+					/** @type {!Position} */
+					move: new Position(-10 * (3 + repeat * 3), 0),
+					duration: (3 + repeat * 3) * 100,
+					/** @type {!FrameList} */
+					frames: new FrameList(
+						[
+							5,
+							4,
+							4,
+						],
+						repeat,
+						0
+					),
+					sound: null,
+					flags: SceneFlag.FlipAfter | SceneFlag.Gravity | SceneFlag.IgnoreEdges,
+				});
+			}),
+			/** @type {!SceneCb} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Universe.tileSize * 2 / 30);
+
+				return /** @type {!Scene} */ ({
+					/** @type {!Position} */
+					start: new Position(
+						Universe.width + Universe.tileSize * 3,
+						Universe.maxY
+					),
+					/** @type {!Position} */
+					move: new Position(-10 * (3 + repeat * 3), 0),
+					duration: (3 + repeat * 3) * 100,
+					/** @type {!FrameList} */
+					frames: new FrameList(
+						[
+							5,
+							4,
+							4,
+						],
+						repeat,
+						0
+					),
+					sound: null,
+					flags: SceneFlag.Gravity | SceneFlag.IgnoreEdges,
+				});
+			}),
+		]),
+		flags: AnimationFlag.EntranceChoice | AnimationFlag.FirstChoice | AnimationFlag.DirectPlay | AnimationFlag.PrimaryMates | AnimationFlag.VariableDuration,
+		childId: Playlist.BlackSheepChaseChild,
+		edge: null,
+		next: Playlist.Run,
+	}),
+	/** @type {!Animation} */ ({
+		id: Playlist.BlackSheepChaseChild,
+		name: 'Black Sheep Chase 👶',
+		scenes: new SceneList([
+			/** @type {!SceneCb} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Universe.width / 30 + Universe.tileSize * 3 / 30);
+
+				return /** @type {!Scene} */ ({
+					/** @type {!Position} */
+					start: new Position(
+						Universe.width + Universe.tileSize,
+						Universe.maxY
+					),
+					/** @type {!Position} */
+					move: new Position(10 * (3 + repeat * 3), 0),
+					duration: (3 + repeat * 3) * 100,
+					/** @type {!FrameList} */
+					frames: new FrameList(
+						[
+							155,
+							154,
+							154,
+						],
+						repeat,
+						0
+					),
+					sound: null,
+					flags: SceneFlag.Gravity | SceneFlag.IgnoreEdges,
+				});
+			}),
+		]),
+		flags: AnimationFlag.AllowExit | AnimationFlag.ReverseX | AnimationFlag.SecondaryMates | AnimationFlag.VariableDuration,
+		childId: null,
+		edge: null,
+		next: null,
+	}),
 ];
 
 /**
@@ -2406,7 +2507,8 @@ export const DefaultList = new ChoiceList([
  */
 export const EntranceList = new ChoiceList([
 	[Playlist.BathDive, 1],
-	[Playlist.BlackSheep, 1],
+	[Playlist.BlackSheepChase, 1],
+	[Playlist.BlackSheepRomance, 1],
 	[Playlist.ChasingAMartian, 1],
 	[Playlist.Stargaze, 1],
 ]);
@@ -2419,7 +2521,8 @@ export const EntranceList = new ChoiceList([
 export const FirstList = new ChoiceList([
 	[Playlist.Fall, 10],
 	[Playlist.BathDive, 1],
-	[Playlist.BlackSheep, 1],
+	[Playlist.BlackSheepChase, 1],
+	[Playlist.BlackSheepRomance, 1],
 	[Playlist.ChasingAMartian, 1],
 	[Playlist.Stargaze, 1],
 ]);

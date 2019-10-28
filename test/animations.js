@@ -12,6 +12,7 @@ import {
 	DefaultList,
 	EntranceList,
 	FirstList,
+	MaxPlaylist,
 	Playlist,
 	SceneList
 } from '../src/js/core.mjs';
@@ -24,6 +25,9 @@ import {
 	let defaults = new Set([...DefaultList]);
 	let entrances = new Set([...EntranceList]);
 	let firsts = new Set([...FirstList]);
+
+	// The MaxPlaylist constant should match the number of animations.
+	it('Playlist length', () => assert.strictEqual(AnimationList.length, MaxPlaylist));
 
 	// Start by looping the main animation list.
 	for (let i = 0; i < AnimationList.length; ++i) {

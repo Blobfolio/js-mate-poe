@@ -143,6 +143,68 @@ export const Mate = class {
 	}
 
 	/**
+	 * Flipped X?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get flippedX() {
+		// This is reversed by default.
+		if (MateFlag.ReverseX & this._flags) {
+			return ! (MateFlag.FlippedX & this._flags);
+		}
+		else {
+			return !! (MateFlag.FlippedX & this._flags);
+		}
+	}
+
+	/**
+	 * Flipped X?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get nextFlippedX() {
+		// If already flipped, we should stay flipped.
+		if (this.flippedX) {
+			return ! (MateFlag.FlippedX & this._next.flags);
+		}
+		// If we aren't flipped now, we should flip next.
+		else {
+			return !! (MateFlag.FlippedX & this._next.flags);
+		}
+	}
+
+	/**
+	 * Flipped Y?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get flippedY() {
+		// This is reversed by default.
+		if (MateFlag.ReverseY & this._flags) {
+			return ! (MateFlag.FlippedY & this._flags);
+		}
+		else {
+			return !! (MateFlag.FlippedY & this._flags);
+		}
+	}
+
+	/**
+	 * Flipped Y?
+	 *
+	 * @return {boolean} True/false.
+	 */
+	get nextFlippedY() {
+		// If already flipped, we should stay flipped.
+		if (this.flippedY) {
+			return ! (MateFlag.FlippedY & this._next.flags);
+		}
+		// If we aren't flipped now, we should flip next.
+		else {
+			return !! (MateFlag.FlippedY & this._next.flags);
+		}
+	}
+
+	/**
 	 * Get Frame
 	 *
 	 * @return {number} Frame.
@@ -213,16 +275,29 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 */
 	flipX(v) {
+		// By default we just swap the toggle.
 		if ('boolean' !== typeof v) {
-			v = ! (MateFlag.FlippedX & this._flags);
+			v = ! this.flippedX;
 		}
 
-		// Turn it on.
-		if (v) {
-			this._flags |= MateFlag.FlippedX;
+		// We're reversed, so flipping means turning off the flip flag.
+		if (MateFlag.ReverseX & this._flags) {
+			// Turn it on.
+			if (v) {
+				this._flags &= ~MateFlag.FlippedX;
+			}
+			else {
+				this._flags |= MateFlag.FlippedX;
+			}
 		}
 		else {
-			this._flags &= ~MateFlag.FlippedX;
+			// Turn it on.
+			if (v) {
+				this._flags |= MateFlag.FlippedX;
+			}
+			else {
+				this._flags &= ~MateFlag.FlippedX;
+			}
 		}
 
 		// Remove it from the next flags.
@@ -342,7 +417,8 @@ export const Mate = class {
 		}
 
 		// Unset a few flags to prevent recursion issues.
-		this._flags &= ~(MateFlag.FlippedX | MateFlag.Dragging | MateFlag.MayExit);
+		this._flags &= ~(MateFlag.Dragging | MateFlag.MayExit);
+		this.flipX(false);
 		this.clearNext();
 
 		/** @const {!Playlist} */
@@ -585,6 +661,10 @@ export const Mate = class {
 	 * @return {void} Nothing.
 	 */
 	setAnimation(id, pos) {
+		// Are we in a reversed animation?
+		/** @const {boolean} */
+		const nowFlippedX = !! (MateFlag.ReverseX & this._flags);
+
 		// Prevent recursion.
 		this._next.animation = null;
 		this._next.position = null;
@@ -659,6 +739,14 @@ export const Mate = class {
 			this._flags |= MateFlag.MayExit;
 		}
 
+		// Reversal.
+		if (AnimationFlag.ReverseX & AnimationList[id - 1].flags) {
+			this._flags |= MateFlag.ReverseX;
+		}
+		else {
+			this._flags &= ~MateFlag.ReverseX;
+		}
+
 		// Stack it under?
 		if (AnimationFlag.Background & AnimationList[id - 1].flags) {
 			this._flags |= MateFlag.Background;
@@ -676,6 +764,11 @@ export const Mate = class {
 		this._animation = id;
 		this._steps = AnimationList[id - 1].scenes.steps();
 		this._stepFlags = null;
+
+		// We might need to reverse the orientation.
+		if (nowFlippedX === ! (MateFlag.ReverseX & this._flags)) {
+			this.flipX();
+		}
 
 		// Move it into place.
 		if (null !== pos) {
@@ -791,7 +884,7 @@ export const Mate = class {
 
 		switch (AnimationList[this._animation - 1].childId) {
 		case Playlist.FlowerChild:
-			if (MateFlag.FlippedX & this._flags) {
+			if (this.flippedX) {
 				x = refPos.x + Math.floor(Universe.tileSize * 0.9);
 			}
 			else {
@@ -813,7 +906,7 @@ export const Mate = class {
 
 		case Playlist.SneezeShadow:
 			// This effect doesn't work flipped.
-			if (MateFlag.FlippedX & this._flags) {
+			if (this.flippedX) {
 				return;
 			}
 
@@ -826,11 +919,11 @@ export const Mate = class {
 		const mate = Universe.initMate();
 
 		// We might want to flip it.
-		if (
-			(MateFlag.FlippedX & this._flags) ||
-			(MateFlag.FlippedX & this._next.flags)
-		) {
+		if (this.nextFlippedX) {
 			mate.flipX(true);
+		}
+		else {
+			mate.flipX(false);
 		}
 
 		mate.next = this._next.time;
@@ -971,8 +1064,8 @@ export const Mate = class {
 			/** @type {number} */
 			let position = 0;
 			if (
-				(Playlist.ClimbDown === this._animation && ! (MateFlag.FlippedX & this._flags)) ||
-				(Playlist.ClimbUp === this._animation && (MateFlag.FlippedX & this._flags))
+				(Playlist.ClimbDown === this._animation && ! this.flippedX) ||
+				(Playlist.ClimbUp === this._animation && this.flippedX)
 			) {
 				position = Universe.maxX;
 			}
