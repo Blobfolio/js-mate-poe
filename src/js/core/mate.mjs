@@ -1,7 +1,5 @@
 /**
  * @file Mates
- *
- * @todo Unit Tests.
  */
 
 /* global Generator */
