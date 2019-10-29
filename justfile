@@ -146,6 +146,7 @@ test_dir  := base_dir + "/test"
 		--language_out STABLE \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
 		--js "{{ src_dir }}/js/js-mate-poe/**.mjs" \
 		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
 		--jscomp_off unknownDefines \

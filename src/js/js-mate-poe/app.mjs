@@ -17,43 +17,13 @@ import {
 	SpriteInfo,
 	Universe
 } from '../core.mjs';
-
+import { universeForBrowser } from '../middleware/universe.browser.mjs';
 import { CssUrl } from './css.url.mjs';
 
 
 
-// ---------------------------------------------------------------------
-// Universe Overloads
-// ---------------------------------------------------------------------
-
-Universe.random = function(max) {
-	return Math.floor(Math.random() * max);
-};
-
-Universe.now = function() {
-	return performance.now();
-};
-
-Universe.log = function(msg, type) {
-	switch (type) {
-	case LogKind.Error:
-		console.error(msg);
-		break;
-
-	case LogKind.Warning:
-		console.warn(msg);
-		break;
-
-	case LogKind.Notice:
-		/* eslint-disable-next-line */
-		console.log(msg);
-		break;
-
-	case LogKind.Info:
-		console.info(msg);
-		break;
-	}
-};
+// Set universe overloads.
+universeForBrowser();
 
 
 
@@ -204,9 +174,6 @@ const Poe = {
 			Poe.initImage(),
 			Poe.initEvents(),
 		]);
-
-		// Set the width and height.
-		Poe.initUniverseSize();
 
 		Universe.start();
 		requestAnimationFrame(Poe.tick);
@@ -390,36 +357,6 @@ const Poe = {
 		}));
 
 		return Promise.resolve();
-	},
-
-	/**
-	 * Init Universe Dimensions
-	 *
-	 * @return {void} Nothing.
-	 */
-	initUniverseSize() {
-		// Height is easy.
-		Universe.height = parseInt(window.innerHeight, 10) || 0;
-
-		// We might want to tweak the width to account for the scrollbar
-		// that Javascript can't natively discover.
-
-		/** @type {number} */
-		let width = parseInt(window.innerWidth, 10) || 0;
-
-		if ('undefined' !== typeof document.documentElement) {
-			/** @const {number} */
-			const dWidth = parseInt(document.documentElement.offsetWidth, 10) || 0;
-
-			// If the document is *slightly* narrower than the screen,
-			// we'll assume it is a scrollbar and set the Universe to
-			// that value.
-			if (dWidth < width && dWidth + 25 >= width) {
-				width = dWidth;
-			}
-		}
-
-		Universe.width = width;
 	},
 
 
@@ -656,7 +593,6 @@ const Poe = {
 		// passive listener state is sufficient to keep it under
 		// control.
 		requestAnimationFrame(() => {
-			Poe.initUniverseSize();
 			Universe.resize();
 			Poe.paint();
 		});

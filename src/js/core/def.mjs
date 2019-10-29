@@ -597,6 +597,10 @@ export const Universe = {
 	 */
 	start() {
 		if (! Universe._mates.length) {
+			// Make sure width and height have been set.
+			Universe._resize();
+
+			// Create and start a mate.
 			Universe.initMate().start();
 		}
 	},
@@ -728,6 +732,8 @@ export const Universe = {
 	 * @return {void} Nothing.
 	 */
 	resize() {
+		Universe._resize();
+
 		for (let i = 0; i < Universe._mates.length; ++i) {
 			if (Universe._mates[i].isEnabled()) {
 				Universe._mates[i].resize();
@@ -780,5 +786,17 @@ export const Universe = {
 	/* eslint-disable-next-line no-unused-vars */
 	random(max) {
 		return 0;
+	},
+
+	/**
+	 * Self Resize
+	 *
+	 * This is triggered by `Universe.start()` and `Universe.resize()`.
+	 * Typically it should calculate and set the Universe's width and
+	 * height according to the environment.
+	 *
+	 * @return {void} Nothing.
+	 */
+	_resize() {
 	},
 };

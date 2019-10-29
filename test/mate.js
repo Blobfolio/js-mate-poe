@@ -12,19 +12,19 @@ import {
 	Sound,
 	Universe
 } from '../src/js/core.mjs';
+import { universeForBrowser } from '../src/js/middleware/universe.browser.mjs';
 
 
 
 (function() {
-	// Set up the universe.
-	Universe.now = function() {
-		return performance.now();
+	universeForBrowser();
+
+	// For testing purposes, let's hard-code the sizes.
+	Universe._resize = function() {
+		Universe._width = 1024;
+		Universe._height = 768;
 	};
-	Universe.random = function(max) {
-		return Math.floor(Math.random() * max);
-	};
-	Universe.width = 1024;
-	Universe.height = 768;
+	Universe._resize();
 
 	// Let it run!
 	describe('Universe Start', () => {

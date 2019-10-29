@@ -11,10 +11,20 @@ import {
 	Playlist,
 	Universe
 } from '../src/js/core.mjs';
+import { universeForBrowser } from '../src/js/middleware/universe.browser.mjs';
 
 
 
 (function() {
+	universeForBrowser();
+
+	// For testing purposes, let's hard-code the sizes.
+	Universe._resize = function() {
+		Universe._width = 1024;
+		Universe._height = 768;
+	};
+	Universe._resize();
+
 	let list = new ChoiceList([
 		[Playlist.Walk, 5],
 		[Playlist.Doze, 1],
@@ -23,11 +33,6 @@ import {
 		[Playlist.Run, 1],
 		[Playlist.Spin, 1],
 	]);
-
-	// Random needs to be defined.
-	Universe.random = function(max) {
-		return Math.floor(Math.random() * max);
-	};
 
 	describe('ChoiceList', () => {
 		let test = new Set();

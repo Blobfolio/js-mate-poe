@@ -13,16 +13,19 @@ import {
 	Sound,
 	Universe
 } from '../src/js/core.mjs';
+import { universeForBrowser } from '../src/js/middleware/universe.browser.mjs';
 
 
 
 (function() {
-	// Set up the universe.
-	Universe.random = function(max) {
-		return Math.floor(Math.random() * max);
+	universeForBrowser();
+
+	// For testing purposes, let's hard-code the sizes.
+	Universe._resize = function() {
+		Universe._width = 1024;
+		Universe._height = 768;
 	};
-	Universe.width = 1024;
-	Universe.height = 768;
+	Universe._resize();
 
 	describe('Basic Scene', () => {
 		// Give us a scene.

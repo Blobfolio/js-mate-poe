@@ -27,6 +27,7 @@ module.exports = function(config) {
         { pattern: 'src/js/core/assets.mjs', type: 'module' },
         { pattern: 'src/js/core/animations.mjs', type: 'module' },
         { pattern: 'src/js/core.mjs', type: 'module' },
+        { pattern: 'src/js/middleware/universe.browser.mjs', type: 'module' },
 	    { pattern: 'test/*.js', type: 'module' },
     ],
 
