@@ -137,6 +137,15 @@ export const SceneList = class {
 					);
 				}
 
+				/** @type {!SceneFlag} */
+				let flags = scenes[i].flags;
+				if ((SceneFlag.FlipXAfter & scenes[i].flags) && stepsLength - 1 === j) {
+					flags |= SceneFlag.FlipX;
+				}
+				if ((SceneFlag.FlipYAfter & scenes[i].flags) && stepsLength - 1 === j) {
+					flags |= SceneFlag.FlipY;
+				}
+
 				/** @const {!Step} */
 				const out = /** @type {!Step} */ ({
 					step: step,
@@ -146,8 +155,7 @@ export const SceneList = class {
 					frame: scenes[i].frames.frame(j),
 					move: position,
 					sound: sound,
-					flip: !! ((SceneFlag.FlipAfter & scenes[i].flags) && stepsLength - 1 === j),
-					flags: scenes[i].flags,
+					flags: flags,
 				});
 				++step;
 

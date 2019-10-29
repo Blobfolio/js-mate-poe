@@ -554,12 +554,19 @@ const Poe = {
 				if (MateFlag.FlippedX & state[i].flags) {
 					value += ' rotateY(180deg)';
 				}
-			}
-			else if (MateFlag.FlippedX & state[i].flags) {
-				value = 'rotateY(180deg)';
+				if (MateFlag.FlippedY & state[i].flags) {
+					value += ' rotateX(180deg)';
+				}
 			}
 			else {
 				value = '';
+				if (MateFlag.FlippedX & state[i].flags) {
+					value = 'rotateY(180deg)';
+				}
+				if (MateFlag.FlippedY & state[i].flags) {
+					value += ' rotateX(180deg)';
+					value = value.trim();
+				}
 			}
 
 			// Update it!

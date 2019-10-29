@@ -21,7 +21,7 @@ import {
  *
  * @const {number}
  */
-export const MaxPlaylist = 53;
+export const MaxPlaylist = 55;
 
 
 
@@ -103,9 +103,12 @@ export const SceneFlag = {
 	None: 0,
 	EaseIn: 1,
 	EaseOut: 2,
-	FlipAfter: 4,
-	Gravity: 8,
-	IgnoreEdges: 16,
+	FlipX: 4,
+	FlipXAfter: 8,
+	FlipY: 16,
+	FlipYAfter: 32,
+	Gravity: 64,
+	IgnoreEdges: 128,
 };
 
 
@@ -216,6 +219,8 @@ export const Playlist = {
 	BlackSheepChase: 51,
 	BlackSheepChaseChild: 52,
 	SlideDown: 53,
+	DeepThoughts: 54,
+	DangleFall: 55,
 };
 
 /**
@@ -335,7 +340,6 @@ export var SceneCb;
 	frame: number,
 	move: ?Position,
 	sound: !Sound,
-	flip: boolean,
 	flags: !SceneFlag
  * }}
  */

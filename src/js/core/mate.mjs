@@ -269,7 +269,7 @@ export const Mate = class {
 	// -----------------------------------------------------------------
 
 	/**
-	 * Flip
+	 * Flip X
 	 *
 	 * @param {boolean=} v Value.
 	 * @return {void} Nothing.
@@ -302,6 +302,42 @@ export const Mate = class {
 
 		// Remove it from the next flags.
 		this.clearNextFlag(MateFlag.FlippedX);
+	}
+
+	/**
+	 * Flip Y
+	 *
+	 * @param {boolean=} v Value.
+	 * @return {void} Nothing.
+	 */
+	flipY(v) {
+		// By default we just swap the toggle.
+		if ('boolean' !== typeof v) {
+			v = ! this.flippedY;
+		}
+
+		// We're reversed, so flipping means turning off the flip flag.
+		if (MateFlag.ReverseY & this._flags) {
+			// Turn it on.
+			if (v) {
+				this._flags &= ~MateFlag.FlippedY;
+			}
+			else {
+				this._flags |= MateFlag.FlippedY;
+			}
+		}
+		else {
+			// Turn it on.
+			if (v) {
+				this._flags |= MateFlag.FlippedY;
+			}
+			else {
+				this._flags &= ~MateFlag.FlippedY;
+			}
+		}
+
+		// Remove it from the next flags.
+		this.clearNextFlag(MateFlag.FlippedY);
 	}
 
 	/**
@@ -419,6 +455,7 @@ export const Mate = class {
 		// Unset a few flags to prevent recursion issues.
 		this._flags &= ~(MateFlag.Dragging | MateFlag.MayExit);
 		this.flipX(false);
+		this.flipY(false);
 		this.clearNext();
 
 		/** @const {!Playlist} */
@@ -498,6 +535,7 @@ export const Mate = class {
 
 				// Turn flip off or weird things might happen.
 				this.flipX(false);
+				this.flipY(false);
 			}
 		}
 
@@ -506,6 +544,9 @@ export const Mate = class {
 			// Flip the movement?
 			if (MateFlag.FlippedX & this._flags) {
 				step.move.flipX();
+			}
+			if (MateFlag.FlippedY & this._flags) {
+				step.move.flipY();
 			}
 
 			this._position.move(step.move, false);
@@ -591,16 +632,24 @@ export const Mate = class {
 		// Are we out of things to do?
 		if (next.done) {
 			// If we're flipping, schedule it for next time.
-			if (step.flip) {
+			if (SceneFlag.FlipX & step.flags) {
 				this.setNextFlag(MateFlag.FlippedX);
+			}
+			if (SceneFlag.FlipY & step.flags) {
+				this.setNextFlag(MateFlag.FlippedY);
 			}
 
 			// Choose another animation.
 			this._next.animation = this.nextAnimation(false);
 		}
 		// Otherwise we might need to flip.
-		else if (step.flip) {
-			this.flipX();
+		else {
+			if (SceneFlag.FlipX & step.flags) {
+				this.flipX();
+			}
+			if (SceneFlag.FlipY & step.flags) {
+				this.flipY();
+			}
 		}
 	}
 
@@ -639,6 +688,9 @@ export const Mate = class {
 		if (MateFlag.FlippedX & this._next.flags) {
 			this.flipX();
 		}
+		if (MateFlag.FlippedY & this._next.flags) {
+			this.flipY();
+		}
 
 		// We don't need to do anything else with flags.
 		this._next.flags = 0;
@@ -664,6 +716,8 @@ export const Mate = class {
 		// Are we in a reversed animation?
 		/** @const {boolean} */
 		const nowFlippedX = !! (MateFlag.ReverseX & this._flags);
+		/** @const {boolean} */
+		const nowFlippedY = !! (MateFlag.ReverseY & this._flags);
 
 		// Prevent recursion.
 		this._next.animation = null;
@@ -746,6 +800,12 @@ export const Mate = class {
 		else {
 			this._flags &= ~MateFlag.ReverseX;
 		}
+		if (AnimationFlag.ReverseY & AnimationList[id - 1].flags) {
+			this._flags |= MateFlag.ReverseY;
+		}
+		else {
+			this._flags &= ~MateFlag.ReverseY;
+		}
 
 		// Stack it under?
 		if (AnimationFlag.Background & AnimationList[id - 1].flags) {
@@ -768,6 +828,9 @@ export const Mate = class {
 		// We might need to reverse the orientation.
 		if (nowFlippedX === ! (MateFlag.ReverseX & this._flags)) {
 			this.flipX();
+		}
+		if (nowFlippedY === ! (MateFlag.ReverseY & this._flags)) {
+			this.flipY();
 		}
 
 		// Move it into place.
@@ -924,6 +987,12 @@ export const Mate = class {
 		}
 		else {
 			mate.flipX(false);
+		}
+		if (this.nextFlippedY) {
+			mate.flipY(true);
+		}
+		else {
+			mate.flipY(false);
 		}
 
 		mate.next = this._next.time;

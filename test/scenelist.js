@@ -70,7 +70,7 @@ import {
 					0
 				),
 				sound: [Sound.Baa, 1],
-				flags: SceneFlag.FlipAfter | SceneFlag.Gravity,
+				flags: SceneFlag.FlipXAfter | SceneFlag.Gravity,
 			},
 		]);
 
@@ -101,7 +101,7 @@ import {
 		it('Step #1: X', () => assert.strictEqual(step1.value.move.x, -21));
 		it('Step #1: Y', () => assert.strictEqual(step1.value.move.y, 0));
 		it('Step #1: Sound', () => assert.strictEqual(step1.value.sound, Sound.None));
-		it('Step #1: Flip', () => assert.isFalse(step1.value.flip));
+		it('Step #1: Flip', () => assert.strictEqual(SceneFlag.FlipX & step1.value.flags, 0));
 		it('Step #1: Flags', () => assert.strictEqual(step1.value.flags, SceneFlag.Gravity));
 
 		it('Step #9: Done', () => assert.isTrue(last.done));
@@ -114,8 +114,8 @@ import {
 		it('Step #9: X', () => assert.strictEqual(last.value.move.x, -5));
 		it('Step #9: Y', () => assert.strictEqual(last.value.move.y, 0));
 		it('Step #9: Sound', () => assert.strictEqual(last.value.sound, Sound.Baa));
-		it('Step #9: Flip', () => assert.isTrue(last.value.flip));
-		it('Step #9: Flags', () => assert.strictEqual(last.value.flags, SceneFlag.FlipAfter | SceneFlag.Gravity));
+		it('Step #9: Flip', () => assert.strictEqual(SceneFlag.FlipX & last.value.flags, SceneFlag.FlipX));
+		it('Step #9: Flags', () => assert.strictEqual(last.value.flags, SceneFlag.FlipX | SceneFlag.FlipXAfter | SceneFlag.Gravity));
 
 		it('Step length', () => assert.strictEqual(length, 9));
 	});

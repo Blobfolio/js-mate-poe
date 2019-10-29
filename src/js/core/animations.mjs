@@ -1,8 +1,5 @@
 /**
  * @file Animation List
- *
- * @todo Upside-down scream.
- * @todo Upside-down cling.
  */
 
 import {
@@ -90,7 +87,7 @@ export const AnimationList = [
 					0
 				),
 				sound: null,
-				flags: SceneFlag.FlipAfter | SceneFlag.Gravity,
+				flags: SceneFlag.FlipXAfter | SceneFlag.Gravity,
 			}),
 
 			/** @type {!Scene} */ ({
@@ -1342,14 +1339,18 @@ export const AnimationList = [
 						0
 					),
 					sound: null,
-					flags: SceneFlag.FlipAfter,
+					flags: SceneFlag.FlipXAfter,
 				});
 			}),
 		]),
 		flags: AnimationFlag.PrimaryMates,
 		childId: null,
 		edge: null,
-		next: Playlist.WalkUpsideDown,
+		/** @type {!ChoiceList} */
+		next: new ChoiceList([
+			[Playlist.WalkUpsideDown, 3],
+			[Playlist.DeepThoughts, 1],
+		]),
 	}),
 	/** @type {!Animation} */ ({
 		id: Playlist.WalkUpsideDown,
@@ -1380,7 +1381,11 @@ export const AnimationList = [
 		]),
 		flags: AnimationFlag.PrimaryMates,
 		childId: null,
-		edge: Playlist.ReachSide,
+		/** @type {!ChoiceList} */
+		edge: new ChoiceList([
+			[Playlist.ReachSide, 3],
+			[Playlist.DangleFall, 1],
+		]),
 		next: Playlist.WalkUpsideDown,
 	}),
 	/** @type {!Animation} */ ({
@@ -1402,7 +1407,7 @@ export const AnimationList = [
 					0
 				),
 				sound: null,
-				flags: SceneFlag.FlipAfter,
+				flags: SceneFlag.FlipXAfter,
 			}),
 		]),
 		flags: AnimationFlag.PrimaryMates,
@@ -2404,7 +2409,7 @@ export const AnimationList = [
 						0
 					),
 					sound: null,
-					flags: SceneFlag.FlipAfter | SceneFlag.Gravity | SceneFlag.IgnoreEdges,
+					flags: SceneFlag.FlipXAfter | SceneFlag.Gravity | SceneFlag.IgnoreEdges,
 				});
 			}),
 			/** @type {!SceneCb} */ (() => {
@@ -2507,6 +2512,118 @@ export const AnimationList = [
 		childId: null,
 		edge: Playlist.ReachFloor,
 		next: Playlist.ClimbDown,
+	}),
+	/** @type {!Animation} */ ({
+		id: Playlist.DeepThoughts,
+		name: 'Deep Thoughts',
+		/** @type {!SceneList} */
+		scenes: new SceneList([
+			/** @type {!Scene} */ ({
+				start: null,
+				move: null,
+				duration: 1050,
+				/** @type {!FrameList} */
+				frames: new FrameList(
+					[
+						3,
+						3,
+						3,
+						3,
+						3,
+						73,
+					],
+					15,
+					5
+				),
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				move: null,
+				duration: 1300,
+				/** @type {!FrameList} */
+				frames: new FrameList(
+					[
+						50,
+						51,
+					],
+					12,
+					0
+				),
+				sound: null,
+				flags: 0,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				move: null,
+				duration: 450,
+				/** @type {!FrameList} */
+				frames: new FrameList(
+					[
+						3,
+						9,
+						10,
+					],
+					0,
+					0
+				),
+				sound: null,
+				flags: SceneFlag.FlipXAfter,
+			}),
+			/** @type {!Scene} */ ({
+				start: null,
+				move: null,
+				duration: 450,
+				/** @type {!FrameList} */
+				frames: new FrameList(
+					[
+						10,
+						9,
+						3,
+					],
+					0,
+					0
+				),
+				sound: null,
+				flags: 0,
+			}),
+		]),
+		flags: AnimationFlag.PrimaryMates | AnimationFlag.ReverseY,
+		childId: null,
+		edge: Playlist.ReachSide,
+		next: Playlist.ReachSide,
+	}),
+	/** @type {!Animation} */ ({
+		id: Playlist.DangleFall,
+		name: 'Dangle',
+		/** @type {!SceneList} */
+		scenes: new SceneList([
+			/** @type {!Scene} */ ({
+				start: null,
+				move: null,
+				duration: 2200,
+				/** @type {!FrameList} */
+				frames: new FrameList(
+					[
+						46,
+						47,
+					],
+					10,
+					0
+				),
+				sound: null,
+				flags: 0,
+			}),
+		]),
+		flags: AnimationFlag.PrimaryMates,
+		childId: null,
+		edge: null,
+		/** @type {!ChoiceList} */
+		next: new ChoiceList([
+			[Playlist.GraspingFall, 2],
+			[Playlist.ClimbDown, 1],
+		]),
 	}),
 ];
 
