@@ -21,7 +21,7 @@ import {
  *
  * @const {number}
  */
-export const MaxPlaylist = 52;
+export const MaxPlaylist = 53;
 
 
 
@@ -215,6 +215,7 @@ export const Playlist = {
 	SneezeShadow: 50,
 	BlackSheepChase: 51,
 	BlackSheepChaseChild: 52,
+	SlideDown: 53,
 };
 
 /**

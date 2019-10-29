@@ -1,5 +1,8 @@
 /**
  * @file Animation List
+ *
+ * @todo Upside-down scream.
+ * @todo Upside-down cling.
  */
 
 import {
@@ -1405,7 +1408,11 @@ export const AnimationList = [
 		flags: AnimationFlag.PrimaryMates,
 		childId: null,
 		edge: null,
-		next: Playlist.ClimbDown,
+		/** @type {!ChoiceList} */
+		next: new ChoiceList([
+			[Playlist.ClimbDown, 2],
+			[Playlist.SlideDown, 1],
+		]),
 	}),
 	/** @type {!Animation} */ ({
 		id: Playlist.ClimbDown,
@@ -2469,6 +2476,37 @@ export const AnimationList = [
 		childId: null,
 		edge: null,
 		next: null,
+	}),
+	/** @type {!Animation} */ ({
+		id: Playlist.SlideDown,
+		name: 'Slide Down',
+		scenes: new SceneList([
+			/** @type {!SceneCb} */ (() => {
+				/** @const {number} */
+				const repeat = Math.floor(Universe.height / 10);
+
+				return /** @type {!Scene} */ ({
+					start: null,
+					/** @type {!Position} */
+					move: new Position(0, 10 * (1 + repeat)),
+					duration: (1 + repeat) * 50,
+					/** @type {!FrameList} */
+					frames: new FrameList(
+						[
+							25,
+						],
+						repeat,
+						0
+					),
+					sound: null,
+					flags: 0,
+				});
+			}),
+		]),
+		flags: AnimationFlag.PrimaryMates | AnimationFlag.VariableDuration,
+		childId: null,
+		edge: Playlist.ReachFloor,
+		next: Playlist.ClimbDown,
 	}),
 ];
 
