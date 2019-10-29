@@ -1,6 +1,6 @@
 {
   "name": "js-mate-poe",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A Javascript recreation of the beloved 16-bit screen mate Poe program.",
   "repository": {
     "type": "git",
