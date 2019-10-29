@@ -45,13 +45,9 @@ import { standardizeChoices } from './core/standardize_choices.mjs';
 import {
 	AsciiArt,
 	ImgSprite,
-	ImgSpriteUrl,
 	SndBaa,
-	SndBaaUrl,
 	SndSneeze,
-	SndSneezeUrl,
 	SndYawn,
-	SndYawnUrl
 } from './core/assets.mjs';
 
 import {
@@ -98,13 +94,9 @@ export { easeOut };
 export { standardizeChoices };
 export { AsciiArt };
 export { ImgSprite };
-export { ImgSpriteUrl };
 export { SndBaa };
-export { SndBaaUrl };
 export { SndSneeze };
-export { SndSneezeUrl };
 export { SndYawn };
-export { SndYawnUrl };
 export { AnimationList };
 export { DefaultList };
 export { EntranceList };
