@@ -360,10 +360,10 @@ export const PoeAnimation = {
 			:id="'animation-' + id"
 		>
 			<h3 class="animation-title accent">
-				<abbr
+				<a
 					class="animation-name"
-					title="View Details"
-				>{{ name }}</abbr>
+					:href="'#animation-' + id"
+				>{{ name }}</a>
 				<span class="animation-id">#{{ id }}</span>
 			</h3>
 

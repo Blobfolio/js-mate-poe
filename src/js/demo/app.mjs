@@ -10,54 +10,23 @@ import {
 	AnimationList,
 	AsciiArt,
 	ChoiceList,
-	LogKind,
 	LogMsg,
 	Playlist,
 	SceneList,
 	standardizeChoices,
 	Universe
 } from '../core.mjs';
+import { universeForBrowser } from '../middleware/universe.browser.mjs';
 import { PoeAnimation } from './poe_animation.mjs';
 import { PoeFrame } from './poe_frame.mjs';
 import { PoeIcon } from './poe_icon.mjs';
-import { PoeSprite } from './poe_sprite.mjs';
 import { PoeTree } from './poe_tree.mjs';
 import { VueApp } from './vue.mjs';
 
 
 
-// ---------------------------------------------------------------------
-// Universe Overloads
-// ---------------------------------------------------------------------
-
-Universe.random = function(max) {
-	return Math.floor(Math.random() * max);
-};
-
-Universe.now = function() {
-	return performance.now();
-};
-
-Universe.log = function(msg, type) {
-	switch (type) {
-	case LogKind.Error:
-		console.error(msg);
-		break;
-
-	case LogKind.Warning:
-		console.warn(msg);
-		break;
-
-	case LogKind.Notice:
-		/* eslint-disable-next-line */
-		console.log(msg);
-		break;
-
-	case LogKind.Info:
-		console.info(msg);
-		break;
-	}
-};
+// Set universe overloads.
+universeForBrowser();
 
 
 
@@ -71,7 +40,6 @@ let _mounted = false;
 Vue.component('poe-animation', PoeAnimation);
 Vue.component('poe-frame', PoeFrame);
 Vue.component('poe-icon', PoeIcon);
-Vue.component('poe-sprite', PoeSprite);
 Vue.component('poe-tree', PoeTree);
 
 new Vue(/** @type {!VueApp} */ ({
@@ -120,18 +88,6 @@ new Vue(/** @type {!VueApp} */ ({
 			}),
 
 		'immersive': false,
-
-		'tab': 'animations',
-		'tabs': [
-			{
-				'id': 'animations',
-				'name': 'Animations',
-			},
-			{
-				'id': 'sprite',
-				'name': 'Sprite',
-			},
-		],
 	},
 
 	/**
@@ -170,13 +126,6 @@ new Vue(/** @type {!VueApp} */ ({
 		'immersiveToggle': function(status) {
 			this['immersive'] = !! status;
 			document.body.classList.toggle('is-immersive', this['immersive']);
-
-			if (this['immersive']) {
-				this['tab'] = 'immersive';
-			}
-			else {
-				this['tab'] = 'animations';
-			}
 		},
 
 		/**
@@ -201,16 +150,6 @@ new Vue(/** @type {!VueApp} */ ({
 			}
 
 			return false;
-		},
-
-		/**
-		 * Change Tab
-		 *
-		 * @param {string} tab Tab.
-		 * @return {void} Nothing.
-		 */
-		'tabToggle': function(tab) {
-			this['tab'] = tab;
 		},
 	},
 

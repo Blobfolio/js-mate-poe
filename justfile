@@ -176,6 +176,7 @@ test_dir  := base_dir + "/test"
 		--externs "{{ src_dir }}/js/demo/externs.js" \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
 		--js "{{ src_dir }}/js/demo/**.mjs" \
 		--js_output_file "{{ demo_dir }}/assets/demo.min.js" \
 		--jscomp_off globalThis \
