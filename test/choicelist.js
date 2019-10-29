@@ -46,4 +46,27 @@ import {
 			});
 		}
 	});
+
+	describe('Small Lists', () => {
+		it('Two Count', () => {
+			let tmp = new ChoiceList([
+				[Playlist.ClimbDown, 1],
+				[Playlist.SlideDown, 1],
+			]);
+
+			let out = [];
+			for (let i = 0; 20 > i; ++i) {
+				out.push(tmp.choose());
+			}
+
+			// After 20 runs we'd expect both options to be present.
+			assert.include(out, Playlist.ClimbDown);
+			assert.include(out, Playlist.SlideDown);
+		});
+
+		it('Single Count', () => {
+			let tmp = new ChoiceList([[Playlist.ClimbDown, 1]]);
+			assert.strictEqual(tmp.choose(), Playlist.ClimbDown);
+		});
+	});
 })();
