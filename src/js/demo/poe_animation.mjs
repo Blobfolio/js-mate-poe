@@ -1,5 +1,7 @@
 /**
  * @file Component: Poe Animation
+ *
+ * @todo Handle flipping.
  */
 
 /* eslint-disable quote-props */
@@ -8,7 +10,8 @@ import {
 	AnimationFlag,
 	Choice,
 	Playlist,
-	Scene
+	Scene,
+	SceneFlag
 } from '../core.mjs';
 import { VueComponent, VueProp } from './vue.mjs';
 
@@ -157,6 +160,12 @@ export const PoeAnimation = {
 			/** @type {!Array} */
 			let out = [];
 
+			/** @type {boolean} */
+			let flipX = !! (AnimationFlag.ReverseX & this['flags']);
+
+			/** @type {boolean} */
+			let flipY = !! (AnimationFlag.ReverseY & this['flags']);
+
 			// Loop the scenes.
 			for (let i = 0; i < this['scenes'].length; ++i) {
 				/** @type {!Array<number>} */
@@ -172,8 +181,22 @@ export const PoeAnimation = {
 					out.push({
 						'id': frames[j],
 						'repeat': repeat && j >= repeatFrom,
-						'flipped': false,
+						'flipX': flipX,
+						'flipY': flipY,
 					});
+
+					if (
+						(SceneFlag.FlipXAfter & this['scenes'][i].flags) &&
+						(frames.length - 1 === j)
+					) {
+						flipX = ! flipX;
+					}
+					if (
+						(SceneFlag.FlipYAfter & this['scenes'][i].flags) &&
+						(frames.length - 1 === j)
+					) {
+						flipY = ! flipY;
+					}
 				}
 			}
 
@@ -444,6 +467,8 @@ export const PoeAnimation = {
 				<poe-frame
 					v-for="(f, index) in frames"
 					:key="'frame-' + id + '-' + index"
+					:flipX="f.flipX"
+					:flipY="f.flipY"
 					:frame="f.id"
 					:repeat="f.repeat"
 				></poe-frame>

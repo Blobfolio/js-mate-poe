@@ -256,6 +256,10 @@ body {
 
 	& > .frame {
 		margin: 0 10px 10px 0;
+
+		&.flipx { transform: rotateY(180deg); }
+		&.flipy { transform: rotateX(180deg); }
+		&.flipx.flipy { transform: rotateX(180deg) rotateY(180deg); }
 	}
 
 	&.is-repeatable > .frame {
