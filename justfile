@@ -58,6 +58,7 @@ test_dir  := base_dir + "/test"
 @_watch_css:
 	just _sassc "{{ src_dir }}/scss/js-mate-poe.scss" "{{ src_dir }}/css/js-mate-poe.css"
 	just _sassc "{{ src_dir }}/scss/demo.scss" "{{ demo_dir }}/assets/demo.css"
+	just _sassc "{{ src_dir }}/scss/director.scss" "{{ demo_dir }}/assets/director.css"
 
 	just _css_to_js
 
@@ -162,14 +163,14 @@ test_dir  := base_dir + "/test"
 		--use_types_for_optimization \
 		--warning_level VERBOSE
 
-	cat "{{ src_dir }}/skel/header.min.js" "{{ dist_dir }}/js-mate-poe.min.js" > "{{ src_dir }}/js/tmp.js"
-	mv "{{ src_dir }}/js/tmp.js" "{{ dist_dir }}/js-mate-poe.min.js"
+	just _compile-header "{{ dist_dir }}/js-mate-poe.min.js"
 
 
 # Compile JS Mate Poe Demo.
 @_compile-demo:
 	just _header "Compiling JS Mate Poe Demo"
 
+	# The main demo.
 	npx google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
@@ -179,12 +180,13 @@ test_dir  := base_dir + "/test"
 		--js "{{ src_dir }}/js/core/**.mjs" \
 		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
 		--js "{{ src_dir }}/js/demo/**.mjs" \
+		--js "!{{ src_dir }}/js/demo/app-director.mjs" \
 		--js_output_file "{{ demo_dir }}/assets/demo.min.js" \
 		--jscomp_off globalThis \
 		--jscomp_off unknownDefines \
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
-		--entry_point "{{ src_dir }}/js/demo/app.mjs" \
+		--entry_point "{{ src_dir }}/js/demo/app-demo.mjs" \
 		--browser_featureset_year 2019 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
@@ -192,8 +194,39 @@ test_dir  := base_dir + "/test"
 		--use_types_for_optimization \
 		--warning_level VERBOSE
 
-	cat "{{ src_dir }}/skel/header.min.js" "{{ demo_dir }}/assets/demo.min.js" > "{{ src_dir }}/js/tmp.js"
-	mv "{{ src_dir }}/js/tmp.js" "{{ demo_dir }}/assets/demo.min.js"
+	# The director tool.
+	npx google-closure-compiler \
+		--env BROWSER \
+		--language_in STABLE \
+		--language_out STABLE \
+		--externs "{{ src_dir }}/js/demo/externs.js" \
+		--js "{{ src_dir }}/js/core.mjs" \
+		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
+		--js "{{ src_dir }}/js/demo/**.mjs" \
+		--js "!{{ src_dir }}/js/demo/app-demo.mjs" \
+		--js_output_file "{{ demo_dir }}/assets/director.min.js" \
+		--jscomp_off globalThis \
+		--jscomp_off unknownDefines \
+		--assume_function_wrapper \
+		--compilation_level ADVANCED \
+		--entry_point "{{ src_dir }}/js/demo/app-director.mjs" \
+		--browser_featureset_year 2019 \
+		--isolation_mode IIFE \
+		--module_resolution BROWSER \
+		--strict_mode_input \
+		--use_types_for_optimization \
+		--warning_level VERBOSE
+
+	# Fix up the outputs.
+	just _compile-header "{{ demo_dir }}/assets/demo.min.js"
+	just _compile-header "{{ demo_dir }}/assets/director.min.js"
+
+
+# Compile JS header.
+@_compile-header OUT:
+	cat "{{ src_dir }}/skel/header.min.js" "{{ OUT }}" > "{{ src_dir }}/js/tmp.js"
+	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
 
 
 # Pull JS Chain.
