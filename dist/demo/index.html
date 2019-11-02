@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>JS Mate Poe: Playground</title>
+	<title>JS Mate Poe: Demo</title>
 
 	<style type="text/css">
 		body { background-color: lavenderblush; }
@@ -32,31 +32,9 @@
 			v-on:click.prevent="immersiveToggle(! immersive)"
 		></poe-icon>
 
-		<nav
-			v-if="! immersive"
-			class="tabs"
-		>
-			<a
-				v-for="item in tabs"
-				class="tab accent"
-				:class="{ 'is-active' : tab === item.id }"
-				v-on:click.prevent="tabToggle(item.id)"
-			>{{ item.name }}</a>
-
-			<div class="pseudo-tab accent">
-				<a
-					class="name"
-					href="https://github.com/Blobfolio/js-mate-poe"
-					rel="noopener"
-					target="_blank"
-				>{{ name }}</a>
-				<span class="version">v{{ version }}</span>
-			</div>
-		</nav>
-
 		<!-- Animations. -->
 		<div
-			v-if="tab === 'animations'"
+			v-if="! immersive"
 			class="section"
 		>
 			<h2 class="section-title">Animations</h2>
@@ -69,23 +47,13 @@
 				></poe-animation>
 			</div>
 		</div>
-
-		<!-- Sprite. -->
-		<div
-			v-if="tab === 'sprite'"
-			class="section"
-		>
-			<h2 class="section-title">Sprite</h2>
-
-			<poe-sprite></poe-sprite>
-		</div>
 	</div>
 
 	<div id="fader"></div>
 
-	<script src="../js-mate-poe.min.js?ver=16"></script>
-	<script src="assets/vue.min.js?ver=16"></script>
-	<script src="assets/demo.min.js?ver=16"></script>
+	<script src="../js-mate-poe.min.js?ver=17"></script>
+	<script src="assets/vue.min.js?ver=17"></script>
+	<script src="assets/demo.min.js?ver=17"></script>
 	<script>
 		(function() {
 			// Start it!

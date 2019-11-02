@@ -10,14 +10,16 @@ import {
 	MateFlag,
 	MateState,
 	Position,
-	SndBaaUrl,
-	SndSneezeUrl,
-	SndYawnUrl,
 	Sound,
 	SpriteInfo,
 	Universe
 } from '../core.mjs';
 import { universeForBrowser } from '../middleware/universe.browser.mjs';
+import {
+	SndBaaUrl,
+	SndSneezeUrl,
+	SndYawnUrl
+} from '../middleware/assets.url.mjs';
 import { CssUrl } from './css.url.mjs';
 
 

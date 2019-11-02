@@ -32,6 +32,20 @@ export const PoeFrame = {
 			'required': false,
 			'default': false,
 		},
+
+		/** @type {!VueProp} */
+		'flipX': {
+			'type': Boolean,
+			'required': false,
+			'default': false,
+		},
+
+		/** @type {!VueProp} */
+		'flipY': {
+			'type': Boolean,
+			'required': false,
+			'default': false,
+		},
 	},
 
 	/**
@@ -56,6 +70,14 @@ export const PoeFrame = {
 		}
 		else {
 			context['data']['staticClass'] = `frame f${context['props']['frame']}`;
+		}
+
+		// Flips.
+		if (context['props']['flipX']) {
+			context['data']['staticClass'] += ' flipx';
+		}
+		if (context['props']['flipY']) {
+			context['data']['staticClass'] += ' flipy';
 		}
 
 		// Add a title for hover clarity.

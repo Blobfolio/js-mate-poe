@@ -249,7 +249,7 @@ export const SpriteInfo = {
 	Tiles: 176,
 	XTiles: 16,
 	YTiles: 11,
-	EmptyTile: 174,
+	EmptyTile: 173,
 };
 
 
