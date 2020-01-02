@@ -9,6 +9,8 @@
 
 // The main sprite.
 .poe {
+	contain: strict;
+
 	box-sizing: border-box;
 	position: fixed;
 	top: 0;
