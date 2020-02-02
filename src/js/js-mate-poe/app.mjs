@@ -194,15 +194,6 @@ const Poe = {
 		// Stop the universe.
 		Universe.stop();
 
-		// DOM cleanup.
-
-		/** @const {?Element} */
-		const style = document.getElementById('css-mate-poe');
-		if (style) {
-			URL.revokeObjectURL(style.href);
-			style.parentNode.removeChild(style);
-		}
-
 		/** @const {!Array<symbol>} */
 		const mateKeys = /** @type {!Array<symbol>} */ (Object.getOwnPropertySymbols(Poe._mates));
 
@@ -249,10 +240,6 @@ const Poe = {
 			delete Poe._mousemove;
 			Poe._mousemove = null;
 		}
-
-		// Free image.
-		URL.revokeObjectURL(Poe._image);
-		Poe._image = '';
 	},
 
 	/**
@@ -322,6 +309,11 @@ const Poe = {
 	 * @return {!Promise} Promise.
 	 */
 	async initImage() {
+		// We don't need to do this twice.
+		if (Poe._image) {
+			return Promise.resolve();
+		}
+
 		// We don't need anything fancy for standard resolution screens.
 		if (1 === window.devicePixelRatio) {
 			Poe._image = URL.createObjectURL(base64toBlob(ImgSprite, 'image/png'));
