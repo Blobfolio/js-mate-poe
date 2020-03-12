@@ -51,6 +51,34 @@ docker_sig := "/opt/righteous-sandbox.version"
 	just _build-success
 
 
+# Set version and rebuild.
+release VERSION="": _only-docker
+	#!/usr/bin/env bash
+
+	_version="{{ VERSION }}"
+	_now="$( just version )"
+	[ ! -z "${_version}" ] || _version=$_now
+
+	_regex="^[0-9]+\.[0-9]+\.[0-9]+$"
+	if [[ $_version =~ $_regex ]]; then
+		if [ "${_version}" != "${_now}" ]; then
+			just _confirm "Change the version from ${_now} to ${_version}?" || exit 1
+
+			# Patch the version!
+			jq --arg _version "$_version" '.version = $_version' "{{ justfile_directory() }}/package.json" > "{{ tmp_dir }}/package.json"
+			mv "{{ tmp_dir }}/package.json" "{{ justfile_directory() }}/package.json"
+			sd -s "Version: '${_now}'" "Version: '${_version}'" "{{ src_dir }}/js/core/def.mjs"
+			sd -s "@version ${_now}" "@version ${_version}" "{{ src_dir }}/skel/header.min.js"
+		fi
+
+		just _success "Version changed to ${_version}."
+		just build Y
+		exit
+	fi
+
+	just _error "Invalid version."
+	exit 1
+
 # Run unit tests.
 @test: _init-test-chain
 	just _header "Unit tests!"
@@ -60,7 +88,10 @@ docker_sig := "/opt/righteous-sandbox.version"
 		--browsers Other \
 		"{{ justfile_directory() }}/karma.conf.js"
 
-	just _notify "Unit tests are looking good!"
+
+# Print version and exit.
+@version: _only-docker
+	cat package.json | jq '.version' | sd '"' ''
 
 
 # Watch for changes to JS files.
@@ -380,6 +411,6 @@ _init-test-chain: _only-docker
 @_success COMMENT:
 	echo "\e[92;1m[Success] \e[0;1m{{ COMMENT }}\e[0m"
 
-# Fancy bubble notification for Linux.
-@_notify COMMENT:
-	[ ! $( command -v "notify-send" ) ] || notify-send -i "{{ src_dir }}/img/icon.png" --category dev.validate -h int:transient:1 -t 3000 "JS Mate Poe" "{{ COMMENT }}"
+# Confirm a yes/no response.
+@_confirm COMMENT:
+	whiptail --title "Confirmation Required" --yesno "{{ COMMENT }}" 0 0 10
