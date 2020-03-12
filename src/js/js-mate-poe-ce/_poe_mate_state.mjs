@@ -11,10 +11,6 @@ import { Sound } from '../core.mjs';
 	primary: boolean,
 	events: ?Object<string, Function>,
 	el: !HTMLDivElement,
-	flags: number,
-	frame: number,
-	x: number,
-	y: number,
 	sound: !Sound
  * }}
  */

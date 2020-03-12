@@ -282,15 +282,10 @@ const Poe = {
 					primary: !! (MateFlag.Primary & state[i].flags),
 					events: null,
 					el: /** @type {!HTMLDivElement} */ (document.createElement('poe-ce')),
-					flags: 0,
-					frame: 0,
-					x: 0,
-					y: 0,
 					sound: Sound.None,
 				});
 
 				// Set up element properties.
-				Poe._mates[state[i].id].el.setAttribute('flags', '0');
 				document.body.appendChild(Poe._mates[state[i].id].el);
 
 				// Primary have some events.
@@ -327,48 +322,34 @@ const Poe = {
 				}
 			}
 
-			// Element class.
+			// Element state.
+			const props = {
+				flags: 0,
+				frame: state[i].frame,
+				x: state[i].x,
+				y: state[i].y,
+			};
 
-			/** @type {number} */
-			let flags = 0;
 			if (Poe._mates[state[i].id].primary) {
-				flags |= PoeFlag.MatePrimary;
+				props.flags |= PoeFlag.MatePrimary;
 			}
 			if (! (MateFlag.Disabled & state[i].flags)) {
-				flags |= PoeFlag.MateEnabled;
+				props.flags |= PoeFlag.MateEnabled;
 			}
 			else if (MateFlag.Dragging & state[i].flags) {
-				flags |= PoeFlag.Dragging;
+				props.flags |= PoeFlag.Dragging;
 			}
 			else if (MateFlag.Background & state[i].flags) {
-				flags |= PoeFlag.MateBackground;
+				props.flags |= PoeFlag.MateBackground;
 			}
 			if (MateFlag.FlippedX & state[i].flags) {
-				flags |= PoeFlag.MateFlippedX;
+				props.flags |= PoeFlag.MateFlippedX;
 			}
 			if (MateFlag.FlippedY & state[i].flags) {
-				flags |= PoeFlag.MateFlippedY;
+				props.flags |= PoeFlag.MateFlippedY;
 			}
 
-			// Update it!
-			if (flags !== Poe._mates[state[i].id].flags) {
-				Poe._mates[state[i].id].flags = flags;
-				Poe._mates[state[i].id].el.setAttribute('flags', flags);
-			}
-
-			// The rest is easy.
-			if (state[i].x !== Poe._mates[state[i].id].x) {
-				Poe._mates[state[i].id].x = state[i].x;
-				Poe._mates[state[i].id].el.setAttribute('x', state[i].x);
-			}
-			if (state[i].y !== Poe._mates[state[i].id].y) {
-				Poe._mates[state[i].id].y = state[i].y;
-				Poe._mates[state[i].id].el.setAttribute('y', state[i].y);
-			}
-			if (state[i].frame !== Poe._mates[state[i].id].frame) {
-				Poe._mates[state[i].id].frame = state[i].frame;
-				Poe._mates[state[i].id].el.setAttribute('frame', state[i].frame);
-			}
+			Poe._mates[state[i].id].el.state = props;
 
 			// Lastly, play a sound.
 			if (
