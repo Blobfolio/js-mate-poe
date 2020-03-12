@@ -1,17 +1,14 @@
 /**
- * @file JS Mate Poe
+ * @file JS Mate Poe: Custom Element
  */
 
 import {
-	base64toBlob,
-	ImgSprite,
 	LogMsg,
 	LogKind,
 	MateFlag,
 	MateState,
 	Position,
 	Sound,
-	SpriteInfo,
 	Universe
 } from '../core.mjs';
 import { universeForBrowser } from '../middleware/universe.browser.mjs';
@@ -20,10 +17,9 @@ import {
 	SndSneezeUrl,
 	SndYawnUrl
 } from '../middleware/assets.url.mjs';
-import { CssUrl } from './css.url.mjs';
 import { PoeFlag } from './poe_flag.mjs';
 import { PoeMateState } from './_poe_mate_state.mjs';
-
+import { PoeCe } from './poe_ce.mjs';
 
 
 // Set universe overloads.
@@ -146,8 +142,6 @@ const Poe = {
 
 		// Set up the CSS.
 		await Promise.all([
-			Poe.initCss(),
-			Poe.initImage(),
 			Poe.initEvents(),
 		]);
 
@@ -194,8 +188,6 @@ const Poe = {
 			}
 
 			// Remove the elements.
-			Poe._mates[key].el.removeChild(Poe._mates[key].img);
-			delete Poe._mates[key].img;
 			Poe._mates[key].el.parentNode.removeChild(Poe._mates[key].el);
 			delete Poe._mates[key].el;
 
@@ -214,35 +206,6 @@ const Poe = {
 			delete Poe._mousemove;
 			Poe._mousemove = null;
 		}
-	},
-
-	/**
-	 * Init CSS
-	 *
-	 * @return {!Promise} Promise.
-	 */
-	async initCss() {
-		// If the styles are already in the document, we're done.
-		if (document.getElementById('css-mate-poe')) {
-			return Promise.resolve();
-		}
-
-		/** @const {!Element} */
-		const style = document.createElement('LINK');
-		style.id = 'css-mate-poe';
-		style.rel = 'stylesheet';
-
-		/** @const {!Promise} */
-		const stylePromise = new Promise((resolve, reject) => {
-			style.onload = resolve;
-			style.onerror = reject;
-		});
-
-		// Set the URL.
-		style.href = CssUrl;
-		(document.head || document.body).appendChild(style);
-
-		return stylePromise;
 	},
 
 	/**
@@ -269,60 +232,6 @@ const Poe = {
 			Poe.dragEnd,
 			{ passive: true }
 		);
-
-		return Promise.resolve();
-	},
-
-	/**
-	 * Init Image
-	 *
-	 * This is a complicated operation because it might need to generate
-	 * a 2x image for proper HD support (CSS resizing techniques make
-	 * pixelated images like Poe very blurry).
-	 *
-	 * @return {!Promise} Promise.
-	 */
-	async initImage() {
-		// We don't need to do this twice.
-		if (Poe._image) {
-			return Promise.resolve();
-		}
-
-		// We don't need anything fancy for standard resolution screens.
-		if (1 === window.devicePixelRatio) {
-			Poe._image = URL.createObjectURL(base64toBlob(ImgSprite, 'image/png'));
-			return Promise.resolve();
-		}
-
-		/** @const {!HTMLCanvasElement} */
-		const canvas = /** @type {!HTMLCanvasElement} */ (document.createElement('CANVAS'));
-		canvas.width = 2 * SpriteInfo.Width;
-		canvas.height = 2 * SpriteInfo.Height;
-
-		/** @const {!CanvasRenderingContext2D} */
-		const ctx = /** @type {!CanvasRenderingContext2D} */ (canvas.getContext('2d'));
-		ctx.imageSmoothingEnabled = false;
-
-		/** @const {!Image} */
-		const image = new Image();
-
-		/** @const {!Promise} */
-		const imagePromise = new Promise((resolve, reject) => {
-			image.onload = resolve;
-			image.onerror = reject;
-		});
-
-		// Load the image.
-		image.src = 'data:image/png;base64,' + ImgSprite;
-		await imagePromise;
-
-		// Draw it.
-		ctx.drawImage(image, 0, 0, 2 * SpriteInfo.Width, 2 * SpriteInfo.Height);
-
-		// Get the blob.
-		Poe._image = URL.createObjectURL(await new Promise((resolve) => {
-			canvas.toBlob(blob => resolve(blob));
-		}));
 
 		return Promise.resolve();
 	},
@@ -372,24 +281,16 @@ const Poe = {
 				Poe._mates[state[i].id] = /** @type {!PoeMateState} */ ({
 					primary: !! (MateFlag.Primary & state[i].flags),
 					events: null,
-					el: /** @type {!HTMLDivElement} */ (document.createElement('DIV')),
-					img: new Image(),
-					elClass: '',
-					elTransform: '',
-					imgClass: '',
+					el: /** @type {!HTMLDivElement} */ (document.createElement('poe-ce')),
+					flags: 0,
+					frame: 0,
+					x: 0,
+					y: 0,
 					sound: Sound.None,
 				});
 
 				// Set up element properties.
-				Poe._mates[state[i].id].el.className = 'poe is-disabled';
-				Poe._mates[state[i].id].el.setAttribute('aria-hidden', 'true');
-
-				Poe._mates[state[i].id].img.src = Poe._image;
-				Poe._mates[state[i].id].img.alt = LogMsg.Name;
-				Poe._mates[state[i].id].img.className = 'poe-img';
-
-				// Hook it up.
-				Poe._mates[state[i].id].el.appendChild(Poe._mates[state[i].id].img);
+				Poe._mates[state[i].id].el.setAttribute('flags', '0');
 				document.body.appendChild(Poe._mates[state[i].id].el);
 
 				// Primary have some events.
@@ -428,63 +329,45 @@ const Poe = {
 
 			// Element class.
 
-			/** @type {string} */
-			let value = 'poe';
-
-			if (! Poe._mates[state[i].id].primary) {
-				value += ' is-child';
+			/** @type {number} */
+			let flags = 0;
+			if (Poe._mates[state[i].id].primary) {
+				flags |= PoeFlag.MatePrimary;
 			}
-
-			if (MateFlag.Disabled & state[i].flags) {
-				value += ' is-disabled';
+			if (! (MateFlag.Disabled & state[i].flags)) {
+				flags |= PoeFlag.MateEnabled;
 			}
 			else if (MateFlag.Dragging & state[i].flags) {
-				value += ' is-dragging';
+				flags |= PoeFlag.Dragging;
 			}
 			else if (MateFlag.Background & state[i].flags) {
-				value += ' is-behind';
+				flags |= PoeFlag.MateBackground;
+			}
+			if (MateFlag.FlippedX & state[i].flags) {
+				flags |= PoeFlag.MateFlippedX;
+			}
+			if (MateFlag.FlippedY & state[i].flags) {
+				flags |= PoeFlag.MateFlippedY;
 			}
 
 			// Update it!
-			if (value !== Poe._mates[state[i].id].elClass) {
-				Poe._mates[state[i].id].elClass = value;
-				Poe._mates[state[i].id].el.className = value;
+			if (flags !== Poe._mates[state[i].id].flags) {
+				Poe._mates[state[i].id].flags = flags;
+				Poe._mates[state[i].id].el.setAttribute('flags', flags);
 			}
 
-			// Now the element transform.
-
-			// Move it?
-			if (state[i].x || state[i].y) {
-				value = `translate3d(${state[i].x}px, ${state[i].y}px, 0)`;
-				if (MateFlag.FlippedX & state[i].flags) {
-					value += ' rotateY(180deg)';
-				}
-				if (MateFlag.FlippedY & state[i].flags) {
-					value += ' rotateX(180deg)';
-				}
+			// The rest is easy.
+			if (state[i].x !== Poe._mates[state[i].id].x) {
+				Poe._mates[state[i].id].x = state[i].x;
+				Poe._mates[state[i].id].el.setAttribute('x', state[i].x);
 			}
-			else {
-				value = '';
-				if (MateFlag.FlippedX & state[i].flags) {
-					value = 'rotateY(180deg)';
-				}
-				if (MateFlag.FlippedY & state[i].flags) {
-					value += ' rotateX(180deg)';
-					value = value.trim();
-				}
+			if (state[i].y !== Poe._mates[state[i].id].y) {
+				Poe._mates[state[i].id].y = state[i].y;
+				Poe._mates[state[i].id].el.setAttribute('y', state[i].y);
 			}
-
-			// Update it!
-			if (value !== Poe._mates[state[i].id].elTransform) {
-				Poe._mates[state[i].id].elTransform = value;
-				Poe._mates[state[i].id].el.style.transform = value;
-			}
-
-			// And the image.
-			value = `poe-img poe-f${state[i].frame}`;
-			if (value !== Poe._mates[state[i].id].imgClass) {
-				Poe._mates[state[i].id].imgClass = value;
-				Poe._mates[state[i].id].img.className = value;
+			if (state[i].frame !== Poe._mates[state[i].id].frame) {
+				Poe._mates[state[i].id].frame = state[i].frame;
+				Poe._mates[state[i].id].el.setAttribute('frame', state[i].frame);
 			}
 
 			// Lastly, play a sound.
@@ -605,3 +488,6 @@ window['Poe']['audio'] = Poe.audio;
 window['Poe']['speed'] = Poe.speed;
 window['Poe']['start'] = Poe.start;
 window['Poe']['stop'] = Poe.stop;
+
+// Register custom element.
+customElements.define('poe-ce', PoeCe);

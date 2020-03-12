@@ -1,0 +1,61 @@
+/**
+ * CSS: JS Mate Poe: CE
+ */
+
+// Import the base.
+@import "_base";
+
+
+
+// The main sprite.
+#p {
+	box-sizing: border-box;
+	position: fixed;
+	top: 0;
+	left: 0;
+
+	display: block;
+	margin: 0;
+	padding: 0;
+	width: $tile_size;
+	height: $tile_size;
+
+	cursor: grab;
+	z-index: 100000;
+	overflow: hidden;
+
+	opacity: 1;
+	transition: opacity .5s ease;
+
+	// Animation: Dragging.
+	&.is-dragging { cursor: grabbing; }
+
+	// Child sprite.
+	&.is-child { pointer-events: none; }
+
+	// Children fade in.
+	&.is-disabled { opacity: 0; }
+
+	// Push behind other sprites.
+	&.is-behind { z-index: 99999; }
+}
+
+// The image.
+#p-img {
+	position: relative;
+	display: block;
+	width: $width;
+	height: $height;
+	margin: 0;
+	padding: 0;
+
+	pointer-events: none;
+}
+
+// There are a lot of frames! (We're skipping the first frame (0) as it matches the default position.)
+@for $frame from 1 through $tiles - 1 {
+	$x: (0 - $tile_size) * ($frame % $tiles_x);
+	$y: (0 - $tile_size) * floor($frame / $tiles_x);
+
+	.f#{$frame} { transform: translate3d($x, $y, 0); }
+}
