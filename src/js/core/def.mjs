@@ -747,6 +747,7 @@ export const Universe = {
 	// Overloads
 	// -----------------------------------------------------------------
 
+	/* eslint-disable no-unused-vars */
 	/**
 	 * Log
 	 *
@@ -756,10 +757,10 @@ export const Universe = {
 	 * @param {!LogKind} type Type.
 	 * @return {void} Nothing.
 	 */
-	/* eslint-disable-next-line no-unused-vars */
 	log(msg, type) {
 		return;
 	},
+	/* eslint-enable no-unused-vars */
 
 	/**
 	 * Get Current Time
@@ -774,6 +775,7 @@ export const Universe = {
 		return 0;
 	},
 
+	/* eslint-disable no-unused-vars */
 	/**
 	 * Get Random
 	 *
@@ -783,10 +785,10 @@ export const Universe = {
 	 * @param {number} max Maximum bound.
 	 * @return {number} Random.
 	 */
-	/* eslint-disable-next-line no-unused-vars */
 	random(max) {
 		return 0;
 	},
+	/* eslint-enable no-unused-vars */
 
 	/**
 	 * Self Resize

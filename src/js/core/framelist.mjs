@@ -2,6 +2,7 @@
  * @file Frame List
  */
 
+/* eslint-disable-next-line */
 /* global Generator */
 /* global Iterable */
 
@@ -124,15 +125,16 @@ export const FrameList = class {
 		return this._size;
 	}
 
+	/* eslint-disable jsdoc/require-returns-check */
 	/**
 	 * Iterator
 	 *
 	 * @return {!Generator} Generator.
 	 */
-	/* eslint-disable-next-line jsdoc/require-returns-check */
 	*[Symbol.iterator]() {
 		for (let i = 0; i < this.size; ++i) {
 			yield this.frame(i);
 		}
 	}
+	/* eslint-enable jsdoc/require-returns-check */
 };

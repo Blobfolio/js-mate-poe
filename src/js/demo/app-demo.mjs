@@ -21,6 +21,7 @@ import { PoeAnimation } from './poe_animation.mjs';
 import { PoeFrame } from './poe_frame.mjs';
 import { PoeIcon } from './poe_icon.mjs';
 import { PoeTree } from './poe_tree.mjs';
+/* eslint-disable-next-line */
 import { VueApp } from './vue.mjs';
 
 
