@@ -2,6 +2,7 @@
  * @file Choices
  */
 
+/* eslint-disable-next-line */
 /* global Generator */
 /* global Iterable */
 import {
@@ -80,15 +81,16 @@ export const ChoiceList = class {
 		return this._pool;
 	}
 
+	/* eslint-disable jsdoc/require-returns-check */
 	/**
 	 * Iterator
 	 *
 	 * @return {!Generator} Generator.
 	 */
-	/* eslint-disable-next-line jsdoc/require-returns-check */
 	*[Symbol.iterator]() {
 		for (let i = 0; i < this._pool.length; ++i) {
 			yield this._pool[i][0];
 		}
 	}
+	/* eslint-enable jsdoc/require-returns-check */
 };

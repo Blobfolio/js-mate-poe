@@ -1,5 +1,5 @@
 /**
- * CSS: JS Mate Poe
+ * CSS: JS Mate Poe: CE
  */
 
 // Import the base.
@@ -8,10 +8,7 @@
 
 
 // The main sprite.
-.poe {
-	contain: strict;
-
-	box-sizing: border-box;
+#p {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -19,6 +16,8 @@
 	display: block;
 	width: $tile_size;
 	height: $tile_size;
+	margin: 0;
+	padding: 0;
 
 	cursor: grab;
 	z-index: 100000;
@@ -38,22 +37,18 @@
 
 	// Push behind other sprites.
 	&.is-behind { z-index: 99999; }
+}
 
-	// The image.
-	&-img {
-		position: relative !important;
-		display: block !important;
-		width: $width !important;
-		height: $height !important;
-		min-width: $width !important;
-		max-width: none !important;
-		min-height: $height !important;
-		max-height: none !important;
-		margin: 0 !important;
-		padding: 0 !important;
+// The image.
+#i {
+	position: relative;
+	display: block;
+	width: $width;
+	height: $height;
+	margin: 0;
+	padding: 0;
 
-		pointer-events: none;
-	} // .poe-img
+	pointer-events: none;
 }
 
 // There are a lot of frames! (We're skipping the first frame (0) as it matches the default position.)
@@ -61,5 +56,5 @@
 	$x: (0 - $tile_size) * ($frame % $tiles_x);
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
 
-	.poe-f#{$frame} { transform: translate3d($x, $y, 0); }
+	.f#{$frame} { transform: translate3d($x, $y, 0); }
 }

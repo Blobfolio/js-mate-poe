@@ -9,169 +9,114 @@
 #   just <task>
 ##
 
-base_dir  := `realpath $PWD`
-src_dir   := base_dir + "/src"
-dist_dir  := base_dir + "/dist"
-demo_dir  := dist_dir + "/demo"
-test_dir  := base_dir + "/test"
+src_dir    := justfile_directory() + "/src"
+dist_dir   := justfile_directory() + "/dist"
+demo_dir   := dist_dir + "/demo"
+test_dir   := justfile_directory() + "/test"
+tmp_dir    := "/tmp"
+
+docker_sig := "/opt/righteous-sandbox.version"
 
 
 
-##     ##
-# BUILD #
-##     ##
+##          ##
+# MAIN TASKS #
+##          ##
 
 # Build site!
-@build: _check_dependencies
+@build RELEASE="": _only-docker
+	# Clear the screen so we can see what's relevant.
+	clear
+
+	[ -z "{{ RELEASE }}" ] || just test
+
+	# Keep track of time.
+	echo "$( date +%s )" > "{{ tmp_dir }}/build.time"
+
 	just _header "Building JS Mate Poe!"
+	echo ""
 
-	just _pull_js_chain
-	just _watch_css
-	just _watch_js
+	just _build-scss
+	just _build-js
 
-	just test
+	# Clear old Gzip/Brotli files.
+	find "{{ dist_dir }}" \( -name "*.br" -o -name '*.gz' \) -type f -delete
 
-	# Done!
-	just _success "JS Mate Poe has been built: {{ dist_dir }}"
+	# If releasing, redo Gzip/Brotli files.
+	[ -z "{{ RELEASE }}" ] || just _build-encode
 
+	just _fix-chmod "{{ dist_dir }}"
+	just _fix-chown "{{ dist_dir }}"
+
+	just _build-success
+
+
+# Set version and rebuild.
+release VERSION="": _only-docker
+	#!/usr/bin/env bash
+
+	_version="{{ VERSION }}"
+	_now="$( just version )"
+	[ ! -z "${_version}" ] || _version=$_now
+
+	_regex="^[0-9]+\.[0-9]+\.[0-9]+$"
+	if [[ $_version =~ $_regex ]]; then
+		if [ "${_version}" != "${_now}" ]; then
+			just _confirm "Change the version from ${_now} to ${_version}?" || exit 1
+
+			# Patch the version!
+			jq --arg _version "$_version" '.version = $_version' "{{ justfile_directory() }}/package.json" > "{{ tmp_dir }}/package.json"
+			mv "{{ tmp_dir }}/package.json" "{{ justfile_directory() }}/package.json"
+			sd -s "Version: '${_now}'" "Version: '${_version}'" "{{ src_dir }}/js/core/def.mjs"
+			sd -s "@version ${_now}" "@version ${_version}" "{{ src_dir }}/skel/header.min.js"
+		fi
+
+		just _success "Version changed to ${_version}."
+		just build Y
+		exit
+	fi
+
+	just _error "Invalid version."
+	exit 1
 
 # Run unit tests.
-@test: _check_dependencies
+@test: _init-test-chain
 	just _header "Unit tests!"
-	npx karma start \
+
+	karma start \
 		--single-run \
-		--browsers ChromeHeadless \
-		"{{ base_dir }}/karma.conf.js"
-	just _notify "Unit tests are looking good!"
+		--browsers Other \
+		"{{ justfile_directory() }}/karma.conf.js"
+
+
+# Print version and exit.
+@version: _only-docker
+	cat package.json | jq '.version' | sd '"' ''
 
 
 # Watch for changes to JS files.
-@watch: _check_dependencies
+@watch: _only-docker
 	just _header "Watching for Changes"
 
-	watchexec --postpone --no-shell --watch "{{ src_dir }}/scss" --debounce 1000 --exts scss -- just _watch_css & \
-	watchexec --postpone --no-shell --watch "{{ src_dir }}/js" --debounce 1000 --exts mjs -- just _watch_js & \
-	watchexec --postpone --no-shell --watch "{{ test_dir }}" --debounce 1000 --exts js -- just _watch_js
+	watchexec \
+		--postpone \
+		--no-shell \
+		--watch "{{ src_dir }}" \
+		--debounce 1000 \
+		--ignore "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs" \
+		--exts mjs,scss -- just build
 
 
-# CSS build task(s).
-@_watch_css:
-	just _sassc "{{ src_dir }}/scss/js-mate-poe.scss" "{{ src_dir }}/css/js-mate-poe.css"
-	just _sassc "{{ src_dir }}/scss/demo.scss" "{{ demo_dir }}/assets/demo.css"
-	just _sassc "{{ src_dir }}/scss/director.scss" "{{ demo_dir }}/assets/director.css"
-
-	just _css_to_js
-
-	just _brotli "{{ dist_dir }}" "css"
-	just _gzip "{{ dist_dir }}" "css"
-
-
-# JS build task(s).
-@_watch_js:
-	just _eslint
-
-	just _compile-js-mate-poe
-	just _compile-demo
-
-	just _brotli "{{ dist_dir }}" "js"
-	just _gzip "{{ dist_dir }}" "js"
-
-	just _notify "JS is looking good!"
-
-
-
-##   ##
-# CSS #
-##   ##
-
-# SASSC.
-@_sassc IN OUT:
-	just _header "Compiling $( basename "{{ IN }}" )."
-	sassc --style=compressed "{{ IN }}" "{{ OUT }}"
-	just _csso "{{ OUT }}" "{{ OUT }}"
-
-
-# CSSO.
-@_csso IN OUT:
-	just _header "Minifying CSS."
-	csso -i "{{ IN }}" -o "{{ OUT }}"
-
-
-# Build a JS module from the CSS.
-@_css_to_js:
-	just _header "Rebuilding CSS module."
-
-	# Make sure we have compressed files to use.
-	[ -f "{{ src_dir }}/css/js-mate-poe.css" ] || just _die "Missing js-mate-poe.css."
-
-	# Start it.
-	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ src_dir }}/skel/css.tmp"
-
-	# The main CSS.
-	echo "export const CssUrl = URL.createObjectURL(new Blob(['$( cat "{{ src_dir }}/css/js-mate-poe.css" )'], {type: 'text/css'}));" >> "{{ src_dir }}/skel/css.tmp"
-
-	# Move the file to its normal place!
-	mv "{{ src_dir }}/skel/css.tmp" "{{ src_dir }}/js/js-mate-poe/css.url.mjs"
-
-
-##          ##
-# JAVASCRIPT #
-##          ##
-
-# Eslint.
-@_eslint:
-	just _header "Linting Javascript."
-	npx eslint \
-		--color \
-		"{{ src_dir }}/js"/**/*.mjs \
-		"{{ test_dir }}"/*.js
-
-
-# Eslint Fix.
-@_eslint-fix:
-	just _header "Fixing Javascript."
-	npx eslint \
-		--color \
-		--fix \
-		"{{ src_dir }}/js"/**/*.mjs \
-		"{{ test_dir }}"/*.js || true
-
-
-# Compile JS Mate Poe.
-@_compile-js-mate-poe:
-	just _header "Compiling JS Mate Poe"
-
-	npx google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--language_out STABLE \
-		--js "{{ src_dir }}/js/core.mjs" \
-		--js "{{ src_dir }}/js/core/**.mjs" \
-		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
-		--js "{{ src_dir }}/js/middleware/assets.url.mjs" \
-		--js "{{ src_dir }}/js/js-mate-poe/**.mjs" \
-		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
-		--jscomp_off unknownDefines \
-		--assume_function_wrapper \
-		--compilation_level ADVANCED \
-		--dependency_mode PRUNE \
-		--entry_point "{{ src_dir }}/js/js-mate-poe/app.mjs" \
-		--browser_featureset_year 2019 \
-		--isolation_mode IIFE \
-		--module_resolution BROWSER \
-		--strict_mode_input \
-		--use_types_for_optimization \
-		--warning_level VERBOSE
-
-	just _compile-header "{{ dist_dir }}/js-mate-poe.min.js"
-
+##        ##
+# BUILDING #
+##        ##
 
 # Compile JS Mate Poe Demo.
-@_compile-demo:
-	just _header "Compiling JS Mate Poe Demo"
+@_build-demo:
+	just _info "Compiling JS Mate Poe Demo"
 
 	# The main demo.
-	npx google-closure-compiler \
+	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
 		--language_out STABLE \
@@ -195,7 +140,7 @@ test_dir  := base_dir + "/test"
 		--warning_level VERBOSE
 
 	# The director tool.
-	npx google-closure-compiler \
+	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
 		--language_out STABLE \
@@ -219,23 +164,165 @@ test_dir  := base_dir + "/test"
 		--warning_level VERBOSE
 
 	# Fix up the outputs.
-	just _compile-header "{{ demo_dir }}/assets/demo.min.js"
-	just _compile-header "{{ demo_dir }}/assets/director.min.js"
+	just _build-js-header "{{ demo_dir }}/assets/demo.min.js"
+	just _build-js-header "{{ demo_dir }}/assets/director.min.js"
+
+
+# Run static encoding.
+@_build-encode:
+	# Tackle Brotli.
+	just _info "Encoding Brotli."
+	find "{{ dist_dir }}" \( \
+		-name '*.css' -o \
+		-name '*.html' -o \
+		-name '*.js' \
+		\) \
+		-type f \
+		-print0 | \
+		parallel -0 brotli -q 11
+
+	# Tackle Gzip.
+	just _info "Encoding Gzip."
+	find "{{ dist_dir }}" \( \
+		-name '*.css' -o \
+		-name '*.html' -o \
+		-name '*.js' \
+		\) \
+		-type f \
+		-print0 | \
+		parallel -0 gzip -k -9
+
+
+# JS build task(s).
+@_build-js:
+	just _eslint
+
+	just _build-js-chain
+	just _build-js-mate-poe-ce
+	just _build-demo
+
+
+# Build a JS module from the CSS.
+@_build-js-css:
+	# JS-Mate-Poe CE.
+	[ -f "{{ tmp_dir }}/js-mate-poe-ce.css" ] || just _die "Missing js-mate-poe-ce.css."
+	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
+	echo "export const PoeCss = '$( cat "{{ tmp_dir }}/js-mate-poe-ce.css" )';" >> "{{ tmp_dir }}/css.tmp"
+	mv "{{ tmp_dir }}/css.tmp" "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
+	just _fix-chown "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
+
+
+# Pull JS Chain.
+@_build-js-chain:
+	# Vue JS.
+	[ -f "{{ demo_dir }}/assets/vue.min.js" ] || wget -q \
+		-O "{{ demo_dir }}/assets/vue.min.js" \
+		"https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.min.js"
 
 
 # Compile JS header.
-@_compile-header OUT:
+@_build-js-header OUT:
 	cat "{{ src_dir }}/skel/header.min.js" "{{ OUT }}" > "{{ src_dir }}/js/tmp.js"
 	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
 
 
-# Pull JS Chain.
-@_pull_js_chain:
-	just _header "Pulling third-party dependencies."
+# Compile JS Mate Poe CE.
+@_build-js-mate-poe-ce:
+	just _info "Compiling JS Mate Poe: CE"
 
-	# Vue JS.
-	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
-	wget -q -O "{{ demo_dir }}/assets/vue.min.js" "https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.min.js"
+	google-closure-compiler \
+		--env BROWSER \
+		--language_in STABLE \
+		--language_out STABLE \
+		--js "{{ src_dir }}/js/core.mjs" \
+		--js "{{ src_dir }}/js/core/**.mjs" \
+		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
+		--js "{{ src_dir }}/js/middleware/assets.url.mjs" \
+		--js "{{ src_dir }}/js/js-mate-poe-ce/**.mjs" \
+		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
+		--jscomp_off unknownDefines \
+		--assume_function_wrapper \
+		--compilation_level ADVANCED \
+		--dependency_mode PRUNE \
+		--entry_point "{{ src_dir }}/js/js-mate-poe-ce/app.mjs" \
+		--browser_featureset_year 2019 \
+		--isolation_mode IIFE \
+		--module_resolution BROWSER \
+		--strict_mode_input \
+		--use_types_for_optimization \
+		--warning_level VERBOSE
+
+	just _build-js-header "{{ dist_dir }}/js-mate-poe.min.js"
+
+
+# CSS build task(s).
+@_build-scss:
+	just _info "Compiling CSS."
+
+	just _sassc "{{ src_dir }}/scss/js-mate-poe-ce.scss" \
+		"{{ tmp_dir }}/js-mate-poe-ce.css"
+	just _sassc "{{ src_dir }}/scss/demo.scss" \
+		"{{ demo_dir }}/assets/demo.css"
+	just _sassc "{{ src_dir }}/scss/director.scss" \
+		"{{ demo_dir }}/assets/director.css"
+
+	just _build-js-css
+
+
+# Print build success message (with elapsed time).
+_build-success:
+	#!/usr/bin/env bash
+
+	if [ ! -f "{{ tmp_dir }}/build.time" ]; then
+		just _success "Build complete!"
+		exit 0
+	fi
+
+	declare -i _then
+	declare -i _now
+	declare -i _elapsed
+	_then=$( cat "{{ tmp_dir }}/build.time" )
+	_now=$( date +%s )
+	_elapsed=$_now-$_then
+
+	rm "{{ tmp_dir }}/build.time"
+	echo ""
+	just _success "Built in $_elapsed seconds!"
+
+
+
+##     ##
+# TOOLS #
+##     ##
+
+# CSSO.
+@_csso IN OUT:
+	csso -i "{{ IN }}" -o "{{ OUT }}"
+
+
+# Eslint.
+@_eslint:
+	just _info "Linting Javascript."
+	eslint \
+		--color \
+		--resolve-plugins-relative-to "/usr/lib/node_modules" \
+		"{{ src_dir }}/js"/**/*.mjs
+
+
+# Eslint Fix.
+@_eslint-fix:
+	just _info "Fixing Javascript."
+	eslint \
+		--color \
+		--resolve-plugins-relative-to "/usr/lib/node_modules" \
+		--fix \
+		"{{ src_dir }}/js"/**/*.mjs || true
+
+
+# SASSC.
+@_sassc IN OUT:
+	sassc --style=compressed "{{ IN }}" "{{ OUT }}"
+	just _csso "{{ OUT }}" "{{ OUT }}"
 
 
 
@@ -243,116 +330,59 @@ test_dir  := base_dir + "/test"
 # OTHER #
 ##     ##
 
-# Compress files with Brotli.
-@_brotli DIR EXT:
-	just _info "Generating static Brotli files."
-
-	[ -d "{{ DIR }}" ] || just _die "Invalid directory: {{ DIR }}"
-	[ ! -z "{{ EXT }}" ] || just _die "An extension is required."
-
-	# Remove existing Brotli files.
-	find "{{ DIR }}" -iname "*.{{ EXT }}.br" -type f -delete
-
-	# Encode!
-	find "{{ DIR }}" -iname "*.{{ EXT }}" -type f -print0 | xargs -0 brotli -q 11
+# Fix file/directory permissions.
+@_fix-chmod PATH:
+	[ ! -e "{{ PATH }}" ] || find "{{ PATH }}" -type f -exec chmod 0644 {} +
+	[ ! -e "{{ PATH }}" ] || find "{{ PATH }}" -type d -exec chmod 0755 {} +
 
 
-# Compress files with Gzip.
-@_gzip DIR EXT:
-	just _info "Generating static Gzip files."
-
-	[ -d "{{ DIR }}" ] || just _die "Invalid directory: {{ DIR }}"
-	[ ! -z "{{ EXT }}" ] || just _die "An extension is required."
-
-	# Remove existing Gzip files.
-	find "{{ DIR }}" -iname "*.{{ EXT }}.gz" -type f -delete
-
-	# Encode!
-	find "{{ DIR }}" -iname "*.{{ EXT }}" -type f -print0 | xargs -0 gzip -k -9
+# Fix file/directory ownership.
+@_fix-chown PATH:
+	[ ! -e "{{ PATH }}" ] || chown -R --reference="{{ justfile() }}" "{{ PATH }}"
 
 
-
-##           ##
-# DEPENENCIES #
-##           ##
-
-# Install system requirements.
-@_check_dependencies:
-	just _header "Starting Up"
-	just _info "Checking runtime dependencies."
-
-	# Make sure we have NPM.
-	[ $( command -v npm ) ] || just _die "NPM is required."
-
-	# Make sure we have wget.
-	[ $( command -v wget ) ] || just _die "Wget is required."
-
-	# Brotli.
-	[ $( command -v brotli ) ] || just _install-os "brotli"
-
-	# Gzip.
-	[ $( command -v gzip ) ] || just _install-os "gzip"
-
-	# SassC.
-	[ $( command -v sassc ) ] || just _install-os "sassc"
-
-	# Watchexec.
-	[ $( command -v watchexec ) ] || just _install-cargo "watchexec"
-
-	# The lightest possible Node check.
-	[ -d "{{ base_dir }}/node_modules" ] || npm i
+# Init.
+@_init: _only-docker
+	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
+	[ ! -d "{{ justfile_directory() }}/node_modules" ] || rm -rf "{{ justfile_directory() }}/node_modules"
+	[ ! -f "{{ justfile_directory() }}/package-lock.json" ] || rm "{{ justfile_directory() }}/package-lock.json"
+	just _build-js-chain
 
 
-# Install Apt application.
-@_install-apt THING:
-	just _header "Installing {{ THING }} via Apt"
-
-	[ $( command -v "apt-get" ) ] || just _die "apt-get is required to install {{ THING }}."
-
-	sudo apt-get update && sudo apt-get install {{ THING }} -y
-	[ $( command -v "{{ THING }}" ) ] || exit 1
-
-	just _success "{{ THING }} has been installed."
-
-
-# Install Homebrew application.
-@_install-brew THING:
-	just _header "Installing {{ THING }} via Homebrew"
-
-	[ $( command -v brew ) ] || just _die "Homebrew is required to install {{ THING }}."
-
-	brew install {{ THING }}
-	[ $( command -v "{{ THING }}" ) ] || exit 1
-
-	just _success "{{ THING }} has been installed."
-
-
-# Install Cargo application.
-@_install-cargo THING:
-	just _header "Installing {{ THING }} via Cargo"
-
-	# Cargo
-	[ $( command -v cargo ) ] || just _die "Cargo is required to install {{ THING }}."
-
-	cargo install {{ THING }} --force
-	[ $( command -v "{{ THING }}" ) ] || exit 1
-
-	just _success "{{ THING }} has been installed."
-
-
-# OS Install.
-_install-os THING:
+# Init for Testing.
+_init-test-chain: _only-docker
 	#!/usr/bin/env bash
-	if [ "linux" = "{{ os() }}" ]; then
-		just _install-apt "{{ THING }}"
-	elif [ "macos" = "{{ os() }}" ]; then
-		just _install-brew "{{ THING }}"
-	else
-		just _error "Unsupported operating system."
-		exit 1
-	fi
 
-	[ $( command -v {{ THING }} ) ] || exit 1
+	[ ! -f "{{ tmp_dir }}/.test-chained" ] || exit 0
+
+	just _info "Installing dependencies for tests."
+
+	# Install NPM crap.
+	npm i -g \
+		chai \
+		karma \
+		karma-chai \
+		karma-chrome-launcher \
+		karma-mocha \
+		mocha
+
+	apt-get update -qq
+	apt-fast install --no-install-recommends -y \
+		chromium \
+		chromium-shell
+
+	touch "{{ tmp_dir }}/.test-chained"
+
+
+
+# Tasks Not Allowed Inside Docker.
+@_no-docker:
+	[ ! -f "{{ docker_sig }}" ] || just _die "This task is meant to be run on a local machine."
+
+
+# Only Allowed Inside Docker.
+@_only-docker:
+	[ -f "{{ docker_sig }}" ] || just _die "This task is meant to be run *inside* a container."
 
 
 
@@ -381,6 +411,6 @@ _install-os THING:
 @_success COMMENT:
 	echo "\e[92;1m[Success] \e[0;1m{{ COMMENT }}\e[0m"
 
-# Fancy bubble notification for Linux.
-@_notify COMMENT:
-	[ ! $( command -v "notify-send" ) ] || notify-send -i "{{ src_dir }}/img/icon.png" --category dev.validate -h int:transient:1 -t 3000 "JS Mate Poe" "{{ COMMENT }}"
+# Confirm a yes/no response.
+@_confirm COMMENT:
+	whiptail --title "Confirmation Required" --yesno "{{ COMMENT }}" 0 0 10

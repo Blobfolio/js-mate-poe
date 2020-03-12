@@ -2,8 +2,8 @@
  * @file JS Mate Poe: Vue Demo: Director
  */
 
-/* global Vue */
 /* eslint-disable quote-props */
+/* global Vue */
 import {
 	Animation,
 	AnimationFlag,
@@ -20,6 +20,7 @@ import {
 import { universeForBrowser } from '../middleware/universe.browser.mjs';
 import { PoeFrame } from './poe_frame.mjs';
 import { PoeIcon } from './poe_icon.mjs';
+/* eslint-disable-next-line */
 import { VueApp } from './vue.mjs';
 
 
