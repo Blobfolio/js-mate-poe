@@ -34,6 +34,8 @@ docker_sig := "/opt/righteous-sandbox.version"
 	just _header "Building JS Mate Poe!"
 	echo ""
 
+	[ -z "{{ RELEASE }}" ] || just test
+
 	just _build-scss
 	just _build-js
 
@@ -50,12 +52,14 @@ docker_sig := "/opt/righteous-sandbox.version"
 
 
 # Run unit tests.
-@test: _no-docker
+@test: _init-test-chain
 	just _header "Unit tests!"
+
 	karma start \
 		--single-run \
-		--browsers ChromeHeadless \
+		--browsers Other \
 		"{{ justfile_directory() }}/karma.conf.js"
+
 	just _notify "Unit tests are looking good!"
 
 
@@ -351,6 +355,33 @@ _build-success:
 	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
 	[ ! -d "{{ justfile_directory() }}/node_modules" ] || rm -rf "{{ justfile_directory() }}/node_modules"
 	[ ! -f "{{ justfile_directory() }}/package-lock.json" ] || rm "{{ justfile_directory() }}/package-lock.json"
+	just _build-js-chain
+
+
+# Init for Testing.
+_init-test-chain: _only-docker
+	#!/usr/bin/env bash
+
+	[ ! -f "{{ tmp_dir }}/.test-chained" ] || exit 0
+
+	just _info "Installing dependencies for tests."
+
+	# Install NPM crap.
+	npm i -g \
+		chai \
+		karma \
+		karma-chai \
+		karma-chrome-launcher \
+		karma-mocha \
+		mocha
+
+	apt-get update -qq
+	apt-fast install --no-install-recommends -y \
+		chromium \
+		chromium-shell
+
+	touch "{{ tmp_dir }}/.test-chained"
+
 
 
 # Tasks Not Allowed Inside Docker.
