@@ -72,7 +72,6 @@ docker_sig := "/opt/righteous-sandbox.version"
 		--no-shell \
 		--watch "{{ src_dir }}" \
 		--debounce 1000 \
-		--ignore "{{ src_dir }}/js/js-mate-poe/css.url.mjs" \
 		--ignore "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs" \
 		--exts mjs,scss -- just build
 
@@ -168,20 +167,12 @@ docker_sig := "/opt/righteous-sandbox.version"
 	just _eslint
 
 	just _build-js-chain
-	just _build-js-mate-poe
 	just _build-js-mate-poe-ce
 	just _build-demo
 
 
 # Build a JS module from the CSS.
 @_build-js-css:
-	# JS-Mate-Poe.
-	[ -f "{{ tmp_dir }}/js-mate-poe.css" ] || just _die "Missing js-mate-poe.css."
-	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
-	echo "export const CssUrl = URL.createObjectURL(new Blob(['$( cat "{{ tmp_dir }}/js-mate-poe.css" )'], {type: 'text/css'}));" >> "{{ tmp_dir }}/css.tmp"
-	mv "{{ tmp_dir }}/css.tmp" "{{ src_dir }}/js/js-mate-poe/css.url.mjs"
-	just _fix-chown "{{ src_dir }}/js/js-mate-poe/css.url.mjs"
-
 	# JS-Mate-Poe CE.
 	[ -f "{{ tmp_dir }}/js-mate-poe-ce.css" ] || just _die "Missing js-mate-poe-ce.css."
 	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
@@ -204,35 +195,6 @@ docker_sig := "/opt/righteous-sandbox.version"
 	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
 
 
-# Compile JS Mate Poe.
-@_build-js-mate-poe:
-	just _info "Compiling JS Mate Poe"
-
-	google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--language_out STABLE \
-		--js "{{ src_dir }}/js/core.mjs" \
-		--js "{{ src_dir }}/js/core/**.mjs" \
-		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
-		--js "{{ src_dir }}/js/middleware/assets.url.mjs" \
-		--js "{{ src_dir }}/js/js-mate-poe/**.mjs" \
-		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
-		--jscomp_off unknownDefines \
-		--assume_function_wrapper \
-		--compilation_level ADVANCED \
-		--dependency_mode PRUNE \
-		--entry_point "{{ src_dir }}/js/js-mate-poe/app.mjs" \
-		--browser_featureset_year 2019 \
-		--isolation_mode IIFE \
-		--module_resolution BROWSER \
-		--strict_mode_input \
-		--use_types_for_optimization \
-		--warning_level VERBOSE
-
-	just _build-js-header "{{ dist_dir }}/js-mate-poe.min.js"
-
-
 # Compile JS Mate Poe CE.
 @_build-js-mate-poe-ce:
 	just _info "Compiling JS Mate Poe: CE"
@@ -246,7 +208,7 @@ docker_sig := "/opt/righteous-sandbox.version"
 		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
 		--js "{{ src_dir }}/js/middleware/assets.url.mjs" \
 		--js "{{ src_dir }}/js/js-mate-poe-ce/**.mjs" \
-		--js_output_file "{{ dist_dir }}/js-mate-poe-ce.min.js" \
+		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
 		--jscomp_off unknownDefines \
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
@@ -259,15 +221,13 @@ docker_sig := "/opt/righteous-sandbox.version"
 		--use_types_for_optimization \
 		--warning_level VERBOSE
 
-	just _build-js-header "{{ dist_dir }}/js-mate-poe-ce.min.js"
+	just _build-js-header "{{ dist_dir }}/js-mate-poe.min.js"
 
 
 # CSS build task(s).
 @_build-scss:
 	just _info "Compiling CSS."
 
-	just _sassc "{{ src_dir }}/scss/js-mate-poe.scss" \
-		"{{ tmp_dir }}/js-mate-poe.css"
 	just _sassc "{{ src_dir }}/scss/js-mate-poe-ce.scss" \
 		"{{ tmp_dir }}/js-mate-poe-ce.css"
 	just _sassc "{{ src_dir }}/scss/demo.scss" \
