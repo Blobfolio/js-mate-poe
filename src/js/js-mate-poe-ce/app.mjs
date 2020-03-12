@@ -3,12 +3,14 @@
  */
 
 import {
+	ImgSprite,
 	LogMsg,
 	LogKind,
 	MateFlag,
 	MateState,
 	Position,
 	Sound,
+	SpriteInfo,
 	Universe
 } from '../core.mjs';
 import { universeForBrowser } from '../middleware/universe.browser.mjs';
@@ -42,11 +44,11 @@ const Poe = {
 	/** @private {number} */
 	_flags: PoeFlag.MakeNoise,
 
-	/** @private {string} */
-	_image: '',
-
 	/** @private {!Object<symbol, !PoeMateState>} */
 	_mates: {},
+
+	/** @private {string} */
+	_src: `data:image/png;base64,${ImgSprite}`,
 
 	/**
 	 * We need to store the mousemove event handler so we can detach it
@@ -78,6 +80,15 @@ const Poe = {
 	 */
 	get speed() {
 		return Universe.speed;
+	},
+
+	/**
+	 * Get the Image Source
+	 *
+	 * @return {string} Source.
+	 */
+	get src() {
+		return Poe._src;
 	},
 
 
@@ -143,6 +154,7 @@ const Poe = {
 		// Set up the CSS.
 		await Promise.all([
 			Poe.initEvents(),
+			Poe.initImage(),
 		]);
 
 		Universe.start();
@@ -236,6 +248,50 @@ const Poe = {
 		return Promise.resolve();
 	},
 
+	/**
+	 * Init Image
+	 *
+	 * We can produce a clearer sprite image for high-res displays using
+	 * the canvas.
+	 *
+	 * @return {!Promise} Promise.
+	 */
+	async initImage() {
+		if (1 !== window.devicePixelRatio && 0 === Poe._src.indexOf('data:')) {
+			/** @const {!HTMLCanvasElement} */
+			const canvas = /** @type {!HTMLCanvasElement} */ (document.createElement('CANVAS'));
+			canvas.width = 2 * SpriteInfo.Width;
+			canvas.height = 2 * SpriteInfo.Height;
+
+			/** @const {!CanvasRenderingContext2D} */
+			const ctx = /** @type {!CanvasRenderingContext2D} */ (canvas.getContext('2d'));
+			ctx.imageSmoothingEnabled = false;
+
+			/** @const {!Image} */
+			const image = new Image();
+
+			/** @const {!Promise} */
+			const imagePromise = new Promise((resolve, reject) => {
+				image.onload = resolve;
+				image.onerror = reject;
+			});
+
+			// Load the image.
+			image.src = Poe._src;
+			await imagePromise;
+
+			// Draw it.
+			ctx.drawImage(image, 0, 0, 2 * SpriteInfo.Width, 2 * SpriteInfo.Height);
+
+			// Get the blob.
+			Poe._src = URL.createObjectURL(await new Promise((resolve) => {
+				canvas.toBlob(blob => resolve(blob));
+			}));
+		}
+
+		return Promise.resolve();
+	},
+
 
 
 	// -----------------------------------------------------------------
@@ -323,33 +379,7 @@ const Poe = {
 			}
 
 			// Element state.
-			const props = {
-				flags: 0,
-				frame: state[i].frame,
-				x: state[i].x,
-				y: state[i].y,
-			};
-
-			if (Poe._mates[state[i].id].primary) {
-				props.flags |= PoeFlag.MatePrimary;
-			}
-			if (! (MateFlag.Disabled & state[i].flags)) {
-				props.flags |= PoeFlag.MateEnabled;
-			}
-			else if (MateFlag.Dragging & state[i].flags) {
-				props.flags |= PoeFlag.Dragging;
-			}
-			else if (MateFlag.Background & state[i].flags) {
-				props.flags |= PoeFlag.MateBackground;
-			}
-			if (MateFlag.FlippedX & state[i].flags) {
-				props.flags |= PoeFlag.MateFlippedX;
-			}
-			if (MateFlag.FlippedY & state[i].flags) {
-				props.flags |= PoeFlag.MateFlippedY;
-			}
-
-			Poe._mates[state[i].id].el.state = props;
+			Poe._mates[state[i].id].el.state = this.paintProps(state[i]);
 
 			// Lastly, play a sound.
 			if (
@@ -364,6 +394,42 @@ const Poe = {
 				Poe._mates[state[i].id].sound = Sound.None;
 			}
 		}
+	},
+
+	/**
+	 * Paint Props
+	 *
+	 * @param {!Object} state State.
+	 * @return {!Object} Props.
+	 */
+	paintProps(state) {
+		const props = {
+			flags: 0,
+			frame: state.frame,
+			x: state.x,
+			y: state.y,
+		};
+
+		if (Poe._mates[state.id].primary) {
+			props.flags |= PoeFlag.MatePrimary;
+		}
+		if (! (MateFlag.Disabled & state.flags)) {
+			props.flags |= PoeFlag.MateEnabled;
+		}
+		else if (MateFlag.Dragging & state.flags) {
+			props.flags |= PoeFlag.Dragging;
+		}
+		else if (MateFlag.Background & state.flags) {
+			props.flags |= PoeFlag.MateBackground;
+		}
+		if (MateFlag.FlippedX & state.flags) {
+			props.flags |= PoeFlag.MateFlippedX;
+		}
+		if (MateFlag.FlippedY & state.flags) {
+			props.flags |= PoeFlag.MateFlippedY;
+		}
+
+		return props;
 	},
 
 	/**
