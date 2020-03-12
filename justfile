@@ -28,13 +28,13 @@ docker_sig := "/opt/righteous-sandbox.version"
 	# Clear the screen so we can see what's relevant.
 	clear
 
+	[ -z "{{ RELEASE }}" ] || just test
+
 	# Keep track of time.
 	echo "$( date +%s )" > "{{ tmp_dir }}/build.time"
 
 	just _header "Building JS Mate Poe!"
 	echo ""
-
-	[ -z "{{ RELEASE }}" ] || just test
 
 	just _build-scss
 	just _build-js
