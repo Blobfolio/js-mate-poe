@@ -9,16 +9,15 @@
 
 // The main sprite.
 #p {
-	box-sizing: border-box;
 	position: fixed;
 	top: 0;
 	left: 0;
 
 	display: block;
-	margin: 0;
-	padding: 0;
 	width: $tile_size;
 	height: $tile_size;
+	margin: 0;
+	padding: 0;
 
 	cursor: grab;
 	z-index: 100000;
@@ -41,7 +40,7 @@
 }
 
 // The image.
-#p-img {
+#i {
 	position: relative;
 	display: block;
 	width: $width;

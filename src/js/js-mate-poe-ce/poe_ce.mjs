@@ -184,7 +184,7 @@ export class PoeCe extends HTMLElement {
 			wrapper.id = 'p';
 
 			img = document.createElement('img');
-			img.id = 'p-img';
+			img.id = 'i';
 			img.src = `data:image/png;base64,${ImgSprite}`;
 
 			wrapper.appendChild(img);
@@ -197,7 +197,7 @@ export class PoeCe extends HTMLElement {
 		}
 		else {
 			wrapper = this.shadowRoot.getElementById('p');
-			img = this.shadowRoot.getElementById('p-img');
+			img = this.shadowRoot.getElementById('i');
 		}
 
 		// Flags control all the classes.
@@ -256,7 +256,7 @@ export class PoeCe extends HTMLElement {
 		ctx.drawImage(image, 0, 0, 2 * SpriteInfo.Width, 2 * SpriteInfo.Height);
 
 		// Get the blob.
-		this.shadowRoot.getElementById('p-img').src = URL.createObjectURL(await new Promise((resolve) => {
+		this.shadowRoot.getElementById('i').src = URL.createObjectURL(await new Promise((resolve) => {
 			canvas.toBlob(blob => resolve(blob));
 		}));
 	}
