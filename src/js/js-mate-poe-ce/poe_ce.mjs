@@ -176,7 +176,7 @@ export class PoeCe extends HTMLElement {
 	 * Set State
 	 *
 	 * @param {!Object} state State.
-	 * @return {boolean} True.
+	 * @return {void} Nothing.
 	 */
 	set state(state) {
 		let changed = false;
@@ -208,7 +208,5 @@ export class PoeCe extends HTMLElement {
 		if (changed) {
 			this.render();
 		}
-
-		return true;
 	}
 }

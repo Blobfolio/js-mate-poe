@@ -43,7 +43,7 @@ docker_sig := "/opt/righteous-sandbox.version"
 	find "{{ dist_dir }}" \( -name "*.br" -o -name '*.gz' \) -type f -delete
 
 	# If releasing, redo Gzip/Brotli files.
-	[ -z "{{ RELEASE }}" ] || just _build-encode
+	[ -z "{{ RELEASE }}" ] || channelz -p "{{ dist_dir }}"
 
 	just _fix-chmod "{{ dist_dir }}"
 	just _fix-chown "{{ dist_dir }}"
@@ -168,30 +168,6 @@ release VERSION="": _only-docker
 	just _build-js-header "{{ demo_dir }}/assets/director.min.js"
 
 
-# Run static encoding.
-@_build-encode:
-	# Tackle Brotli.
-	just _info "Encoding Brotli."
-	find "{{ dist_dir }}" \( \
-		-name '*.css' -o \
-		-name '*.html' -o \
-		-name '*.js' \
-		\) \
-		-type f \
-		-print0 | \
-		parallel -0 brotli -q 11
-
-	# Tackle Gzip.
-	just _info "Encoding Gzip."
-	find "{{ dist_dir }}" \( \
-		-name '*.css' -o \
-		-name '*.html' -o \
-		-name '*.js' \
-		\) \
-		-type f \
-		-print0 | \
-		parallel -0 gzip -k -9
-
 
 # JS build task(s).
 @_build-js:
@@ -206,7 +182,7 @@ release VERSION="": _only-docker
 @_build-js-css:
 	# JS-Mate-Poe CE.
 	[ -f "{{ tmp_dir }}/js-mate-poe-ce.css" ] || just _die "Missing js-mate-poe-ce.css."
-	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
+	cp "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
 	echo "export const PoeCss = '$( cat "{{ tmp_dir }}/js-mate-poe-ce.css" )';" >> "{{ tmp_dir }}/css.tmp"
 	mv "{{ tmp_dir }}/css.tmp" "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
 	just _fix-chown "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"

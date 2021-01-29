@@ -152,10 +152,7 @@ const Poe = {
 		}
 
 		// Set up the CSS.
-		await Promise.all([
-			Poe.initEvents(),
-			Poe.initImage(),
-		]);
+		await Poe.initEvents();
 
 		Universe.start();
 		requestAnimationFrame(Poe.tick);
@@ -244,50 +241,6 @@ const Poe = {
 			Poe.dragEnd,
 			{ passive: true }
 		);
-
-		return Promise.resolve();
-	},
-
-	/**
-	 * Init Image
-	 *
-	 * We can produce a clearer sprite image for high-res displays using
-	 * the canvas.
-	 *
-	 * @return {!Promise} Promise.
-	 */
-	async initImage() {
-		if (1 !== window.devicePixelRatio && 0 === Poe._src.indexOf('data:')) {
-			/** @const {!HTMLCanvasElement} */
-			const canvas = /** @type {!HTMLCanvasElement} */ (document.createElement('CANVAS'));
-			canvas.width = 2 * SpriteInfo.Width;
-			canvas.height = 2 * SpriteInfo.Height;
-
-			/** @const {!CanvasRenderingContext2D} */
-			const ctx = /** @type {!CanvasRenderingContext2D} */ (canvas.getContext('2d'));
-			ctx.imageSmoothingEnabled = false;
-
-			/** @const {!Image} */
-			const image = new Image();
-
-			/** @const {!Promise} */
-			const imagePromise = new Promise((resolve, reject) => {
-				image.onload = resolve;
-				image.onerror = reject;
-			});
-
-			// Load the image.
-			image.src = Poe._src;
-			await imagePromise;
-
-			// Draw it.
-			ctx.drawImage(image, 0, 0, 2 * SpriteInfo.Width, 2 * SpriteInfo.Height);
-
-			// Get the blob.
-			Poe._src = URL.createObjectURL(await new Promise((resolve) => {
-				canvas.toBlob(blob => resolve(blob));
-			}));
-		}
 
 		return Promise.resolve();
 	},
