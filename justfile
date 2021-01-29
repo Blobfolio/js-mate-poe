@@ -206,7 +206,7 @@ release VERSION="": _only-docker
 @_build-js-css:
 	# JS-Mate-Poe CE.
 	[ -f "{{ tmp_dir }}/js-mate-poe-ce.css" ] || just _die "Missing js-mate-poe-ce.css."
-	cp -a "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
+	cp "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
 	echo "export const PoeCss = '$( cat "{{ tmp_dir }}/js-mate-poe-ce.css" )';" >> "{{ tmp_dir }}/css.tmp"
 	mv "{{ tmp_dir }}/css.tmp" "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
 	just _fix-chown "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
