@@ -10,7 +10,6 @@ import {
 	MateState,
 	Position,
 	Sound,
-	SpriteInfo,
 	Universe
 } from '../core.mjs';
 import { universeForBrowser } from '../middleware/universe.browser.mjs';
