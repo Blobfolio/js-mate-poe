@@ -131,7 +131,7 @@ release VERSION="": _only-docker
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
 		--entry_point "{{ src_dir }}/js/demo/app-demo.mjs" \
-		--browser_featureset_year 2019 \
+		--browser_featureset_year 2021 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
 		--strict_mode_input \
@@ -154,7 +154,7 @@ release VERSION="": _only-docker
 		--assume_function_wrapper \
 		--compilation_level ADVANCED \
 		--entry_point "{{ src_dir }}/js/demo/app-director.mjs" \
-		--browser_featureset_year 2019 \
+		--browser_featureset_year 2021 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
 		--strict_mode_input \
@@ -218,7 +218,7 @@ release VERSION="": _only-docker
 		--compilation_level ADVANCED \
 		--dependency_mode PRUNE \
 		--entry_point "{{ src_dir }}/js/js-mate-poe-ce/app.mjs" \
-		--browser_featureset_year 2019 \
+		--browser_featureset_year 2021 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
 		--strict_mode_input \

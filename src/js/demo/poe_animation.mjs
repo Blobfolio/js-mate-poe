@@ -1,6 +1,5 @@
 /**
  * @file Component: Poe Animation
- *
  * @todo Handle flipping.
  */
 
