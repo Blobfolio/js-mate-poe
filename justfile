@@ -119,7 +119,6 @@ release VERSION="": _only-docker
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--language_out STABLE \
 		--externs "{{ src_dir }}/js/demo/externs.js" \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
@@ -143,7 +142,6 @@ release VERSION="": _only-docker
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--language_out STABLE \
 		--externs "{{ src_dir }}/js/demo/externs.js" \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
@@ -209,7 +207,6 @@ release VERSION="": _only-docker
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--language_out STABLE \
 		--js "{{ src_dir }}/js/core.mjs" \
 		--js "{{ src_dir }}/js/core/**.mjs" \
 		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
