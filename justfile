@@ -232,11 +232,11 @@ release VERSION="": _only-docker
 @_build-scss:
 	just _info "Compiling CSS."
 
-	just _sassc "{{ src_dir }}/scss/js-mate-poe-ce.scss" \
+	just _scss "{{ src_dir }}/scss/js-mate-poe-ce.scss" \
 		"{{ tmp_dir }}/js-mate-poe-ce.css"
-	just _sassc "{{ src_dir }}/scss/demo.scss" \
+	just _scss "{{ src_dir }}/scss/demo.scss" \
 		"{{ demo_dir }}/assets/demo.css"
-	just _sassc "{{ src_dir }}/scss/director.scss" \
+	just _scss "{{ src_dir }}/scss/director.scss" \
 		"{{ demo_dir }}/assets/director.css"
 
 	just _build-js-css
@@ -268,10 +268,6 @@ _build-success:
 # TOOLS #
 ##     ##
 
-# CSSO.
-@_csso IN OUT:
-	csso -i "{{ IN }}" -o "{{ OUT }}"
-
 
 # Eslint.
 @_eslint:
@@ -292,10 +288,9 @@ _build-success:
 		"{{ src_dir }}/js"/**/*.mjs || true
 
 
-# SASSC.
-@_sassc IN OUT:
-	sassc --style=compressed "{{ IN }}" "{{ OUT }}"
-	just _csso "{{ OUT }}" "{{ OUT }}"
+# SCSS.
+@_scss IN OUT:
+	guff -i "{{ IN }}" -o "{{ OUT }}"
 
 
 
