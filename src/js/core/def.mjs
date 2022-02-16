@@ -156,7 +156,7 @@ export const LogMsg = {
 	WarnAudio: 'Hint: try clicking Poe with your mouse.',
 	Name: 'JS Mate Poe',
 	URL: 'https://github.com/Blobfolio/js-mate-poe/',
-	Version: '1.3.3',
+	Version: '1.3.4',
 };
 
 /**
