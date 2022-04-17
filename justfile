@@ -67,6 +67,7 @@ release VERSION="": _only-docker
 			# Patch the version!
 			jq --arg _version "$_version" '.version = $_version' "{{ justfile_directory() }}/package.json" > "{{ tmp_dir }}/package.json"
 			mv "{{ tmp_dir }}/package.json" "{{ justfile_directory() }}/package.json"
+			just _fix-chown "{{ justfile_directory() }}/package.json"
 			sd -s "Version: '${_now}'" "Version: '${_version}'" "{{ src_dir }}/js/core/def.mjs"
 			sd -s "@version ${_now}" "@version ${_version}" "{{ src_dir }}/skel/header.min.js"
 		fi
