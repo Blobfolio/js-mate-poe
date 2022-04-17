@@ -219,7 +219,7 @@ release VERSION="": _only-docker
 		--compilation_level ADVANCED \
 		--dependency_mode PRUNE \
 		--entry_point "{{ src_dir }}/js/js-mate-poe-ce/app.mjs" \
-		--browser_featureset_year 2021 \
+		--browser_featureset_year 2022 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
 		--strict_mode_input \
