@@ -18,7 +18,7 @@ A compact, dependency-free Javascript implementation of the beloved 16-bit Scree
 &nbsp;
 ## Features
 
-There have been dozens of ports of Screen Mate Poe over the past 23 years, including several browser-based implements such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — *ancient* in web years! — and either rely on bloated frameworks like jQuery or use outdated animation techniques like `setTimeout()`.
+There have been dozens of ports of Screen Mate Poe over the past 23 years, including several browser-based implementations such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — *ancient* in web years! — and either rely on bloated frameworks like jQuery or use outdated animation techniques like `setTimeout()`.
 
 JS Mate Poe is a web-first, self-contained implementation written in vanilla Javascript. Everything it needs — graphics, sounds, styles — are embedded in the [main script](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/js-mate-poe.min.js), making installation a breeze. It takes advantage of all of the latest and greatest [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript) goodies, including `requestAnimationFrame()` to maximize playback framerate while keeping resource requirements to a minimum.
 
