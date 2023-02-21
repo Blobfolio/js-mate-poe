@@ -26,9 +26,9 @@ The JS Mate Poe script has also been heavily optimized using [Google Closure Com
 
 | Encoding | Size |
 | -------- | ---- |
-| None | 96,514 Bytes |
-| Gzip | 53,592 Bytes |
-| Brotli | 52,227 Bytes |
+| None | 95,464 Bytes |
+| Gzip | 52,709 Bytes |
+| Brotli | 51,493 Bytes |
 
 The [latest release](https://github.com/Blobfolio/js-mate-poe/releases/latest) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
 
@@ -51,7 +51,7 @@ Adding the screen mate to your web page is very easy. All you need to do is down
 </script>
 ```
 
-If your web page has a lot going on, you might want to wait to trigger Poe's entrance until everything has loaded.
+If your web page has a lot going on, you might want to wait to trigger Poe's entrance until everything else has finished loading.
 
 ```js
 window.addEventListener('load', Poe.start, { once: true });
