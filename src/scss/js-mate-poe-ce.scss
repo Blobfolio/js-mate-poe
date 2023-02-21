@@ -56,5 +56,5 @@
 	$x: (0 - $tile_size) * ($frame % $tiles_x);
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
 
-	.f#{$frame} { transform: translate3d($x, $y, 0); }
+	.f#{u8ToHex($frame)} { transform: translate3d($x, $y, 0); }
 }

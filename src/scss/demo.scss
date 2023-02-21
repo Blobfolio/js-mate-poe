@@ -240,18 +240,18 @@ body {
 	$y: (0 - $tile_size) * floor($frame / $tiles_x);
 
 	@if $x != 0 and $y != 0 {
-		.f#{$frame} { background-position: $x $y; }
+		.f#{u8ToHex($frame)} { background-position: $x $y; }
 	} @else if $x != 0 {
-		.f#{$frame} { background-position-x: $x; }
+		.f#{u8ToHex($frame)} { background-position-x: $x; }
 	} @else if $y != 0 {
-		.f#{$frame} { background-position-y: $y; }
+		.f#{u8ToHex($frame)} { background-position-y: $y; }
 	}
 }
 
 // Style blank frames so it is more obvious they exist.
-.f173,
-.f174,
-.f175 {
+.f#{u8ToHex(173)},
+.f#{u8ToHex(174)},
+.f#{u8ToHex(175)} {
 	position: relative;
 	background-image: none;
 

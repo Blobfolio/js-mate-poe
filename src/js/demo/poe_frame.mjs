@@ -66,10 +66,10 @@ export const PoeFrame = {
 
 		// We need to add some classes.
 		if ('string' === typeof context['data']['staticClass']) {
-			context['data']['staticClass'] += ` frame f${context['props']['frame']}`;
+			context['data']['staticClass'] += ` frame f${context['props']['frame'].toString(16)}`;
 		}
 		else {
-			context['data']['staticClass'] = `frame f${context['props']['frame']}`;
+			context['data']['staticClass'] = `frame f${context['props']['frame'].toString(16)}`;
 		}
 
 		// Flips.
