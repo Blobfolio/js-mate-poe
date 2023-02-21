@@ -5,7 +5,7 @@
 // Import the base.
 @import "_base";
 
-
+:host { display: contents; }
 
 // The main sprite.
 #p {
