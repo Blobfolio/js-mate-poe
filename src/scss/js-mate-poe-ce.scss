@@ -5,7 +5,10 @@
 // Import the base.
 @import "_base";
 
-:host { display: contents; }
+:host {
+	display: contents;
+	image-rendering: pixelated;
+}
 
 // The main sprite.
 #p {
