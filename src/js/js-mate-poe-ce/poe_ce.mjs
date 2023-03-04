@@ -166,7 +166,9 @@ export class PoeCe extends HTMLElement {
 		}
 
 		// Set the image class.
-		classes = `f${this._frame.toString(16)}`;
+		let r = Math.floor(this._frame / 16).toString(16);
+		let c = (this._frame % 16).toString(16);
+		classes = `r${r} c${c}`;
 		if ((img.className || '') !== classes) {
 			img.className = classes;
 		}
