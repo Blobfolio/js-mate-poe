@@ -1,0 +1,107 @@
+/**
+ * RS Mate Poe: CSS
+ */
+
+// The size of a single (square) sprite tile.
+$tile_size: 40px;
+
+// The sprite image width.
+$width: 640px;
+
+// The sprite image height.
+$height: 440px;
+
+:host {
+	display: contents;
+	image-rendering: pixelated;
+}
+
+#p, #i {
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+// The wrapper/window.
+#p {
+	position: fixed;
+	top: 0;
+	left: 0;
+
+	width: $tile_size;
+	height: $tile_size;
+
+	cursor: grab;
+	z-index: 100000;
+	overflow: hidden;
+
+	opacity: 1;
+	transition: opacity .5s ease;
+	transform:
+		translate3d(var(--x, 0), var(--y, 0), 0)
+		var(--rx, rotateY(0deg))
+		var(--ry, rotateX(0deg));
+}
+
+// The image.
+#i {
+	width: $width;
+	height: $height;
+
+	transform: translate3d(var(--c, 0), var(--r, 0), 0);
+}
+
+// Disable mouse clicks for disabled sprites, child sprites, and the image
+// element.
+#p.child, #p.off, #i { pointer-events: none; }
+
+// Disabled sprite.
+#p.off { opacity: 0; }
+
+// Reverse the image across one or both planes.
+.rx { --rx: rotateY(180deg); }
+.ry { --ry: rotateX(180deg); }
+
+// Animation: Dragging.
+#p.a1 { cursor: grabbing; }
+
+// Animation: SneezeShadow.
+#p.a2 { z-index: 99999; }
+
+// Animation: Abduction.
+#p.a3 { animation: a3 0.25s 4.2s infinite; }
+
+// Color-shift the sprite to make the abduction more dramatic.
+@keyframes a3 {
+	from { filter: saturate(5); }
+	to { filter: saturate(5) hue-rotate(359deg); }
+}
+
+// Frame row offsets.
+.r1 { --r: -40px; }
+.r2 { --r: -80px; }
+.r3 { --r: -120px; }
+.r4 { --r: -160px; }
+.r5 { --r: -200px; }
+.r6 { --r: -240px; }
+.r7 { --r: -280px; }
+.r8 { --r: -320px; }
+.r9 { --r: -360px; }
+.ra { --r: -400px; }
+
+// Frame column offsets.
+.c1 { --c: -40px; }
+.c2 { --c: -80px; }
+.c3 { --c: -120px; }
+.c4 { --c: -160px; }
+.c5 { --c: -200px; }
+.c6 { --c: -240px; }
+.c7 { --c: -280px; }
+.c8 { --c: -320px; }
+.c9 { --c: -360px; }
+.ca { --c: -400px; }
+.cb { --c: -440px; }
+.cc { --c: -480px; }
+.cd { --c: -520px; }
+.ce { --c: -560px; }
+.cf { --c: -600px; }

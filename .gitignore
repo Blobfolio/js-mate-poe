@@ -1,4 +1,7 @@
 **/*.br
 **/*.gz
-/node_modules/
-/package-lock.json
+/Cargo.lock
+/doc/
+/release/
+/skel/js/wasm/
+/target/

@@ -1,303 +1,225 @@
 ##
-# Taskrunner
+# Development Recipes
 #
-# This requires "just". See https://github.com/casey/just for more
-# details.
+# This justfile is intended to be run from inside a Docker sandbox:
+# https://github.com/Blobfolio/righteous-sandbox
 #
-# USAGE:
-#   just --list
-#   just <task>
+# docker run \
+#	--rm \
+#	-v "{{ invocation_directory() }}":/share \
+#	-it \
+#	--name "righteous_sandbox" \
+#	"righteous/sandbox:debian"
+#
+# Alternatively, you can just run cargo commands the usual way and ignore these
+# recipes.
 ##
 
-src_dir    := justfile_directory() + "/src"
-dist_dir   := justfile_directory() + "/dist"
-demo_dir   := dist_dir + "/demo"
-test_dir   := justfile_directory() + "/test"
-tmp_dir    := "/tmp"
+pkg_id      := "rs_mate_poe"
+pkg_name    := "RS Mate Poe"
 
-docker_sig := "/opt/righteous-sandbox.version"
+cargo_dir   := "/tmp/" + pkg_id + "-cargo"
+doc_dir     := justfile_directory() + "/doc"
+release_dir := justfile_directory() + "/release"
+skel_dir    := justfile_directory() + "/skel"
+wasm_dir    := release_dir + "/wasm"
 
 
 
-##          ##
-# MAIN TASKS #
-##          ##
+# Build.
+@build FEATURES="":
+	# Nuke any previous wasm output.
+	[ ! -d "{{ wasm_dir }}" ] || rm -rf "{{ wasm_dir }}"
+	[ ! -d "{{ skel_dir }}/js/wasm" ] || rm -rf "{{ skel_dir }}/js/wasm"
+	mkdir "{{ wasm_dir }}"
 
-# Build site!
-@build RELEASE="": _only-docker
-	# Clear the screen so we can see what's relevant.
-	clear
+	# Build One.
+	fyi print -p "Stage #1" "Compile wasm binary."
+	[ -z "{{ FEATURES }}" ] || cargo build \
+		--release \
+		--features "{{ FEATURES }}" \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+	[ ! -z "{{ FEATURES }}" ] || cargo build \
+		--release \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
 
-	[ -z "{{ RELEASE }}" ] || just test
+	# Build Two.
+	fyi print -p "Stage #2" "Run wasm-bindgen."
+	wasm-bindgen \
+		--out-dir "{{ skel_dir }}/js/wasm" \
+		--target web \
+		--no-typescript \
+		--omit-default-module-path \
+		--encode-into always \
+		--reference-types \
+		"{{ cargo_dir }}/wasm32-unknown-unknown/release/{{ pkg_id }}.wasm"
 
-	# Keep track of time.
-	echo "$( date +%s )" > "{{ tmp_dir }}/build.time"
+	# Build Three.
+	fyi print -p "Stage #3" "Run wasm-opt."
+	wasm-opt "{{ skel_dir }}/js/wasm/{{ pkg_id }}_bg.wasm" \
+		--enable-reference-types \
+		--enable-multivalue \
+		-O3 -Oz \
+		-o "{{ wasm_dir }}/js-mate-poe.wasm"
 
-	just _header "Building JS Mate Poe!"
-	echo ""
-
-	just _build-scss
+	# Build Four.
+	fyi print -p "Stage #4" "Compile and minify JS bootstrap."
 	just _build-js
 
-	# Clear old Gzip/Brotli files.
-	find "{{ dist_dir }}" \( -name "*.br" -o -name '*.gz' \) -type f -delete
-
-	# If releasing, redo Gzip/Brotli files.
-	[ -z "{{ RELEASE }}" ] || channelz -p "{{ dist_dir }}"
-
-	just _fix-chmod "{{ dist_dir }}"
-	just _fix-chown "{{ dist_dir }}"
-
-	just _build-success
+	# Done!
+	just _fix-chown "{{ release_dir }}"
+	just _fix-chown "{{ skel_dir }}"
+	fyi success "Done!"
 
 
-# Set version and rebuild.
-release VERSION="": _only-docker
-	#!/usr/bin/env bash
-
-	_version="{{ VERSION }}"
-	_now="$( just version )"
-	[ ! -z "${_version}" ] || _version=$_now
-
-	_regex="^[0-9]+\.[0-9]+\.[0-9]+$"
-	if [[ $_version =~ $_regex ]]; then
-		if [ "${_version}" != "${_now}" ]; then
-			just _confirm "Change the version from ${_now} to ${_version}?" || exit 1
-
-			# Patch the version!
-			jq --arg _version "$_version" '.version = $_version' "{{ justfile_directory() }}/package.json" > "{{ tmp_dir }}/package.json"
-			mv "{{ tmp_dir }}/package.json" "{{ justfile_directory() }}/package.json"
-			just _fix-chown "{{ justfile_directory() }}/package.json"
-			sd -s "Version: '${_now}'" "Version: '${_version}'" "{{ src_dir }}/js/core/def.mjs"
-			sd -s "@version ${_now}" "@version ${_version}" "{{ src_dir }}/skel/header.min.js"
-		fi
-
-		just _success "Version changed to ${_version}."
-		just build Y
-		exit
-	fi
-
-	just _error "Invalid version."
-	exit 1
-
-# Run unit tests.
-@test: _init-test-chain
-	just _header "Unit tests!"
-
-	karma start \
-		--single-run \
-		--browsers Other \
-		"{{ justfile_directory() }}/karma.conf.js"
-
-
-# Print version and exit.
-@version: _only-docker
-	cat package.json | jq '.version' | sd '"' ''
-
-
-# Watch for changes to JS files.
-@watch: _only-docker
-	just _header "Watching for Changes"
-
-	watchexec \
-		--postpone \
-		--no-shell \
-		--watch "{{ src_dir }}" \
-		--debounce 1000 \
-		--ignore "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs" \
-		--exts mjs,scss -- just build
-
-
-##        ##
-# BUILDING #
-##        ##
-
-# Compile JS Mate Poe Demo.
-@_build-demo:
-	just _info "Compiling JS Mate Poe Demo"
-
-	# The main demo.
-	google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--externs "{{ src_dir }}/js/demo/externs.js" \
-		--js "{{ src_dir }}/js/core.mjs" \
-		--js "{{ src_dir }}/js/core/**.mjs" \
-		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
-		--js "{{ src_dir }}/js/demo/**.mjs" \
-		--js "!{{ src_dir }}/js/demo/app-director.mjs" \
-		--js_output_file "{{ demo_dir }}/assets/demo.min.js" \
-		--jscomp_off globalThis \
-		--jscomp_off unknownDefines \
-		--assume_function_wrapper \
-		--compilation_level ADVANCED \
-		--entry_point "{{ src_dir }}/js/demo/app-demo.mjs" \
-		--browser_featureset_year 2021 \
-		--isolation_mode IIFE \
-		--module_resolution BROWSER \
-		--strict_mode_input \
-		--use_types_for_optimization \
-		--warning_level VERBOSE
-
-	# The director tool.
-	google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--externs "{{ src_dir }}/js/demo/externs.js" \
-		--js "{{ src_dir }}/js/core.mjs" \
-		--js "{{ src_dir }}/js/core/**.mjs" \
-		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
-		--js "{{ src_dir }}/js/demo/**.mjs" \
-		--js "!{{ src_dir }}/js/demo/app-demo.mjs" \
-		--js_output_file "{{ demo_dir }}/assets/director.min.js" \
-		--jscomp_off globalThis \
-		--jscomp_off unknownDefines \
-		--assume_function_wrapper \
-		--compilation_level ADVANCED \
-		--entry_point "{{ src_dir }}/js/demo/app-director.mjs" \
-		--browser_featureset_year 2021 \
-		--isolation_mode IIFE \
-		--module_resolution BROWSER \
-		--strict_mode_input \
-		--use_types_for_optimization \
-		--warning_level VERBOSE
-
-	# Fix up the outputs.
-	just _build-js-header "{{ demo_dir }}/assets/demo.min.js"
-	just _build-js-header "{{ demo_dir }}/assets/director.min.js"
-
-
-
-# JS build task(s).
+# Build JS.
 @_build-js:
-	just _eslint
+	# Make sure we ran build first.
+	[ -d "{{ wasm_dir }}" ] || fyi error -e 1 "Missing {{ wasm_dir }}"
+	[ -f "{{ skel_dir }}/js/wasm/{{ pkg_id }}.js" ] || fyi error -e 1 "Missing {{ pkg_id }}.js"
 
-	just _build-js-chain
-	just _build-js-mate-poe-ce
-	just _build-demo
+	# Remove this long-ass console message from the JS.
+	sd -s 'console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);' '' \
+		"{{ skel_dir }}/js/wasm/{{ pkg_id }}.js"
 
-
-# Build a JS module from the CSS.
-@_build-js-css:
-	# JS-Mate-Poe CE.
-	[ -f "{{ tmp_dir }}/js-mate-poe-ce.css" ] || just _die "Missing js-mate-poe-ce.css."
-	cp "{{ src_dir }}/skel/css.js-mate-poe.mjs" "{{ tmp_dir }}/css.tmp"
-	echo "export const PoeCss = '$( cat "{{ tmp_dir }}/js-mate-poe-ce.css" )';" >> "{{ tmp_dir }}/css.tmp"
-	mv "{{ tmp_dir }}/css.tmp" "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
-	just _fix-chown "{{ src_dir }}/js/js-mate-poe-ce/poe_css.mjs"
-
-
-# Pull JS Chain.
-@_build-js-chain:
-	# Vue JS.
-	[ -f "{{ demo_dir }}/assets/vue.min.js" ] || wget -q \
-		-O "{{ demo_dir }}/assets/vue.min.js" \
-		"https://raw.githubusercontent.com/vuejs/vue/dev/dist/vue.min.js"
-
-
-# Compile JS header.
-@_build-js-header OUT:
-	cat "{{ src_dir }}/skel/header.min.js" "{{ OUT }}" > "{{ src_dir }}/js/tmp.js"
-	mv "{{ src_dir }}/js/tmp.js" "{{ OUT }}"
-
-
-# Compile JS Mate Poe CE.
-@_build-js-mate-poe-ce:
-	just _info "Compiling JS Mate Poe: CE"
-
+	# Compile the JS module into a normal script.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--js "{{ src_dir }}/js/core.mjs" \
-		--js "{{ src_dir }}/js/core/**.mjs" \
-		--js "{{ src_dir }}/js/middleware/universe.browser.mjs" \
-		--js "{{ src_dir }}/js/middleware/assets.url.mjs" \
-		--js "{{ src_dir }}/js/js-mate-poe-ce/**.mjs" \
-		--js_output_file "{{ dist_dir }}/js-mate-poe.min.js" \
-		--jscomp_off unknownDefines \
-		--assume_function_wrapper \
-		--compilation_level ADVANCED \
-		--dependency_mode PRUNE \
-		--entry_point "{{ src_dir }}/js/js-mate-poe-ce/app.mjs" \
-		--browser_featureset_year 2022 \
+		--js "{{ skel_dir }}/js/wasm/{{ pkg_id }}.js" \
+		--js "{{ skel_dir }}/js/entrypoint.mjs" \
+		--js_output_file "/tmp/{{ pkg_id }}.js" \
+		--compilation_level WHITESPACE_ONLY \
+		--entry_point "{{ skel_dir }}/js/entrypoint.mjs" \
+		--browser_featureset_year 2021 \
 		--isolation_mode IIFE \
 		--module_resolution BROWSER \
-		--strict_mode_input \
-		--use_types_for_optimization \
 		--warning_level VERBOSE
 
-	just _build-js-header "{{ dist_dir }}/js-mate-poe.min.js"
+	# Compress the script.
+	cat "/tmp/{{ pkg_id }}.js" | \
+		terser -c ecma=2021,passes=25 -m -o "/tmp/{{ pkg_id }}.min.js"
+
+	# Add the version header.
+	cat \
+		"$( find "{{ cargo_dir }}/wasm32-unknown-unknown/release" -name 'header.js' -type f -printf "%T@ %p\n"  | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
+		"/tmp/{{ pkg_id }}.min.js" > "{{ wasm_dir }}/js-mate-poe.min.js"
+
+	channelz "{{ release_dir }}"
 
 
-# CSS build task(s).
-@_build-scss:
-	just _info "Compiling CSS."
+# Clean Cargo crap.
+@clean:
+	# Most things go here.
+	[ ! -d "{{ cargo_dir }}" ] || rm -rf "{{ cargo_dir }}"
 
-	just _scss "{{ src_dir }}/scss/js-mate-poe-ce.scss" \
-		"{{ tmp_dir }}/js-mate-poe-ce.css"
-	just _scss "{{ src_dir }}/scss/demo.scss" \
-		"{{ demo_dir }}/assets/demo.css"
-	just _scss "{{ src_dir }}/scss/director.scss" \
-		"{{ demo_dir }}/assets/director.css"
+	# But some Cargo apps place shit in subdirectories even if
+	# they place *other* shit in the designated target dir. Haha.
+	[ ! -d "{{ justfile_directory() }}/target" ] || rm -rf "{{ justfile_directory() }}/target"
 
-	just _build-js-css
+	cargo update -w
 
 
-# Print build success message (with elapsed time).
-_build-success:
+# Clippy.
+@clippy:
+	clear
+
+	fyi task "Features: none (default)"
+	RUSTFLAGS="-D warnings" cargo clippy \
+		--release \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+
+	fyi task "Features: director"
+	RUSTFLAGS="-D warnings" cargo clippy \
+		--release \
+		--features director \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+
+	fyi task "Features: flac"
+	RUSTFLAGS="-D warnings" cargo clippy \
+		--release \
+		--features flac \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+
+
+# Generate CREDITS.
+@credits:
+	cargo bashman --no-bash --no-man
+	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"
+
+
+# Build Docs.
+@doc:
+	# Make sure nightly is installed; this version generates better docs.
+	# env RUSTUP_PERMIT_COPY_RENAME=true rustup install nightly
+
+	# Make the docs.
+	cargo rustdoc \
+		--release \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+
+	# Move the docs and clean up ownership.
+	[ ! -d "{{ doc_dir }}" ] || rm -rf "{{ doc_dir }}"
+	mv "{{ cargo_dir }}/x86_64-unknown-linux-gnu/doc" "{{ justfile_directory() }}"
+	just _fix-chown "{{ doc_dir }}"
+
+
+# Unit tests!
+@test:
+	clear
+	# Note: we have to target x86-64 because private tests can't be run
+	# under wasm yet.
+	fyi task "Features: none (default)"
+	cargo test \
+		--release \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+
+	fyi task "Features: director"
+	cargo test \
+		--release \
+		--features director \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+
+
+# Get/Set version.
+version:
 	#!/usr/bin/env bash
 
-	if [ ! -f "{{ tmp_dir }}/build.time" ]; then
-		just _success "Build complete!"
+	# Current version.
+	_ver1="$( toml get "{{ justfile_directory() }}/Cargo.toml" package.version | \
+		sed 's/"//g' )"
+
+	# Find out if we want to bump it.
+	_ver2="$( whiptail --inputbox "Set {{ pkg_name }} version:" --title "Release Version" 0 0 "$_ver1" 3>&1 1>&2 2>&3 )"
+
+	exitstatus=$?
+	if [ $exitstatus != 0 ] || [ "$_ver1" = "$_ver2" ]; then
 		exit 0
 	fi
 
-	declare -i _then
-	declare -i _now
-	declare -i _elapsed
-	_then=$( cat "{{ tmp_dir }}/build.time" )
-	_now=$( date +%s )
-	_elapsed=$_now-$_then
+	fyi success "Setting version to $_ver2."
 
-	rm "{{ tmp_dir }}/build.time"
-	echo ""
-	just _success "Built in $_elapsed seconds!"
+	# Set the release version!
+	just _version "{{ justfile_directory() }}" "$_ver2"
 
 
+# Set version for real.
+@_version DIR VER:
+	[ -f "{{ DIR }}/Cargo.toml" ] || exit 1
 
-##     ##
-# TOOLS #
-##     ##
+	# Set the release version!
+	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
+	just _fix-chown "/tmp/Cargo.toml"
+	mv "/tmp/Cargo.toml" "{{ DIR }}/Cargo.toml"
 
-
-# Eslint.
-@_eslint:
-	just _info "Linting Javascript."
-	eslint \
-		--color \
-		--resolve-plugins-relative-to "/usr/lib/node_modules" \
-		"{{ src_dir }}/js"/**/*.mjs
-
-
-# Eslint Fix.
-@_eslint-fix:
-	just _info "Fixing Javascript."
-	eslint \
-		--color \
-		--resolve-plugins-relative-to "/usr/lib/node_modules" \
-		--fix \
-		"{{ src_dir }}/js"/**/*.mjs || true
-
-
-# SCSS.
-@_scss IN OUT:
-	guff -i "{{ IN }}" -o "{{ OUT }}"
-
-
-
-##     ##
-# OTHER #
-##     ##
 
 # Fix file/directory permissions.
 @_fix-chmod PATH:
@@ -310,76 +232,6 @@ _build-success:
 	[ ! -e "{{ PATH }}" ] || chown -R --reference="{{ justfile() }}" "{{ PATH }}"
 
 
-# Init.
-@_init: _only-docker
-	[ ! -f "{{ demo_dir }}/assets/vue.min.js" ] || rm "{{ demo_dir }}/assets/vue.min.js"
-	[ ! -d "{{ justfile_directory() }}/node_modules" ] || rm -rf "{{ justfile_directory() }}/node_modules"
-	[ ! -f "{{ justfile_directory() }}/package-lock.json" ] || rm "{{ justfile_directory() }}/package-lock.json"
-	just _build-js-chain
-
-
-# Init for Testing.
-_init-test-chain: _only-docker
-	#!/usr/bin/env bash
-
-	[ ! -f "{{ tmp_dir }}/.test-chained" ] || exit 0
-
-	just _info "Installing dependencies for tests."
-
-	# Install NPM crap.
-	npm i -g \
-		chai \
-		karma \
-		karma-chai \
-		karma-chrome-launcher \
-		karma-mocha \
-		mocha
-
-	apt-get update -qq
-	apt-fast install --no-install-recommends -y \
-		chromium \
-		chromium-shell
-
-	touch "{{ tmp_dir }}/.test-chained"
-
-
-
-# Tasks Not Allowed Inside Docker.
-@_no-docker:
-	[ ! -f "{{ docker_sig }}" ] || just _die "This task is meant to be run on a local machine."
-
-
-# Only Allowed Inside Docker.
-@_only-docker:
-	[ -f "{{ docker_sig }}" ] || just _die "This task is meant to be run *inside* a container."
-
-
-
-##             ##
-# NOTIFICATIONS #
-##             ##
-
-# Task header.
-@_header TASK:
-	echo "\e[34;1m[Task] \e[0;1m{{ TASK }}\e[0m"
-
-# Echo an informational comment.
-@_info COMMENT:
-	echo "\e[95;1m[Info] \e[0;1m{{ COMMENT }}\e[0m"
-
-# Echo an error.
-@_error COMMENT:
-	>&2 echo "\e[31;1m[Error] \e[0;1m{{ COMMENT }}\e[0m"
-
-# Error and exit.
-@_die COMMENT:
-	just _error "{{ COMMENT }}"
-	exit 1
-
-# Echo a success.
-@_success COMMENT:
-	echo "\e[92;1m[Success] \e[0;1m{{ COMMENT }}\e[0m"
-
-# Confirm a yes/no response.
-@_confirm COMMENT:
-	whiptail --title "Confirmation Required" --yesno "{{ COMMENT }}" 0 0 10
+# Initialization.
+@_init:
+	[ $(command -v wasm-pack) ] || cargo install wasm-pack

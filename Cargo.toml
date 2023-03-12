@@ -1,0 +1,79 @@
+[package]
+name = "rs_mate_poe"
+version = "1.4.0"
+authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
+edition = "2021"
+rust-version = "1.62"
+description = "WASM port of Screen Mate Poe."
+license = "WTFPL"
+repository = "https://github.com/Blobfolio/js-mate-poe"
+readme = "README.md"
+publish = false
+
+[package.metadata.bashman]
+name = "RS Mate Poe"
+bash-dir = "./"
+man-dir = "./"
+credits-dir = "./"
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+guff_css = "0.1.*"
+
+[dependencies]
+js-sys = "0.3.*"
+wasm-bindgen = "0.2.*"
+
+[dependencies.gloo-console]
+version = "0.2.*"
+optional = true
+
+[dependencies.itoap]
+version = "1.0.*"
+default-features = false
+
+[target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies]
+lol_alloc = "0.3.*"
+
+[dependencies.web-sys]
+version = "0.3.*"
+features = [
+	"DomTokenList",
+	"AddEventListenerOptions",
+	"Blob",
+	"BlobPropertyBag",
+	"CssStyleDeclaration",
+	"Document",
+	"Element",
+	"Event",
+	"EventListenerOptions",
+	"EventTarget",
+	"HtmlAudioElement",
+	"HtmlElement",
+	"MouseEvent",
+	"Node",
+	"ShadowRoot",
+	"ShadowRootInit",
+	"ShadowRootMode",
+	"Url",
+	"Window",
+]
+
+[features]
+default = []
+
+# Use (lossless) flac instead of (lossy) mp3 for sound. The binary will be
+# larger as a result, but only by ~20 KiB.
+flac = []
+
+# Director Mode: print debug information to console, expose additional
+# browserland methods like Poe.list, Poe.play, and Poe.version.
+director = [ "gloo-console" ]
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+opt-level = "z"
