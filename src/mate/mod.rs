@@ -311,14 +311,23 @@ impl Mate {
 	/// # Set Position.
 	pub(crate) fn set_position(&mut self, pos: Position, absolute: bool) {
 		if absolute {
-			if pos.x != self.pos.x || pos.y != self.pos.y {
-				self.pos = pos;
-				self.flags.mark_transform_changed();
+			if pos.x != self.pos.x {
+				self.pos.x = pos.x;
+				self.flags.mark_transform_x_changed();
+			}
+			if pos.y != self.pos.y {
+				self.pos.y = pos.y;
+				self.flags.mark_transform_y_changed();
 			}
 		}
 		else if pos.x != 0 || pos.y != 0 {
 			self.pos.move_to(pos);
-			self.flags.mark_transform_changed();
+			if pos.x != 0 {
+				self.flags.mark_transform_x_changed();
+			}
+			if pos.y != 0 {
+				self.flags.mark_transform_y_changed();
+			}
 		}
 	}
 }
@@ -544,8 +553,12 @@ impl Mate {
 
 				if self.flags.transform_changed() {
 					let style = wrapper.style();
-					style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
-					style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
+					if self.flags.transform_x_changed() {
+						style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
+					}
+					if self.flags.transform_y_changed() {
+						style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
+					}
 				}
 			}
 

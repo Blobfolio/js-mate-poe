@@ -23,7 +23,12 @@ impl MateFlags {
 	const CHANGED_CLASS: u16 =     0b0000_0001_0000_0000; // Class-affecting property changed.
 	const CHANGED_FRAME: u16 =     0b0000_0010_0000_0000; // Image frame changed.
 	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000; // Need to play a sound.
-	const CHANGED_TRANSFORM: u16 = 0b0000_1000_0000_0000; // Transform-affecting property changed.
+	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000; // X position changed.
+	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000; // Y position changed.
+
+	// Transform-related changes.
+	const CHANGED_TRANSFORM: u16 =
+		Self::CHANGED_TRANS_X | Self::CHANGED_TRANS_Y;
 
 	// All change-related settings.
 	const CHANGED: u16 =
@@ -60,7 +65,13 @@ impl MateFlags {
 	get!("Primary Mate", PRIMARY, primary);
 	get!("Class Changed", CHANGED_CLASS, class_changed);
 	get!("Frame Changed", CHANGED_FRAME, frame_changed);
-	get!("Transform Changed", CHANGED_TRANSFORM, transform_changed);
+	get!("Transform (X) Changed", CHANGED_TRANS_X, transform_x_changed);
+	get!("Transform (Y) Changed", CHANGED_TRANS_Y, transform_y_changed);
+
+	/// # Any Transform Changed?
+	pub(crate) const fn transform_changed(self) -> bool {
+		0 != self.0 & Self::CHANGED_TRANSFORM
+	}
 
 	/// # Anything Changed?
 	pub(crate) const fn changed(self) -> bool {
@@ -105,8 +116,11 @@ impl MateFlags {
 	/// # Mark Sound Changed.
 	pub(crate) fn mark_sound_changed(&mut self) { self.0 |= Self::CHANGED_SOUND; }
 
-	/// # Mark Transform Changed.
-	pub(crate) fn mark_transform_changed(&mut self) { self.0 |= Self::CHANGED_TRANSFORM; }
+	/// # Mark Transform (X) Changed.
+	pub(crate) fn mark_transform_x_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_X; }
+
+	/// # Mark Transform (Y) Changed.
+	pub(crate) fn mark_transform_y_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_Y; }
 
 	/// # Mark All Changed.
 	pub(crate) fn mark_changed(&mut self) { self.0 |= Self::CHANGED; }
