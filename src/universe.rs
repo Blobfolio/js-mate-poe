@@ -180,9 +180,7 @@ impl Universe {
 		if max == 0 { 0 }
 		else { (Self::rand() % u64::from(max)) as u16 }
 	}
-}
 
-impl Universe {
 	#[cfg(target_arch = "wasm32")]
 	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 	/// # Reseed Randomness.
@@ -197,6 +195,22 @@ impl Universe {
 			));
 		}
 	}
+}
+
+macro_rules! set {
+	($title:literal, $flag:ident, $fn:ident) => (
+		#[doc = concat!("# Set ", $title, ".")]
+		pub(crate) fn $fn(v: bool) {
+			if v { FLAGS.fetch_or(Self::$flag, SeqCst); }
+			else { FLAGS.fetch_and(! Self::$flag, SeqCst); }
+		}
+	);
+}
+
+impl Universe {
+	set!("Allow Audio", AUDIO, set_audio);
+	set!("Dragging", DRAGGING, set_dragging);
+	set!("State", STATE, set_state);
 
 	/// # Set Width/Height.
 	///
@@ -226,6 +240,8 @@ impl Universe {
 				State::init();
 			}
 			else {
+				// Clear everything but the audio and state properties. (State
+				// will clear itself in a moment, hopefully.)
 				FLAGS.fetch_and(Self::AUDIO | Self::STATE, SeqCst);
 			}
 			true
@@ -281,14 +297,6 @@ impl Universe {
 		#[cfg(feature = "director")] dom::debug!(format!(
 			"Playback Speed: {speed:.2}%"
 		));
-	}
-
-	/// # Set State Active.
-	///
-	/// Enables or disables the secondary STATE flag.
-	pub(crate) fn set_state(v: bool) {
-		if v { FLAGS.fetch_or(Self::STATE, SeqCst); }
-		else { FLAGS.fetch_and(! Self::STATE, SeqCst); }
 	}
 }
 
