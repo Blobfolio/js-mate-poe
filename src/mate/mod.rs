@@ -30,7 +30,7 @@ use web_sys::{
 
 
 /// # Buffer for our --x, --y values.
-type TransformBuffer = [MaybeUninit::<u8>; 13];
+type WrapperBuffer = [MaybeUninit::<u8>; 15];
 
 
 
@@ -536,20 +536,14 @@ impl Mate {
 					.unwrap_throw()
 					.unchecked_into();
 
+				let mut buf = [MaybeUninit::<u8>::uninit(); 15];
+
 				if self.flags.class_changed() {
-					let classes = wrapper.class_list();
-					classes.toggle_with_force("off", ! self.active()).unwrap_throw();
-					classes.toggle_with_force("rx", self.flags.flipped_x()).unwrap_throw();
-					classes.toggle_with_force("ry", self.flags.flipped_y()).unwrap_throw();
-					classes.toggle_with_force("a1", matches!(self.animation, Some(Animation::Drag))).unwrap_throw();
-					classes.toggle_with_force("a3", matches!(self.animation, Some(Animation::Abduction))).unwrap_throw();
-					classes.toggle_with_force("a2", matches!(self.animation, Some(Animation::SneezeShadow))).unwrap_throw();
-					classes.toggle_with_force("a4", matches!(self.animation, Some(Animation::BigFishChild))).unwrap_throw();
+					wrapper.set_class_name(self.write_classes(&mut buf));
 				}
 
 				if self.flags.transform_changed() {
 					let style = wrapper.style();
-					let mut buf = [MaybeUninit::<u8>::uninit(); 13];
 					style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
 					style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
 				}
@@ -572,6 +566,92 @@ impl Mate {
 			}
 
 			self.flags.clear_changed();
+		}
+	}
+
+	#[allow(unsafe_code)]
+	/// # Write Wrapper Class(es).
+	///
+	/// This writes the applicable wrapper classes to the provided buffer so
+	/// they can be set en masse (versus a half dozen ugly `classList.toggle`
+	/// operations).
+	///
+	/// Classes aren't updated very frequently, but the buffer is also used for
+	/// style transforms, which _are_ updated frequently, so it shouldn't be a
+	/// total waste.
+	///
+	/// ## Safety
+	///
+	/// Only one animation-related class can exist at a time, so the largest
+	/// possible combination of classes is "child rx ry off", 15 bytes.
+	fn write_classes(&self, buf: &mut WrapperBuffer) -> &str {
+		// Start with "child" if this is a child sprite.
+		let mut from =
+			if self.flags.primary() { 0 }
+			else {
+				unsafe {
+					std::ptr::copy_nonoverlapping(
+						b"child ".as_ptr(),
+						buf.as_mut_ptr().cast::<u8>(),
+						6,
+					);
+				}
+				6
+			};
+
+		// Add X flip.
+		if self.flags.flipped_x() {
+			unsafe {
+				std::ptr::copy_nonoverlapping(
+					b"rx ".as_ptr(),
+					buf.as_mut_ptr().add(from).cast::<u8>(),
+					3,
+				);
+			}
+			from += 3;
+		}
+
+		// Add Y flip.
+		if self.flags.flipped_y() {
+			unsafe {
+				std::ptr::copy_nonoverlapping(
+					b"ry ".as_ptr(),
+					buf.as_mut_ptr().add(from).cast::<u8>(),
+					3,
+				);
+			}
+			from += 3;
+		}
+
+		// Add a special animation-related, or "off" if there is no animation.
+		if let Some(rest) = match self.animation {
+			None => Some(b"off".as_slice()),
+			Some(Animation::Abduction) => Some(b"a3".as_slice()),
+			Some(Animation::BigFishChild) => Some(b"a4".as_slice()),
+			Some(Animation::Drag) => Some(b"a1".as_slice()),
+			Some(Animation::SneezeShadow) => Some(b"a2".as_slice()),
+			_ => {
+				// Trim the trailing space, if any, without calling "trim()",
+				// as that bloats the binary. Haha.
+				from = from.saturating_sub(1);
+				None
+			},
+		} {
+			unsafe {
+				std::ptr::copy_nonoverlapping(
+					rest.as_ptr(),
+					buf.as_mut_ptr().add(from).cast::<u8>(),
+					rest.len(),
+				);
+			}
+			from += rest.len();
+		}
+
+		// Return the string.
+		unsafe {
+			std::str::from_utf8_unchecked(
+				&*(std::ptr::addr_of!(buf[..from]) as *const [u8])
+			)
 		}
 	}
 }
@@ -773,6 +853,8 @@ const fn hex_half_byte(byte: u8) -> u8 {
 }
 
 /// # Make Element.
+///
+/// Create and append the "mate" elements to the document body.
 fn make_element(primary: bool) -> HtmlElement {
 	let document = dom::document();
 
@@ -818,9 +900,10 @@ fn make_element(primary: bool) -> HtmlElement {
 ///
 /// ## Safety
 ///
-/// The buffer is 13 bytes, which has enough room for the worst-case value
-/// (11 bytes) and the 2-byte "px" suffix.
-fn write_transform(v: i32, buf: &mut TransformBuffer) -> &str {
+/// This shares a buffer with the class-writer. That method requires 15 bytes,
+/// but this only requires at most 13 bytes (11 for the integer and 2 for the
+/// unit), so there's sufficient room.
+fn write_transform(v: i32, buf: &mut WrapperBuffer) -> &str {
 	// Stringify the value.
 	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr().cast::<u8>(), v) };
 	unsafe {

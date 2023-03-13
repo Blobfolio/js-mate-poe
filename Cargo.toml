@@ -40,7 +40,6 @@ lol_alloc = "0.3.*"
 [dependencies.web-sys]
 version = "0.3.*"
 features = [
-	"DomTokenList",
 	"AddEventListenerOptions",
 	"Blob",
 	"BlobPropertyBag",
