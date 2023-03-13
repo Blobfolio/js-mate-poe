@@ -123,8 +123,7 @@ impl Scene {
 	pub(crate) const FLIP_Y_NEXT: u8 =   0b0000_1000;
 	pub(crate) const GRAVITY: u8 =       0b0001_0000;
 	pub(crate) const IGNORE_EDGES: u8 =  0b0010_0000;
-	pub(super) const END_SCENE: u8 =     0b0100_0000;
-	pub(super) const END_SCENELIST: u8 = 0b1000_0000;
+	pub(super) const END_SCENELIST: u8 = 0b0100_0000;
 
 	pub(crate) const MATE_MASK: u8 =
 		Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
@@ -228,18 +227,18 @@ impl Iterator for SceneList {
 
 				// Adjust flags.
 				let mut scene_flags = scene.flags;
-				if self.step_idx == steps {
-					scene_flags |= Scene::END_SCENE;
-					if self.scene_idx + 1 == self.scenes.len() {
-						scene_flags |= Scene::END_SCENELIST;
-					}
+				if self.step_idx < steps {
+					scene_flags &= ! (Scene::FLIP_X_NEXT | Scene::FLIP_Y_NEXT);
+				}
+				else if self.scene_idx + 1 == self.scenes.len() {
+					scene_flags |= Scene::END_SCENELIST;
 				}
 
 				// Calculate the step movement, if any.
 				let move_to = scene.move_to.and_then(|m| {
 					let pos =
 						// For the last step, just return whatever's left.
-						if Scene::END_SCENE == scene_flags & Scene::END_SCENE {
+						if self.step_idx == steps {
 							Position::new(m.x - self.moved.0, m.y - self.moved.1)
 						}
 						// Otherwise we need to math it a bit.
@@ -339,12 +338,7 @@ impl Step {
 	///
 	/// Convert the scene flags to mate flags to make them easier to set.
 	pub(crate) const fn mate_flags(&self) -> u16 {
-		if Scene::END_SCENE == self.scene_flags & Scene::END_SCENE {
-			(self.scene_flags & Scene::MATE_MASK) as u16
-		}
-		else {
-			(self.scene_flags & (Scene::GRAVITY | Scene::IGNORE_EDGES)) as u16
-		}
+		(self.scene_flags & Scene::MATE_MASK) as u16
 	}
 }
 
