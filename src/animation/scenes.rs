@@ -152,6 +152,11 @@ pub(super) const DANGLE_FALL: &[Scene] = &[
 		.with_repeat(10, 0),
 ];
 
+/// # For `Animation::DangleRecover`.
+pub(super) const DANGLE_RECOVER: &[Scene] = &[
+	Scene::new(100, &[81, 81, 81, 82, 10, 9, 3]),
+];
+
 /// # For `Animation::DeepThoughts`.
 pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 	Scene::new(50, &[3, 3, 3, 3, 3, 73])

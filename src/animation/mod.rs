@@ -15,7 +15,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 58; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 59; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -115,6 +115,7 @@ pub(crate) enum Animation {
 	ClimbDown,
 	ClimbUp,
 	DangleFall,
+	DangleRecover,
 	DeepThoughts,
 	Drag,
 	EndRun,
@@ -221,7 +222,8 @@ impl Animation {
 			Self::ChaseAMartian => "Chase a Martian",
 			Self::ClimbDown => "Climb Down",
 			Self::ClimbUp => "Climb Up",
-			Self::DangleFall => "Dangle Fall",
+			Self::DangleFall => "Dangle (Maybe) Fall",
+			Self::DangleRecover => "Dangle Fall Recovery",
 			Self::DeepThoughts => "Deep Thoughts",
 			Self::Doze => "Doze",
 			Self::Drag => "Drag",
@@ -306,7 +308,9 @@ impl Animation {
 	///
 	/// Returns `true` if the animation needs to flip the sprite image
 	/// vertically.
-	pub(crate) const fn flip_y(self) -> bool { matches!(self, Self::DeepThoughts) }
+	pub(crate) const fn flip_y(self) -> bool {
+		matches!(self, Self::DangleRecover | Self::DeepThoughts)
+	}
 
 	/// # Animation May Exit Screen?
 	///
@@ -332,11 +336,12 @@ impl Animation {
 			Self::BeginRun | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::Boing | Self::BoredSleep |
 			Self::Bounce | Self::ChaseAMartian | Self::ClimbDown | Self::ClimbUp |
-			Self::DangleFall | Self::DeepThoughts | Self::Doze | Self::Drag |
-			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
-			Self::Handstand | Self::Jump | Self::PlayDead | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 | Self::Rest |
-			Self::Roll | Self::Rotate | Self::Run | Self::RunDown | Self::Scoot |
+			Self::DangleFall | Self::DangleRecover | Self::DeepThoughts |
+			Self::Doze | Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
+			Self::GraspingFall | Self::Handstand | Self::Jump | Self::PlayDead |
+			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
+			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
+			Self::Run | Self::RunDown | Self::Scoot |
 			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
 			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
 			Self::Stargaze | Self::Urinate | Self::Walk | Self::WalkUpsideDown |
@@ -389,7 +394,10 @@ impl Animation {
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
 			Self::ClimbUp | Self::ReachSide1 => Some(Self::ClimbUp),
-			Self::DangleFall => Some(choose(&[Self::GraspingFall, Self::WalkUpsideDown])),
+			Self::DangleFall => Some(choose(&[
+				Self::DangleRecover, Self::DangleRecover, Self::DangleRecover,
+				Self::GraspingFall,
+			])),
 			Self::DeepThoughts => Some(Self::ReachSide2),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
@@ -398,8 +406,8 @@ impl Animation {
 				Self::Run,
 				Self::Slide,
 			])),
-			Self::ReachCeiling => Some(choose(&[
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
+			Self::DangleRecover | Self::ReachCeiling => Some(choose(&[
+				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
 				Self::DeepThoughts,
 			])),
 			Self::ReachSide2 => Some(choose(&[
@@ -455,7 +463,8 @@ impl Animation {
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::ClimbDown | Self::RunDown | Self::SlideDown => Some(Self::ReachFloor),
 			Self::ClimbUp => Some(Self::ReachCeiling),
-			Self::DeepThoughts | Self::WalkUpsideDown => Some(Self::ReachSide2),
+			Self::DangleRecover | Self::DeepThoughts |
+			Self::WalkUpsideDown => Some(Self::ReachSide2),
 			Self::GraspingFall => Some(choose(&[
 				Self::Splat, Self::Splat, Self::Splat,
 				Self::Bounce,
@@ -509,6 +518,7 @@ impl Animation {
 			Self::ClimbDown => fixed!(CLIMB_DOWN),
 			Self::ClimbUp => fixed!(CLIMB_UP),
 			Self::DangleFall => fixed!(DANGLE_FALL),
+			Self::DangleRecover => fixed!(DANGLE_RECOVER),
 			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
 			Self::Doze => scenes::doze(),
 			Self::Drag => fixed!(DRAG),
