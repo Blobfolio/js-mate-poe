@@ -254,7 +254,7 @@ pub(super) const REACH_SIDE1: &[Scene] = &[
 
 /// # For `Animation::ReachSide2`.
 pub(super) const REACH_SIDE2: &[Scene] = &[
-	Scene::new(200, &[97, 97])
+	Scene::new(200, &[26])
 		.with_flags(Scene::FLIP_X_AFTER),
 ];
 
@@ -299,8 +299,15 @@ pub(super) const RUN: &[Scene] = &[
 
 /// # For `Animation::RunDown`.
 pub(super) const RUN_DOWN: &[Scene] = &[
-	Scene::new(100, &[22, 21, 21])
+	Scene::new(60, &[22, 22, 21, 21, 21])
 		.with_move_to(Position::new(0, 180))
+		.with_repeat(5, 0),
+];
+
+/// # For `Animation::RunUpsideDown`.
+pub(super) const RUN_UPSIDE_DOWN: &[Scene] = &[
+	Scene::new(60, &[99, 99, 100, 100, 100])
+		.with_move_to(Position::new(-180, 0))
 		.with_repeat(5, 0),
 ];
 

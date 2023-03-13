@@ -15,7 +15,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 59; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 60; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -126,6 +126,7 @@ pub(crate) enum Animation {
 	ReachSide1,
 	ReachSide2,
 	RunDown,
+	RunUpsideDown,
 	SlideDown,
 	Splat,
 	WalkUpsideDown,
@@ -243,6 +244,7 @@ impl Animation {
 			Self::Rotate => "Rotate",
 			Self::Run => "Run",
 			Self::RunDown => "Run Down",
+			Self::RunUpsideDown => "Run Upside Down",
 			Self::Scoot => "Scoot",
 			Self::Scratch => "Scratch",
 			Self::Scream => "Scream",
@@ -301,7 +303,7 @@ impl Animation {
 	/// Returns `true` if the animation needs to flip the sprite image
 	/// horizontally.
 	pub(crate) const fn flip_x(self) -> bool {
-		matches!(self, Self::BlackSheepChaseChild)
+		matches!(self, Self::BlackSheepChaseChild | Self::ReachSide2)
 	}
 
 	/// # Flip (Y).
@@ -341,7 +343,7 @@ impl Animation {
 			Self::GraspingFall | Self::Handstand | Self::Jump | Self::PlayDead |
 			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
 			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
-			Self::Run | Self::RunDown | Self::Scoot |
+			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
 			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
 			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
 			Self::Stargaze | Self::Urinate | Self::Walk | Self::WalkUpsideDown |
@@ -398,7 +400,7 @@ impl Animation {
 				Self::DangleRecover, Self::DangleRecover, Self::DangleRecover,
 				Self::GraspingFall,
 			])),
-			Self::DeepThoughts => Some(Self::ReachSide2),
+			Self::DeepThoughts | Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
 			Self::Fall | Self::GraspingFall => Some(Self::GraspingFall),
@@ -445,9 +447,11 @@ impl Animation {
 				Self::Roll,
 			])),
 			Self::WalkUpsideDown => Some(choose(&[
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
+				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
+				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
+				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
 				Self::DangleFall,
+				Self::DeepThoughts,
 			])),
 			Self::WallSlide => Some(Self::WallSlide),
 			_ => None,
@@ -463,7 +467,7 @@ impl Animation {
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::ClimbDown | Self::RunDown | Self::SlideDown => Some(Self::ReachFloor),
 			Self::ClimbUp => Some(Self::ReachCeiling),
-			Self::DangleRecover | Self::DeepThoughts |
+			Self::DangleRecover | Self::DeepThoughts | Self::RunUpsideDown |
 			Self::WalkUpsideDown => Some(Self::ReachSide2),
 			Self::GraspingFall => Some(choose(&[
 				Self::Splat, Self::Splat, Self::Splat,
@@ -474,8 +478,8 @@ impl Animation {
 			Self::Jump => Some(Self::WallSlide),
 			Self::BeginRun | Self::EndRun | Self::Run => Some(Self::Boing),
 			Self::Walk => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Scoot, Self::Scoot,
+				//Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
+				Self::Scoot, //Self::Scoot,
 				Self::ReachSide1,
 			])),
 			Self::WallSlide => Some(Self::Rotate),
@@ -538,6 +542,7 @@ impl Animation {
 			Self::Rotate => fixed!(ROTATE),
 			Self::Run => fixed!(RUN),
 			Self::RunDown => fixed!(RUN_DOWN),
+			Self::RunUpsideDown => fixed!(RUN_UPSIDE_DOWN),
 			Self::Scoot => fixed!(SCOOT),
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
@@ -664,7 +669,6 @@ mod tests {
 		// These are the frames we weren't using the last time this was run.
 		const EXPECTED: &[u8] = &[
 			18,
-			26,
 			27,
 			40,
 			41,
@@ -675,8 +679,6 @@ mod tests {
 			84,
 			85,
 			91,
-			99,
-			100,
 			172,
 		];
 
