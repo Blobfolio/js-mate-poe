@@ -192,6 +192,9 @@ pub(super) const DANGLE_FALL: &[Scene] = &[
 
 /// # For `Animation::DangleRecover`.
 pub(super) const DANGLE_RECOVER: &[Scene] = &[
+	Scene::new(200, &[88, 89, 90])
+		.with_move_to(Position::new(-30, 0))
+		.with_repeat(1, 0),
 	Scene::new(100, &[81, 81, 81, 82, 10, 9, 3]),
 ];
 

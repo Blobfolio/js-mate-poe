@@ -628,7 +628,7 @@ impl Mate {
 			from += 3;
 		}
 
-		// Add a special animation-related, or "off" if there is no animation.
+		// Add animation-related class.
 		if let Some(rest) = match self.animation {
 			None => Some(b"off".as_slice()),
 			Some(Animation::Abduction) => Some(b"a3".as_slice()),
