@@ -313,7 +313,7 @@ impl Universe {
 	///
 	/// This returns (and clears) the animation set by `Poe.play`, if any.
 	pub(crate) fn next_animation() -> Option<Animation> {
-		Animation::from_u8(NEXT_ANIMATION.swap(0, SeqCst))
+		Animation::from_u8(NEXT_ANIMATION.swap(0, SeqCst)).filter(|a| a.playable())
 	}
 
 	/// # Set Browserland Next Animation.

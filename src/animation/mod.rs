@@ -166,7 +166,7 @@ impl Animation {
 		else { None }
 	}
 
-	#[cfg(any(test))]
+	#[cfg(any(test, feature = "director"))]
 	/// # Directly Playable?
 	///
 	/// Returns `true` if the animation can be cued up via the userland setter
