@@ -160,8 +160,7 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 		.with_repeat(12, 0),
 	Scene::new(150, &[3, 9, 10])
 		.with_flags(Scene::FLIP_X_AFTER),
-	Scene::new(150, &[10, 9, 3])
-		.with_flags(Scene::FLIP_Y_AFTER),
+	Scene::new(150, &[10, 9, 3]),
 ];
 
 /// # For `Animation::Drag`.

@@ -192,16 +192,20 @@ impl Mate {
 		let old = self.animation.take();
 		let animation_changed = old.map_or(true, |a| a != animation);
 
-		// If we're just getting started, force an everything-change to make
-		// sure it renders right.
-		if old.is_none() {
+		// Old animation business.
+		if let Some(o) = old {
+			// Change classes if going to or coming from a special animation.
+			if animation.change_class() || o.change_class() {
+				self.flags.mark_class_changed();
+			}
+
+			// Unflip if the old animation was flipped.
+			if o.flip_x() { self.flags.flip_x(None); }
+			if o.flip_y() { self.flags.flip_y(None); }
+		}
+		else {
 			self.set_frame(Sprite::EMPTY_TILE);
 			self.flags.mark_changed();
-		}
-		// Otherwise maybe mark the classes as having changed if we're going to
-		// or coming from a special animation.
-		else if animation.change_class() || old.map_or(false, Animation::change_class) {
-			self.flags.mark_class_changed();
 		}
 
 		// Remove flippage for these two.
@@ -213,17 +217,17 @@ impl Mate {
 		// animations.
 		if animation_changed { self.set_starting_position(animation, old.is_none()); }
 
-		// Exiting off-screen has a 1/10 probability for animations that allow
+		// Exiting off-screen has a 1/15 probability for animations that allow
 		// it.
 		let animation_exit = animation.may_exit();
 		if animation_changed || ! animation_exit { self.flags.set_may_exit(false); }
-		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand() % 10 {
+		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand() % 15 {
 			self.flags.set_may_exit(true);
 		}
 
-		// Reverse according to what the animation wants.
-		if self.flags.set_reversed_x(animation.flip_x()) { self.flags.flip_x(None); }
-		if self.flags.set_reversed_y(animation.flip_y()) { self.flags.flip_y(None); }
+		// Flip if the entire animation is flipped.
+		if animation.flip_x() { self.flags.flip_x(None); }
+		if animation.flip_y() { self.flags.flip_y(None); }
 
 		// Store the new animation!
 		self.scenes.replace(animation.scenes(self.size.0));
