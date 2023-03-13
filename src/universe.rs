@@ -236,33 +236,18 @@ impl Universe {
 	///
 	/// This will also remove the incompatible no-child flag.
 	pub(crate) fn set_assign_child() {
-		FLAGS.fetch_or(Self::ASSIGN_CHILD, SeqCst);
-		FLAGS.fetch_and(! Self::NO_CHILD, SeqCst);
-	}
-
-	/// # Set Allow Audio.
-	///
-	/// Enables or disables audio playback.
-	pub(crate) fn set_audio(v: bool) {
-		if v { FLAGS.fetch_or(Self::AUDIO, SeqCst); }
-		else { FLAGS.fetch_and(! Self::AUDIO, SeqCst); }
-	}
-
-	/// # Set Dragging.
-	///
-	/// Enables or disables the `DRAGGING` flag used to capture mouse
-	/// positioning during a drag event.
-	pub(crate) fn set_dragging(v: bool) {
-		if v { FLAGS.fetch_or(Self::DRAGGING, SeqCst); }
-		else { FLAGS.fetch_and(! Self::DRAGGING, SeqCst); }
+		if Self::NO_CHILD == FLAGS.fetch_or(Self::ASSIGN_CHILD, SeqCst) & Self::NO_CHILD {
+			FLAGS.fetch_and(! Self::NO_CHILD, SeqCst);
+		}
 	}
 
 	/// # Set No Child Flag.
 	///
 	/// This will also remove the incompatible assign-child flag.
 	pub(crate) fn set_no_child() {
-		FLAGS.fetch_or(Self::NO_CHILD, SeqCst);
-		FLAGS.fetch_and(! Self::ASSIGN_CHILD, SeqCst);
+		if Self::ASSIGN_CHILD == FLAGS.fetch_or(Self::NO_CHILD, SeqCst) & Self::ASSIGN_CHILD {
+			FLAGS.fetch_and(! Self::ASSIGN_CHILD, SeqCst);
+		}
 	}
 
 	/// # Set Position.
