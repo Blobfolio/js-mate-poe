@@ -42,12 +42,12 @@ impl Position {
 
 impl Position {
 	/// # Invert (X).
-	pub(crate) const fn invert_x(&self) -> Self {
+	pub(crate) const fn invert_x(self) -> Self {
 		Self::new(self.x.saturating_neg(), self.y)
 	}
 
 	/// # Invert (Y).
-	pub(crate) const fn invert_y(&self) -> Self {
+	pub(crate) const fn invert_y(self) -> Self {
 		Self::new(self.x, self.y.saturating_neg())
 	}
 
