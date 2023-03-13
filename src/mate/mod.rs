@@ -199,7 +199,7 @@ impl Mate {
 				self.flags.mark_class_changed();
 			}
 
-			// Unflip if the old animation was flipped.
+			// Unapply the previous animation-wide flips.
 			if o.flip_x() { self.flags.flip_x(None); }
 			if o.flip_y() { self.flags.flip_y(None); }
 		}
@@ -209,12 +209,11 @@ impl Mate {
 		}
 
 		// Remove flippage for these two.
-		if matches!(animation, Animation::Drag | Animation::Fall) {
+		if matches!(animation, Animation::Drag | Animation::Fall | Animation::GraspingFall) {
 			self.flags.clear_flips();
 		}
 
-		// Miscellaneous animation-specific adjustments, only necessary for new
-		// animations.
+		// Miscellaneous animation-specific adjustments (if we changed).
 		if animation_changed { self.set_starting_position(animation, old.is_none()); }
 
 		// Exiting off-screen has a 1/15 probability for animations that allow
@@ -225,13 +224,13 @@ impl Mate {
 			self.flags.set_may_exit(true);
 		}
 
-		// Flip if the entire animation is flipped.
+		// Apply animation-wide flips.
 		if animation.flip_x() { self.flags.flip_x(None); }
 		if animation.flip_y() { self.flags.flip_y(None); }
 
 		// Store the new animation!
-		self.scenes.replace(animation.scenes(self.size.0));
 		self.animation.replace(animation);
+		self.scenes.replace(animation.scenes(self.size.0));
 
 		// Finally, if this requires a child, request it.
 		if animation.child().is_some() { Universe::set_assign_child(); }
@@ -542,14 +541,10 @@ impl Mate {
 					classes.toggle_with_force("off", ! self.active()).unwrap_throw();
 					classes.toggle_with_force("rx", self.flags.flipped_x()).unwrap_throw();
 					classes.toggle_with_force("ry", self.flags.flipped_y()).unwrap_throw();
-					if self.flags.primary() {
-						classes.toggle_with_force("a1", matches!(self.animation, Some(Animation::Drag))).unwrap_throw();
-						classes.toggle_with_force("a3", matches!(self.animation, Some(Animation::Abduction))).unwrap_throw();
-					}
-					else {
-						classes.toggle_with_force("a2", matches!(self.animation, Some(Animation::SneezeShadow))).unwrap_throw();
-						classes.toggle_with_force("a4", matches!(self.animation, Some(Animation::BigFishChild))).unwrap_throw();
-					}
+					classes.toggle_with_force("a1", matches!(self.animation, Some(Animation::Drag))).unwrap_throw();
+					classes.toggle_with_force("a3", matches!(self.animation, Some(Animation::Abduction))).unwrap_throw();
+					classes.toggle_with_force("a2", matches!(self.animation, Some(Animation::SneezeShadow))).unwrap_throw();
+					classes.toggle_with_force("a4", matches!(self.animation, Some(Animation::BigFishChild))).unwrap_throw();
 				}
 
 				if self.flags.transform_changed() {

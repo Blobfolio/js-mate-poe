@@ -290,8 +290,7 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BigFishChild | Self::Drag | Self::Fall |
-			Self::GraspingFall | Self::SneezeShadow
+			Self::Abduction | Self::BigFishChild | Self::Drag | Self::SneezeShadow
 		)
 	}
 

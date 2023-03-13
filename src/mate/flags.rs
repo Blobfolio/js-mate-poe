@@ -24,9 +24,14 @@ impl MateFlags {
 	const CHANGED_FRAME: u16 =     0b0000_0010_0000_0000; // Image frame changed.
 	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000; // Need to play a sound.
 	const CHANGED_TRANSFORM: u16 = 0b0000_1000_0000_0000; // Transform-affecting property changed.
+
+	// All change-related settings.
 	const CHANGED: u16 =
 		Self::CHANGED_CLASS | Self::CHANGED_FRAME |
 		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM;
+
+	// All flip-related settings.
+	const FLIPPED: u16 = Self::FLIPPED_X | Self::FLIPPED_Y;
 }
 
 impl MateFlags {
@@ -110,14 +115,23 @@ impl MateFlags {
 	///
 	/// Remove the next X/Y properties and flip (the current state) accordingly.
 	pub(crate) fn apply_next(&mut self) {
-		if Self::FLIP_X_NEXT == self.0 & Self::FLIP_X_NEXT { self.flip_x(None); }
-		if Self::FLIP_Y_NEXT == self.0 & Self::FLIP_Y_NEXT { self.flip_y(None); }
-		self.0 &= ! (Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT);
+		if 0 != self.0 & (Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT) {
+			if Self::FLIP_X_NEXT == self.0 & Self::FLIP_X_NEXT {
+				self.0 ^= Self::FLIPPED_X | Self::FLIP_X_NEXT;
+			}
+			if Self::FLIP_Y_NEXT == self.0 & Self::FLIP_Y_NEXT {
+				self.0 ^= Self::FLIPPED_Y | Self::FLIP_Y_NEXT;
+			}
+			self.mark_class_changed();
+		}
 	}
 
 	/// # Clear All Flip-Related Flags.
 	pub(crate) fn clear_flips(&mut self) {
-		self.0 &= ! (Self::FLIPPED_X | Self::FLIPPED_Y);
+		if 0 != self.0 & Self::FLIPPED {
+			self.0 &= ! Self::FLIPPED;
+			self.mark_class_changed();
+		}
 	}
 
 	/// # Flip (X).
