@@ -81,8 +81,7 @@ impl Scene {
 	/// # Frame at Step Number.
 	///
 	/// Note: Frames start from zero for the purposes of this method.
-	pub(crate) const fn frame_at_step(&self, idx: u16) -> u8 {
-		let idx = idx as usize;
+	pub(crate) const fn frame_at_step(&self, idx: usize) -> u8 {
 		let len = self.frames.len();
 
 		if idx < len { self.frames[idx] }
@@ -100,9 +99,9 @@ impl Scene {
 	/// # Sound at Step Number.
 	///
 	/// Note: Steps start from zero for the purposes of this method.
-	pub(crate) const fn sound_at_step(&self, idx: u16) -> Option<Sound> {
+	pub(crate) const fn sound_at_step(&self, idx: usize) -> Option<Sound> {
 		if let Some((out, idx2)) = self.sound {
-			if idx2 as u16 == idx { Some(out) }
+			if idx2 as usize == idx { Some(out) }
 			else { None }
 		}
 		else { None }
@@ -193,7 +192,7 @@ impl SceneListKind {
 pub(crate) struct SceneList {
 	scenes: SceneListKind,
 	scene_idx: usize,
-	step_idx: u16,
+	step_idx: usize,
 	moved: (i32, i32),
 }
 
@@ -220,7 +219,7 @@ impl Iterator for SceneList {
 	fn next(&mut self) -> Option<Self::Item> {
 		loop {
 			let scene = self.scenes.get(self.scene_idx)?;
-			let steps = scene.steps() as u16;
+			let steps = scene.steps();
 			if self.step_idx < steps {
 				self.step_idx += 1;
 
@@ -243,8 +242,9 @@ impl Iterator for SceneList {
 						// Otherwise we need to math it a bit.
 						else {
 							// Find the percentage of the total movements reached by
-							// this step.
-							let mut scale = f32::from(self.step_idx) / f32::from(steps);
+							// this step. (Note: these values all fit 16-bit
+							// widths, so are safe to cast to f32.)
+							let mut scale = self.step_idx as f32 / steps as f32;
 							if scene.ease_in() { scale *= scale; }
 							else if scene.ease_out() {
 								scale = (scale * (2.0 - scale)).powi(2);
@@ -397,7 +397,7 @@ mod tests {
 	#[test]
 	fn scenes() {
 		for a in Animation::all() {
-			let scenes = a.scenes(1024);
+			let scenes = a.scenes(3840);
 
 			let mut total_steps = 0;
 			for s in scenes.scenes.as_slice() {
