@@ -81,7 +81,7 @@ impl Scene {
 	/// # Frame at Step Number.
 	///
 	/// Note: Frames start from zero for the purposes of this method.
-	pub(crate) const fn frame_at_step(&self, idx: u8) -> u8 {
+	pub(crate) const fn frame_at_step(&self, idx: u16) -> u8 {
 		let idx = idx as usize;
 		let len = self.frames.len();
 
@@ -100,9 +100,9 @@ impl Scene {
 	/// # Sound at Step Number.
 	///
 	/// Note: Steps start from zero for the purposes of this method.
-	pub(crate) const fn sound_at_step(&self, idx: u8) -> Option<Sound> {
+	pub(crate) const fn sound_at_step(&self, idx: u16) -> Option<Sound> {
 		if let Some((out, idx2)) = self.sound {
-			if idx2 == idx { Some(out) }
+			if idx2 as u16 == idx { Some(out) }
 			else { None }
 		}
 		else { None }
@@ -193,7 +193,7 @@ impl SceneListKind {
 pub(crate) struct SceneList {
 	scenes: SceneListKind,
 	scene_idx: usize,
-	step_idx: u8,
+	step_idx: u16,
 	moved: (i32, i32),
 }
 
@@ -220,7 +220,7 @@ impl Iterator for SceneList {
 	fn next(&mut self) -> Option<Self::Item> {
 		loop {
 			let scene = self.scenes.get(self.scene_idx)?;
-			let steps = scene.steps() as u8;
+			let steps = scene.steps() as u16;
 			if self.step_idx < steps {
 				self.step_idx += 1;
 
@@ -402,6 +402,14 @@ mod tests {
 			let mut total_steps = 0;
 			for s in scenes.scenes.as_slice() {
 				total_steps += s.steps();
+
+				// We're using u16 for index access in some places, so make
+				// sure the value fits.
+				assert!(
+					total_steps < usize::from(u16::MAX),
+					"Step overflow ({total_steps}) {}", a.as_str()
+				);
+
 				// Make sure we don't have too short a duration for the number
 				// of frames.
 				assert!(5 < s.fpms, "Scene too short {}.", a.as_str());
