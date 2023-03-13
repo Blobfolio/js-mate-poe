@@ -149,7 +149,8 @@ impl Mate {
 		// Set the animation.
 		child.set_animation(animation);
 
-		// Some animations require a position override.
+		// Some animations require a position override using knowledge of the
+		// primary sprite's position.
 		if let Some(pos) = match animation {
 			Animation::FlowerChild => {
 				let x =
@@ -163,13 +164,7 @@ impl Mate {
 					self.pos.y - Sprite::TILE_SIZE_I * 2 - 480,
 				))
 			},
-			Animation::SneezeShadow =>
-				// This effect doesn't work when flipped.
-				if self.flags.flipped_x() {
-					child.stop();
-					return;
-				}
-				else { Some(self.pos) },
+			Animation::SneezeShadow => Some(self.pos),
 			_ => None,
 		} {
 			child.set_position(pos, true);
