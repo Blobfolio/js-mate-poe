@@ -119,19 +119,22 @@ macro_rules! get {
 impl Scene {
 	pub(super) const EASE_IN: u8 =       0b0000_0001;
 	pub(super) const EASE_OUT: u8 =      0b0000_0010;
-	pub(super) const FLIP_X_AFTER: u8 =  0b0000_0100;
-	pub(super) const FLIP_Y_AFTER: u8 =  0b0000_1000;
-	pub(super) const GRAVITY: u8 =       0b0001_0000;
-	pub(super) const IGNORE_EDGES: u8 =  0b0010_0000;
+	pub(crate) const FLIP_X_NEXT: u8 =   0b0000_0100;
+	pub(crate) const FLIP_Y_NEXT: u8 =   0b0000_1000;
+	pub(crate) const GRAVITY: u8 =       0b0001_0000;
+	pub(crate) const IGNORE_EDGES: u8 =  0b0010_0000;
 	pub(super) const END_SCENE: u8 =     0b0100_0000;
 	pub(super) const END_SCENELIST: u8 = 0b1000_0000;
+
+	pub(crate) const MATE_MASK: u8 =
+		Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
 
 impl Scene {
 	get!("Ease In", EASE_IN, ease_in);
 	get!("Ease Out", EASE_OUT, ease_out);
-	//get!("Flip (X) After Scene", FLIP_X_AFTER, flip_x_after);
-	//get!("Flip (Y) After Scene", FLIP_Y_AFTER, flip_y_after);
+	//get!("Flip (X) After Scene", FLIP_X_NEXT, flip_x_next);
+	//get!("Flip (Y) After Scene", FLIP_Y_NEXT, flip_y_next);
 	//get!("Gravity Applies", GRAVITY, gravity);
 	//get!("Ignore Edges", IGNORE_EDGES, ignore_edges);
 }
@@ -332,38 +335,16 @@ impl Step {
 		Scene::END_SCENELIST == self.scene_flags & Scene::END_SCENELIST
 	}
 
-	/// # Flip X (after this step).
+	/// # Mate Flags.
 	///
-	/// This returns `true` when the scene wants the _next_ step reversed.
-	/// This only applies for the last step of a given `Scene`.
-	pub(crate) const fn flip_x_after(&self) -> bool {
-		let flag = Scene::FLIP_X_AFTER | Scene::END_SCENE;
-		flag == self.scene_flags & flag
-	}
-
-	/// # Flip Y (after this step).
-	///
-	/// This returns `true` when the scene wants the _next_ step reversed.
-	/// This only applies for the last step of a given `Scene`.
-	pub(crate) const fn flip_y_after(&self) -> bool {
-		let flag = Scene::FLIP_Y_AFTER | Scene::END_SCENE;
-		flag == self.scene_flags & flag
-	}
-
-	/// # Gravity Applies?
-	///
-	/// Returns `true` if the sprite should remain floored for the duration of
-	/// the `Scene`.
-	pub(crate) const fn gravity(&self) -> bool {
-		Scene::GRAVITY == self.scene_flags & Scene::GRAVITY
-	}
-
-	/// # Ignore Edges?
-	///
-	/// Returns `true` if the sprite is allowed to cross the screen edge
-	/// while progressing through the `Scene`.
-	pub(crate) const fn ignore_edges(&self) -> bool {
-		Scene::IGNORE_EDGES == self.scene_flags & Scene::IGNORE_EDGES
+	/// Convert the scene flags to mate flags to make them easier to set.
+	pub(crate) const fn mate_flags(&self) -> u16 {
+		if Scene::END_SCENE == self.scene_flags & Scene::END_SCENE {
+			(self.scene_flags & Scene::MATE_MASK) as u16
+		}
+		else {
+			(self.scene_flags & (Scene::GRAVITY | Scene::IGNORE_EDGES)) as u16
+		}
 	}
 }
 

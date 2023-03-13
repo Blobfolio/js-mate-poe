@@ -202,7 +202,7 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 	Scene::new(50, &[50, 51])
 		.with_repeat(12, 0),
 	Scene::new(150, &[3, 9, 10])
-		.with_flags(Scene::FLIP_X_AFTER),
+		.with_flags(Scene::FLIP_X_NEXT),
 	Scene::new(150, &[10, 9, 3]),
 ];
 
@@ -278,7 +278,7 @@ pub(super) const PLAY_DEAD: &[Scene] = &[
 pub(super) const REACH_CEILING: &[Scene] = &[
 	Scene::new(100, &[16, 17, 28])
 		.with_move_to(Position::new(3, 0))
-		.with_flags(Scene::FLIP_X_AFTER),
+		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
 /// # For `Animation::ReachFloor`.
@@ -293,7 +293,7 @@ pub(super) const REACH_SIDE1: &[Scene] = &[
 /// # For `Animation::ReachSide2`.
 pub(super) const REACH_SIDE2: &[Scene] = &[
 	Scene::new(200, &[26])
-		.with_flags(Scene::FLIP_X_AFTER),
+		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
 /// # For `Animation::Rest`.
@@ -322,7 +322,7 @@ pub(super) const ROLL: &[Scene] = &[
 /// # For `Animation::Rotate`.
 pub(super) const ROTATE: &[Scene] = &[
 	Scene::new(150, &[3, 9, 10])
-		.with_flags(Scene::FLIP_X_AFTER | Scene::GRAVITY),
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
 	Scene::new(150, &[10, 9, 3])
 		.with_flags(Scene::GRAVITY),
 ];
@@ -488,7 +488,7 @@ pub(super) const fn black_sheep_chase(w: u16) -> SceneList {
 		Scene::new(100, &[5, 4, 4])
 			.with_move_to(Position::new(repeat as i32 * -10 * 3, 0))
 			.with_repeat(repeat - 1, 0)
-			.with_flags(Scene::FLIP_X_AFTER | Scene::GRAVITY | Scene::IGNORE_EDGES),
+			.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
 		Scene::new(50, &[5, 5, 4, 4, 4, 4])
 			.with_move_to(Position::new(4 * -10 * 3, 0))
 			.with_repeat(3, 0)

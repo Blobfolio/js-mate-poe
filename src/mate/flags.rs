@@ -37,6 +37,10 @@ impl MateFlags {
 
 	// All flip-related settings.
 	const FLIPPED: u16 = Self::FLIPPED_X | Self::FLIPPED_Y;
+
+	// Scene Mask.
+	const SCENE_MASK: u16 =
+		Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
 
 impl MateFlags {
@@ -79,23 +83,7 @@ impl MateFlags {
 	}
 }
 
-macro_rules! set {
-	($title:literal, $flag:ident, $set:ident) => (
-		#[doc = concat!("# Set ", $title)]
-		pub(crate) fn $set(&mut self, v: bool) {
-			if v { self.0 |= Self::$flag; }
-			else { self.0 &= ! Self::$flag; }
-		}
-	);
-}
-
 impl MateFlags {
-	set!("Gravity", GRAVITY, set_gravity);
-	set!("Ignore Edges", IGNORE_EDGES, set_ignore_edges);
-	set!("Allowed to Exit Screen", MAY_EXIT, set_may_exit);
-	set!("Flip (X) Next", FLIP_X_NEXT, set_flip_x_next);
-	set!("Flip (Y) Next", FLIP_Y_NEXT, set_flip_y_next);
-
 	/// # Clear.
 	///
 	/// Reset all flags except `Self::PRIMARY`.
@@ -166,5 +154,49 @@ impl MateFlags {
 			self.0 ^= Self::FLIPPED_Y;
 			self.mark_class_changed();
 		}
+	}
+
+	/// # Set May Exit.
+	pub(crate) fn set_may_exit(&mut self, v: bool) {
+		if v { self.0 |= Self::MAY_EXIT; }
+		else { self.0 &= ! Self::MAY_EXIT; }
+	}
+
+	/// # Set Scene Flags.
+	pub(crate) fn set_scene_flags(&mut self, flags: u16) {
+		self.0 &= ! Self::SCENE_MASK;
+		self.0 |= flags & Self::SCENE_MASK;
+	}
+}
+
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn t_mate_scene_flags() {
+		use crate::Scene;
+
+		macro_rules! flag {
+			($flag:ident) => (
+				assert_eq!(
+					Scene::$flag as u16, MateFlags::$flag,
+					concat!(stringify!($flag), " flags are not equivalent."),
+				);
+			);
+		}
+
+		flag!(FLIP_X_NEXT);
+		flag!(FLIP_Y_NEXT);
+		flag!(GRAVITY);
+		flag!(IGNORE_EDGES);
+
+		assert_eq!(
+			Scene::MATE_MASK as u16,
+			MateFlags::SCENE_MASK,
+			"MATE_MASK/SCENE_MASK flags are not equivalent.",
+		);
 	}
 }

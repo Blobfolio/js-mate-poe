@@ -382,14 +382,14 @@ impl Mate {
 				self.next_animation.replace(n);
 			}
 
+			// Flip if flipping is needed.
+			self.flags.apply_next();
+
 			// Switch animations?
 			if let Some(a) = self.next_animation.take() { self.set_animation(a); }
 			// Otherwise if we're dragging, make sure to update the
 			// coordinates.
 			else if dragging { self.set_position(Universe::pos(), true); }
-
-			// Flip if flipping is needed.
-			self.flags.apply_next();
 
 			// Full tick if active (which we should be).
 			self.active()
@@ -440,10 +440,7 @@ impl Mate {
 
 		// Adjust the timings.
 		self.next_tick = now + u32::from(step.next_tick());
-		self.flags.set_flip_x_next(step.flip_x_after());
-		self.flags.set_flip_y_next(step.flip_y_after());
-		self.flags.set_gravity(step.gravity());
-		self.flags.set_ignore_edges(step.ignore_edges());
+		self.flags.set_scene_flags(step.mate_flags());
 
 		// Easy stuff.
 		self.set_frame(step.frame());
