@@ -19,8 +19,10 @@ use scene::SceneListKind;
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun,
+	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
+	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
+	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
+	Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun,
 	Animation::Beg, Animation::Beg,
 	Animation::Blink, Animation::Blink,
 	Animation::Eat, Animation::Eat,
@@ -394,7 +396,8 @@ impl Animation {
 			Self::BeginRun | Self::BlackSheepChase | Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
 			Self::Boing => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
+				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
+				Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk,
 				Self::BeginRun,
 			])),
@@ -414,8 +417,9 @@ impl Animation {
 			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
 			Self::Fall | Self::GraspingFall => Some(Self::GraspingFall),
 			Self::Jump => Some(choose(&[
-				Self::Run,
-				Self::Slide,
+				Self::Run, Self::Run,
+				Self::Slide, Self::Slide,
+				Self::Jump,
 			])),
 			Self::DangleRecover | Self::ReachCeiling => Some(choose(&[
 				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
@@ -441,10 +445,7 @@ impl Animation {
 				Self::Walk,
 			])),
 			Self::SlideDown => Some(Self::SlideDown),
-			Self::Spin => Some(choose(&[
-				Self::PlayDead,
-				Self::Sneeze,
-			])),
+			Self::Spin => Some(choose(&[Self::PlayDead, Self::Sneeze])),
 			Self::Stargaze => Some(Self::Scream),
 			Self::Walk => Some(choose(&[
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
@@ -487,8 +488,8 @@ impl Animation {
 			Self::Jump => Some(Self::WallSlide),
 			Self::BeginRun | Self::EndRun | Self::Run => Some(Self::Boing),
 			Self::Walk => Some(choose(&[
-				//Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Scoot, //Self::Scoot,
+				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
+				Self::Scoot, Self::Scoot,
 				Self::ReachSide1,
 			])),
 			Self::WallSlide => Some(Self::Rotate),
