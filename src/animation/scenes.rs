@@ -105,6 +105,44 @@ pub(super) const BEGIN_END_RUN: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::BigFish`.
+pub(super) const BIG_FISH: &[Scene] = &[
+	Scene::new(60, &[5, 5, 4, 4, 4])
+		.with_move_to(Position::new(-210, 0))
+		.with_repeat(6, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(2000, &[Sprite::EMPTY_TILE])
+		.with_move_to(Position::new(-100, Sprite::TILE_SIZE_I))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(50, &[30])
+		.with_move_to(Position::new(-5, -30))
+		.with_repeat(4, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(50, &[23])
+		.with_move_to(Position::new(0, -10))
+		.with_repeat(1, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(100, &[23, 23, 23, 77, 78, 3])
+		.with_flags(Scene::GRAVITY),
+];
+
+/// # For `Animation::BigFishChild`.
+pub(super) const BIG_FISH_CHILD: &[Scene] = &[
+	Scene::new(1000, &[58])
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(25, &[58])
+		.with_move_to(Position::new(-175, -75))
+		.with_repeat(24, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(25, &[59, 59, 59, 59, 59, 58, 58, 60, 60, 61])
+		.with_move_to(Position::new(-40, 0))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(25, &[61, 60, 61, 60, 61])
+		.with_move_to(Position::new(-150, 75))
+		.with_repeat(4, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::Bleat`.
 pub(super) const BLEAT: &[Scene] = &[
 	Scene::new(200, &[3, 71, 72, 71, 72, 71, 3])

@@ -260,6 +260,14 @@ impl Mate {
 				w + Sprite::TILE_SIZE_I - 790,
 				h - Sprite::TILE_SIZE_I,
 			)),
+			Animation::BigFish | Animation::Stargaze => Some(Position::new(
+				w,
+				h - Sprite::TILE_SIZE_I,
+			)),
+			Animation::BigFishChild => Some(Position::new(
+				w + 50,
+				h + 35,
+			)),
 			Animation::BlackSheepChase | Animation::ChaseAMartian => Some(Position::new(
 				w + Sprite::TILE_SIZE_I * 3,
 				h - Sprite::TILE_SIZE_I,
@@ -274,7 +282,6 @@ impl Mate {
 				-Sprite::TILE_SIZE_I * 2,
 				h - Sprite::TILE_SIZE_I,
 			)),
-			Animation::Stargaze => Some(Position::new(w, h - Sprite::TILE_SIZE_I)),
 			Animation::StargazeChild => Some(Position::new(
 				-Sprite::TILE_SIZE_I,
 				Sprite::TILE_SIZE_I * 2,
@@ -535,9 +542,14 @@ impl Mate {
 					classes.toggle_with_force("off", ! self.active()).unwrap_throw();
 					classes.toggle_with_force("rx", self.flags.flipped_x()).unwrap_throw();
 					classes.toggle_with_force("ry", self.flags.flipped_y()).unwrap_throw();
-					classes.toggle_with_force("a1", matches!(self.animation, Some(Animation::Drag))).unwrap_throw();
-					classes.toggle_with_force("a2", matches!(self.animation, Some(Animation::SneezeShadow))).unwrap_throw();
-					classes.toggle_with_force("a3", matches!(self.animation, Some(Animation::Abduction))).unwrap_throw();
+					if self.flags.primary() {
+						classes.toggle_with_force("a1", matches!(self.animation, Some(Animation::Drag))).unwrap_throw();
+						classes.toggle_with_force("a3", matches!(self.animation, Some(Animation::Abduction))).unwrap_throw();
+					}
+					else {
+						classes.toggle_with_force("a2", matches!(self.animation, Some(Animation::SneezeShadow))).unwrap_throw();
+						classes.toggle_with_force("a4", matches!(self.animation, Some(Animation::BigFishChild))).unwrap_throw();
+					}
 				}
 
 				if self.flags.transform_changed() {

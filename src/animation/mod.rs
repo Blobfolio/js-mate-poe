@@ -15,7 +15,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 60; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 62; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -46,6 +46,7 @@ const DEFAULT: &[Animation] = &[
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
 	Animation::BathDive,
+	Animation::BigFish,
 	Animation::BlackSheepChase,
 	Animation::BlackSheepRomance,
 	Animation::ChaseAMartian,
@@ -57,6 +58,7 @@ const ENTRANCE: &[Animation] = &[
 const FIRST: &[Animation] = &[
 	Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall,
 	Animation::BathDive,
+	Animation::BigFish,
 	Animation::BlackSheepChase,
 	Animation::BlackSheepRomance,
 	Animation::ChaseAMartian,
@@ -81,6 +83,7 @@ pub(crate) enum Animation {
 	BathDive,
 	Beg,
 	BeginRun,
+	BigFish,
 	BlackSheepChase,
 	BlackSheepRomance,
 	Bleat,
@@ -135,6 +138,7 @@ pub(crate) enum Animation {
 	// Animations for the child mates.
 	AbductionChild,
 	BathDiveChild,
+	BigFishChild,
 	BlackSheepChaseChild,
 	BlackSheepRomanceChild,
 	ChaseAMartianChild,
@@ -171,12 +175,13 @@ impl Animation {
 		matches!(
 			self,
 			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
-			Self::BlackSheepChase | Self::BlackSheepRomance | Self::Bleat |
-			Self::Blink | Self::BoredSleep | Self::ChaseAMartian | Self::Doze |
-			Self::Eat | Self::Handstand | Self::Jump | Self::PlayDead | Self::Rest |
-			Self::Roll | Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze | Self::Spin |
-			Self::Stargaze | Self::Urinate | Self::Walk | Self::Yoyo
+			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
+			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
+			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
+			Self::PlayDead | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
+			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
+			Self::Slide | Self::Sneeze | Self::Spin | Self::Stargaze |
+			Self::Urinate | Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -209,18 +214,25 @@ impl Animation {
 	pub(crate) const fn as_str(self) -> &'static str {
 		match self {
 			Self::Abduction => "Abduction",
+			Self::AbductionChild => "Abduction (Child)",
 			Self::BathCoolDown => "Bath Cool Down",
 			Self::BathDive => "Bath Dive",
+			Self::BathDiveChild => "Bathtub (Child)",
 			Self::Beg => "Beg",
 			Self::BeginRun => "Begin Run",
+			Self::BigFish => "Big Fish",
+			Self::BigFishChild => "Big Fish (Child)",
 			Self::BlackSheepChase => "Black Sheep Chase",
+			Self::BlackSheepChaseChild => "Black Sheep Chase (Child)",
 			Self::BlackSheepRomance => "Black Sheep Romance",
+			Self::BlackSheepRomanceChild => "Black Sheep Romance (Child)",
 			Self::Bleat => "Bleat",
 			Self::Blink => "Blink",
 			Self::Boing => "Boing!",
 			Self::BoredSleep => "Bored Sleep",
 			Self::Bounce => "Bounce",
 			Self::ChaseAMartian => "Chase a Martian",
+			Self::ChaseAMartianChild => "Chase a Martian (Child)",
 			Self::ClimbDown => "Climb Down",
 			Self::ClimbUp => "Climb Up",
 			Self::DangleFall => "Dangle (Maybe) Fall",
@@ -231,6 +243,7 @@ impl Animation {
 			Self::Eat => "Eat",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
+			Self::FlowerChild => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Jump => "Jump",
@@ -252,22 +265,16 @@ impl Animation {
 			Self::Slide => "Slide",
 			Self::SlideDown => "Slide Down",
 			Self::Sneeze => "Sneeze",
+			Self::SneezeShadow => "Sneeze Shadow (Child)",
 			Self::Spin => "Spin",
 			Self::Splat => "Splat",
 			Self::Stargaze => "Stargaze",
+			Self::StargazeChild => "Stargaze (Child)",
 			Self::Urinate => "Urinate",
 			Self::Walk => "Walk",
 			Self::WalkUpsideDown => "Walk Upside Down",
 			Self::WallSlide => "Wall Slide",
 			Self::Yoyo => "Yo-Yo",
-			Self::AbductionChild => "Abduction (Child)",
-			Self::BathDiveChild => "Bathtub (Child)",
-			Self::BlackSheepChaseChild => "Black Sheep Chase (Child)",
-			Self::BlackSheepRomanceChild => "Black Sheep Romance (Child)",
-			Self::ChaseAMartianChild => "Chase a Martian (Child)",
-			Self::FlowerChild => "Flower (Child)",
-			Self::SneezeShadow => "Sneeze Shadow (Child)",
-			Self::StargazeChild => "Stargaze (Child)",
 		}
 	}
 }
@@ -281,8 +288,8 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::Drag | Self::Fall | Self::GraspingFall |
-			Self::SneezeShadow
+			Self::Abduction | Self::BigFishChild | Self::Drag | Self::Fall |
+			Self::GraspingFall | Self::SneezeShadow
 		)
 	}
 
@@ -335,19 +342,19 @@ impl Animation {
 		matches!(
 			self,
 			Self::Abduction | Self::BathCoolDown | Self::BathDive | Self::Beg |
-			Self::BeginRun | Self::BlackSheepChase | Self::BlackSheepRomance |
-			Self::Bleat | Self::Blink | Self::Boing | Self::BoredSleep |
-			Self::Bounce | Self::ChaseAMartian | Self::ClimbDown | Self::ClimbUp |
-			Self::DangleFall | Self::DangleRecover | Self::DeepThoughts |
-			Self::Doze | Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
-			Self::GraspingFall | Self::Handstand | Self::Jump | Self::PlayDead |
-			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
-			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
-			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
-			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
-			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
-			Self::Stargaze | Self::Urinate | Self::Walk | Self::WalkUpsideDown |
-			Self::WallSlide | Self::Yoyo
+			Self::BeginRun | Self::BigFish | Self::BlackSheepChase |
+			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
+			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
+			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
+			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
+			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
+			Self::Handstand | Self::Jump | Self::PlayDead | Self::ReachCeiling |
+			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
+			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
+			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
+			Self::Sleep | Self::Slide | Self::SlideDown | Self::Sneeze |
+			Self::Spin | Self::Splat | Self::Stargaze | Self::Urinate |
+			Self::Walk | Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -360,6 +367,7 @@ impl Animation {
 		match self {
 			Self::Abduction => Some(Self::AbductionChild),
 			Self::BathDive => Some(Self::BathDiveChild),
+			Self::BigFish => Some(Self::BigFishChild),
 			Self::BlackSheepChase => Some(Self::BlackSheepChaseChild),
 			Self::BlackSheepRomance => Some(Self::BlackSheepRomanceChild),
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
@@ -384,6 +392,7 @@ impl Animation {
 			Self::Abduction => Some(Self::ChaseAMartian),
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::BeginRun | Self::BlackSheepChase | Self::Scream => Some(Self::Run),
+			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
 			Self::Boing => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk,
@@ -508,6 +517,8 @@ impl Animation {
 			Self::BathDiveChild => fixed!(BATH_DIVE_CHILD),
 			Self::Beg => fixed!(BEG),
 			Self::BeginRun | Self::EndRun => fixed!(BEGIN_END_RUN),
+			Self::BigFish => fixed!(BIG_FISH),
+			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
 			Self::BlackSheepChase => scenes::black_sheep_chase(width),
 			Self::BlackSheepChaseChild => scenes::black_sheep_chase_child(width),
 			Self::BlackSheepRomance => scenes::black_sheep_romance(width),

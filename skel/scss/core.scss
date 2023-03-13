@@ -71,6 +71,15 @@ $height: 440px;
 // Animation: Abduction.
 #p.a3 { animation: a3 0.25s 4.2s infinite; }
 
+// Animation: Big Fish.
+#p.a4 {
+	transform:
+		translate3d(var(--x, 0), var(--y, 0), 0)
+		var(--rx, rotateY(0deg))
+		var(--ry, rotateX(0deg))
+		scale(3);
+}
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
