@@ -7,28 +7,32 @@ A compact, dependency-free ~~JavaScript~~ wasm implementation of the beloved 16-
 &nbsp;
 ## Features
 
-There have been dozens of ports of Screen Mate Poe over the past 27s years, including several browser-based implementations such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — _ancient_ in web years! — and either rely on bloated frameworks like jQuery or use outdated/nonperformant animation techniques like `setTimeout()`.
+There have been dozens of ports of Screen Mate Poe over the past 27 years, including several browser-based implementations such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now ancient and either rely on bloated frameworks like jQuery or use outdated/nonperformant animation techniques like `setTimeout()`.
 
-JS Mate Poe is a lean, web-first iteration designed for playback in all modern web browsers, with all of the original characters, sounds, and animation sequences, except those relating to interactions with page objects. (Web page elements do not have coherent visual boundaries in the same way boxy desktop windows do, so Poe can't sit on a page title or anything like that. He will, however, occasionally climb up the side of the screen.)
+JS Mate Poe is a lean, web-first iteration designed for playback in all modern web browsers, with all of the original characters, sounds, and animation sequences — except those relating to interactions with page objects. (Web page elements do not have coherent visual boundaries in the same way boxy desktop windows do, so Poe can't sit on a page title or anything like that. He will, however, occasionally climb up the side of the screen.)
 
 As the name suggests, JS Mate Poe was originally a vanilla JavaScript project, but it has since been entirely re-rewritten in Rust — a real programming language! — and is now distributed as a compiled wasm binary instead.
 
-Unfortunately, at the moment, JavaScript is still needed to actually _load_ a wasm file into a browser, so "RS Mate Poe" requires two files rather than one. (Eventually that won't be the case, but for now, it is what it is…)
+Well, sort of.
 
-That said, both have been heavily optimized for size and are loadable asynchronously, so have a negligible impact on page loads and bandwidth:
+For whatever reason, browsers cannot yet directly load wasm applications; they have to be initialized with JavaScript "glue" instead.
 
-| Encoding | JS | Wasm | Total |
-| ---- | ---- | ---- | ---- |
-| None   | 8,491 | 71,076 | 79,567 |
-| Brotli | 2,567 | 53,750 | 56,317 |
-| Gzip   | 2,875 | 55,591 | 58,466 |
+So until that changes, the wasm binary is distributed _inside_ a standalone Javascript file. That isn't ideal, but it is what it is.
+
+Even so, JS Mate Poe has been heavily optimized for size to minimize the impact on page load and network:
+
+| Encoding | Bytes |
+| ---- | ---- |
+| None | 103,955 |
+| Brotli | 61,613 |
+| Gzip | 63,740 |
 
 
 
 &nbsp;
 ## Installation
 
-Adding the screen mate to your web page is very easy. Simply download the `js-mate-poe.min.js` and `js-mate-poe.wasm` files from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases), upload them to a location of your choosing, and add the following before the closing `</body>` tag of your web page:
+Adding the screen mate to your web page is very easy. Simply download the `js-mate-poe.min.js` script from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases), upload it to a location of your choosing, and add the following before the closing `</body>` tag of your web page:
 
 ```html
 <script async src="https://yourdomain.com/assets/js-mate-poe.min.js"></script>
@@ -36,16 +40,11 @@ Adding the screen mate to your web page is very easy. Simply download the `js-ma
 
 That's it!
 
-Poe will automatically start running around the screen as soon as everything has loaded.
+By default, Poe will start playing automatically as soon as its script has loaded, but if you'd rather handle that manually — refer to the [next section](#methods) — just add a `data-manual` attribute to the script tag, like:
 
-Speaking of loading, the `js-mate-poe.min.js` script infers the path of the `js-mate-poe.wasm` binary using its own location. Be sure the two files are uploaded to the same directory, with their original names, or the former won't be able to find the latter.
-
-
-
-&nbsp;
-## Legacy Version
-
-While all modern browsers support wasm, some servers and content management systems do not. If you can't get it working for whatever reason, you might want to try version [1.3.7](https://github.com/Blobfolio/js-mate-poe/tree/v1.3.7#installation) instead, the last JavaScript-only release.
+```html
+<script async data-manual src="https://yourdomain.com/assets/js-mate-poe.min.js"></script>
+```
 
 
 
@@ -54,27 +53,23 @@ While all modern browsers support wasm, some servers and content management syst
 
 All of the public endpoints are made available through the global `window.Poe` object.
 
-
-&nbsp;
 ### Starting/Stopping Poe
 
-Poe starts automatically once its script has loaded.
-
-If you subsequently want to _stop_ the madness, you can either double-click Poe with your mouse, or use the `Poe.active` setter like:
+You can use the `Poe.active` getter/setter to check or change the current state (i.e. turn it on or off).
 
 **Example:**
 
 ```js
-// Disable Poe (and remove all corresponding elements and
-// event listeners from the page):
+// Check if Poe is currently running.
+console.log(Poe.active); // true
+
+// Disable Poe (and remove its DOM elements and event bindings).
 Poe.active = false;
 
-// Restart Poe (and recreate the elements and event listeners):
+// (Re)start Poe.
 Poe.active = true;
 ```
 
-
-&nbsp;
 ### Audio Playback
 
 Some of the animation sequences make noise. Audio playback is enabled by default because it is adorable, but it can be disabled if you're a party pooper.
@@ -95,8 +90,6 @@ Poe.audio = true;
 console.log(Poe.audio); // true
 ```
 
-
-&nbsp;
 ### Playback Speed
 
 The playback animation speed can be adjusted up or down to either slow or speed up the action. Values between `0` (paused) and `10` (10x speed) are supported.

@@ -15,23 +15,23 @@
 # recipes.
 ##
 
-pkg_id      := "rs_mate_poe"
-pkg_name    := "RS Mate Poe"
+pkg_id        := "rs_mate_poe"
+pkg_name      := "RS Mate Poe"
 
-cargo_dir   := "/tmp/" + pkg_id + "-cargo"
-doc_dir     := justfile_directory() + "/doc"
-release_dir := justfile_directory() + "/release"
-skel_dir    := justfile_directory() + "/skel"
-wasm_dir    := release_dir + "/wasm"
+cargo_dir     := "/tmp/" + pkg_id + "-cargo"
+doc_dir       := justfile_directory() + "/doc"
+release_dir   := justfile_directory() + "/release"
+skel_dir      := justfile_directory() + "/skel"
+generated_dir := skel_dir + "/js/generated"
 
 
 
 # Build.
 @build FEATURES="":
 	# Nuke any previous wasm output.
-	[ ! -d "{{ wasm_dir }}" ] || rm -rf "{{ wasm_dir }}"
-	[ ! -d "{{ skel_dir }}/js/wasm" ] || rm -rf "{{ skel_dir }}/js/wasm"
-	mkdir "{{ wasm_dir }}"
+	[ ! -d "{{ release_dir }}" ] || rm -rf "{{ release_dir }}"
+	[ ! -d "{{ generated_dir }}" ] || rm -rf "{{ generated_dir }}"
+	mkdir "{{ release_dir }}"
 
 	# Build One.
 	fyi print -p "Stage #1" "Compile wasm binary."
@@ -48,7 +48,7 @@ wasm_dir    := release_dir + "/wasm"
 	# Build Two.
 	fyi print -p "Stage #2" "Run wasm-bindgen."
 	wasm-bindgen \
-		--out-dir "{{ skel_dir }}/js/wasm" \
+		--out-dir "{{ generated_dir }}" \
 		--target web \
 		--no-typescript \
 		--omit-default-module-path \
@@ -56,58 +56,77 @@ wasm_dir    := release_dir + "/wasm"
 		--reference-types \
 		"{{ cargo_dir }}/wasm32-unknown-unknown/release/{{ pkg_id }}.wasm"
 
+	# Patch away some tediousness from the JS.
+	cd "{{ generated_dir }}" && patch -p1 -i ../js.patch
+
 	# Build Three.
 	fyi print -p "Stage #3" "Run wasm-opt."
-	wasm-opt "{{ skel_dir }}/js/wasm/{{ pkg_id }}_bg.wasm" \
+	wasm-opt "{{ generated_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
 		--enable-multivalue \
 		-O3 -Oz \
-		-o "{{ wasm_dir }}/js-mate-poe.wasm"
+		-o "{{ generated_dir }}/js-mate-poe.wasm"
+	rm "{{ generated_dir }}/{{ pkg_id }}_bg.wasm"
 
 	# Build Four.
-	fyi print -p "Stage #4" "Compile and minify JS bootstrap."
+	fyi print -p "Stage #4" "Compile javascript."
 	just _build-js
 
-	# Done!
+	# Encode some things!
+	channelz "{{ release_dir }}"
 	just _fix-chown "{{ release_dir }}"
 	just _fix-chown "{{ skel_dir }}"
+
+	# Done!
 	fyi success "Done!"
 
 
-# Build JS.
+# Build Combined JS.
 @_build-js:
-	# Make sure we ran build first.
-	[ -d "{{ wasm_dir }}" ] || fyi error -e 1 "Missing {{ wasm_dir }}"
-	[ -f "{{ skel_dir }}/js/wasm/{{ pkg_id }}.js" ] || fyi error -e 1 "Missing {{ pkg_id }}.js"
+	# Make sure we ran the other builds first.
+	[ -f "{{ generated_dir }}/js-mate-poe.wasm" ] || fyi error -e 1 "Missing js-mate-poe.wasm"
+	[ -f "{{ generated_dir }}/{{ pkg_id }}.js" ] || fyi error -e 1 "Missing {{ pkg_id }}.js"
 
-	# Remove this long-ass console message from the JS.
-	sd -s 'console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);' '' \
-		"{{ skel_dir }}/js/wasm/{{ pkg_id }}.js"
+	# Base64-encode the wasm.
+	echo -n "export const wasmFile = '" > "{{ generated_dir }}/wasm_file.mjs"
+	cat "{{ generated_dir }}/js-mate-poe.wasm" | base64 -w0 >> "{{ generated_dir }}/wasm_file.mjs"
+	echo "';" >> "{{ generated_dir }}/wasm_file.mjs"
+
+	just _fix-chown "{{ skel_dir }}"
 
 	# Compile the JS module into a normal script.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--js "{{ skel_dir }}/js/wasm/{{ pkg_id }}.js" \
-		--js "{{ skel_dir }}/js/entrypoint.mjs" \
+		--js "{{ generated_dir }}/{{ pkg_id }}.js" \
+		--js "{{ generated_dir }}/wasm_file.mjs" \
+		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
+		--js "{{ skel_dir }}/js/entry.mjs" \
+		--entry_point "{{ skel_dir }}/js/entry.mjs" \
 		--js_output_file "/tmp/{{ pkg_id }}.js" \
-		--compilation_level WHITESPACE_ONLY \
-		--entry_point "{{ skel_dir }}/js/entrypoint.mjs" \
+		--assume_function_wrapper \
 		--browser_featureset_year 2021 \
-		--isolation_mode IIFE \
+		--compilation_level WHITESPACE_ONLY \
+		--isolation_mode NONE \
+		--jscomp_off unknownDefines \
 		--module_resolution BROWSER \
 		--warning_level VERBOSE
 
 	# Compress the script.
 	cat "/tmp/{{ pkg_id }}.js" | \
-		terser -c ecma=2021,passes=25 -m -o "/tmp/{{ pkg_id }}.min.js"
+		terser \
+			-c ecma=2021,passes=25 \
+			-e currentScript:document.currentScript \
+			-m \
+			-o "/tmp/{{ pkg_id }}.min.js"
 
 	# Add the version header.
 	cat \
 		"$( find "{{ cargo_dir }}/wasm32-unknown-unknown/release" -name 'header.js' -type f -printf "%T@ %p\n"  | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
-		"/tmp/{{ pkg_id }}.min.js" > "{{ wasm_dir }}/js-mate-poe.min.js"
+		"/tmp/{{ pkg_id }}.min.js" > "{{ release_dir }}/js-mate-poe.min.js"
 
-	channelz "{{ release_dir }}"
+	# Copy the example HTML.
+	cp -a "{{ skel_dir }}/html/index.html" "{{ release_dir }}/index.html"
 
 
 # Clean Cargo crap.

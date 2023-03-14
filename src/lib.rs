@@ -69,6 +69,7 @@ use wasm_bindgen::prelude::*;
 
 
 
+#[cfg(feature = "director")]
 #[wasm_bindgen(start)]
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Bootstrap.
@@ -76,10 +77,7 @@ use wasm_bindgen::prelude::*;
 /// Automatically start up the Poe animations as soon as the WASM content has
 /// initialized in the browser.
 pub fn bootstrap() {
-	#[cfg(feature = "director")]
 	dom::info!(format!("{}\n{}", Poe::version(), Poe::ascii()));
-
-	Poe::set_active(true);
 }
 
 
@@ -98,6 +96,14 @@ pub struct Poe;
 #[wasm_bindgen]
 /// ## Getters.
 impl Poe {
+	#[wasm_bindgen(getter)]
+	#[must_use]
+	#[inline]
+	/// # Is Poe Active?
+	///
+	/// Return `true` if active, or `false` if not.
+	pub fn active() -> bool { Universe::active() }
+
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(getter)]
 	#[must_use]

@@ -3,5 +3,5 @@
 /Cargo.lock
 /doc/
 /release/
-/skel/js/wasm/
+/skel/js/generated/
 /target/

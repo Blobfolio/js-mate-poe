@@ -1,0 +1,53 @@
+diff --git a/rs_mate_poe.js b/rs_mate_poe.js
+index af05090..0281157 100644
+--- a/rs_mate_poe.js
++++ b/rs_mate_poe.js
+@@ -216,33 +216,13 @@ export class Poe {
+ }
+ 
+ async function load(module, imports) {
+-    if (typeof Response === 'function' && module instanceof Response) {
+-        if (typeof WebAssembly.instantiateStreaming === 'function') {
+-            try {
+-                return await WebAssembly.instantiateStreaming(module, imports);
+-
+-            } catch (e) {
+-                if (module.headers.get('Content-Type') != 'application/wasm') {
+-                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
+-
+-                } else {
+-                    throw e;
+-                }
+-            }
+-        }
++    const instance = await WebAssembly.instantiate(module, imports);
+ 
+-        const bytes = await module.arrayBuffer();
+-        return await WebAssembly.instantiate(bytes, imports);
++    if (instance instanceof WebAssembly.Instance) {
++        return { instance, module };
+ 
+     } else {
+-        const instance = await WebAssembly.instantiate(module, imports);
+-
+-        if (instance instanceof WebAssembly.Instance) {
+-            return { instance, module };
+-
+-        } else {
+-            return instance;
+-        }
++        return instance;
+     }
+ }
+ 
+@@ -520,10 +500,6 @@ async function init(input) {
+ 
+     const imports = getImports();
+ 
+-    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
+-        input = fetch(input);
+-    }
+-
+     initMemory(imports);
+ 
+     const { instance, module } = await load(await input, imports);
