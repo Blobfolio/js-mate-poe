@@ -35,13 +35,9 @@ generated_dir := skel_dir + "/js/generated"
 
 	# Build One.
 	fyi print -p "Stage #1" "Compile wasm binary."
-	[ -z "{{ FEATURES }}" ] || cargo build \
+	cargo build \
 		--release \
 		--features "{{ FEATURES }}" \
-		--target wasm32-unknown-unknown \
-		--target-dir "{{ cargo_dir }}"
-	[ ! -z "{{ FEATURES }}" ] || cargo build \
-		--release \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
@@ -84,8 +80,8 @@ generated_dir := skel_dir + "/js/generated"
 # Build Combined JS.
 @_build-js:
 	# Make sure we ran the other builds first.
-	[ -f "{{ generated_dir }}/js-mate-poe.wasm" ] || fyi error -e 1 "Missing js-mate-poe.wasm"
-	[ -f "{{ generated_dir }}/{{ pkg_id }}.js" ] || fyi error -e 1 "Missing {{ pkg_id }}.js"
+	just _require "{{ generated_dir }}/js-mate-poe.wasm"
+	just _require "{{ generated_dir }}/{{ pkg_id }}.js"
 
 	# Base64-encode the wasm.
 	echo -n "export const wasmFile = '" > "{{ generated_dir }}/wasm_file.mjs"
@@ -237,7 +233,7 @@ version:
 
 # Set Cargo version for real.
 @_version DIR VER:
-	[ -f "{{ DIR }}/Cargo.toml" ] || exit 1
+	just _require "{{ DIR }}/Cargo.toml"
 
 	# Set the release version!
 	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
@@ -259,3 +255,8 @@ version:
 # Initialization.
 @_init:
 	[ $(command -v wasm-pack) ] || cargo install wasm-pack
+
+
+# Require Thing Exists.
+@_require PATH:
+	[ -e "{{ PATH }}" ] || fyi error -e 1 "Missing {{ PATH }}"
