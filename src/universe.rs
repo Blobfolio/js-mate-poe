@@ -10,11 +10,11 @@ use crate::{
 #[cfg(feature = "director")] use crate::{Animation, dom};
 use std::sync::atomic::{
 	AtomicU8,
-	AtomicU16,
 	AtomicU32,
 	AtomicU64,
 	Ordering::SeqCst,
 };
+#[cfg(feature = "director")] use std::sync::atomic::AtomicU16;
 
 
 
@@ -46,6 +46,7 @@ static POS: AtomicU64 = AtomicU64::new(0);
 /// during initialization.
 static SEED: AtomicU64 = AtomicU64::new(0x8a5c_d789_635d_2dff);
 
+#[cfg(feature = "director")]
 /// # Speed.
 ///
 /// This holds the playback speed as an integer percentage in the range of
@@ -112,9 +113,14 @@ impl Universe {
 		Self::NO_CHILD == old & Self::NO_CHILD
 	}
 
+	#[cfg(feature = "director")]
 	#[inline]
 	/// # Are We Paused?
 	pub(crate) fn paused() -> bool { SPEED.load(SeqCst) == 0 }
+
+	#[cfg(not(feature = "director"))]
+	/// # We Aren't Paused.
+	pub(crate) const fn paused() -> bool { false }
 
 	/// # Position.
 	///
@@ -147,15 +153,6 @@ impl Universe {
 			(w, 0) => (w, 1),
 			(w, h) => (w, h),
 		}
-	}
-
-	/// # Speed.
-	///
-	/// Returns the current playback speed if other than "normal" or paused.
-	pub(crate) fn speed() -> Option<f32> {
-		let speed = SPEED.load(SeqCst);
-		if speed == 0 || speed == 100 { None }
-		else { Some(f32::from(speed) / 100.0) }
 	}
 }
 
@@ -280,6 +277,18 @@ impl Universe {
 		]);
 		POS.store(pos, SeqCst);
 	}
+}
+
+#[cfg(feature = "director")]
+impl Universe {
+	/// # Speed.
+	///
+	/// Returns the current playback speed if other than "normal" or paused.
+	pub(crate) fn speed() -> Option<f32> {
+		let speed = SPEED.load(SeqCst);
+		if speed == 0 || speed == 100 { None }
+		else { Some(f32::from(speed) / 100.0) }
+	}
 
 	#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 	/// # Set Speed.
@@ -298,10 +307,7 @@ impl Universe {
 			"Playback Speed: {speed:.2}%"
 		));
 	}
-}
 
-#[cfg(feature = "director")]
-impl Universe {
 	/// # Browserland Next Animation.
 	///
 	/// This returns (and clears) the animation set by `Poe.play`, if any.

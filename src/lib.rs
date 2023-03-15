@@ -132,6 +132,7 @@ impl Poe {
 		include_str!("../skel/playlist.txt").to_owned()
 	}
 
+	#[cfg(feature = "director")]
 	#[wasm_bindgen(getter)]
 	#[must_use]
 	/// # Playback Speed.
@@ -172,6 +173,7 @@ impl Poe {
 	/// Enable or disable audio playback.
 	pub fn set_audio(v: bool) { Universe::set_audio(v); }
 
+	#[cfg(feature = "director")]
 	#[wasm_bindgen(setter)]
 	#[inline]
 	/// # Set Playback Speed.

@@ -6,7 +6,6 @@ use crate::{
 	Direction,
 	Position,
 	Sound,
-	Universe,
 };
 use std::num::NonZeroU16;
 
@@ -105,6 +104,20 @@ impl Scene {
 			else { None }
 		}
 		else { None }
+	}
+
+	#[cfg(not(feature = "director"))]
+	/// # Next Tick.
+	pub(crate) const fn next_tick(&self) -> u16 { self.fpms }
+
+	#[cfg(feature = "director")]
+	#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+	/// # Next Tick.
+	pub(crate) fn next_tick(&self) -> u16 {
+		crate::Universe::speed().map_or(
+			self.fpms,
+			|speed| (f32::from(self.fpms) / speed) as u16
+		)
 	}
 }
 
@@ -213,11 +226,7 @@ impl SceneList {
 impl Iterator for SceneList {
 	type Item = Step;
 
-	#[allow(
-		clippy::cast_possible_truncation,
-		clippy::cast_precision_loss,
-		clippy::cast_sign_loss,
-	)]
+	#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
 	fn next(&mut self) -> Option<Self::Item> {
 		loop {
 			let scene = self.scenes.get(self.scene_idx)?;
@@ -278,10 +287,7 @@ impl Iterator for SceneList {
 					direction,
 					frame: scene.frame_at_step(self.step_idx - 1),
 					sound: scene.sound_at_step(self.step_idx - 1),
-					next_tick: Universe::speed().map_or(
-						scene.fpms,
-						|speed| (f32::from(scene.fpms) / speed) as u16
-					),
+					next_tick: scene.next_tick(),
 					scene_flags,
 				});
 			}
