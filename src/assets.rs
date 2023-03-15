@@ -9,15 +9,17 @@ use web_sys::Blob;
 
 const IMG_POE: &[u8] = include_bytes!("../skel/img/poe.png");
 
-#[cfg(not(feature = "flac"))] const SND_BAA: &[u8] = include_bytes!("../skel/sound/baa.mp3");
-#[cfg(not(feature = "flac"))] const SND_SNEEZE: &[u8] = include_bytes!("../skel/sound/sneeze.mp3");
-#[cfg(not(feature = "flac"))] const SND_YAWN: &[u8] = include_bytes!("../skel/sound/yawn.mp3");
-#[cfg(not(feature = "flac"))] const SND_MIME: &str = "audio/mp3";
+macro_rules! audio {
+	($ext:literal) => (
+		const SND_BAA: &[u8] = include_bytes!(concat!("../skel/sound/baa.", $ext));
+		const SND_SNEEZE: &[u8] = include_bytes!(concat!("../skel/sound/sneeze.", $ext));
+		const SND_YAWN: &[u8] = include_bytes!(concat!("../skel/sound/yawn.", $ext));
+		const SND_MIME: &str = concat!("audio/", $ext);
+	);
+}
 
-#[cfg(feature = "flac")] const SND_BAA: &[u8] = include_bytes!("../skel/sound/baa.flac");
-#[cfg(feature = "flac")] const SND_SNEEZE: &[u8] = include_bytes!("../skel/sound/sneeze.flac");
-#[cfg(feature = "flac")] const SND_YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
-#[cfg(feature = "flac")] const SND_MIME: &str = "audio/flac";
+#[cfg(not(feature = "flac"))] audio!("mp3");
+#[cfg(feature = "flac")]      audio!("flac");
 
 
 
