@@ -122,7 +122,7 @@ generated_dir := skel_dir + "/js/generated"
 
 	# Add the version header.
 	cat \
-		"$( find "{{ cargo_dir }}/wasm32-unknown-unknown/release" -name 'header.js' -type f -printf "%T@ %p\n"  | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
+		"{{ skel_dir }}/js/header.js" \
 		"/tmp/{{ pkg_id }}.min.js" > "{{ release_dir }}/js-mate-poe.min.js"
 
 	# Copy the example HTML.
@@ -174,9 +174,6 @@ generated_dir := skel_dir + "/js/generated"
 
 # Build Docs.
 @doc:
-	# Make sure nightly is installed; this version generates better docs.
-	# env RUSTUP_PERMIT_COPY_RENAME=true rustup install nightly
-
 	# Make the docs.
 	cargo rustdoc \
 		--release \
@@ -229,8 +226,16 @@ version:
 	# Set the release version!
 	just _version "{{ justfile_directory() }}" "$_ver2"
 
+	# Set Extension Version.
+	jq --arg _version "$_version" '.version = $_version' "{{ skel_dir }}/firefox/manifest.json" > /tmp/manifest.json
+	mv /tmp/manifest.json "{{ skel_dir }}/firefox/manifest.json"
+	just _fix-chown "{{ skel_dir }}"
 
-# Set version for real.
+	# Set JS Header Version.
+	sd '@version [\d.]+' "@version $_ver2" "{{ skel_dir }}/js/header.js"
+
+
+# Set Cargo version for real.
 @_version DIR VER:
 	[ -f "{{ DIR }}/Cargo.toml" ] || exit 1
 

@@ -20,10 +20,6 @@ pub fn main() {
 	write_file(&path, format!(
 		r#"<style>{css}</style><div id="p" class="child off"><img id="i" width="640" height="440"></div>"#
 	).as_bytes());
-
-	let js = build_js_header();
-	let path = out_path("header.js");
-	write_file(&path, js.as_bytes());
 }
 
 fn build_css() -> String {
@@ -32,19 +28,6 @@ fn build_css() -> String {
 		.expect("Unable to parse core.scss")
 		.minified(None)
 		.expect("Unable to minify core.css")
-}
-
-fn build_js_header() -> String {
-	format!(
-		r#"/**
- * JS Mate Poe
- *
- * @version {}
- * @see {{https://github.com/Blobfolio/js-mate-poe}}
- */
-"#,
-		std::env::var("CARGO_PKG_VERSION").expect("Missing version."),
-	)
 }
 
 /// # Out path.
