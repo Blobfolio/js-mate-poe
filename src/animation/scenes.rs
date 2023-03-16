@@ -204,9 +204,9 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 		.with_repeat(15, 5),
 	Scene::new(50, &[50, 51])
 		.with_repeat(12, 0),
-	Scene::new(150, &[3, 9, 10])
+	Scene::new(50, &[3, 9, 10])
 		.with_flags(Scene::FLIP_X_NEXT),
-	Scene::new(150, &[10, 9, 3]),
+	Scene::new(50, &[10, 9, 3]),
 ];
 
 /// # For `Animation::Drag`.
@@ -260,14 +260,10 @@ pub(super) const HANDSTAND: &[Scene] = &[
 
 /// # For `Animation::Jump`.
 pub(super) const JUMP: &[Scene] = &[
-	Scene::new(40, &[76, 76, 30])
-		.with_move_to(Position::new(-50, -30))
-		.with_repeat(7, 2),
-	Scene::new(25, &[23])
-		.with_move_to(Position::new(-32, 0))
-		.with_repeat(3, 0),
-	Scene::new(40, &[24, 24, 24, 24, 24, 24, 24, 24, 77, 77])
-		.with_move_to(Position::new(-50, 30)),
+	Scene::new(35, &[76, 76, 30, 30, 30, 30, 30, 30, 23])
+		.with_move_to(Position::new(-54, -18)),
+	Scene::new(35, &[23, 23, 23, 24, 24, 24, 24, 77, 77])
+		.with_move_to(Position::new(-45, 18)),
 ];
 
 /// # For `Animation::PlayDead`.
