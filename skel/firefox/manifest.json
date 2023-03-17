@@ -1,0 +1,66 @@
+{
+    "manifest_version": 3,
+    "browser_specific_settings":
+    {
+        "gecko":
+        {
+            "id": "js-mate-poe@blobfolio.com",
+            "update_url": "https://github.com/Blobfolio/js-mate-poe/blob/master/skel/firefox/updates.json"
+        }
+    },
+    "name": "JS Mate Poe",
+    "version": "1.4.0",
+    "author": "Blobfolio, LLC",
+    "description": "Add Screen Mate Poe to your active tab for company and amusement.",
+    "homepage_url": "https://github.com/Blobfolio/js-mate-poe",
+    "icons":
+    {
+        "24": "image/walk.svg",
+        "48": "image/walk.svg",
+        "96": "image/walk.svg"
+    },
+    "content_security_policy":
+    {
+        "extension_pages": "default-src 'self'"
+    },
+    "action":
+    {
+        "default_icon": "image/sleep.svg",
+        "default_title": "Enable JS Mate Poe"
+    },
+    "background":
+    {
+        "scripts":
+        [
+            "background.js"
+        ]
+    },
+    "content_scripts":
+    [
+        {
+            "matches":
+            [
+                "<all_urls>"
+            ],
+            "js":
+            [
+                "foreground.js"
+            ]
+        }
+    ],
+    "web_accessible_resources":
+    [
+        {
+            "resources":
+            [
+                "sound/baa.flac",
+                "sound/sneeze.flac",
+                "sound/yawn.flac"
+            ],
+            "matches":
+            [
+                "<all_urls>"
+            ]
+        }
+    ]
+}

@@ -1,144 +1,101 @@
 # JS Mate Poe
 
-A compact, dependency-free Javascript implementation of the beloved 16-bit Screen Mate Poe Windows program released in 1996.
+[![ci](https://img.shields.io/github/actions/workflow/status/Blobfolio/js-mate-poe/ci.yaml?style=flat-square&label=ci)](https://github.com/Blobfolio/js-mate-poe/actions)
+[![deps.rs](https://deps.rs/repo/github/blobfolio/js-mate-poe/status.svg?style=flat-square&label=deps.rs)](https://deps.rs/repo/github/blobfolio/js-mate-poe)<br>
+[![license](https://img.shields.io/badge/license-wtfpl-ff1493?style=flat-square)](https://en.wikipedia.org/wiki/WTFPL)
+[![contributions welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&label=contributions)](https://github.com/Blobfolio/js-mate-poe/issues)
 
+A compact, dependency-free ~~Javascript~~ [wasm](https://en.wikipedia.org/wiki/WebAssembly) recreation of the beloved 16-bit Screen Mate Poe Windows program, distributed as a standalone library and a Firefox browser extension.
 
-
-&nbsp;
-##### Table of Contents
-
-1. [Features](#features)
-2. [Installation](#installation)
-3. [Methods](#methods)
-4. [License](#license)
-5. [Credits](#credits)
-
+<img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.png" width="30%" alt="Add Poe to any site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.png" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.png" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
 
 
 &nbsp;
-## Features
+## About
 
-There have been dozens of ports of Screen Mate Poe over the past 23 years, including several browser-based implementations such as [this](http://esheep.petrucci.ch/) and [this](https://github.com/tobozo/jqsheep). Unfortunately many of the projects are now old — *ancient* in web years! — and either rely on bloated frameworks like jQuery or use outdated animation techniques like `setTimeout()`.
+There have been several ports of Screen Mate Poe since its original release in 1996, but modern desktop environments simply aren't _capable_ of running anything like a "screen mate" app anymore. (Display servers no longer give applications unfettered, global access to every conceivable windowing property, for reasons obvious in hindsight.)
 
-JS Mate Poe is a web-first, self-contained implementation written in vanilla Javascript. Everything it needs — graphics, sounds, styles — are embedded in the [main script](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/js-mate-poe.min.js), making installation a breeze. It takes advantage of all of the latest and greatest [ECMAScript](https://en.wikipedia.org/wiki/ECMAScript) goodies, including `requestAnimationFrame()` to maximize playback framerate while keeping resource requirements to a minimum.
+But hey, the Internet is a thing now!
 
-The JS Mate Poe script has also been heavily optimized using [Google Closure Compiler](https://developers.google.com/closure/compiler/). Its impact on your page's load time will be minimal, particularly if your server supports serving Gzip and/or Brotli-encoded data.
+JS Mate Poe is a lean, web-first iteration designed for playback in modern web browsers. It was originally written in vanilla Javascript, but has since been re-rewritten in Rust, and is now compactly compiled to wasm.
 
-| Encoding | Size |
-| -------- | ---- |
-| None | 89,087 Bytes |
-| Gzip | 52,132 Bytes |
-| Brotli | 51,230 Bytes |
+It includes all the original characters and sounds, most of the animation sequences — a few desktop-specific things have been omitted, and I've probably forgotten a few — and some _new_ sequences and visual enhancements.
 
-The [latest release](https://github.com/Blobfolio/js-mate-poe/releases/latest) contains all of the main animation sequences, including complex multi-sprite interactions such as alien encounters and multimedia experiences such as sneezing and bleating. Poe can also be dragged around the screen using your mouse (if you're *that* kind of person!).
+JS Mate Poe has been heavily optimized for both performance and size — it's smaller than the original! — ensuring a minimal impact on page load, bandwidth, and/or user experience. It is framework-free, isolated (via `ShadowDOM`), leverages hardware-accelerated rendering, and is all around _adorable_.
 
-JS Mate Poe *does not* support alternate characters or sprites; it's Poe or bust. Also intentionally omitted are interactions with individual page elements such as `<div>` or `<h1>`; edge detection is instead bound to the main window.
-
-To see JS Mate Poe in action — and for a full list of animation sequences — look at [`dist/demo/`](https://github.com/Blobfolio/js-mate-poe/blob/master/dist/demo/).
-
+You're welcome!
 
 
 &nbsp;
 ## Installation
 
-Adding the screen mate to your web page is very easy. All you need to do is download and include `dist/js-mate-poe.min.js` and then call `Poe.start()`.
+JS Mate Poe is distributed as both a general purpose Javascript library and as a Firefox browser extension.
+
+
+### Library
+
+To add the screen mate to your own web page, all you need to do is grab the `js-mate-poe.min.js` script from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases), upload it to a location of your choosing, and add the following code snippet before the closing `</body>` tag of your HTML:
 
 ```html
-<script src="js-mate-poe.min.js"></script>
-<script>
-    // Start the screen mate.
-    Poe.start();
-</script>
+<script async src="https://domain.com/path/to/js-mate-poe.min.js"></script>
 ```
 
-If your web page has a lot going on, you might want to wait to trigger Poe's entrance until everything else has finished loading.
+By default, that's all you need to do! Poe will automatically start running around as soon as the script has loaded.
 
-```js
-window.addEventListener('load', Poe.start, { once: true });
+If you'd prefer to handle playback manually, or want to disable the sounds he occasionally makes, do the same thing, but add a `data-no-start` and/or `data-no-audio` attribute to the script tag, like:
+
+```html
+<script async data-no-sound data-no-start src="https://domain.com/path/to/js-mate-poe.min.js"></script>
 ```
 
+The [next section](#advanced-library-usage) covers the minimal API, which you'd need to use to enable Poe programmatically.
+
+
+### Firefox Extension
+
+The Firefox browser extension lets you add Poe to any web page with the click of a button.
+
+The extension is signed, but self-hosted (in this repository), so it has to be installed manually the first time around:
+
+1. Grab the `js-mate-poe_*.xpi` package from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases)
+2. Pull up Firefox's addons page (`about:addons`)
+3. Click the gear/settings icon
+4. Select "Install Add-on From File"
+
+Before you can actually use the extension, you'll need to grant it "Access To Your Data On All Sites". This is silly and gratuitous because Poe doesn't give two bleats about "your data", but that permission is an all-or-nothing proposition. Because Poe needs permission to add _itself_ to a page (and read relevant properties like the window size and mouse position), Firefox assumes it needs _carte blanche_. Haha.
+
+At any rate, once installed, simply click the Poe icon to turn him on or off for the current tab!
+
+Hurray for constant companionship!
 
 
 &nbsp;
-## Methods
+## Advanced Library Usage
 
-All of the public endpoints are made available through the global `window.Poe` object.
+The standalone Javascript library adds a global `Poe` class to the `window` object that you can use for basic control (if you want it):
 
+| Property | Type | Description | Default |
+| -------- | ----- | ------- | ------------- |
+| `active` | `bool` | Start or stop the Poe script. | `true` |
+| `audio` | `bool` | Enable or disable audio playback. | `true` |
 
-&nbsp;
-### Poe.start()
-
-The screen mate must be turned on. Use this method to start it!
-
-**Example:**
-
-```js
-Poe.start();
-```
-
-
-&nbsp;
-### Poe.stop()
-
-If you're tired of the fun and games, you can either double-click the main Poe sprite, or execute this method to stop the program.
-
-This will remove all traces of the Poe sprite from your page. If you change your mind, you can restart it at any time by calling `Poe.start()` again.
-
-**Example:**
+These are standard getter/setter methods, so can either give you the current value or allow you to make changes depending on how you use them. For example:
 
 ```js
-// Get the screen mate going.
-Poe.start();
+// Stop Poe (and remove its DOM elements and event bindings).
+Poe.active = false;
 
-// Stop it.
-Poe.stop();
+// The current status should be `false`, i.e. stopped.
+console.log(Poe.active);
 
-// Restart it.
-Poe.start();
+// Restart Poe (and recreate its DOM elements, etc.)
+Poe.active = true;
+
+// The current status should be `true`, i.e. started.
+console.log(Poe.active);
 ```
 
-
-&nbsp;
-### Audio Playback
-
-Some of the animation sequences make noise. Audio playback is enabled by default because it is adorable, but it can be disabled if you're a party pooper.
-
-*Note:* Many browsers — particularly mobile ones — block auto-playing audio, so JS Mate Poe might not be allowed to make noise regardless. This can be worked around by either asking users to whitelist auto-playing audio from your domain, or by having users click Poe with their mouse.
-
-**Example:**
-```js
-// Audio is enabled by default.
-console.log(Poe.audio); // true
-
-// But if you turn it off...
-Poe.audio = false;
-console.log(Poe.audio); // false
-
-// And back on again if you want.
-Poe.audio = true;
-console.log(Poe.audio); // true
-```
-
-
-&nbsp;
-### Playback Speed
-
-The playback animation speed can be adjusted up or down to either slow or speed up the action.
-
-**Example:**
-```js
-// The default speed is 1.
-console.log(Poe.speed); // 1
-
-// A fractional value between 0 and 1 slows things down.
-Poe.speed = 0.5; // Half speed!
-
-// A value greater than 1 speeds things up.
-Poe.speed = 2; // Double speed!
-
-// And back to the default.
-Poe.speed = 1;
-```
+Short and sweet!
 
 
 &nbsp;
@@ -163,10 +120,9 @@ This work is free. You can redistribute it and/or modify it under the terms of t
     0. You just DO WHAT THE FUCK YOU WANT TO.
 
 
-
 &nbsp;
 ## Credits
 
 The [original Screen Mate Poe](http://www.thefullwiki.org/eSheep) (AKA eSheep, Screen Mate Poo, etc.) was based on Tatsutoshi Nomura's animated shorts "Stray Sheep", which aired on the Fuji Television network in Japan. Mr. Nomura has subsequently published a series of cute children's books and games featuring featuring Poe.
 
-If you're looking for an adorable gift for young readers, be sure to check out ["Poe At Play"](https://www.biblio.com/9781591822882).
+If you're looking for an adorable gift for young readers, be sure to check out ["Poe At Play"](https://www.biblio.com/9781591822882)!

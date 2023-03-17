@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  all:
+    name: All
+
+    strategy:
+      matrix:
+        target: [ x86_64-unknown-linux-gnu ]
+
+    runs-on: ubuntu-latest
+
+    env:
+      RUSTFLAGS: "-D warnings"
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }},wasm32-unknown-unknown
+        components: clippy
+
+    - name: Info
+      run: |
+        rustup --version
+        cargo --version
+        cargo clippy --version
+
+    - name: Build
+      run: |
+        cargo build --release --no-default-features --target wasm32-unknown-unknown
+        cargo build --release --no-default-features --features director --target wasm32-unknown-unknown
+        cargo build --release --no-default-features --features firefox --target wasm32-unknown-unknown
+        cargo build --release --no-default-features --features flac --target wasm32-unknown-unknown
+
+    - name: Clippy
+      run: |
+        cargo clippy --release --no-default-features --target ${{ matrix.target }}
+        cargo clippy --release --no-default-features --features director --target ${{ matrix.target }}
+        cargo clippy --release --no-default-features --features firefox --target ${{ matrix.target }}
+        cargo clippy --release --no-default-features --features flac --target ${{ matrix.target }}
+
+    - name: Tests
+      run: |
+        cargo test --release --no-default-features --target ${{ matrix.target }}
+        cargo test --release --no-default-features --features director --target ${{ matrix.target }}
+        cargo test --release --no-default-features --features firefox --target ${{ matrix.target }}
+        cargo test --release --no-default-features --features flac --target ${{ matrix.target }}
