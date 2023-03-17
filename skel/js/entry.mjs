@@ -24,6 +24,9 @@ init(base64toBlob(wasmFile, 'application/wasm').arrayBuffer()).then(() => {
 	// Make the Poe instance public.
 	window.Poe = Poe;
 
-	// Autostart, unless the caller wanted to handle that themselves.
-	if (! currentScript.hasAttribute('data-manual')) { Poe.active = true; }
+	// Disable audio?
+	if (currentScript.hasAttribute('data-no-audio')) { Poe.audio = false; }
+
+	// Autostart?
+	if (! currentScript.hasAttribute('data-no-start')) { Poe.active = true; }
 });
