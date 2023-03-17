@@ -22,7 +22,9 @@ cargo_dir     := "/tmp/" + pkg_id + "-cargo"
 doc_dir       := justfile_directory() + "/doc"
 release_dir   := justfile_directory() + "/release"
 skel_dir      := justfile_directory() + "/skel"
-generated_dir := skel_dir + "/js/generated"
+
+cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
+generated_dir     := skel_dir + "/js/generated"
 
 
 
@@ -31,45 +33,21 @@ generated_dir := skel_dir + "/js/generated"
 	# Nuke any previous wasm output.
 	[ ! -d "{{ release_dir }}" ] || rm -rf "{{ release_dir }}"
 	[ ! -d "{{ generated_dir }}" ] || rm -rf "{{ generated_dir }}"
-	mkdir "{{ release_dir }}"
+	mkdir "{{ release_dir }}" "{{ generated_dir }}"
 
-	# Build One.
+	# Build the wasm and exports.
 	fyi print -p "Stage #1" "Compile wasm binary."
-	cargo build \
-		--release \
-		--features "{{ FEATURES }}" \
-		--target wasm32-unknown-unknown \
-		--target-dir "{{ cargo_dir }}"
-
-	# Build Two.
-	fyi print -p "Stage #2" "Run wasm-bindgen."
-	wasm-bindgen \
-		--out-dir "{{ generated_dir }}" \
-		--target web \
-		--no-typescript \
-		--omit-default-module-path \
-		--encode-into always \
-		--reference-types \
-		"{{ cargo_dir }}/wasm32-unknown-unknown/release/{{ pkg_id }}.wasm"
-
-	# Patch away some tediousness from the JS.
-	cd "{{ generated_dir }}" && patch -p1 -i ../js.patch
-
-	# Build Three.
-	fyi print -p "Stage #3" "Run wasm-opt."
-	wasm-opt "{{ generated_dir }}/{{ pkg_id }}_bg.wasm" \
-		--enable-reference-types \
-		--enable-multivalue \
-		-O3 -Oz \
-		-o "{{ generated_dir }}/js-mate-poe.wasm"
-	rm "{{ generated_dir }}/{{ pkg_id }}_bg.wasm"
+	just _build-wasm "{{ FEATURES }}"
 
 	# Build Four.
-	fyi print -p "Stage #4" "Compile javascript."
+	fyi print -p "Stage #2" "Compile browser javascript."
 	just _build-js
 
+	# Build Five.
+	fyi print -p "Stage #3" "Compile Firefox extension."
+	just _build-firefox
+
 	# Encode some things!
-	channelz "{{ release_dir }}"
 	just _fix-chown "{{ release_dir }}"
 	just _fix-chown "{{ skel_dir }}"
 
@@ -77,18 +55,53 @@ generated_dir := skel_dir + "/js/generated"
 	fyi success "Done!"
 
 
+# Build Wasm.
+@_build-wasm FEATURES="":
+	# Cargo.
+	cargo build \
+		--release \
+		--features "{{ FEATURES }}" \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+
+	# Wasm-Bindgen.
+	wasm-bindgen \
+		--out-dir "{{ cargo_release_dir }}" \
+		--target web \
+		--no-typescript \
+		--omit-default-module-path \
+		--encode-into always \
+		--reference-types \
+		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
+
+	# Wasm-Opt.
+	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
+		--enable-reference-types \
+		--enable-multivalue \
+		-O3 -Oz \
+		-o "{{ cargo_release_dir }}/js-mate-poe.wasm"
+
+	[ -d "{{ generated_dir }}" ] || mkdir "{{ generated_dir }}"
+
+	# Shove base64-encoded wasm into a JS module.
+	echo -n "export const wasmFile = '" > "{{ generated_dir }}/wasm_file.mjs"
+	cat "{{ cargo_release_dir }}/js-mate-poe.wasm" | base64 -w0 >> "{{ generated_dir }}/wasm_file.mjs"
+	echo "';" >> "{{ generated_dir }}/wasm_file.mjs"
+
+	# Patch and copy the bindgen glue.
+	cd "{{ cargo_release_dir }}" && patch -p1 -i "{{ skel_dir }}/js/js.patch"
+	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ generated_dir }}"
+
+	# Fix permissions.
+	just _fix-chown "{{ generated_dir }}"
+
+
 # Build Combined JS.
 @_build-js:
 	# Make sure we ran the other builds first.
-	just _require "{{ generated_dir }}/js-mate-poe.wasm"
 	just _require "{{ generated_dir }}/{{ pkg_id }}.js"
-
-	# Base64-encode the wasm.
-	echo -n "export const wasmFile = '" > "{{ generated_dir }}/wasm_file.mjs"
-	cat "{{ generated_dir }}/js-mate-poe.wasm" | base64 -w0 >> "{{ generated_dir }}/wasm_file.mjs"
-	echo "';" >> "{{ generated_dir }}/wasm_file.mjs"
-
-	just _fix-chown "{{ skel_dir }}"
+	just _require "{{ generated_dir }}/wasm_file.mjs"
+	[ -d "{{ release_dir }}" ] || mkdir "{{ release_dir }}"
 
 	# Compile the JS module into a normal script.
 	google-closure-compiler \
@@ -108,7 +121,7 @@ generated_dir := skel_dir + "/js/generated"
 		--module_resolution BROWSER \
 		--warning_level VERBOSE
 
-	# Compress the script.
+	# Compress and wrap the script.
 	cat "/tmp/{{ pkg_id }}.js" | \
 		terser \
 			-c ecma=2021,passes=25 \
@@ -116,13 +129,63 @@ generated_dir := skel_dir + "/js/generated"
 			-m \
 			-o "/tmp/{{ pkg_id }}.min.js"
 
-	# Add the version header.
+	# Add the version header and save it to the release directory.
 	cat \
 		"{{ skel_dir }}/js/header.js" \
 		"/tmp/{{ pkg_id }}.min.js" > "{{ release_dir }}/js-mate-poe.min.js"
 
 	# Copy the example HTML.
 	cp -a "{{ skel_dir }}/html/index.html" "{{ release_dir }}/index.html"
+
+	# Clean-up.
+	rm /tmp/*.js
+	just _fix-chown "{{ release_dir }}"
+
+
+# Build Firefox Extension.
+@_build-firefox:
+	# Recompile w/ flac support and w/o double-click support.
+	just _build-wasm firefox
+
+	# Set up the directory.
+	[ ! -d "{{ release_dir }}/firefox" ] || rm -rf "{{ release_dir }}/firefox"
+	mkdir -p "{{ release_dir }}/firefox/image" "{{ release_dir }}/firefox/sound"
+
+	# Copy the basic assets over.
+	cp -a "{{ skel_dir }}/firefox/manifest.json" "{{ release_dir }}/firefox"
+	cp -a "{{ skel_dir }}/img/icons/"*.svg "{{ release_dir }}/firefox/image"
+	cp -a "{{ skel_dir }}/js/firefox-bg.js" "{{ release_dir }}/firefox/background.js"
+	cp -a "{{ skel_dir }}/sound"/*.flac "{{ release_dir }}/firefox/sound"
+
+	# Compile the foreground script.
+	google-closure-compiler \
+		--env BROWSER \
+		--language_in STABLE \
+		--js "{{ generated_dir }}/{{ pkg_id }}.js" \
+		--js "{{ generated_dir }}/wasm_file.mjs" \
+		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
+		--js "{{ skel_dir }}/js/firefox-fg.mjs" \
+		--entry_point "{{ skel_dir }}/js/firefox-fg.mjs" \
+		--js_output_file "/tmp/foreground.js" \
+		--assume_function_wrapper \
+		--browser_featureset_year 2021 \
+		--compilation_level WHITESPACE_ONLY \
+		--isolation_mode NONE \
+		--jscomp_off unknownDefines \
+		--module_resolution BROWSER \
+		--warning_level VERBOSE
+
+	# Compress, wrap, but don't mangle it.
+	cat "/tmp/foreground.js" | \
+		terser \
+			-c ecma=2021,passes=25 \
+			-e browser:browser \
+			-m \
+			-o "{{ release_dir }}/firefox/foreground.js"
+
+	# Clean Up.
+	rm /tmp/*.js
+	just _fix-chown "{{ release_dir }}"
 
 
 # Clean Cargo crap.
@@ -154,18 +217,19 @@ generated_dir := skel_dir + "/js/generated"
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
+	fyi task "Features: firefox"
+	RUSTFLAGS="-D warnings" cargo clippy \
+		--release \
+		--features firefox \
+		--target wasm32-unknown-unknown \
+		--target-dir "{{ cargo_dir }}"
+
 	fyi task "Features: flac"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features flac \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
-
-
-# Generate CREDITS.
-@credits:
-	cargo bashman --no-bash --no-man
-	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"
 
 
 # Build Docs.
@@ -197,6 +261,13 @@ generated_dir := skel_dir + "/js/generated"
 	cargo test \
 		--release \
 		--features director \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+
+	fyi task "Features: firefox"
+	cargo test \
+		--release \
+		--features firefox \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 

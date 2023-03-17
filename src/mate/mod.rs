@@ -20,11 +20,16 @@ use flags::MateFlags;
 use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
-	HtmlAudioElement,
 	HtmlElement,
 	ShadowRootInit,
 	ShadowRootMode,
 	Url,
+};
+#[cfg(not(feature = "firefox"))] use web_sys::HtmlAudioElement;
+#[cfg(feature = "firefox")]
+use web_sys::{
+	CustomEvent,
+	CustomEventInit,
 };
 
 
@@ -563,6 +568,22 @@ impl Mate {
 			}
 
 			// Play a sound?
+			#[cfg(feature = "firefox")]
+			if let Some(sound) = self.sound.take() {
+				// Firefox needs to handle playback itself, so trigger an event
+				// to let it know what to do.
+				let sound = match sound {
+					Sound::Baa => JsValue::from_str("baa"),
+					Sound::Sneeze => JsValue::from_str("sneeze"),
+					Sound::Yawn => JsValue::from_str("yawn"),
+				};
+				let _res = CustomEvent::new_with_event_init_dict(
+					"poe-sound",
+					CustomEventInit::new().detail(&sound)
+				).and_then(|e| dom::document().dispatch_event(&e));
+			}
+
+			#[cfg(not(feature = "firefox"))]
 			if let Some(sound) = self.sound.take() {
 				let blob = sound.as_blob();
 				let _res = Url::create_object_url_with_blob(&blob)
@@ -882,8 +903,7 @@ fn make_element(primary: bool) -> HtmlElement {
 
 	// Set the image source.
 	let img = shadow.get_element_by_id("i").unwrap_throw();
-	let blob = Sprite::as_blob();
-	Url::create_object_url_with_blob(&blob)
+	Url::create_object_url_with_blob(&Sprite::as_blob())
 		.and_then(|u| img.set_attribute("src", &u))
 		.unwrap_throw();
 

@@ -114,7 +114,9 @@ impl State {
 /// # Event Handlers.
 struct StateEvents {
 	contextmenu: Closure<dyn FnMut(Event)>,
-	dblclick: Closure<dyn FnMut(Event)>,
+
+	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut(Event)>,
+
 	mousedown: Closure<dyn FnMut(MouseEvent)>,
 	mousemove: Closure<dyn FnMut(MouseEvent)>,
 	mouseup: Closure<dyn FnMut(Event)>,
@@ -127,6 +129,7 @@ impl Default for StateEvents {
 			contextmenu: Closure::new(Box::new(|e: Event| {
 				e.prevent_default();
 			})),
+			#[cfg(not(feature = "firefox"))]
 			dblclick: Closure::new(Box::new(|_| {
 				Universe::set_active(false);
 			})),
@@ -169,7 +172,7 @@ impl StateEvents {
 		}
 
 		bind!(el, contextmenu, capture);
-		bind!(el, dblclick, passive);
+		#[cfg(not(feature = "firefox"))] bind!(el, dblclick, passive);
 		bind!(el, mousedown, passive);
 		bind!(document_element, mousemove, passive);
 		bind!(document_element, mouseup, passive);
@@ -197,7 +200,7 @@ impl StateEvents {
 			);
 		}
 
-		unbind!(el, dblclick);
+		#[cfg(not(feature = "firefox"))] unbind!(el, dblclick);
 		unbind!(el, mousedown);
 		unbind!(document_element, mousemove);
 		unbind!(document_element, mouseup);

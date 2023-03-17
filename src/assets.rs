@@ -9,6 +9,7 @@ use web_sys::Blob;
 
 const IMG_POE: &[u8] = include_bytes!("../skel/img/poe.png");
 
+#[allow(unused_macros)]
 macro_rules! audio {
 	($ext:literal) => (
 		const SND_BAA: &[u8] = include_bytes!(concat!("../skel/sound/baa.", $ext));
@@ -18,8 +19,8 @@ macro_rules! audio {
 	);
 }
 
-#[cfg(not(feature = "flac"))] audio!("mp3");
-#[cfg(feature = "flac")]      audio!("flac");
+#[cfg(not(any(feature = "flac", feature = "firefox")))] audio!("mp3");
+#[cfg(feature = "flac")] audio!("flac");
 
 
 
@@ -69,6 +70,7 @@ pub(crate) enum Sound {
 	Yawn,
 }
 
+#[cfg(not(feature = "firefox"))]
 impl Sound {
 	/// # As Blob.
 	pub(crate) fn as_blob(self) -> Blob {

@@ -67,8 +67,12 @@ default = []
 # larger as a result, but only by ~20 KiB.
 flac = []
 
-# Director Mode: print debug information to console, expose additional
-# browserland methods like Poe.list, Poe.play, and Poe.version.
+# The Firefox browser extension handles audio differently, and has no dblclick
+# event listener. Note: do not enable this in conjunction with other features!
+firefox = ["web-sys/CustomEvent", "web-sys/CustomEventInit"]
+
+# The director mode exposes additional browserland methods to make it easier to
+# preview and debug animations, like Poe.list, Poe.play, and Poe.speed.
 director = ["gloo-console"]
 
 [profile.release]
