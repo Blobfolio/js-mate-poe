@@ -303,6 +303,12 @@ impl Mate {
 	/// # Set Frame.
 	pub(crate) fn set_frame(&mut self, frame: u8) {
 		if frame != self.frame {
+			// Mark the class as having changed too if the old or new frame is
+			// a halfsie.
+			if half_frame(self.frame) || half_frame(frame) {
+				self.flags.mark_class_changed();
+			}
+
 			self.frame = frame;
 			self.flags.mark_frame_changed();
 		}
@@ -330,13 +336,6 @@ impl Mate {
 			}
 		}
 	}
-}
-
-impl Mate {
-	/// # Image Class Name.
-	///
-	/// This represents the current step's sprite frame.
-	const fn image_class_name(&self) -> MateFrame { MateFrame::new(self.frame) }
 }
 
 impl Mate {
@@ -536,35 +535,49 @@ impl Mate {
 		if self.flags.changed() {
 			let shadow = self.el.shadow_root().unwrap_throw();
 
-			// Update the wrapper div's class and/or style.
-			if self.flags.class_changed() || self.flags.transform_changed() {
-				let wrapper: HtmlElement = shadow.get_element_by_id("p")
-					.unwrap_throw()
-					.unchecked_into();
-
+			if self.flags.bufferable_changed() {
 				let mut buf = [MaybeUninit::<u8>::uninit(); 15];
 
-				if self.flags.class_changed() {
-					wrapper.set_class_name(self.write_classes(&mut buf));
+				// Update the wrapper div's class and/or style.
+				if self.flags.class_changed() || self.flags.transform_changed() {
+					let wrapper: HtmlElement = shadow.get_element_by_id("p")
+						.unwrap_throw()
+						.unchecked_into();
+
+
+					if self.flags.class_changed() {
+						wrapper.set_class_name(self.write_classes(&mut buf));
+					}
+
+					if self.flags.transform_changed() {
+						let style = wrapper.style();
+						if self.flags.transform_x_changed() {
+							style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
+						}
+						if self.flags.transform_y_changed() {
+							style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
+						}
+					}
 				}
 
-				if self.flags.transform_changed() {
-					let style = wrapper.style();
-					if self.flags.transform_x_changed() {
-						style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
-					}
-					if self.flags.transform_y_changed() {
-						style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
-					}
-				}
-			}
+				// Update the image frame class.
+				if self.flags.frame_changed() {
+					let offset: i32 =
+						if self.frame >= Sprite::EMPTY_TILE { 40 }
+						else if half_frame(self.frame) {
+							i32::from(self.frame - 135) * -40
+						}
+						else {
+							i32::from(self.frame) * -40
+						};
 
-			// Update the image frame class.
-			if self.flags.frame_changed() {
-				let frame = self.image_class_name();
-				shadow.get_element_by_id("i")
-					.unwrap_throw()
-					.set_class_name(frame.as_str());
+					shadow.get_element_by_id("i")
+						.unwrap_throw()
+						.unchecked_into::<HtmlElement>()
+						.style()
+						.set_property("--c", write_transform(offset, &mut buf))
+						.unwrap_throw();
+				}
 			}
 
 			// Play a sound?
@@ -613,7 +626,20 @@ impl Mate {
 	fn write_classes(&self, buf: &mut WrapperBuffer) -> &str {
 		// Start with "child" if this is a child sprite.
 		let mut from =
-			if self.flags.primary() { 0 }
+			if self.flags.primary() {
+				// Half-frame? This only applies to the main mate.
+				if half_frame(self.frame) {
+					unsafe {
+						std::ptr::copy_nonoverlapping(
+							b"h ".as_ptr(),
+							buf.as_mut_ptr().cast::<u8>(),
+							2,
+						);
+					}
+					2
+				}
+				else { 0 }
+			}
 			else {
 				unsafe {
 					std::ptr::copy_nonoverlapping(
@@ -839,44 +865,12 @@ impl Mate {
 
 
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-/// # Mate Frame.
+/// # Half Frame.
 ///
-/// This is a simple wrapper holding the CSS class to use for a given image
-/// frame. Because the logic and sizing is so tight, this lets us minimize
-/// allocations, leading to a smaller overall binary.
-struct MateFrame([u8; 5]);
-
-impl MateFrame {
-	#[allow(clippy::integer_division)]
-	#[must_use]
-	/// # New.
-	const fn new(src: u8) -> Self {
-		let row = hex_half_byte((src / 16) & 0xf);
-		let col = hex_half_byte((src % 16) & 0xf);
-		Self([b'r', row, b' ', b'c', col])
-	}
-
-	#[allow(unsafe_code)]
-	#[must_use]
-	/// # As Str.
-	const fn as_str(&self) -> &str {
-		// Safety: the inner array is valid ASCII.
-		unsafe { std::str::from_utf8_unchecked(self.0.as_slice()) }
-	}
-}
-
-
-
-/// # Hex Encode Half Byte.
-///
-/// This quickly maps a single-digit decimal to its lower-hex equivalent. There
-/// are no sanity checks or anything; we know the values being passed to it are
-/// appropriately clamped.
-const fn hex_half_byte(byte: u8) -> u8 {
-	if byte < 10 { byte + b'0' }
-	else { byte - 10 + b'a' }
-}
+/// The bath scene uses the top half of three existing sprites. Rather than
+/// duplicating the tiles, we just kind of fake it and temporarily shrink the
+/// wrapper.
+const fn half_frame(frame: u8) -> bool { matches!(frame, 169 | 170 | 171) }
 
 /// # Make Element.
 ///

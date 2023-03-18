@@ -690,7 +690,6 @@ mod tests {
 			84,
 			85,
 			91,
-			172,
 		];
 
 		// Build a list of every frame used by an animation.

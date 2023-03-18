@@ -28,23 +28,17 @@ impl Sprite {
 
 	/*
 	/// # Image Width.
-	pub(crate) const WIDTH: &str = "640";
+	pub(crate) const WIDTH: &str = "6760";
 
 	/// # Image Height.
-	pub(crate) const HEIGHT: &str = "440";
+	pub(crate) const HEIGHT: &str = "40";
 
 	/// # Number of Tiles.
 	pub(crate) const TILES: u8 = 176;
-
-	/// # Number of Tiles Per Row.
-	pub(crate) const TILES_X: u8 = 16;
-
-	/// # Number of Tile Rows.
-	pub(crate) const TILES_Y: u8 = 11;
 	*/
 
 	/// # Empty/Blank Tile.
-	pub(crate) const EMPTY_TILE: u8 = 173;
+	pub(crate) const EMPTY_TILE: u8 = 172;
 
 	/// # As Blob.
 	pub(crate) fn as_blob() -> Blob { dom::blob(IMG_POE, "image/png") }

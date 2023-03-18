@@ -18,7 +18,7 @@ pub fn main() {
 	let css = build_css();
 	let path = out_path("poe.html");
 	write_file(&path, format!(
-		r#"<style>{css}</style><div id="p" class="child off"><img id="i" width="640" height="440"></div>"#
+		r#"<style>{css}</style><div id="p" class="child off"><img id="i" width="6760" height="40"></div>"#
 	).as_bytes());
 }
 
