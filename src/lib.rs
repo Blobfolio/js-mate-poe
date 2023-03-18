@@ -47,6 +47,7 @@ mod universe;
 
 pub(crate) use animation::{
 	Animation,
+	frame::Frame,
 	scene::{
 		Scene,
 		SceneList,
@@ -55,7 +56,7 @@ pub(crate) use animation::{
 };
 pub(crate) use assets::{
 	Sound,
-	Sprite,
+	sprite_as_blob,
 };
 pub(crate) use mate::Mate;
 pub(crate) use position::{

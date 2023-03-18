@@ -4,6 +4,7 @@
 
 use crate::{
 	Direction,
+	Frame,
 	Position,
 	Sound,
 };
@@ -21,7 +22,7 @@ use std::num::NonZeroU16;
 pub(crate) struct Scene {
 	move_to: Option<Position>,
 	fpms: u16,
-	frames: &'static [u8],
+	frames: &'static [Frame],
 	repeat: Option<(NonZeroU16, u8)>,
 	sound: Option<(Sound, u8)>,
 	flags: u8,
@@ -29,7 +30,7 @@ pub(crate) struct Scene {
 
 impl Scene {
 	/// # New.
-	pub(crate) const fn new(fpms: u16, frames: &'static [u8]) -> Self {
+	pub(crate) const fn new(fpms: u16, frames: &'static [Frame]) -> Self {
 		Self {
 			move_to: None,
 			fpms,
@@ -80,7 +81,7 @@ impl Scene {
 	/// # Frame at Step Number.
 	///
 	/// Note: Frames start from zero for the purposes of this method.
-	pub(crate) const fn frame_at_step(&self, idx: usize) -> u8 {
+	pub(crate) const fn frame_at_step(&self, idx: usize) -> Frame {
 		let len = self.frames.len();
 
 		if idx < len { self.frames[idx] }
@@ -311,7 +312,7 @@ pub(crate) struct Step {
 	move_to: Option<Position>,
 	direction: Direction,
 	next_tick: u16,
-	frame: u8,
+	frame: Frame,
 	sound: Option<Sound>,
 	scene_flags: u8,
 }
@@ -327,7 +328,7 @@ impl Step {
 	pub(crate) const fn next_tick(&self) -> u16 { self.next_tick }
 
 	/// # Frame.
-	pub(crate) const fn frame(&self) -> u8 { self.frame }
+	pub(crate) const fn frame(&self) -> Frame { self.frame }
 
 	/// # Sound.
 	pub(crate) const fn sound(&self) -> Option<Sound> { self.sound }
@@ -360,13 +361,24 @@ mod tests {
 		let expected = Scene {
 			move_to: Some(Position::new(55, 0)),
 			fpms: 100,
-			frames: &[62, 62, 63, 64, 65, 66, 67, 68, 69, 70, 6],
+			frames: &[
+				Frame::F062, Frame::F062, Frame::F063, Frame::F064,
+				Frame::F065, Frame::F066, Frame::F067, Frame::F068,
+				Frame::F069, Frame::F070, Frame::F006,
+			],
 			repeat: Some((NonZeroU16::new(20).unwrap(), 1)),
 			sound: Some((Sound::Baa, 0)),
 			flags: Scene::EASE_OUT | Scene::GRAVITY,
 		};
 
-		let built = Scene::new(100, &[62, 62, 63, 64, 65, 66, 67, 68, 69, 70, 6])
+		let built = Scene::new(
+			100,
+			&[
+				Frame::F062, Frame::F062, Frame::F063, Frame::F064,
+				Frame::F065, Frame::F066, Frame::F067, Frame::F068,
+				Frame::F069, Frame::F070, Frame::F006,
+			]
+		)
 			.with_move_to(Position::new(55, 0))
 			.with_repeat(20, 1)
 			.with_sound(Sound::Baa, 0)

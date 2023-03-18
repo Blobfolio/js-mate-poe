@@ -3,8 +3,8 @@
 */
 
 use crate::{
+	Frame,
 	Position,
-	Sprite,
 	State,
 };
 #[cfg(feature = "director")] use crate::{Animation, dom};
@@ -268,7 +268,7 @@ impl Universe {
 	/// Update the cached X/Y mouse coordinates, only used when dragging a
 	/// Poe around the screen.
 	pub(crate) fn set_pos(x: i32, y: i32) {
-		let half_tile = Sprite::TILE_SIZE_I.saturating_div(2);
+		let half_tile = Frame::SIZE_I.saturating_div(2);
 		let x = x.saturating_sub(half_tile).to_le_bytes();
 		let y = y.saturating_sub(half_tile).to_le_bytes();
 		let pos = u64::from_le_bytes([

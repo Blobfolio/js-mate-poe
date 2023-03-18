@@ -2,6 +2,7 @@
 # RS Mate Poe: Animations
 */
 
+pub(super) mod frame;
 pub(super) mod scene;
 mod scenes;
 
@@ -670,49 +671,6 @@ mod tests {
 				);
 			}
 		}
-	}
-
-	#[test]
-	fn dbg_unused_frames() {
-		use crate::Sprite;
-		use std::collections::HashSet;
-
-		// These are the frames we weren't using the last time this was run.
-		const EXPECTED: &[u8] = &[
-			18,
-			27,
-			40,
-			41,
-			45,
-			74,
-			75,
-			83,
-			84,
-			85,
-			91,
-		];
-
-		// Build a list of every frame used by an animation.
-		let mut frames = HashSet::new();
-		for a in Animation::all() {
-			let scenes = a.scenes(1024);
-			for step in scenes {
-				frames.insert(step.frame());
-			}
-		}
-
-		// Do a simple count up to EMPTY_TILE to see which ones are missing.
-		let mut missing: Vec<u8> = Vec::new();
-		for i in 0..=Sprite::EMPTY_TILE {
-			if ! frames.contains(&i) { missing.push(i); }
-		}
-
-		// If the list changed, we'll need to update our tile reference file.
-		assert_eq!(
-			EXPECTED,
-			missing,
-			"Unused frames changed: {missing:#?}",
-		);
 	}
 
 	#[cfg(feature = "director")]

@@ -8,10 +8,11 @@ use crate::{
 	Animation,
 	Direction,
 	dom,
+	Frame,
 	Position,
 	SceneList,
 	Sound,
-	Sprite,
+	sprite_as_blob,
 	Step,
 	Universe,
 };
@@ -45,7 +46,7 @@ pub(crate) struct Mate {
 	pub(crate) el: HtmlElement,
 	size: (u16, u16),
 	flags: MateFlags,
-	frame: u8,
+	frame: Frame,
 	sound: Option<Sound>,
 	pos: Position,
 	animation: Option<Animation>,
@@ -74,7 +75,7 @@ impl Mate {
 			el,
 			size: Universe::size(),
 			flags: MateFlags::new(primary),
-			frame: Sprite::EMPTY_TILE,
+			frame: Frame::None,
 			sound: None,
 			pos: Position::new(0, 0),
 			animation: None,
@@ -166,7 +167,7 @@ impl Mate {
 			Animation::AbductionChild => {
 				Some(Position::new(
 					self.pos.x,
-					self.pos.y - Sprite::TILE_SIZE_I * 2 - 480,
+					self.pos.y - Frame::SIZE_I * 2 - 480,
 				))
 			},
 			Animation::SneezeShadow => Some(self.pos),
@@ -204,7 +205,7 @@ impl Mate {
 			if o.flip_y() { self.flags.flip_y(None); }
 		}
 		else {
-			self.set_frame(Sprite::EMPTY_TILE);
+			self.set_frame(Frame::None);
 			self.flags.mark_changed();
 		}
 
@@ -256,42 +257,42 @@ impl Mate {
 			// Basic canvas awareness required.
 			Animation::BathDive => Some(Position::new(w, h - 600)),
 			Animation::BathDiveChild => Some(Position::new(
-				w + Sprite::TILE_SIZE_I - 790,
-				h - Sprite::TILE_SIZE_I,
+				w + Frame::SIZE_I - 790,
+				h - Frame::SIZE_I,
 			)),
 			Animation::BigFish | Animation::Stargaze => Some(Position::new(
 				w,
-				h - Sprite::TILE_SIZE_I,
+				h - Frame::SIZE_I,
 			)),
 			Animation::BigFishChild => Some(Position::new(
 				w + 50,
 				h + 35,
 			)),
 			Animation::BlackSheepChase | Animation::ChaseAMartian => Some(Position::new(
-				w + Sprite::TILE_SIZE_I * 3,
-				h - Sprite::TILE_SIZE_I,
+				w + Frame::SIZE_I * 3,
+				h - Frame::SIZE_I,
 			)),
 			Animation::BlackSheepChaseChild |
 			Animation::BlackSheepRomance |
 			Animation::ChaseAMartianChild => Some(Position::new(
-				w + Sprite::TILE_SIZE_I,
-				h - Sprite::TILE_SIZE_I,
+				w + Frame::SIZE_I,
+				h - Frame::SIZE_I,
 			)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(
-				-Sprite::TILE_SIZE_I * 2,
-				h - Sprite::TILE_SIZE_I,
+				-Frame::SIZE_I * 2,
+				h - Frame::SIZE_I,
 			)),
 			Animation::StargazeChild => Some(Position::new(
-				-Sprite::TILE_SIZE_I,
-				Sprite::TILE_SIZE_I * 2,
+				-Frame::SIZE_I,
+				Frame::SIZE_I * 2,
 			)),
 			// Randomize positioning.
 			Animation::Yoyo => Some(Position::new(
 				self.random_x(),
-				-Sprite::TILE_SIZE_I,
+				-Frame::SIZE_I,
 			)),
-			Animation::Fall | Animation::GraspingFall | Animation::WallSlide if first || self.pos.x < 0 || w - Sprite::TILE_SIZE_I < self.pos.x =>
-				Some(Position::new(self.random_x(), -Sprite::TILE_SIZE_I)),
+			Animation::Fall | Animation::GraspingFall | Animation::WallSlide if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>
+				Some(Position::new(self.random_x(), -Frame::SIZE_I)),
 			_ => None,
 		} {
 			self.flags.flip_x(Some(false));
@@ -301,11 +302,11 @@ impl Mate {
 	}
 
 	/// # Set Frame.
-	pub(crate) fn set_frame(&mut self, frame: u8) {
-		if frame != self.frame {
+	pub(crate) fn set_frame(&mut self, frame: Frame) {
+		if frame as u8 != self.frame as u8 {
 			// Mark the class as having changed too if the old or new frame is
 			// a halfsie.
-			if half_frame(self.frame) || half_frame(frame) {
+			if frame.half_frame() || self.frame.half_frame() {
 				self.flags.mark_class_changed();
 			}
 
@@ -562,20 +563,11 @@ impl Mate {
 
 				// Update the image frame class.
 				if self.flags.frame_changed() {
-					let offset: i32 =
-						if self.frame >= Sprite::EMPTY_TILE { 40 }
-						else if half_frame(self.frame) {
-							i32::from(self.frame - 135) * -40
-						}
-						else {
-							i32::from(self.frame) * -40
-						};
-
 					shadow.get_element_by_id("i")
 						.unwrap_throw()
 						.unchecked_into::<HtmlElement>()
 						.style()
-						.set_property("--c", write_transform(offset, &mut buf))
+						.set_property("--c", write_transform(self.frame.offset(), &mut buf))
 						.unwrap_throw();
 				}
 			}
@@ -628,7 +620,7 @@ impl Mate {
 		let mut from =
 			if self.flags.primary() {
 				// Half-frame? This only applies to the main mate.
-				if half_frame(self.frame) {
+				if self.frame.half_frame() {
 					unsafe {
 						std::ptr::copy_nonoverlapping(
 							b"h ".as_ptr(),
@@ -745,7 +737,7 @@ impl Mate {
 		// If we're allowed to walk offscreen, horizontal edges only apply
 		// once we're totally gone.
 		if self.flags.may_exit() {
-			if self.pos.x <= 0 - Sprite::TILE_SIZE_I {
+			if self.pos.x <= 0 - Frame::SIZE_I {
 				if ! dir.is_right() { hit_edge = true; }
 			}
 			else if self.pos.x >= w && ! dir.is_left() { hit_edge = true; }
@@ -755,7 +747,7 @@ impl Mate {
 			// Unless we're moving right, something happened.
 			if ! dir.is_right() {
 				// Let offscreen fix itself with an entrance choice.
-				if self.pos.x <= 0 - Sprite::TILE_SIZE_I { hit_edge = true; }
+				if self.pos.x <= 0 - Frame::SIZE_I { hit_edge = true; }
 				else {
 					// Clamp it.
 					self.set_position(Position::new(0, self.pos.y), true);
@@ -781,7 +773,7 @@ impl Mate {
 			// Unless we're coming down, something happened.
 			if ! dir.is_down() {
 				// Let offscreen fix itself with an entrance choice.
-				if self.pos.y <= 0 - Sprite::TILE_SIZE_I { hit_edge = true; }
+				if self.pos.y <= 0 - Frame::SIZE_I { hit_edge = true; }
 				else {
 					// Clamp it.
 					self.set_position(Position::new(self.pos.x, 0), true);
@@ -816,12 +808,12 @@ impl Mate {
 
 	/// # Max X Position.
 	const fn max_x(&self) -> i32 {
-		self.size.0.saturating_sub(Sprite::TILE_SIZE) as i32
+		self.size.0.saturating_sub(Frame::SIZE) as i32
 	}
 
 	/// # Max Y Position.
 	const fn max_y(&self) -> i32 {
-		self.size.1.saturating_sub(Sprite::TILE_SIZE) as i32
+		self.size.1.saturating_sub(Frame::SIZE) as i32
 	}
 
 	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
@@ -851,8 +843,8 @@ impl Mate {
 		}
 		// Fully hidden.
 		else if
-			self.pos.x <= -Sprite::TILE_SIZE_I ||
-			self.pos.y <= -Sprite::TILE_SIZE_I ||
+			self.pos.x <= -Frame::SIZE_I ||
+			self.pos.y <= -Frame::SIZE_I ||
 			self.pos.x >= self.size.0 as i32 ||
 			self.pos.y >= self.size.1 as i32
 		{
@@ -864,13 +856,6 @@ impl Mate {
 }
 
 
-
-/// # Half Frame.
-///
-/// The bath scene uses the top half of three existing sprites. Rather than
-/// duplicating the tiles, we just kind of fake it and temporarily shrink the
-/// wrapper.
-const fn half_frame(frame: u8) -> bool { matches!(frame, 169 | 170 | 171) }
 
 /// # Make Element.
 ///
@@ -900,7 +885,7 @@ fn make_element(primary: bool) -> HtmlElement {
 
 	// Set the image source.
 	let img = shadow.get_element_by_id("i").unwrap_throw();
-	Url::create_object_url_with_blob(&Sprite::as_blob())
+	Url::create_object_url_with_blob(&sprite_as_blob())
 		.and_then(|u| img.set_attribute("src", &u))
 		.unwrap_throw();
 

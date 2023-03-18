@@ -15,34 +15,8 @@ const IMG_POE: &[u8] = include_bytes!("../skel/img/poe.png");
 
 
 
-#[derive(Debug, Clone, Copy)]
 /// # Image Sprite.
-pub(crate) struct Sprite;
-
-impl Sprite {
-	/// # Tile Size.
-	pub(crate) const TILE_SIZE: u16 = 40;
-
-	/// # Tile Size.
-	pub(crate) const TILE_SIZE_I: i32 = 40;
-
-	/*
-	/// # Image Width.
-	pub(crate) const WIDTH: &str = "6760";
-
-	/// # Image Height.
-	pub(crate) const HEIGHT: &str = "40";
-
-	/// # Number of Tiles.
-	pub(crate) const TILES: u8 = 176;
-	*/
-
-	/// # Empty/Blank Tile.
-	pub(crate) const EMPTY_TILE: u8 = 172;
-
-	/// # As Blob.
-	pub(crate) fn as_blob() -> Blob { dom::blob(IMG_POE, "image/png") }
-}
+pub(crate) fn sprite_as_blob() -> Blob { dom::blob(IMG_POE, "image/png") }
 
 
 
