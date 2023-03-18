@@ -9,18 +9,9 @@ use web_sys::Blob;
 
 const IMG_POE: &[u8] = include_bytes!("../skel/img/poe.png");
 
-#[allow(unused_macros)]
-macro_rules! audio {
-	($ext:literal) => (
-		const SND_BAA: &[u8] = include_bytes!(concat!("../skel/sound/baa.", $ext));
-		const SND_SNEEZE: &[u8] = include_bytes!(concat!("../skel/sound/sneeze.", $ext));
-		const SND_YAWN: &[u8] = include_bytes!(concat!("../skel/sound/yawn.", $ext));
-		const SND_MIME: &str = concat!("audio/", $ext);
-	);
-}
-
-#[cfg(not(any(feature = "flac", feature = "firefox")))] audio!("mp3");
-#[cfg(feature = "flac")] audio!("flac");
+#[cfg(not(feature = "firefox"))] const SND_BAA: &[u8] = include_bytes!("../skel/sound/baa.flac");
+#[cfg(not(feature = "firefox"))] const SND_SNEEZE: &[u8] = include_bytes!("../skel/sound/sneeze.flac");
+#[cfg(not(feature = "firefox"))] const SND_YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
 
 
 
@@ -75,9 +66,9 @@ impl Sound {
 	/// # As Blob.
 	pub(crate) fn as_blob(self) -> Blob {
 		match self {
-			Self::Baa => dom::blob(SND_BAA, SND_MIME),
-			Self::Sneeze => dom::blob(SND_SNEEZE, SND_MIME),
-			Self::Yawn => dom::blob(SND_YAWN, SND_MIME),
+			Self::Baa => dom::blob(SND_BAA, "audio/flac"),
+			Self::Sneeze => dom::blob(SND_SNEEZE, "audio/flac"),
+			Self::Yawn => dom::blob(SND_YAWN, "audio/flac"),
 		}
 	}
 }

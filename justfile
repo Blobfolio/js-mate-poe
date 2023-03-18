@@ -144,7 +144,7 @@ generated_dir     := skel_dir + "/js/generated"
 
 # Build Firefox Extension.
 @_build-firefox:
-	# Recompile w/ flac support and w/o double-click support.
+	# Recompile w/ firefox flag.
 	just _build-wasm firefox
 
 	# Set up the directory.
@@ -221,13 +221,6 @@ generated_dir     := skel_dir + "/js/generated"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features firefox \
-		--target wasm32-unknown-unknown \
-		--target-dir "{{ cargo_dir }}"
-
-	fyi task "Features: flac"
-	RUSTFLAGS="-D warnings" cargo clippy \
-		--release \
-		--features flac \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 

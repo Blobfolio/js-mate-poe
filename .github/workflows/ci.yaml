@@ -44,18 +44,15 @@ jobs:
         cargo build --release --no-default-features --target wasm32-unknown-unknown
         cargo build --release --no-default-features --features director --target wasm32-unknown-unknown
         cargo build --release --no-default-features --features firefox --target wasm32-unknown-unknown
-        cargo build --release --no-default-features --features flac --target wasm32-unknown-unknown
 
     - name: Clippy
       run: |
         cargo clippy --release --no-default-features --target ${{ matrix.target }}
         cargo clippy --release --no-default-features --features director --target ${{ matrix.target }}
         cargo clippy --release --no-default-features --features firefox --target ${{ matrix.target }}
-        cargo clippy --release --no-default-features --features flac --target ${{ matrix.target }}
 
     - name: Tests
       run: |
         cargo test --release --no-default-features --target ${{ matrix.target }}
         cargo test --release --no-default-features --features director --target ${{ matrix.target }}
         cargo test --release --no-default-features --features firefox --target ${{ matrix.target }}
-        cargo test --release --no-default-features --features flac --target ${{ matrix.target }}

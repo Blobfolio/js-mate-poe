@@ -63,10 +63,6 @@ features = [
 [features]
 default = []
 
-# Use (lossless) flac instead of (lossy) mp3 for sound. The binary will be
-# larger as a result, but only by ~20 KiB.
-flac = []
-
 # The Firefox browser extension handles audio differently, and has no dblclick
 # event listener. Note: do not enable this in conjunction with other features!
 firefox = ["web-sys/CustomEvent", "web-sys/CustomEventInit"]
