@@ -883,6 +883,9 @@ fn make_element(primary: bool) -> HtmlElement {
 		.unwrap_throw()
 		.unchecked_into();
 
+	// Disable aria-ness.
+	el.set_attribute("aria-hidden", "true").unwrap_throw();
+
 	let shadow = el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.unwrap_throw();
 
