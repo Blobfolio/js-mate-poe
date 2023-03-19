@@ -36,7 +36,7 @@ release_wasm  := cargo_release_dir + "/js-mate-poe.wasm"
 release_js    := cargo_release_dir + "/js-mate-poe.js"
 
 generated_ext_js   := generated_ext_dir + "/glue.mjs"
-generated_lib_wasm := generated_lib_dir + "/wasm_b64.mjs"
+generated_lib_wasm := generated_lib_dir + "/wasm_base64.mjs"
 generated_lib_js   := generated_lib_dir + "/glue.mjs"
 
 
@@ -100,7 +100,7 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 	just _build-rust "{{ FEATURES }}"
 
 	# Base64-encode the wasm.
-	echo -n "export const wasmFile = '" > "{{ generated_lib_wasm }}"
+	echo -n "export const wasmBase64 = '" > "{{ generated_lib_wasm }}"
 	cat "{{ release_wasm }}" | base64 -w0 >> "{{ generated_lib_wasm }}"
 	echo "';" >> "{{ generated_lib_wasm }}"
 
@@ -114,7 +114,7 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 		--language_in STABLE \
 		--js "{{ generated_lib_js }}" \
 		--js "{{ generated_lib_wasm }}" \
-		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
+		--js "{{ skel_dir }}/js/base64_to_uint8array.mjs" \
 		--js "{{ skel_dir }}/js/library.mjs" \
 		--entry_point "{{ skel_dir }}/js/library.mjs" \
 		--js_output_file "/tmp/library.js" \
