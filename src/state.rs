@@ -5,6 +5,7 @@
 use crate::{
 	dom,
 	Mate,
+	sprite_as_blob,
 	Universe,
 };
 use std::{
@@ -21,6 +22,7 @@ use web_sys::{
 	EventListenerOptions,
 	HtmlElement,
 	MouseEvent,
+	Url,
 };
 
 
@@ -61,12 +63,14 @@ impl State {
 		let (w, h) = size();
 		Universe::resize(w, h);
 
+		let url = Url::create_object_url_with_blob(&sprite_as_blob()).unwrap_throw();
+
 		// Initialize the primary mate.
-		let mut m1 = Mate::new(true);
+		let mut m1 = Mate::new(true, &url);
 		m1.start();
 
 		// Initialize the child mate.
-		let mut m2 = Mate::new(false);
+		let mut m2 = Mate::new(false, &url);
 		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
 
 		// Set up the event bindings.
