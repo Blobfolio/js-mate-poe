@@ -22,6 +22,7 @@ use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	HtmlElement,
+	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
 	Url,
@@ -238,7 +239,7 @@ impl Mate {
 
 		#[cfg(feature = "director")]
 		if animation_changed {
-			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u16));
+			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
 		}
 	}
 
@@ -874,25 +875,34 @@ fn make_element(primary: bool) -> HtmlElement {
 	let shadow = el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.unwrap_throw();
 
-	shadow.set_inner_html(include_str!(concat!(env!("OUT_DIR"), "/poe.html")));
+	// Stylesheet.
+	document.create_element("style")
+		.and_then(|s| {
+			s.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
+			shadow.append_child(&s)
+		}).unwrap_throw();
 
-	// Change the wrapper class for primary sprites.
-	if primary {
-		shadow.get_element_by_id("p")
-			.unwrap_throw()
-			.set_class_name("off");
-	}
-
-	// Set the image source.
-	let img = shadow.get_element_by_id("i").unwrap_throw();
-	Url::create_object_url_with_blob(&sprite_as_blob())
-		.and_then(|u| img.set_attribute("src", &u))
-		.unwrap_throw();
+	// Wrapper div.
+	let wrapper = document.create_element("div").unwrap_throw();
+	wrapper.set_id("p");
+	if primary { wrapper.set_class_name("off"); }
+	else { wrapper.set_class_name("child off"); }
+	make_element_img().and_then(|img| wrapper.append_child(&img)).unwrap_throw();
+	shadow.append_child(&wrapper).unwrap_throw();
 
 	// Attach it to the body.
 	dom::body().append_child(&el).unwrap_throw();
 
 	el
+}
+
+/// # Make Image Element.
+fn make_element_img() -> Result<HtmlImageElement, JsValue> {
+	let img = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)?;
+	img.set_id("i");
+	let u = Url::create_object_url_with_blob(&sprite_as_blob())?;
+	img.set_src(&u);
+	Ok(img)
 }
 
 #[allow(unsafe_code)]

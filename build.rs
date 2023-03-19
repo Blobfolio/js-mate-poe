@@ -16,10 +16,7 @@ pub fn main() {
 	println!("cargo:rerun-if-changed=skel/scss/core.scss");
 
 	let css = build_css();
-	let path = out_path("poe.html");
-	write_file(&path, format!(
-		r#"<style>{css}</style><div id="p" class="child off"><img id="i" width="6760" height="40"></div>"#
-	).as_bytes());
+	write_file(&out_path("poe.css"), css.as_bytes());
 }
 
 fn build_css() -> String {
