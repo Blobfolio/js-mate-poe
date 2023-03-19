@@ -281,9 +281,7 @@ version:
 	just _version "{{ justfile_directory() }}" "$_ver2"
 
 	# Set Extension Version.
-	jq --arg _version "$_version" '.version = $_version' "{{ skel_dir }}/firefox/manifest.json" > /tmp/manifest.json
-	mv /tmp/manifest.json "{{ skel_dir }}/firefox/manifest.json"
-	just _fix-chown "{{ skel_dir }}"
+	sd '"version": "[\d.]+"' "\"version\": \"$_ver2\"" "{{ skel_dir }}/firefox/manifest.json"
 
 	# Set JS Header Version.
 	sd '@version [\d.]+' "@version $_ver2" "{{ skel_dir }}/js/header.js"
