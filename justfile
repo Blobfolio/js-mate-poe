@@ -73,6 +73,12 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
+	# Snip Snip.
+	wasm-snip \
+		--snip-rust-panicking-code \
+		-o "{{ release_cargo }}" \
+		"{{ release_cargo }}"
+
 	# Wasm-Bindgen.
 	wasm-bindgen \
 		--out-dir "{{ cargo_release_dir }}" \
@@ -310,7 +316,9 @@ version:
 
 # Initialization.
 @_init:
-	[ $(command -v wasm-pack) ] || cargo install wasm-pack
+	[ $(command -v wasm-bindgen-cli) ] || cargo install wasm-bindgen-cli
+	[ $(command -v wasm-opt) ] || cargo install wasm-opt
+	[ $(command -v wasm-snip) ] || cargo install wasm-snip
 
 
 # Require Thing Exists.
