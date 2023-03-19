@@ -1,24 +1,16 @@
 /**
- * @file Combined Entry Point.
+ * @file Firefox Extension: Foreground Script.
  *
- * This entry point is used for the single-file (combined) release of JS Mate
- * Poe.
- *
- * Only having one file to deal with is more convenient than two, but comes at
- * the cost of encoding bloat (larger file size).
+ * Unlike the general library, Poe is started/stopped when signals are
+ * received from the extension's background script, and the audio is stored
+ * and triggered outside the wasm (to avoid CSP issues).
  */
 
 // Pull in the two things we need from the glue.
-import init, { Poe } from './generated/rs_mate_poe.js';
-
-// Pull in the wasm payload.
-import { wasmFile } from './generated/wasm_file.mjs';
-
-// Pull in a helper to decode our base64 into a more useful format.
-import { base64toBlob } from './b64_to_blob.mjs';
+import init, { Poe } from './generated/ext/glue.mjs';
 
 // Let's party like it's 1996!
-init(base64toBlob(wasmFile, 'application/wasm').arrayBuffer());
+init(browser.runtime.getURL('js-mate-poe.wasm'));
 
 // Sounds.
 const Sounds = {

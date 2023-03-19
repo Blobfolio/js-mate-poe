@@ -21,7 +21,7 @@
     },
     "content_security_policy":
     {
-        "extension_pages": "default-src 'self'"
+        "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'"
     },
     "action":
     {
@@ -53,6 +53,7 @@
         {
             "resources":
             [
+            	"js-mate-poe.wasm",
                 "sound/baa.flac",
                 "sound/sneeze.flac",
                 "sound/yawn.flac"

@@ -24,39 +24,48 @@ release_dir   := justfile_directory() + "/release"
 skel_dir      := justfile_directory() + "/skel"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
+
+release_ext_dir := release_dir + "/firefox"
+
 generated_dir     := skel_dir + "/js/generated"
+generated_lib_dir := generated_dir + "/lib"
+generated_ext_dir := generated_dir + "/ext"
+
+release_cargo := cargo_release_dir + "/" + pkg_id + ".wasm"
+release_wasm  := cargo_release_dir + "/js-mate-poe.wasm"
+release_js    := cargo_release_dir + "/js-mate-poe.js"
+
+generated_ext_js   := generated_ext_dir + "/glue.mjs"
+generated_lib_wasm := generated_lib_dir + "/wasm_b64.mjs"
+generated_lib_js   := generated_lib_dir + "/glue.mjs"
 
 
 
 # Build.
-@build FEATURES="":
-	# Nuke any previous wasm output.
-	[ ! -d "{{ release_dir }}" ] || rm -rf "{{ release_dir }}"
-	[ ! -d "{{ generated_dir }}" ] || rm -rf "{{ generated_dir }}"
-	mkdir "{{ release_dir }}" "{{ generated_dir }}"
-
-	# Build the wasm and exports.
-	fyi print -p "Stage #1" "Compile wasm binary."
-	just _build-wasm "{{ FEATURES }}"
-
-	# Build Four.
-	fyi print -p "Stage #2" "Compile browser javascript."
-	just _build-js
-
-	# Build Five.
-	fyi print -p "Stage #3" "Compile Firefox extension."
+@build FEATURES="": _build-pre
+	just _build-library "{{ FEATURES }}"
 	just _build-firefox
 
-	# Encode some things!
+	# Clean up.
 	just _fix-chown "{{ release_dir }}"
-	just _fix-chown "{{ skel_dir }}"
-
-	# Done!
-	fyi success "Done!"
+	just _fix-chown "{{ generated_dir }}"
+	just _fix-chmod "{{ justfile_directory() }}"
 
 
-# Build Wasm.
-@_build-wasm FEATURES="":
+# Pre-Build.
+@_build-pre:
+	# (Re)create generated asset and release directories.
+	[ ! -d "{{ generated_dir }}" ] || rm -rf "{{ generated_dir }}"
+	[ ! -d "{{ release_dir }}" ] || rm -rf "{{ release_dir }}"
+	mkdir -p \
+		"{{ release_ext_dir }}/sound" \
+		"{{ release_ext_dir }}/image" \
+		"{{ generated_lib_dir }}" \
+		"{{ generated_ext_dir }}"
+
+
+# Build: Rust.
+@_build-rust FEATURES="":
 	# Cargo.
 	cargo build \
 		--release \
@@ -72,47 +81,43 @@ generated_dir     := skel_dir + "/js/generated"
 		--omit-default-module-path \
 		--encode-into always \
 		--reference-types \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
+		"{{ release_cargo }}"
+
+	# Rename the JS.
+	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ release_js }}"
 
 	# Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
 		--enable-multivalue \
-		-O3 -Oz \
-		-o "{{ cargo_release_dir }}/js-mate-poe.wasm"
+		-O3 \
+		-o "{{ release_wasm }}"
 
-	[ -d "{{ generated_dir }}" ] || mkdir "{{ generated_dir }}"
 
-	# Shove base64-encoded wasm into a JS module.
-	echo -n "export const wasmFile = '" > "{{ generated_dir }}/wasm_file.mjs"
-	cat "{{ cargo_release_dir }}/js-mate-poe.wasm" | base64 -w0 >> "{{ generated_dir }}/wasm_file.mjs"
-	echo "';" >> "{{ generated_dir }}/wasm_file.mjs"
+# Build: Library.
+@_build-library FEATURES="":
+	fyi task "Building JS library…"
+	just _build-rust "{{ FEATURES }}"
+
+	# Base64-encode the wasm.
+	echo -n "export const wasmFile = '" > "{{ generated_lib_wasm }}"
+	cat "{{ release_wasm }}" | base64 -w0 >> "{{ generated_lib_wasm }}"
+	echo "';" >> "{{ generated_lib_wasm }}"
 
 	# Patch and copy the bindgen glue.
-	cd "{{ cargo_release_dir }}" && patch -p1 -i "{{ skel_dir }}/js/js.patch"
-	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ generated_dir }}"
-
-	# Fix permissions.
-	just _fix-chown "{{ generated_dir }}"
-
-
-# Build Combined JS.
-@_build-js:
-	# Make sure we ran the other builds first.
-	just _require "{{ generated_dir }}/{{ pkg_id }}.js"
-	just _require "{{ generated_dir }}/wasm_file.mjs"
-	[ -d "{{ release_dir }}" ] || mkdir "{{ release_dir }}"
+	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/js.patch"
+	cp "{{ release_js }}" "{{ generated_lib_js }}"
 
 	# Compile the JS module into a normal script.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--js "{{ generated_dir }}/{{ pkg_id }}.js" \
-		--js "{{ generated_dir }}/wasm_file.mjs" \
+		--js "{{ generated_lib_js }}" \
+		--js "{{ generated_lib_wasm }}" \
 		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
-		--js "{{ skel_dir }}/js/entry.mjs" \
-		--entry_point "{{ skel_dir }}/js/entry.mjs" \
-		--js_output_file "/tmp/{{ pkg_id }}.js" \
+		--js "{{ skel_dir }}/js/library.mjs" \
+		--entry_point "{{ skel_dir }}/js/library.mjs" \
+		--js_output_file "/tmp/library.js" \
 		--assume_function_wrapper \
 		--browser_featureset_year 2021 \
 		--compilation_level WHITESPACE_ONLY \
@@ -122,48 +127,39 @@ generated_dir     := skel_dir + "/js/generated"
 		--warning_level VERBOSE
 
 	# Compress and wrap the script.
-	cat "/tmp/{{ pkg_id }}.js" | \
+	cat "/tmp/library.js" | \
 		terser \
 			-c ecma=2021,passes=25 \
 			-e currentScript:document.currentScript \
-			-m \
-			-o "/tmp/{{ pkg_id }}.min.js"
+			-o "/tmp/library.min.js"
 
-	# Add the version header and save it to the release directory.
-	cat \
-		"{{ skel_dir }}/js/header.js" \
-		"/tmp/{{ pkg_id }}.min.js" > "{{ release_dir }}/js-mate-poe.min.js"
+	# Copy into place.
+	just _build-js-header "/tmp/library.min.js" "{{ release_dir }}/js-mate-poe.min.js"
+	cp "{{ skel_dir }}/html/index.html" "{{ release_dir }}"
+	channelz "{{ release_dir }}"
 
-	# Copy the example HTML.
-	cp -a "{{ skel_dir }}/html/index.html" "{{ release_dir }}/index.html"
-
-	# Clean-up.
+	# Clean up.
 	rm /tmp/*.js
-	just _fix-chown "{{ release_dir }}"
+	fyi success "Built JS library!"
 
 
-# Build Firefox Extension.
+# Build: Firefox Extension.
 @_build-firefox:
-	# Recompile w/ firefox flag.
-	just _build-wasm firefox
+	fyi task "Building Firefox extension…"
+	just _build-rust firefox
 
-	# Set up the directory.
-	[ ! -d "{{ release_dir }}/firefox" ] || rm -rf "{{ release_dir }}/firefox"
-	mkdir -p "{{ release_dir }}/firefox/image" "{{ release_dir }}/firefox/sound"
+	# Copy most assets more or less as-are.
+	cp "{{ release_js }}" "{{ generated_ext_js }}"
+	cp "{{ release_wasm }}" "{{ release_ext_dir }}/js-mate-poe.wasm"
+	cp "{{ skel_dir }}/firefox/manifest.json" "{{ release_ext_dir }}"
+	cp "{{ skel_dir }}/img/icons/"*.svg "{{ release_ext_dir }}/image"
+	cp "{{ skel_dir }}/sound/"*.flac "{{ release_ext_dir }}/sound"
 
-	# Copy the basic assets over.
-	cp -a "{{ skel_dir }}/firefox/manifest.json" "{{ release_dir }}/firefox"
-	cp -a "{{ skel_dir }}/img/icons/"*.svg "{{ release_dir }}/firefox/image"
-	cp -a "{{ skel_dir }}/js/firefox-bg.js" "{{ release_dir }}/firefox/background.js"
-	cp -a "{{ skel_dir }}/sound"/*.flac "{{ release_dir }}/firefox/sound"
-
-	# Compile the foreground script.
+	# Build the foreground script.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--js "{{ generated_dir }}/{{ pkg_id }}.js" \
-		--js "{{ generated_dir }}/wasm_file.mjs" \
-		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
+		--js "{{ generated_ext_js }}" \
 		--js "{{ skel_dir }}/js/firefox-fg.mjs" \
 		--entry_point "{{ skel_dir }}/js/firefox-fg.mjs" \
 		--js_output_file "/tmp/foreground.js" \
@@ -181,11 +177,23 @@ generated_dir     := skel_dir + "/js/generated"
 			-c ecma=2021,passes=25 \
 			-e browser:browser \
 			-m \
-			-o "{{ release_dir }}/firefox/foreground.js"
+			-o "/tmp/foreground.min.js"
 
-	# Clean Up.
+	just _build-js-header "{{ skel_dir }}/js/firefox-bg.js" "{{ release_ext_dir }}/background.js"
+	sd -s "JS Mate Poe" "JS Mate Poe: Background" "{{ release_ext_dir }}/background.js"
+
+	just _build-js-header "/tmp/foreground.min.js" "{{ release_ext_dir }}/foreground.js"
+	sd -s "JS Mate Poe" "JS Mate Poe: Foreground" "{{ release_ext_dir }}/foreground.js"
+
+	# Clean up.
 	rm /tmp/*.js
-	just _fix-chown "{{ release_dir }}"
+	fyi success "Built Firefox extension!"
+
+
+# Build: Append JS Header.
+@_build-js-header SRC DST:
+	just _require "{{ SRC }}"
+	cat "{{ skel_dir }}/js/header.js" "{{ SRC }}" > "{{ DST }}"
 
 
 # Clean Cargo crap.
@@ -223,20 +231,6 @@ generated_dir     := skel_dir + "/js/generated"
 		--features firefox \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
-
-
-# Build Docs.
-@doc:
-	# Make the docs.
-	cargo rustdoc \
-		--release \
-		--target x86_64-unknown-linux-gnu \
-		--target-dir "{{ cargo_dir }}"
-
-	# Move the docs and clean up ownership.
-	[ ! -d "{{ doc_dir }}" ] || rm -rf "{{ doc_dir }}"
-	mv "{{ cargo_dir }}/x86_64-unknown-linux-gnu/doc" "{{ justfile_directory() }}"
-	just _fix-chown "{{ doc_dir }}"
 
 
 # Unit tests!

@@ -1,19 +1,15 @@
-/**
- * @file Firefox Extension: Background Script.
- */
-
-// Watch for clicks to the icon, and let the foreground script know about it.
-browser.action.onClicked.addListener((tab)=>{
+browser.action.onClicked.addListener((tab) => {
+	// Tell the foreground script we want to toggle Poe on/off.
 	browser.tabs.sendMessage(tab.id, {"message": "clickedPoe"}).then((r) => {
-		let icon = r.response ? 'image/sit.svg' : 'image/sleep.svg';
-		let title = r.response ? 'Disable JS Mate Poe' : 'Enable JS Mate Poe';
+		// The response is the current status (after toggling). Let's update
+		// the icon image/title accordingly.
 		browser.action.setIcon({
-			path: icon,
+			path: r.response ? 'image/sit.svg' : 'image/sleep.svg',
 			tabId: tab.id,
 		});
 		browser.action.setTitle({
-			title: title,
+			title: r.response ? 'Disable JS Mate Poe' : 'Enable JS Mate Poe',
 			tabId: tab.id,
 		});
-	})
+	});
 });

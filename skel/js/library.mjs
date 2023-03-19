@@ -1,18 +1,15 @@
 /**
- * @file Combined Entry Point.
+ * @file Library Entry Point.
  *
- * This entry point is used for the single-file (combined) release of JS Mate
- * Poe.
- *
- * Only having one file to deal with is more convenient than two, but comes at
- * the cost of encoding bloat (larger file size).
+ * This is the entry point for the library version of JS Mate Poe. It compiles
+ * to a sngle file — audio, images, wasm, etc., included.
  */
 
 // Pull in the two things we need from the glue.
-import init, { Poe } from './generated/rs_mate_poe.js';
+import init, { Poe } from './generated/lib/glue.mjs';
 
 // Pull in the wasm payload.
-import { wasmFile } from './generated/wasm_file.mjs';
+import { wasmFile } from './generated/lib/wasm_b64.mjs';
 
 // Pull in a helper to decode our base64 into a more useful format.
 import { base64toBlob } from './b64_to_blob.mjs';
