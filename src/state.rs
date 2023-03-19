@@ -210,35 +210,27 @@ impl StateEvents {
 
 
 
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Get Width/Height.
 ///
-/// Query the DOM to get the window's current widht and height.
+/// Pull the closest thing to a window size we can get without injecting our
+/// own 100% fixed element. This may or may not factor the width of the
+/// scrollbar (if any), but most browsers auto-hide them nowadays anyway.
 fn size() -> (u16, u16) {
-	let window = dom::window();
-	let width = size_to_u16(window.inner_width());
-	let height = size_to_u16(window.inner_height());
+	const MAX: i32 = u16::MAX as i32;
+	let el = dom::document_element();
 
-	// We might want to take the document width instead, if it is about a
-	// scrollbar's width smaller.
-	if let Ok(width2) = u16::try_from(dom::document_element().offset_width()) {
-		if 0 != width2 && (width == 0 || width2 < width && width <= width2 + 25) {
-			return (width2, height);
-		}
-	}
+	let size = el.client_width();
+	let width =
+		if size <= 0 { 0 }
+		else if size < MAX { size as u16 }
+		else { u16::MAX };
+
+	let size = el.client_height();
+	let height =
+		if size <= 0 { 0 }
+		else if size < MAX { size as u16 }
+		else { u16::MAX };
 
 	(width, height)
-}
-
-#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-/// # Parse JS Value to u16.
-///
-/// Javascript's sloppy number-handling is very inconvenient! Haha.
-fn size_to_u16(v: Result<JsValue, JsValue>) -> u16 {
-	if let Ok(v) = v {
-		if let Some(v) = v.as_f64() {
-			if v.is_normal() && v.is_sign_positive() { return v as u16; }
-		}
-	}
-
-	0
 }
