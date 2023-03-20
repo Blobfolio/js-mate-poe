@@ -4,7 +4,13 @@
         "js-mate-poe@blobfolio.com":
         {
             "updates":
-            []
+            [
+                {
+                    "version": "1.4.1",
+                    "update_link": "https://github.com/Blobfolio/js-mate-poe/releases/download/v1.4.1/js-mate-poe_firefox_1.4.1.xpi",
+                    "update_hash": "sha512:e58e9047283da601cb3adcb48c5160cf50988f66e8dfc9f285875d72731a0c8e7ad82244222664fb290ae5c35505a7eea0b768de6d530d4319a2f94d12c188ca"
+                }
+            ]
         }
     }
 }

@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/badge/license-wtfpl-ff1493?style=flat-square)](https://en.wikipedia.org/wiki/WTFPL)
 [![contributions welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&label=contributions)](https://github.com/Blobfolio/js-mate-poe/issues)
 
-A compact, dependency-free ~~Javascript~~ [wasm](https://en.wikipedia.org/wiki/WebAssembly) recreation of the beloved 16-bit Screen Mate Poe Windows program, distributed as a standalone library.
+A compact, dependency-free ~~Javascript~~ [wasm](https://en.wikipedia.org/wiki/WebAssembly) recreation of the beloved 16-bit Screen Mate Poe Windows program, distributed as a standalone library and a Firefox browser extension.
 
 <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.png" width="30%" alt="Add Poe to any site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.png" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.png" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
 
@@ -29,7 +29,7 @@ You're welcome!
 &nbsp;
 ## Installation
 
-JS Mate Poe is distributed as both a general purpose Javascript library and (coming soon) as a Firefox browser extension.
+JS Mate Poe is distributed as both a general purpose Javascript library and a Firefox browser extension.
 
 
 ### Library
@@ -53,7 +53,19 @@ The [next section](#advanced-library-usage) covers the minimal API, which you'd 
 
 ### Firefox Extension
 
-**PENDING REVIEW** The extension has been submitted to Mozilla for signing, but hasn't yet been approved. This section will hopefully be updated soon with installation instructions, or removed if for some reason they deny it.
+The Firefox browser extension lets you add Poe to any web page with the click of a button!
+
+To install it, simply download the `js-mate-poe_firefox_#.#.#.xpi` package from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases).
+
+Firefox should prompt you to install it then and there, but if not, simply go to the "Manage Your Extensions" settings page (`about:addons`), click the gear/settings icon, and select "Install Add-on From File".
+
+**Note:** Before you can actually use the extension, you'll need to grant it "Access To Your Data On All Sites".
+
+This is silly and gratuitous because Poe doesn't give two bleats about "your data", but that permission is unfortunately an all-or-nothing proposition. Because Poe needs permission to add _itself_ to a page (and read relevant properties like the window size and mouse position), Firefox assumes it needs _carte blanche_. Haha.
+
+At any rate, once installed, simply click the extension's Poe icon to turn him on or off for the current tab!
+
+Hurray for constant companionship!
 
 
 &nbsp;
