@@ -91,13 +91,17 @@ impl State {
 		state2.raf.borrow_mut().replace(Closure::new(Box::new(move |e: f64| {
 			if Universe::active() {
 				if ! Universe::paused() { state1.paint(e as u32); } // No change if paused!
-				dom::request_animation_frame(state1.raf.borrow().as_ref().unwrap_throw());
+				state1.raf.borrow()
+					.as_ref()
+					.and_then(|f| dom::window().request_animation_frame(f.as_ref().unchecked_ref()).ok());
 			}
 			else { state1.raf.borrow_mut().take(); }
 		})));
 
 		// Move the state into a frame request!
-		dom::request_animation_frame(state2.raf.borrow().as_ref().unwrap_throw());
+		state2.raf.borrow()
+			.as_ref()
+			.and_then(|f| dom::window().request_animation_frame(f.as_ref().unchecked_ref()).ok());
 	}
 
 	/// # Paint!
