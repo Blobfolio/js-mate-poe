@@ -15,7 +15,7 @@
  * @param {string} data Data.
  * @return {!Uint8Array} Uint8Array.
  */
-export const base64toUint8Array = function(data) {
+export const base64toUint8 = function(data) {
 	// Decode to a string.
 	const bytes = atob(data);
 

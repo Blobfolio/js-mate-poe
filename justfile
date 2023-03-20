@@ -120,7 +120,7 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 		--language_in STABLE \
 		--js "{{ generated_lib_js }}" \
 		--js "{{ generated_lib_wasm }}" \
-		--js "{{ skel_dir }}/js/base64_to_uint8array.mjs" \
+		--js "{{ skel_dir }}/js/base64_to_uint8.mjs" \
 		--js "{{ skel_dir }}/js/library.mjs" \
 		--entry_point "{{ skel_dir }}/js/library.mjs" \
 		--js_output_file "/tmp/library.js" \

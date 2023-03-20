@@ -12,10 +12,10 @@ import init, { Poe } from './generated/lib/glue.mjs';
 import { wasmBase64 } from './generated/lib/wasm_base64.mjs';
 
 // Our decoding helper function.
-import { base64toUint8Array } from './base64_to_uint8array.mjs';
+import { base64toUint8 } from './base64_to_uint8.mjs';
 
 // Let's party like it's 1996!
-init(base64toUint8Array(wasmBase64).buffer).then(() => {
+init(base64toUint8(wasmBase64).buffer).then(() => {
 	// Make the Poe instance public.
 	window.Poe = Poe;
 
