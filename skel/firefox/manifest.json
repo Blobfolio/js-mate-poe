@@ -5,7 +5,7 @@
         "gecko":
         {
             "id": "js-mate-poe@blobfolio.com",
-            "update_url": "https://github.com/Blobfolio/js-mate-poe/blob/master/skel/firefox/updates.json"
+            "update_url": "https://blobfolio.com/lib/js-mate-poe.json"
         }
     },
     "name": "JS Mate Poe",
