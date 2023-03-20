@@ -122,9 +122,7 @@ impl State {
 /// # Event Handlers.
 struct StateEvents {
 	contextmenu: Closure<dyn FnMut(Event)>,
-
 	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut(Event)>,
-
 	mousedown: Closure<dyn FnMut(MouseEvent)>,
 	mousemove: Closure<dyn FnMut(MouseEvent)>,
 	mouseup: Closure<dyn FnMut(Event)>,
