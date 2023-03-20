@@ -316,7 +316,7 @@ version:
 
 # Initialization.
 @_init:
-	[ $(command -v wasm-bindgen-cli) ] || cargo install wasm-bindgen-cli
+	[ $(command -v wasm-bindgen) ] || cargo install wasm-bindgen-cli
 	[ $(command -v wasm-opt) ] || cargo install wasm-opt
 	[ $(command -v wasm-snip) ] || cargo install wasm-snip
 
