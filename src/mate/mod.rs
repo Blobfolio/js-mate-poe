@@ -18,7 +18,6 @@ use crate::{
 };
 #[cfg(feature = "director")] use crate::dom::debug;
 use flags::MateFlags;
-use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	Element,
@@ -34,8 +33,12 @@ use web_sys::{
 
 
 
-/// # Buffer for our --x, --y values.
-type WrapperBuffer = [MaybeUninit::<u8>; 15];
+/// # String Buffer.
+///
+/// Each mate instance contains a scratch buffer that can be used to write
+/// data into before passing along to Javascript (to avoid the allocation
+/// overhead of using strings).
+type Buffer = [u8; 15];
 
 
 
@@ -52,6 +55,7 @@ pub(crate) struct Mate {
 	scenes: Option<SceneList>,
 	next_animation: Option<Animation>,
 	next_tick: u32,
+	buf: Buffer,
 }
 
 impl Drop for Mate {
@@ -81,6 +85,7 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
+			buf: [0_u8; 15],
 		}
 	}
 }
@@ -532,39 +537,36 @@ impl Mate {
 		if self.flags.changed() {
 			let shadow = self.el.shadow_root().unwrap_throw();
 
-			if self.flags.bufferable_changed() {
-				let mut buf = [MaybeUninit::<u8>::uninit(); 15];
+			// Update the wrapper div's class and/or style.
+			if self.flags.class_changed() || self.flags.transform_changed() {
+				let wrapper: HtmlElement = shadow.get_element_by_id("p")
+					.unwrap_throw()
+					.unchecked_into();
 
-				// Update the wrapper div's class and/or style.
-				if self.flags.class_changed() || self.flags.transform_changed() {
-					let wrapper: HtmlElement = shadow.get_element_by_id("p")
-						.unwrap_throw()
-						.unchecked_into();
-
-					if self.flags.class_changed() {
-						wrapper.set_class_name(self.write_classes(&mut buf));
-					}
-
-					if self.flags.transform_changed() {
-						let style = wrapper.style();
-						if self.flags.transform_x_changed() {
-							style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
-						}
-						if self.flags.transform_y_changed() {
-							style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
-						}
-					}
+				if self.flags.class_changed() {
+					wrapper.set_class_name(self.write_classes());
 				}
 
-				// Update the image frame class.
-				if self.flags.frame_changed() {
-					shadow.get_element_by_id("i")
-						.unwrap_throw()
-						.unchecked_into::<HtmlElement>()
-						.style()
-						.set_property("--c", write_transform(self.frame.offset(), &mut buf))
-						.unwrap_throw();
+				if self.flags.transform_changed() {
+					let style = wrapper.style();
+					if self.flags.transform_x_changed() {
+						style.set_property("--x", write_transform(self.pos.x, &mut self.buf)).unwrap_throw();
+					}
+					if self.flags.transform_y_changed() {
+						style.set_property("--y", write_transform(self.pos.y, &mut self.buf)).unwrap_throw();
+					}
 				}
+			}
+
+			// Update the image frame class.
+			if self.flags.frame_changed() {
+				shadow.get_element_by_id("i")
+					.and_then(|img|
+						img.unchecked_into::<HtmlElement>()
+							.style()
+							.set_property("--c", write_transform(self.frame.offset(), &mut self.buf)).ok()
+					)
+					.unwrap_throw();
 			}
 
 			// Play a sound?
@@ -605,7 +607,7 @@ impl Mate {
 	///
 	/// Only one animation-related class can exist at a time, so the largest
 	/// possible combination of classes is "child rx ry off", 15 bytes.
-	fn write_classes(&self, buf: &mut WrapperBuffer) -> &str {
+	fn write_classes(&mut self) -> &str {
 		// Start with "child" if this is a child sprite.
 		let mut from =
 			if self.flags.primary() {
@@ -614,7 +616,7 @@ impl Mate {
 					unsafe {
 						std::ptr::copy_nonoverlapping(
 							b"h ".as_ptr(),
-							buf.as_mut_ptr().cast::<u8>(),
+							self.buf.as_mut_ptr(),
 							2,
 						);
 					}
@@ -626,7 +628,7 @@ impl Mate {
 				unsafe {
 					std::ptr::copy_nonoverlapping(
 						b"child ".as_ptr(),
-						buf.as_mut_ptr().cast::<u8>(),
+						self.buf.as_mut_ptr(),
 						6,
 					);
 				}
@@ -638,7 +640,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					b"rx ".as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					3,
 				);
 			}
@@ -650,7 +652,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					b"ry ".as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					3,
 				);
 			}
@@ -674,7 +676,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					rest.as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					rest.len(),
 				);
 			}
@@ -683,9 +685,7 @@ impl Mate {
 
 		// Return the string.
 		unsafe {
-			std::str::from_utf8_unchecked(
-				&*(std::ptr::addr_of!(buf[..from]) as *const [u8])
-			)
+			std::str::from_utf8_unchecked(&self.buf[..from])
 		}
 	}
 }
@@ -893,20 +893,14 @@ fn make_element(primary: bool) -> Element {
 /// This shares a buffer with the class-writer. That method requires 15 bytes,
 /// but this only requires at most 13 bytes (11 for the integer and 2 for the
 /// unit), so there's sufficient room.
-fn write_transform(v: i32, buf: &mut WrapperBuffer) -> &str {
+fn write_transform(v: i32, buf: &mut Buffer) -> &str {
 	// Stringify the value.
-	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr().cast::<u8>(), v) };
+	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr(), v) };
 	unsafe {
 		// Add the unit.
-		std::ptr::copy_nonoverlapping(
-			b"px".as_ptr(),
-			buf.as_mut_ptr().add(len).cast::<u8>(),
-			2,
-		);
+		std::ptr::copy_nonoverlapping(b"px".as_ptr(), buf.as_mut_ptr().add(len), 2);
 
 		// Stringify what we've written.
-		std::str::from_utf8_unchecked(
-			&*(std::ptr::addr_of!(buf[..len + 2]) as *const [u8])
-		)
+		std::str::from_utf8_unchecked(&buf[..len + 2])
 	}
 }

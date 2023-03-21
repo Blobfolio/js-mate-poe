@@ -77,13 +77,6 @@ impl MateFlags {
 		0 != self.0 & Self::CHANGED_TRANSFORM
 	}
 
-	/// # Anything Requiring Buffer Changed?
-	///
-	/// This means any changeable other than sound.
-	pub(crate) const fn bufferable_changed(self) -> bool {
-		Self::CHANGED_SOUND != self.0 & Self::CHANGED
-	}
-
 	/// # Anything Changed?
 	pub(crate) const fn changed(self) -> bool {
 		0 != self.0 & Self::CHANGED
