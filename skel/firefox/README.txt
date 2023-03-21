@@ -3,11 +3,12 @@
 CONTENTS
 ========
 
-The source material for the JS Mate Poe Firefox browser extension is split into three directories:
+The source material for the JS Mate Poe Firefox browser extension is split into four directories:
 
 	* static: things that don't need building, like images, sounds, the manifest, etc.
 	* js:     Javascript module sources
 	* rust:   Rust sources
+	* docker: Docker setup files (not directly part of this extension)
 
 Compilation is a multi-step process, so a Docker file and build script are included in the top-level directory to simplify it (and make the process more reproducible).
 

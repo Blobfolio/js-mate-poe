@@ -3,7 +3,7 @@
 # Look for a file we placed inside the Docker to make sure we're actually
 # inside said Docker…
 if [ ! -f "/etc/inside-docker" ]; then
-	echo "This is mean to be run inside the Docker environment."
+	echo -e "\e[91;1mError:\e[0m This is mean to be run inside the Docker environment."
 	exit 1
 fi
 
@@ -29,7 +29,7 @@ cargo build \
 # This is the only piece that is likely to fail; let's make sure the output
 # file was created before continuing.
 if [ ! -f "target/wasm32-unknown-unknown/release/rs_mate_poe.wasm" ]; then
-	echo "That didn't work!"
+	echo -e "\e[91;1mError:\e[0m Cargo build failed!"
 	exit 1
 fi
 
@@ -88,6 +88,6 @@ sed -i "s/* JS Mate Poe/* JS Mate Poe: Foreground/g" dist/foreground.js
 chown -R --reference=./Dockerfile dist js/generated
 
 # Done!
-echo "All done!"
-echo "The compiled extension can be found in the 'dist' folder!"
+echo -e "\e[92;1mSuccess:\e[0m All done!"
+echo -e "The compiled extension can be found in \e[2m./dist\e[0m."
 echo "You can exit out of the Docker now."
