@@ -18,9 +18,9 @@ use wasm_bindgen::{
 };
 use web_sys::{
 	AddEventListenerOptions,
+	Element,
 	Event,
 	EventListenerOptions,
-	HtmlElement,
 	MouseEvent,
 	Url,
 };
@@ -164,7 +164,7 @@ impl Default for StateEvents {
 
 impl StateEvents {
 	/// # Bind Event Listeners.
-	fn bind(&self, el: &HtmlElement) {
+	fn bind(&self, el: &Element) {
 		let document_element = dom::document_element();
 
 		macro_rules! bind {
@@ -186,7 +186,7 @@ impl StateEvents {
 	}
 
 	/// # Unbind Event Listeners.
-	fn unbind(&self, el: &HtmlElement) {
+	fn unbind(&self, el: &Element) {
 		let document_element = dom::document_element();
 
 		// This one works different from the rest because it was registered

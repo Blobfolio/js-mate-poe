@@ -20,6 +20,7 @@ use flags::MateFlags;
 use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
+	Element,
 	HtmlElement,
 	HtmlImageElement,
 	ShadowRootInit,
@@ -46,7 +47,7 @@ type WrapperBuffer = [MaybeUninit::<u8>; 15];
 #[derive(Debug)]
 /// # Mate.
 pub(crate) struct Mate {
-	pub(crate) el: HtmlElement,
+	pub(crate) el: Element,
 	size: (u16, u16),
 	flags: MateFlags,
 	frame: Frame,
@@ -548,7 +549,6 @@ impl Mate {
 						.unwrap_throw()
 						.unchecked_into();
 
-
 					if self.flags.class_changed() {
 						wrapper.set_class_name(self.write_classes(&mut buf));
 					}
@@ -863,13 +863,11 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and append the "mate" elements to the document body.
-fn make_element(primary: bool, src: &str) -> HtmlElement {
+fn make_element(primary: bool, src: &str) -> Element {
 	let document = dom::document();
 
 	// Create the main element, its shadow DOM, and its shadow elements.
-	let el: HtmlElement = document.create_element("div")
-		.unwrap_throw()
-		.unchecked_into();
+	let el = document.create_element("div").unwrap_throw();
 
 	// Disable aria-ness.
 	el.set_attribute("aria-hidden", "true").unwrap_throw();
