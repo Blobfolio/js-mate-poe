@@ -12,6 +12,7 @@ use crate::{
 	Position,
 	SceneList,
 	Sound,
+	sprite_image_element,
 	Step,
 	Universe,
 };
@@ -22,14 +23,8 @@ use wasm_bindgen::prelude::*;
 use web_sys::{
 	Element,
 	HtmlElement,
-	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
-};
-#[cfg(not(feature = "firefox"))]
-use web_sys::{
-	HtmlAudioElement,
-	Url,
 };
 #[cfg(feature = "firefox")]
 use web_sys::{
@@ -73,8 +68,8 @@ impl Mate {
 	/// # New.
 	///
 	/// Create a new instance, including all of the initial DOM setup.
-	pub(crate) fn new(primary: bool, src: &str) -> Self {
-		let el = make_element(primary, src);
+	pub(crate) fn new(primary: bool) -> Self {
+		let el = make_element(primary);
 		Self {
 			el,
 			size: Universe::size(),
@@ -592,12 +587,7 @@ impl Mate {
 			}
 
 			#[cfg(not(feature = "firefox"))]
-			if let Some(sound) = self.sound.take() {
-				let blob = sound.as_blob();
-				let _res = Url::create_object_url_with_blob(&blob)
-					.and_then(|src| HtmlAudioElement::new_with_src(&src))
-					.and_then(|player| player.play());
-			}
+			if let Some(sound) = self.sound.take() { sound.play(); }
 
 			self.flags.clear_changed();
 		}
@@ -863,7 +853,7 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and append the "mate" elements to the document body.
-fn make_element(primary: bool, src: &str) -> Element {
+fn make_element(primary: bool) -> Element {
 	let document = dom::document();
 
 	// Create the main element, its shadow DOM, and its shadow elements.
@@ -888,13 +878,7 @@ fn make_element(primary: bool, src: &str) -> Element {
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
 
-	wrapper.append_child(&*{
-		let img = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
-			.unwrap_throw();
-		img.set_id("i");
-		img.set_src(src);
-		img
-	}).unwrap_throw();
+	wrapper.append_child(&sprite_image_element()).unwrap_throw();
 
 	shadow.append_child(&wrapper).unwrap_throw();
 
