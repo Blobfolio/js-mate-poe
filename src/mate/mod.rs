@@ -376,9 +376,12 @@ impl Mate {
 
 			// Browser override?
 			#[cfg(feature = "director")]
-			if let Some(n) = Universe::next_animation() {
-				Universe::set_no_child();
-				self.next_animation.replace(n);
+			if self.flags.primary() {
+				if let Some(n) = Universe::next_animation() {
+					self.animation.take();
+					Universe::set_no_child();
+					self.next_animation.replace(n);
+				}
 			}
 
 			// Flip if flipping is needed.
