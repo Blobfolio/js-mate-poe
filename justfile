@@ -67,11 +67,11 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--enable-reference-types \
 		--enable-multivalue \
 		-O3 \
-		-o "{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
+		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
 
 	# Jam a base64-encoded wasm into a simple module script.
 	echo -n "export const wasmBase64 = '" > "{{ skel_dir }}/js/generated/wasm_base64.mjs"
-	cat "{{ cargo_release_dir }}/{{ pkg_id }}.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
+	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 
 	# Transpile the JS.
