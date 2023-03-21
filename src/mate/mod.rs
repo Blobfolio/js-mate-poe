@@ -858,33 +858,26 @@ fn make_element(primary: bool) -> Element {
 
 	// Create the main element, its shadow DOM, and its shadow elements.
 	let el = document.create_element("div").unwrap_throw();
-
-	// Disable aria-ness.
 	el.set_attribute("aria-hidden", "true").unwrap_throw();
 
-	let shadow = el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-		.unwrap_throw();
+	// Create its stylesheet.
+	let style = document.create_element("style").unwrap_throw();
+	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
-	// Stylesheet.
-	shadow.append_child(&*{
-		let style = document.create_element("style").unwrap_throw();
-		style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
-		style
-	}).unwrap_throw();
-
-	//Wrapper div.
+	// And the wrapper div (with the image).
 	let wrapper = document.create_element("div").unwrap_throw();
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
-
 	wrapper.append_child(&sprite_image_element()).unwrap_throw();
 
-	shadow.append_child(&wrapper).unwrap_throw();
+	// Create a shadow and move the inner elements into it.
+	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+		.and_then(|s| s.append_with_node_2(&style, &wrapper))
+		.unwrap_throw();
 
-	// Attach it to the body.
+	// Append the element to the body and return a reference.
 	dom::body().append_child(&el).unwrap_throw();
-
 	el
 }
 
