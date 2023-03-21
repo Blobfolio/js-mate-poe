@@ -410,23 +410,12 @@ impl Mate {
 	/// Returns `true` if a resize-related change occurred, as determined by
 	/// comparing the universe's current size with the value cached on this
 	/// particular mate.
-	fn pretick_resize(&mut self) -> bool {
-		if self.active() {
-			let (w, h) = Universe::size();
-			if self.size.0 != w || self.size.1 != h {
-				self.size.0 = w;
-				self.size.1 = h;
-
-				// If we're totally off-screen, we need to restart.
-				if 0 == self.visibility() {
-					if self.flags.primary() { self.start(); }
-					else { self.stop(); }
-					return true;
-				}
-			}
+	fn pretick_resize(&mut self) {
+		let (w, h) = Universe::size();
+		if self.size.0 != w || self.size.1 != h {
+			self.size.0 = w;
+			self.size.1 = h;
 		}
-
-		false
 	}
 
 	/// # Tick.
