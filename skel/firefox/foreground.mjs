@@ -7,7 +7,7 @@
  */
 
 // Pull in the two things we need from the glue.
-import init, { Poe } from './generated/ext/glue.mjs';
+import init, { Poe } from './generated/glue.mjs';
 
 // Let's party like it's 1996!
 init(browser.runtime.getURL('js-mate-poe.wasm'));

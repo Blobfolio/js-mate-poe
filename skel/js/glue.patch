@@ -1,7 +1,7 @@
-diff --git a/js-mate-poe.js b/js-mate-poe.js
+diff --git a/rs_mate_poe.js b/rs_mate_poe.js
 index af05090..0281157 100644
---- a/js-mate-poe.js
-+++ b/js-mate-poe.js
+--- a/rs_mate_poe.js
++++ b/rs_mate_poe.js
 @@ -216,33 +216,13 @@ export class Poe {
  }
  

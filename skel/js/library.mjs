@@ -6,10 +6,10 @@
  */
 
 // Pull in the two things we need from the glue.
-import init, { Poe } from './generated/lib/glue.mjs';
+import init, { Poe } from './generated/glue.mjs';
 
 // Pull in the wasm payload.
-import { wasmBase64 } from './generated/lib/wasm_base64.mjs';
+import { wasmBase64 } from './generated/wasm_base64.mjs';
 
 // Our decoding helper function.
 import { base64toUint8 } from './base64_to_uint8.mjs';
