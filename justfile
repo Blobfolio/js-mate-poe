@@ -97,6 +97,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		terser \
 			-c ecma=2021,passes=25 \
 			-e currentScript:document.currentScript \
+			-m \
 			-o "/tmp/library.min.js"
 
 	# Stick a header onto the JS and move it into place, along with a demo
