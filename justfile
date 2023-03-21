@@ -28,7 +28,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 
 # Build Library!
-@build-library FEATURES="": _init
+@build FEATURES="": _init
 	just _require-app cargo
 	just _require-app google-closure-compiler
 	just _require-app terser
