@@ -182,6 +182,12 @@ pub(crate) enum Frame {
 }
 
 impl Frame {
+	/// # Full Sprite Width.
+	pub(crate) const SPRITE_WIDTH: u32 = 6760;
+
+	/// # Full Sprite Height.
+	pub(crate) const SPRITE_HEIGHT: u32 = 40;
+
 	/// # Tile Size (Unsigned).
 	pub(crate) const SIZE: u16 = 40;
 

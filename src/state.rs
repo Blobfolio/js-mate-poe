@@ -5,6 +5,7 @@
 use crate::{
 	dom,
 	Mate,
+	sprite_as_blob,
 	Universe,
 };
 use std::{
@@ -21,6 +22,7 @@ use web_sys::{
 	EventListenerOptions,
 	HtmlElement,
 	MouseEvent,
+	Url,
 };
 
 
@@ -61,12 +63,14 @@ impl State {
 		let (w, h) = size();
 		Universe::resize(w, h);
 
+		let url = Url::create_object_url_with_blob(&sprite_as_blob()).unwrap_throw();
+
 		// Initialize the primary mate.
-		let mut m1 = Mate::new(true);
+		let mut m1 = Mate::new(true, &url);
 		m1.start();
 
 		// Initialize the child mate.
-		let mut m2 = Mate::new(false);
+		let mut m2 = Mate::new(false, &url);
 		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
 
 		// Set up the event bindings.
@@ -87,13 +91,17 @@ impl State {
 		state2.raf.borrow_mut().replace(Closure::new(Box::new(move |e: f64| {
 			if Universe::active() {
 				if ! Universe::paused() { state1.paint(e as u32); } // No change if paused!
-				dom::request_animation_frame(state1.raf.borrow().as_ref().unwrap_throw());
+				state1.raf.borrow()
+					.as_ref()
+					.and_then(|f| dom::window().request_animation_frame(f.as_ref().unchecked_ref()).ok());
 			}
 			else { state1.raf.borrow_mut().take(); }
 		})));
 
 		// Move the state into a frame request!
-		dom::request_animation_frame(state2.raf.borrow().as_ref().unwrap_throw());
+		state2.raf.borrow()
+			.as_ref()
+			.and_then(|f| dom::window().request_animation_frame(f.as_ref().unchecked_ref()).ok());
 	}
 
 	/// # Paint!
@@ -114,9 +122,7 @@ impl State {
 /// # Event Handlers.
 struct StateEvents {
 	contextmenu: Closure<dyn FnMut(Event)>,
-
 	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut(Event)>,
-
 	mousedown: Closure<dyn FnMut(MouseEvent)>,
 	mousemove: Closure<dyn FnMut(MouseEvent)>,
 	mouseup: Closure<dyn FnMut(Event)>,
@@ -210,35 +216,27 @@ impl StateEvents {
 
 
 
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Get Width/Height.
 ///
-/// Query the DOM to get the window's current widht and height.
+/// Pull the closest thing to a window size we can get without injecting our
+/// own 100% fixed element. This may or may not factor the width of the
+/// scrollbar (if any), but most browsers auto-hide them nowadays anyway.
 fn size() -> (u16, u16) {
-	let window = dom::window();
-	let width = size_to_u16(window.inner_width());
-	let height = size_to_u16(window.inner_height());
+	const MAX: i32 = u16::MAX as i32;
+	let el = dom::document_element();
 
-	// We might want to take the document width instead, if it is about a
-	// scrollbar's width smaller.
-	if let Ok(width2) = u16::try_from(dom::document_element().offset_width()) {
-		if 0 != width2 && (width == 0 || width2 < width && width <= width2 + 25) {
-			return (width2, height);
-		}
-	}
+	let size = el.client_width();
+	let width =
+		if size <= 0 { 0 }
+		else if size < MAX { size as u16 }
+		else { u16::MAX };
+
+	let size = el.client_height();
+	let height =
+		if size <= 0 { 0 }
+		else if size < MAX { size as u16 }
+		else { u16::MAX };
 
 	(width, height)
-}
-
-#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-/// # Parse JS Value to u16.
-///
-/// Javascript's sloppy number-handling is very inconvenient! Haha.
-fn size_to_u16(v: Result<JsValue, JsValue>) -> u16 {
-	if let Ok(v) = v {
-		if let Some(v) = v.as_f64() {
-			if v.is_normal() && v.is_sign_positive() { return v as u16; }
-		}
-	}
-
-	0
 }

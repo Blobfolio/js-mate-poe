@@ -12,7 +12,6 @@ use crate::{
 	Position,
 	SceneList,
 	Sound,
-	sprite_as_blob,
 	Step,
 	Universe,
 };
@@ -22,11 +21,15 @@ use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	HtmlElement,
+	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
+};
+#[cfg(not(feature = "firefox"))]
+use web_sys::{
+	HtmlAudioElement,
 	Url,
 };
-#[cfg(not(feature = "firefox"))] use web_sys::HtmlAudioElement;
 #[cfg(feature = "firefox")]
 use web_sys::{
 	CustomEvent,
@@ -69,8 +72,8 @@ impl Mate {
 	/// # New.
 	///
 	/// Create a new instance, including all of the initial DOM setup.
-	pub(crate) fn new(primary: bool) -> Self {
-		let el = make_element(primary);
+	pub(crate) fn new(primary: bool, src: &str) -> Self {
+		let el = make_element(primary, src);
 		Self {
 			el,
 			size: Universe::size(),
@@ -238,7 +241,7 @@ impl Mate {
 
 		#[cfg(feature = "director")]
 		if animation_changed {
-			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u16));
+			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
 		}
 	}
 
@@ -860,7 +863,7 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and append the "mate" elements to the document body.
-fn make_element(primary: bool) -> HtmlElement {
+fn make_element(primary: bool, src: &str) -> HtmlElement {
 	let document = dom::document();
 
 	// Create the main element, its shadow DOM, and its shadow elements.
@@ -874,20 +877,28 @@ fn make_element(primary: bool) -> HtmlElement {
 	let shadow = el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.unwrap_throw();
 
-	shadow.set_inner_html(include_str!(concat!(env!("OUT_DIR"), "/poe.html")));
+	// Stylesheet.
+	shadow.append_child(&*{
+		let style = document.create_element("style").unwrap_throw();
+		style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
+		style
+	}).unwrap_throw();
 
-	// Change the wrapper class for primary sprites.
-	if primary {
-		shadow.get_element_by_id("p")
-			.unwrap_throw()
-			.set_class_name("off");
-	}
+	//Wrapper div.
+	let wrapper = document.create_element("div").unwrap_throw();
+	wrapper.set_id("p");
+	if primary { wrapper.set_class_name("off"); }
+	else { wrapper.set_class_name("child off"); }
 
-	// Set the image source.
-	let img = shadow.get_element_by_id("i").unwrap_throw();
-	Url::create_object_url_with_blob(&sprite_as_blob())
-		.and_then(|u| img.set_attribute("src", &u))
-		.unwrap_throw();
+	wrapper.append_child(&*{
+		let img = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
+			.unwrap_throw();
+		img.set_id("i");
+		img.set_src(src);
+		img
+	}).unwrap_throw();
+
+	shadow.append_child(&wrapper).unwrap_throw();
 
 	// Attach it to the body.
 	dom::body().append_child(&el).unwrap_throw();

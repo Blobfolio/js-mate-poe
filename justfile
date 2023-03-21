@@ -20,60 +20,34 @@ pkg_name      := "RS Mate Poe"
 
 cargo_dir     := "/tmp/" + pkg_id + "-cargo"
 doc_dir       := justfile_directory() + "/doc"
-release_dir   := justfile_directory() + "/release"
+dist_dir      := justfile_directory() + "/dist"
 skel_dir      := justfile_directory() + "/skel"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
-release_ext_dir := release_dir + "/firefox"
-
-generated_dir     := skel_dir + "/js/generated"
-generated_lib_dir := generated_dir + "/lib"
-generated_ext_dir := generated_dir + "/ext"
-
-release_cargo := cargo_release_dir + "/" + pkg_id + ".wasm"
-release_wasm  := cargo_release_dir + "/js-mate-poe.wasm"
-release_js    := cargo_release_dir + "/js-mate-poe.js"
-
-generated_ext_js   := generated_ext_dir + "/glue.mjs"
-generated_lib_wasm := generated_lib_dir + "/wasm_b64.mjs"
-generated_lib_js   := generated_lib_dir + "/glue.mjs"
 
 
+# Build Library!
+@build-library FEATURES="": _init
+	just _require-app cargo
+	just _require-app google-closure-compiler
+	just _require-app terser
 
-# Build.
-@build FEATURES="": _build-pre
-	just _build-library "{{ FEATURES }}"
-	just _build-firefox
+	[ ! $(command -v fyi) ] || fyi task "Building JS Mate Poe…"
 
-	# Clean up.
-	just _fix-chown "{{ release_dir }}"
-	just _fix-chown "{{ generated_dir }}"
-	just _fix-chmod "{{ justfile_directory() }}"
+	# Reset the output directories.
+	[ ! -d "{{ dist_dir }}" ] || rm -rf "{{ dist_dir }}"
+	[ ! -d "{{ skel_dir }}/js/generated" ] || rm -rf "{{ skel_dir }}/js/generated"
+	mkdir -p "{{ dist_dir }}" "{{ skel_dir }}/js/generated"
 
-
-# Pre-Build.
-@_build-pre:
-	# (Re)create generated asset and release directories.
-	[ ! -d "{{ generated_dir }}" ] || rm -rf "{{ generated_dir }}"
-	[ ! -d "{{ release_dir }}" ] || rm -rf "{{ release_dir }}"
-	mkdir -p \
-		"{{ release_ext_dir }}/sound" \
-		"{{ release_ext_dir }}/image" \
-		"{{ generated_lib_dir }}" \
-		"{{ generated_ext_dir }}"
-
-
-# Build: Rust.
-@_build-rust FEATURES="":
-	# Cargo.
+	# Start with Cargo.
 	cargo build \
 		--release \
 		--features "{{ FEATURES }}" \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
-	# Wasm-Bindgen.
+	# Run Bindgen.
 	wasm-bindgen \
 		--out-dir "{{ cargo_release_dir }}" \
 		--target web \
@@ -81,40 +55,32 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 		--omit-default-module-path \
 		--encode-into always \
 		--reference-types \
-		"{{ release_cargo }}"
+		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
-	# Rename the JS.
-	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ release_js }}"
+	# Remove the unused "fetch" stuff from the glue and move the file to the
+	# generated module directory.
+	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
+	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ skel_dir }}/js/generated/glue.mjs"
 
-	# Wasm-Opt.
+	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
 		--enable-multivalue \
 		-O3 \
-		-o "{{ release_wasm }}"
+		-o "{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
+	# Jam a base64-encoded wasm into a simple module script.
+	echo -n "export const wasmBase64 = '" > "{{ skel_dir }}/js/generated/wasm_base64.mjs"
+	cat "{{ cargo_release_dir }}/{{ pkg_id }}.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
+	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 
-# Build: Library.
-@_build-library FEATURES="":
-	fyi task "Building JS library…"
-	just _build-rust "{{ FEATURES }}"
-
-	# Base64-encode the wasm.
-	echo -n "export const wasmFile = '" > "{{ generated_lib_wasm }}"
-	cat "{{ release_wasm }}" | base64 -w0 >> "{{ generated_lib_wasm }}"
-	echo "';" >> "{{ generated_lib_wasm }}"
-
-	# Patch and copy the bindgen glue.
-	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/js.patch"
-	cp "{{ release_js }}" "{{ generated_lib_js }}"
-
-	# Compile the JS module into a normal script.
+	# Transpile the JS.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
-		--js "{{ generated_lib_js }}" \
-		--js "{{ generated_lib_wasm }}" \
-		--js "{{ skel_dir }}/js/b64_to_blob.mjs" \
+		--js "{{ skel_dir }}/js/generated/glue.mjs" \
+		--js "{{ skel_dir }}/js/generated/wasm_base64.mjs" \
+		--js "{{ skel_dir }}/js/base64_to_uint8.mjs" \
 		--js "{{ skel_dir }}/js/library.mjs" \
 		--entry_point "{{ skel_dir }}/js/library.mjs" \
 		--js_output_file "/tmp/library.js" \
@@ -126,74 +92,77 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 		--module_resolution BROWSER \
 		--warning_level VERBOSE
 
-	# Compress and wrap the script.
+	# Compress and enclose the JS.
 	cat "/tmp/library.js" | \
 		terser \
 			-c ecma=2021,passes=25 \
 			-e currentScript:document.currentScript \
 			-o "/tmp/library.min.js"
 
-	# Copy into place.
-	just _build-js-header "/tmp/library.min.js" "{{ release_dir }}/js-mate-poe.min.js"
-	cp "{{ skel_dir }}/html/index.html" "{{ release_dir }}"
-	channelz "{{ release_dir }}"
+	# Stick a header onto the JS and move it into place, along with a demo
+	# index.
+	cat "{{ skel_dir }}/js/header.js" "/tmp/library.min.js" > "{{ dist_dir }}/js-mate-poe.min.js"
+	cp "{{ skel_dir }}/html/index.html" "{{ dist_dir }}"
+	[ ! $(command -v channelz) ] || channelz "{{ dist_dir }}/js-mate-poe.min.js"
 
 	# Clean up.
-	rm /tmp/*.js
-	fyi success "Built JS library!"
+	rm /tmp/library*.js
+	just _fix-chown "{{ dist_dir }}"
+
+	[ ! $(command -v fyi) ] || fyi success "Built JS Mate Poe!"
 
 
-# Build: Firefox Extension.
-@_build-firefox:
-	fyi task "Building Firefox extension…"
-	just _build-rust firefox
+# Build Firefox Extension Build Environment.
+@build-firefox-src:
+	just _require-app cargo
 
-	# Copy most assets more or less as-are.
-	cp "{{ release_js }}" "{{ generated_ext_js }}"
-	cp "{{ release_wasm }}" "{{ release_ext_dir }}/js-mate-poe.wasm"
-	cp "{{ skel_dir }}/firefox/manifest.json" "{{ release_ext_dir }}"
-	cp "{{ skel_dir }}/img/icons/"*.svg "{{ release_ext_dir }}/image"
-	cp "{{ skel_dir }}/sound/"*.flac "{{ release_ext_dir }}/sound"
+	[ ! $(command -v fyi) ] || fyi task "Building Firefox Extension Build Environment…"
 
-	# Build the foreground script.
-	google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--js "{{ generated_ext_js }}" \
-		--js "{{ skel_dir }}/js/firefox-fg.mjs" \
-		--entry_point "{{ skel_dir }}/js/firefox-fg.mjs" \
-		--js_output_file "/tmp/foreground.js" \
-		--assume_function_wrapper \
-		--browser_featureset_year 2021 \
-		--compilation_level WHITESPACE_ONLY \
-		--isolation_mode NONE \
-		--jscomp_off unknownDefines \
-		--module_resolution BROWSER \
-		--warning_level VERBOSE
+	# Make sure there's a Cargo lock.
+	cargo update
 
-	# Compress, wrap, but don't mangle it.
-	cat "/tmp/foreground.js" | \
-		terser \
-			-c ecma=2021,passes=25 \
-			-e browser:browser \
-			-m \
-			-o "/tmp/foreground.min.js"
+	# Reset the output directories.
+	[ ! -d "{{ dist_dir }}" ] || rm -rf "{{ dist_dir }}"
+	mkdir -p \
+		"{{ dist_dir }}/js-mate-poe_firefox/static/image" \
+		"{{ dist_dir }}/js-mate-poe_firefox/static/sound" \
+		"{{ dist_dir }}/js-mate-poe_firefox/js/generated" \
+		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 
-	just _build-js-header "{{ skel_dir }}/js/firefox-bg.js" "{{ release_ext_dir }}/background.js"
-	sd -s "JS Mate Poe" "JS Mate Poe: Background" "{{ release_ext_dir }}/background.js"
+	# Copy static assets over.
+	cp "{{ skel_dir }}/firefox/build.sh" "{{ dist_dir }}/js-mate-poe_firefox"
+	cp "{{ skel_dir }}/firefox/Dockerfile" "{{ dist_dir }}/js-mate-poe_firefox"
+	cp "{{ skel_dir }}/firefox/README.txt" "{{ dist_dir }}/js-mate-poe_firefox"
+	cp "{{ skel_dir }}/firefox/manifest.json" "{{ dist_dir }}/js-mate-poe_firefox/static"
+	cp "{{ skel_dir }}/img/icons/"*.svg "{{ dist_dir }}/js-mate-poe_firefox/static/image"
+	cp "{{ skel_dir }}/sound/"*.flac "{{ dist_dir }}/js-mate-poe_firefox/static/sound"
 
-	just _build-js-header "/tmp/foreground.min.js" "{{ release_ext_dir }}/foreground.js"
-	sd -s "JS Mate Poe" "JS Mate Poe: Foreground" "{{ release_ext_dir }}/foreground.js"
+	# Patch the readme to remove its warning.
+	sed -i 's/## THIS IS ONLY A MESSAGE TEMPLATE  ##//g' "{{ dist_dir }}/js-mate-poe_firefox/README.txt"
+	sed -i 's/## DO NOT FOLLOW THESE INSTRUCTIONS ##//g' "{{ dist_dir }}/js-mate-poe_firefox/README.txt"
 
-	# Clean up.
-	rm /tmp/*.js
-	fyi success "Built Firefox extension!"
+	# Copy Javascript.
+	cp "{{ skel_dir }}/firefox/"*.mjs "{{ dist_dir }}/js-mate-poe_firefox/js"
+	cp "{{ skel_dir }}/js/header.js" "{{ dist_dir }}/js-mate-poe_firefox/js"
 
+	# Copy Rust.
+	cp "{{ justfile_directory() }}/build.rs" "{{ dist_dir }}/js-mate-poe_firefox/rust"
+	cp "{{ justfile_directory() }}/Cargo.toml" "{{ dist_dir }}/js-mate-poe_firefox/rust"
+	cp "{{ justfile_directory() }}/Cargo.lock" "{{ dist_dir }}/js-mate-poe_firefox/rust"
+	cp "{{ skel_dir }}/img/poe.png" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
+	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/scss"
+	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust/src"
 
-# Build: Append JS Header.
-@_build-js-header SRC DST:
-	just _require "{{ SRC }}"
-	cat "{{ skel_dir }}/js/header.js" "{{ SRC }}" > "{{ DST }}"
+	# Fix the permissions and package it up.
+	just _fix-chown "{{ dist_dir }}/js-mate-poe_firefox"
+	just _fix-chmod "{{ dist_dir }}/js-mate-poe_firefox"
+	chmod 755 "{{ dist_dir }}/js-mate-poe_firefox/build.sh"
+	cd "{{ dist_dir }}" && \
+		tar -cvzf js-mate-poe_firefox.tar.gz js-mate-poe_firefox
+	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"
+
+	just _fix-chown "{{ dist_dir }}"
+	[ ! $(command -v fyi) ] || fyi success "Built Firefox Extension Build Environment!"
 
 
 # Clean Cargo crap.
@@ -212,20 +181,20 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 @clippy:
 	clear
 
-	fyi task "Features: none (default)"
+	[ ! $(command -v fyi) ] || fyi task "Features: none (default)"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
-	fyi task "Features: director"
+	[ ! $(command -v fyi) ] || fyi task "Features: director"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features director \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
-	fyi task "Features: firefox"
+	[ ! $(command -v fyi) ] || fyi task "Features: firefox"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features firefox \
@@ -238,20 +207,20 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 	clear
 	# Note: we have to target x86-64 because private tests can't be run
 	# under wasm yet.
-	fyi task "Features: none (default)"
+	[ ! $(command -v fyi) ] || fyi task "Features: none (default)"
 	cargo test \
 		--release \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 
-	fyi task "Features: director"
+	[ ! $(command -v fyi) ] || fyi task "Features: director"
 	cargo test \
 		--release \
 		--features director \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 
-	fyi task "Features: firefox"
+	[ ! $(command -v fyi) ] || fyi task "Features: firefox"
 	cargo test \
 		--release \
 		--features firefox \
@@ -260,7 +229,7 @@ generated_lib_js   := generated_lib_dir + "/glue.mjs"
 
 
 # Get/Set version.
-version:
+version: _pre_version
 	#!/usr/bin/env bash
 
 	# Current version.
@@ -275,7 +244,7 @@ version:
 		exit 0
 	fi
 
-	fyi success "Setting version to $_ver2."
+	[ ! $(command -v fyi) ] || fyi success "Setting version to $_ver2."
 
 	# Set the release version!
 	just _version "{{ justfile_directory() }}" "$_ver2"
@@ -285,6 +254,13 @@ version:
 
 	# Set JS Header Version.
 	sd '@version [\d.]+' "@version $_ver2" "{{ skel_dir }}/js/header.js"
+
+
+# Version requirements.
+@_pre_version:
+	just _require-app sd
+	just _require-app toml
+	just _require-app whiptail
 
 
 # Set Cargo version for real.
@@ -310,9 +286,22 @@ version:
 
 # Initialization.
 @_init:
-	[ $(command -v wasm-pack) ] || cargo install wasm-pack
+	[ $(command -v wasm-bindgen) ] || cargo install wasm-bindgen-cli
+	[ $(command -v wasm-opt) ] || cargo install wasm-opt
 
 
 # Require Thing Exists.
 @_require PATH:
-	[ -e "{{ PATH }}" ] || fyi error -e 1 "Missing {{ PATH }}"
+	[ -e "{{ PATH }}" ] || just _error "Missing {{ PATH }}"
+
+
+# Require Program.
+@_require-app APP:
+	[ $(command -v "{{ APP }}") ] || just _error "Missing dependency: {{ APP }}"
+
+
+# Print error and exit.
+@_error MSG:
+	[ ! $(command -v fyi) ] || fyi error -e 1 "{{ MSG }}"
+	[ $(command -v fyi) ] || echo "{{ MSG }}"
+	exit 1
