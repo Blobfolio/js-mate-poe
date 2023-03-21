@@ -114,6 +114,7 @@ impl Mate {
 			self.flags.clear();
 			self.next_animation.take();
 			self.next_tick = 0;
+			self.animation.take();
 			self.set_animation(Animation::first_choice());
 		}
 	}
@@ -152,6 +153,7 @@ impl Mate {
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
+		child.animation.take();
 		child.set_animation(animation);
 
 		// Some animations require a position override using knowledge of the
@@ -174,6 +176,9 @@ impl Mate {
 		} {
 			child.set_position(pos, true);
 		}
+
+		// Make sure we're going to tick right away.
+		child.next_tick = 0;
 	}
 
 	/// # Set Animation.
