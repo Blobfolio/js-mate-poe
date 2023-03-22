@@ -1,5 +1,5 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "browser_specific_settings":
     {
         "gecko":
@@ -11,7 +11,7 @@
     "name": "JS Mate Poe",
     "version": "1.4.2",
     "author": "Blobfolio, LLC",
-    "description": "Add Screen Mate Poe to your active tab for company and amusement.",
+    "description": "Add Screen Mate Poe to every web site for constant companionship!",
     "homepage_url": "https://github.com/Blobfolio/js-mate-poe",
     "icons":
     {
@@ -19,14 +19,22 @@
         "48": "image/walk.svg",
         "96": "image/walk.svg"
     },
-    "content_security_policy":
-    {
-        "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'"
-    },
-    "action":
+    "content_security_policy": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'",
+    "permissions":
+    [
+        "storage",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "page_action":
     {
         "default_icon": "image/sleep.svg",
-        "default_title": "Enable JS Mate Poe"
+        "default_title": "Enable JS Mate Poe",
+        "show_matches":
+        [
+            "http://*/*",
+            "https://*/*"
+        ]
     },
     "background":
     {
@@ -50,18 +58,9 @@
     ],
     "web_accessible_resources":
     [
-        {
-            "resources":
-            [
-            	"js-mate-poe.wasm",
-                "sound/baa.flac",
-                "sound/sneeze.flac",
-                "sound/yawn.flac"
-            ],
-            "matches":
-            [
-                "<all_urls>"
-            ]
-        }
+        "js-mate-poe.wasm",
+        "sound/baa.flac",
+        "sound/sneeze.flac",
+        "sound/yawn.flac"
     ]
 }

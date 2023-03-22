@@ -7,7 +7,7 @@
 
 A compact, dependency-free ~~Javascript~~ [wasm](https://en.wikipedia.org/wiki/WebAssembly) recreation of the beloved 16-bit Screen Mate Poe Windows program, distributed as a standalone library and a Firefox browser extension.
 
-<img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.png" width="30%" alt="Add Poe to any site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.png" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.png" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
+<img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.webp" width="30%" alt="Add Poe to every site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.png" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.png" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
 
 
 &nbsp;
@@ -53,19 +53,13 @@ The [next section](#advanced-library-usage) covers the minimal API, which you'd 
 
 ### Firefox Extension
 
-The Firefox browser extension lets you add Poe to any web page with the click of a button!
+The Firefox browser extension lets you add Poe to any and every web site for constant companionship!
 
-To install it, simply download the `js-mate-poe_firefox_#.#.#.xpi` package from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases).
+To install it, simply click the `js-mate-poe_firefox_#.#.#.xpi` package link from the [latest release](https://github.com/Blobfolio/js-mate-poe/releases).
 
-Firefox should prompt you to install it then and there, but if not, simply go to the "Manage Your Extensions" settings page (`about:addons`), click the gear/settings icon, and select "Install Add-on From File".
+Firefox should prompt you to install it then and there, but if you end up downloading the file, you can either double-click it, or go to the "Manage Your Extensions" settings page (`about:addons`), click the gear/settings icon, and select "Install Add-on From File".
 
-**Note:** Before you can actually use the extension, you'll need to grant it "Access To Your Data On All Sites".
-
-This is silly and gratuitous because Poe doesn't give two bleats about "your data", but that permission is unfortunately an all-or-nothing proposition. Because Poe needs permission to add _itself_ to a page (and read relevant properties like the window size and mouse position), Firefox assumes it needs _carte blanche_. Haha.
-
-At any rate, once installed, simply click the extension's Poe icon to turn him on or off for the current tab!
-
-Hurray for constant companionship!
+Once installed, look for the little sheep icon in the URL bar — visible on regular pages, not settings pages — and click that to turn Poe on or off.
 
 
 &nbsp;
