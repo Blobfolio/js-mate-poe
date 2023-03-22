@@ -72,9 +72,9 @@ google-closure-compiler \
 	--entry_point "js/foreground.mjs" \
 	--js_output_file "/tmp/foreground.js" \
 	--assume_function_wrapper \
+	--isolation_mode IIFE \
 	--browser_featureset_year 2021 \
 	--compilation_level WHITESPACE_ONLY \
-	--isolation_mode NONE \
 	--jscomp_off unknownDefines \
 	--module_resolution BROWSER \
 	--warning_level VERBOSE
