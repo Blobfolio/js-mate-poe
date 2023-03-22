@@ -37,12 +37,16 @@ document.addEventListener('poe-sound', function(e) {
  * @return {void} Nothing.
  */
 browser.runtime.onMessage.addListener(function(request) {
-	if ('startPoe' === request.message) {
-		if (! Poe.active) {
-			Poe.active = true;
+	if (
+		(null !== request.message) &&
+		('object' === typeof request.message) &&
+		('updateFg' === request.message.message)
+	) {
+		if (Poe.audio !== request.message.audio) {
+			Poe.audio = !! request.message.audio;
 		}
-	}
-	else if (('stopPoe' === request.message) && Poe.active) {
-		Poe.active = false;
+		if (Poe.active !== request.message.active) {
+			Poe.active = !! request.message.active;
+		}
 	}
 });

@@ -57,34 +57,65 @@ wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
 # top-level directory.
 cd ..
 
-# The background script has no dependencies, so we can just chuck a header on
-# top and copy it into place.
-cat js/header.js js/background.mjs > dist/background.js
+# Compile the background script.
+google-closure-compiler \
+	--env BROWSER \
+	--language_in STABLE \
+	--js "js/settings.mjs" \
+	--js "js/background.mjs" \
+	--entry_point "js/background.mjs" \
+	--js_output_file "/tmp/out.js" \
+	--assume_function_wrapper \
+	--isolation_mode IIFE \
+	--browser_featureset_year 2021 \
+	--compilation_level WHITESPACE_ONLY \
+	--module_resolution BROWSER \
+	--warning_level VERBOSE
+
+# Add a header and move it into place.
+cat js/header.js /tmp/out.js > dist/background.js
 sed -i "s/* JS Mate Poe/* JS Mate Poe: Background/g" dist/background.js
 
-# The foreground, however, does have dependencies, so we need to run
-# google-closure-compiler to flatten it into a regular ol' script.
+# Compile the options script.
+google-closure-compiler \
+	--env BROWSER \
+	--language_in STABLE \
+	--js "js/settings.mjs" \
+	--js "js/options.mjs" \
+	--entry_point "js/options.mjs" \
+	--js_output_file "/tmp/out.js" \
+	--assume_function_wrapper \
+	--isolation_mode IIFE \
+	--browser_featureset_year 2021 \
+	--compilation_level WHITESPACE_ONLY \
+	--module_resolution BROWSER \
+	--warning_level VERBOSE
+
+# Add a header and move it into place.
+cat js/header.js /tmp/out.js > dist/options.js
+sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options.js
+
+# Compile the foreground script.
 google-closure-compiler \
 	--env BROWSER \
 	--language_in STABLE \
 	--js "js/generated/glue.mjs" \
 	--js "js/foreground.mjs" \
 	--entry_point "js/foreground.mjs" \
-	--js_output_file "/tmp/foreground.js" \
+	--js_output_file "/tmp/out.js" \
 	--assume_function_wrapper \
 	--isolation_mode IIFE \
 	--browser_featureset_year 2021 \
 	--compilation_level WHITESPACE_ONLY \
-	--jscomp_off unknownDefines \
 	--module_resolution BROWSER \
 	--warning_level VERBOSE
 
-# As with the background, we just need to chuck a header onto it and copy it
-# over.
-cat js/header.js /tmp/foreground.js > dist/foreground.js
+# Add a header and move it into place.
+cat js/header.js /tmp/out.js > dist/foreground.js
 sed -i "s/* JS Mate Poe/* JS Mate Poe: Foreground/g" dist/foreground.js
 
-# Fix permissions. (Docker is probably running as root.)
+# Clean up.
+rm /tmp/out.js
 chown -R --reference=./Dockerfile dist js/generated
 
 # Done!

@@ -141,6 +141,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/firefox/build.sh" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/README.txt" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/manifest.json" "{{ dist_dir }}/js-mate-poe_firefox/static"
+	cp "{{ skel_dir }}/firefox/options.html" "{{ dist_dir }}/js-mate-poe_firefox/static"
 	cp "{{ skel_dir }}/img/icons/"*.svg "{{ dist_dir }}/js-mate-poe_firefox/static/image"
 	cp "{{ skel_dir }}/sound/"*.flac "{{ dist_dir }}/js-mate-poe_firefox/static/sound"
 
