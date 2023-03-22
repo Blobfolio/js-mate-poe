@@ -5,7 +5,6 @@
 use crate::{
 	dom,
 	Mate,
-	sprite_as_blob,
 	Universe,
 };
 use std::{
@@ -18,11 +17,10 @@ use wasm_bindgen::{
 };
 use web_sys::{
 	AddEventListenerOptions,
+	Element,
 	Event,
 	EventListenerOptions,
-	HtmlElement,
 	MouseEvent,
-	Url,
 };
 
 
@@ -63,14 +61,12 @@ impl State {
 		let (w, h) = size();
 		Universe::resize(w, h);
 
-		let url = Url::create_object_url_with_blob(&sprite_as_blob()).unwrap_throw();
-
 		// Initialize the primary mate.
-		let mut m1 = Mate::new(true, &url);
+		let mut m1 = Mate::new(true);
 		m1.start();
 
 		// Initialize the child mate.
-		let mut m2 = Mate::new(false, &url);
+		let mut m2 = Mate::new(false);
 		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
 
 		// Set up the event bindings.
@@ -164,7 +160,7 @@ impl Default for StateEvents {
 
 impl StateEvents {
 	/// # Bind Event Listeners.
-	fn bind(&self, el: &HtmlElement) {
+	fn bind(&self, el: &Element) {
 		let document_element = dom::document_element();
 
 		macro_rules! bind {
@@ -186,7 +182,7 @@ impl StateEvents {
 	}
 
 	/// # Unbind Event Listeners.
-	fn unbind(&self, el: &HtmlElement) {
+	fn unbind(&self, el: &Element) {
 		let document_element = dom::document_element();
 
 		// This one works different from the rest because it was registered

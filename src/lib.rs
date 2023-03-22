@@ -56,7 +56,7 @@ pub(crate) use animation::{
 };
 pub(crate) use assets::{
 	Sound,
-	sprite_as_blob,
+	sprite_image_element,
 };
 pub(crate) use mate::Mate;
 pub(crate) use position::{

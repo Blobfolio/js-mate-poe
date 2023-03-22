@@ -32,7 +32,7 @@ $height: 40px;
 	height: $tile_size;
 
 	cursor: grab;
-	z-index: 100000;
+	z-index: 2147483647; // i32::MAX
 	overflow: hidden;
 
 	opacity: 1;

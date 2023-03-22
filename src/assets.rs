@@ -2,21 +2,45 @@
 # RS Mate Poe: Assets
 */
 
-use crate::dom;
-use web_sys::Blob;
+use crate::Frame;
+use js_sys::{
+	Array,
+	Uint8Array,
+};
+use wasm_bindgen::prelude::*;
+use web_sys::{
+	Blob,
+	BlobPropertyBag,
+	HtmlImageElement,
+	Url,
+};
+
+// Register the Blob/URLs _once_ and hold onto them since garbage collection is
+// iffy.
+thread_local! {
+	static IMG_POE: String = url(include_bytes!("../skel/img/poe.png"), "image/png");
+}
+
+#[cfg(not(feature = "firefox"))]
+thread_local! {
+	static SND_BAA: String = url(include_bytes!("../skel/sound/baa.flac"), "audio/flac");
+	static SND_SNEEZE: String = url(include_bytes!("../skel/sound/sneeze.flac"), "audio/flac");
+	static SND_YAWN: String = url(include_bytes!("../skel/sound/yawn.flac"), "audio/flac");
+}
 
 
 
-const IMG_POE: &[u8] = include_bytes!("../skel/img/poe.png");
-
-#[cfg(not(feature = "firefox"))] const SND_BAA: &[u8] = include_bytes!("../skel/sound/baa.flac");
-#[cfg(not(feature = "firefox"))] const SND_SNEEZE: &[u8] = include_bytes!("../skel/sound/sneeze.flac");
-#[cfg(not(feature = "firefox"))] const SND_YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
-
-
-
+#[inline]
 /// # Image Sprite.
-pub(crate) fn sprite_as_blob() -> Blob { dom::blob(IMG_POE, "image/png") }
+///
+/// Return an image element populated with the sprite.
+pub(crate) fn sprite_image_element() -> HtmlImageElement {
+	let el = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
+		.unwrap_throw();
+	el.set_id("i");
+	IMG_POE.with(|s| el.set_src(s));
+	el
+}
 
 
 
@@ -31,12 +55,27 @@ pub(crate) enum Sound {
 
 #[cfg(not(feature = "firefox"))]
 impl Sound {
-	/// # As Blob.
-	pub(crate) fn as_blob(self) -> Blob {
+	/// # Play Sound.
+	pub(crate) fn play(self) {
+		use web_sys::HtmlAudioElement;
+
 		match self {
-			Self::Baa => dom::blob(SND_BAA, "audio/flac"),
-			Self::Sneeze => dom::blob(SND_SNEEZE, "audio/flac"),
-			Self::Yawn => dom::blob(SND_YAWN, "audio/flac"),
+			Self::Baa => SND_BAA.with(|s| HtmlAudioElement::new_with_src(s).ok()),
+			Self::Sneeze => SND_SNEEZE.with(|s| HtmlAudioElement::new_with_src(s).ok()),
+			Self::Yawn => SND_YAWN.with(|s| HtmlAudioElement::new_with_src(s).ok()),
 		}
+			.and_then(|obj| obj.play().ok());
 	}
+}
+
+
+
+/// # Slice to Blob to URL.
+fn url(data: &'static [u8], mime: &str) -> String {
+	Blob::new_with_u8_array_sequence_and_options(
+		&Array::of1(&Uint8Array::from(data)),
+		BlobPropertyBag::new().type_(mime)
+	)
+		.and_then(|b| Url::create_object_url_with_blob(&b))
+		.unwrap_throw()
 }

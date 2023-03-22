@@ -12,23 +12,18 @@ use crate::{
 	Position,
 	SceneList,
 	Sound,
+	sprite_image_element,
 	Step,
 	Universe,
 };
 #[cfg(feature = "director")] use crate::dom::debug;
 use flags::MateFlags;
-use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
+	Element,
 	HtmlElement,
-	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
-};
-#[cfg(not(feature = "firefox"))]
-use web_sys::{
-	HtmlAudioElement,
-	Url,
 };
 #[cfg(feature = "firefox")]
 use web_sys::{
@@ -38,15 +33,19 @@ use web_sys::{
 
 
 
-/// # Buffer for our --x, --y values.
-type WrapperBuffer = [MaybeUninit::<u8>; 15];
+/// # String Buffer.
+///
+/// Each mate instance contains a scratch buffer that can be used to write
+/// data into before passing along to Javascript (to avoid the allocation
+/// overhead of using strings).
+type Buffer = [u8; 15];
 
 
 
 #[derive(Debug)]
 /// # Mate.
 pub(crate) struct Mate {
-	pub(crate) el: HtmlElement,
+	pub(crate) el: Element,
 	size: (u16, u16),
 	flags: MateFlags,
 	frame: Frame,
@@ -56,6 +55,7 @@ pub(crate) struct Mate {
 	scenes: Option<SceneList>,
 	next_animation: Option<Animation>,
 	next_tick: u32,
+	buf: Buffer,
 }
 
 impl Drop for Mate {
@@ -72,8 +72,8 @@ impl Mate {
 	/// # New.
 	///
 	/// Create a new instance, including all of the initial DOM setup.
-	pub(crate) fn new(primary: bool, src: &str) -> Self {
-		let el = make_element(primary, src);
+	pub(crate) fn new(primary: bool) -> Self {
+		let el = make_element(primary);
 		Self {
 			el,
 			size: Universe::size(),
@@ -85,6 +85,7 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
+			buf: [0_u8; 15],
 		}
 	}
 }
@@ -118,6 +119,7 @@ impl Mate {
 			self.flags.clear();
 			self.next_animation.take();
 			self.next_tick = 0;
+			self.animation.take();
 			self.set_animation(Animation::first_choice());
 		}
 	}
@@ -156,6 +158,7 @@ impl Mate {
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
+		child.animation.take();
 		child.set_animation(animation);
 
 		// Some animations require a position override using knowledge of the
@@ -178,6 +181,9 @@ impl Mate {
 		} {
 			child.set_position(pos, true);
 		}
+
+		// Make sure we're going to tick right away.
+		child.next_tick = 0;
 	}
 
 	/// # Set Animation.
@@ -380,9 +386,12 @@ impl Mate {
 
 			// Browser override?
 			#[cfg(feature = "director")]
-			if let Some(n) = Universe::next_animation() {
-				Universe::set_no_child();
-				self.next_animation.replace(n);
+			if self.flags.primary() {
+				if let Some(n) = Universe::next_animation() {
+					self.animation.take();
+					Universe::set_no_child();
+					self.next_animation.replace(n);
+				}
 			}
 
 			// Flip if flipping is needed.
@@ -411,23 +420,12 @@ impl Mate {
 	/// Returns `true` if a resize-related change occurred, as determined by
 	/// comparing the universe's current size with the value cached on this
 	/// particular mate.
-	fn pretick_resize(&mut self) -> bool {
-		if self.active() {
-			let (w, h) = Universe::size();
-			if self.size.0 != w || self.size.1 != h {
-				self.size.0 = w;
-				self.size.1 = h;
-
-				// If we're totally off-screen, we need to restart.
-				if 0 == self.visibility() {
-					if self.flags.primary() { self.start(); }
-					else { self.stop(); }
-					return true;
-				}
-			}
+	fn pretick_resize(&mut self) {
+		let (w, h) = Universe::size();
+		if self.size.0 != w || self.size.1 != h {
+			self.size.0 = w;
+			self.size.1 = h;
 		}
-
-		false
 	}
 
 	/// # Tick.
@@ -539,40 +537,36 @@ impl Mate {
 		if self.flags.changed() {
 			let shadow = self.el.shadow_root().unwrap_throw();
 
-			if self.flags.bufferable_changed() {
-				let mut buf = [MaybeUninit::<u8>::uninit(); 15];
+			// Update the wrapper div's class and/or style.
+			if self.flags.class_changed() || self.flags.transform_changed() {
+				let wrapper: HtmlElement = shadow.get_element_by_id("p")
+					.unwrap_throw()
+					.unchecked_into();
 
-				// Update the wrapper div's class and/or style.
-				if self.flags.class_changed() || self.flags.transform_changed() {
-					let wrapper: HtmlElement = shadow.get_element_by_id("p")
-						.unwrap_throw()
-						.unchecked_into();
-
-
-					if self.flags.class_changed() {
-						wrapper.set_class_name(self.write_classes(&mut buf));
-					}
-
-					if self.flags.transform_changed() {
-						let style = wrapper.style();
-						if self.flags.transform_x_changed() {
-							style.set_property("--x", write_transform(self.pos.x, &mut buf)).unwrap_throw();
-						}
-						if self.flags.transform_y_changed() {
-							style.set_property("--y", write_transform(self.pos.y, &mut buf)).unwrap_throw();
-						}
-					}
+				if self.flags.class_changed() {
+					wrapper.set_class_name(self.write_classes());
 				}
 
-				// Update the image frame class.
-				if self.flags.frame_changed() {
-					shadow.get_element_by_id("i")
-						.unwrap_throw()
-						.unchecked_into::<HtmlElement>()
-						.style()
-						.set_property("--c", write_transform(self.frame.offset(), &mut buf))
-						.unwrap_throw();
+				if self.flags.transform_changed() {
+					let style = wrapper.style();
+					if self.flags.transform_x_changed() {
+						style.set_property("--x", write_transform(self.pos.x, &mut self.buf)).unwrap_throw();
+					}
+					if self.flags.transform_y_changed() {
+						style.set_property("--y", write_transform(self.pos.y, &mut self.buf)).unwrap_throw();
+					}
 				}
+			}
+
+			// Update the image frame class.
+			if self.flags.frame_changed() {
+				shadow.get_element_by_id("i")
+					.and_then(|img|
+						img.unchecked_into::<HtmlElement>()
+							.style()
+							.set_property("--c", write_transform(self.frame.offset(), &mut self.buf)).ok()
+					)
+					.unwrap_throw();
 			}
 
 			// Play a sound?
@@ -592,12 +586,7 @@ impl Mate {
 			}
 
 			#[cfg(not(feature = "firefox"))]
-			if let Some(sound) = self.sound.take() {
-				let blob = sound.as_blob();
-				let _res = Url::create_object_url_with_blob(&blob)
-					.and_then(|src| HtmlAudioElement::new_with_src(&src))
-					.and_then(|player| player.play());
-			}
+			if let Some(sound) = self.sound.take() { sound.play(); }
 
 			self.flags.clear_changed();
 		}
@@ -618,7 +607,7 @@ impl Mate {
 	///
 	/// Only one animation-related class can exist at a time, so the largest
 	/// possible combination of classes is "child rx ry off", 15 bytes.
-	fn write_classes(&self, buf: &mut WrapperBuffer) -> &str {
+	fn write_classes(&mut self) -> &str {
 		// Start with "child" if this is a child sprite.
 		let mut from =
 			if self.flags.primary() {
@@ -627,7 +616,7 @@ impl Mate {
 					unsafe {
 						std::ptr::copy_nonoverlapping(
 							b"h ".as_ptr(),
-							buf.as_mut_ptr().cast::<u8>(),
+							self.buf.as_mut_ptr(),
 							2,
 						);
 					}
@@ -639,7 +628,7 @@ impl Mate {
 				unsafe {
 					std::ptr::copy_nonoverlapping(
 						b"child ".as_ptr(),
-						buf.as_mut_ptr().cast::<u8>(),
+						self.buf.as_mut_ptr(),
 						6,
 					);
 				}
@@ -651,7 +640,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					b"rx ".as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					3,
 				);
 			}
@@ -663,7 +652,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					b"ry ".as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					3,
 				);
 			}
@@ -687,7 +676,7 @@ impl Mate {
 			unsafe {
 				std::ptr::copy_nonoverlapping(
 					rest.as_ptr(),
-					buf.as_mut_ptr().add(from).cast::<u8>(),
+					self.buf.as_mut_ptr().add(from),
 					rest.len(),
 				);
 			}
@@ -696,9 +685,7 @@ impl Mate {
 
 		// Return the string.
 		unsafe {
-			std::str::from_utf8_unchecked(
-				&*(std::ptr::addr_of!(buf[..from]) as *const [u8])
-			)
+			std::str::from_utf8_unchecked(&self.buf[..from])
 		}
 	}
 }
@@ -863,46 +850,31 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and append the "mate" elements to the document body.
-fn make_element(primary: bool, src: &str) -> HtmlElement {
+fn make_element(primary: bool) -> Element {
 	let document = dom::document();
 
 	// Create the main element, its shadow DOM, and its shadow elements.
-	let el: HtmlElement = document.create_element("div")
-		.unwrap_throw()
-		.unchecked_into();
-
-	// Disable aria-ness.
+	let el = document.create_element("div").unwrap_throw();
 	el.set_attribute("aria-hidden", "true").unwrap_throw();
 
-	let shadow = el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
-		.unwrap_throw();
+	// Create its stylesheet.
+	let style = document.create_element("style").unwrap_throw();
+	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
-	// Stylesheet.
-	shadow.append_child(&*{
-		let style = document.create_element("style").unwrap_throw();
-		style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
-		style
-	}).unwrap_throw();
-
-	//Wrapper div.
+	// And the wrapper div (with the image).
 	let wrapper = document.create_element("div").unwrap_throw();
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
+	wrapper.append_child(&sprite_image_element()).unwrap_throw();
 
-	wrapper.append_child(&*{
-		let img = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
-			.unwrap_throw();
-		img.set_id("i");
-		img.set_src(src);
-		img
-	}).unwrap_throw();
+	// Create a shadow and move the inner elements into it.
+	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
+		.and_then(|s| s.append_with_node_2(&style, &wrapper))
+		.unwrap_throw();
 
-	shadow.append_child(&wrapper).unwrap_throw();
-
-	// Attach it to the body.
+	// Append the element to the body and return a reference.
 	dom::body().append_child(&el).unwrap_throw();
-
 	el
 }
 
@@ -921,20 +893,14 @@ fn make_element(primary: bool, src: &str) -> HtmlElement {
 /// This shares a buffer with the class-writer. That method requires 15 bytes,
 /// but this only requires at most 13 bytes (11 for the integer and 2 for the
 /// unit), so there's sufficient room.
-fn write_transform(v: i32, buf: &mut WrapperBuffer) -> &str {
+fn write_transform(v: i32, buf: &mut Buffer) -> &str {
 	// Stringify the value.
-	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr().cast::<u8>(), v) };
+	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr(), v) };
 	unsafe {
 		// Add the unit.
-		std::ptr::copy_nonoverlapping(
-			b"px".as_ptr(),
-			buf.as_mut_ptr().add(len).cast::<u8>(),
-			2,
-		);
+		std::ptr::copy_nonoverlapping(b"px".as_ptr(), buf.as_mut_ptr().add(len), 2);
 
 		// Stringify what we've written.
-		std::str::from_utf8_unchecked(
-			&*(std::ptr::addr_of!(buf[..len + 2]) as *const [u8])
-		)
+		std::str::from_utf8_unchecked(&buf[..len + 2])
 	}
 }

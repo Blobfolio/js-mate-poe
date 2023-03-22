@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://deb.nodesource.com/node_14.x
+Suites: bullseye
+Components: main
+Signed-By: /usr/share/keyrings/nodesource-archive-keyring.gpg

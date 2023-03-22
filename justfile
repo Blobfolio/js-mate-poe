@@ -28,7 +28,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 
 # Build Library!
-@build-library FEATURES="": _init
+@build FEATURES="": _init
 	just _require-app cargo
 	just _require-app google-closure-compiler
 	just _require-app terser
@@ -67,11 +67,14 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--enable-reference-types \
 		--enable-multivalue \
 		-O3 \
-		-o "{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
+		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
+
+	# Remove for next time around.
+	rm "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm"
 
 	# Jam a base64-encoded wasm into a simple module script.
 	echo -n "export const wasmBase64 = '" > "{{ skel_dir }}/js/generated/wasm_base64.mjs"
-	cat "{{ cargo_release_dir }}/{{ pkg_id }}.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
+	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 
 	# Transpile the JS.
@@ -130,9 +133,12 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		"{{ dist_dir }}/js-mate-poe_firefox/js/generated" \
 		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 
+	# Copy docker bits.
+	cp "{{ skel_dir }}/firefox/Dockerfile" "{{ dist_dir }}/js-mate-poe_firefox"
+	cp -aR "{{ skel_dir }}/firefox/docker" "{{ dist_dir }}/js-mate-poe_firefox/docker"
+
 	# Copy static assets over.
 	cp "{{ skel_dir }}/firefox/build.sh" "{{ dist_dir }}/js-mate-poe_firefox"
-	cp "{{ skel_dir }}/firefox/Dockerfile" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/README.txt" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/manifest.json" "{{ dist_dir }}/js-mate-poe_firefox/static"
 	cp "{{ skel_dir }}/img/icons/"*.svg "{{ dist_dir }}/js-mate-poe_firefox/static/image"
@@ -157,7 +163,11 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Fix the permissions and package it up.
 	just _fix-chown "{{ dist_dir }}/js-mate-poe_firefox"
 	just _fix-chmod "{{ dist_dir }}/js-mate-poe_firefox"
-	chmod 755 "{{ dist_dir }}/js-mate-poe_firefox/build.sh"
+
+	chmod 755 \
+		"{{ dist_dir }}/js-mate-poe_firefox/build.sh" \
+		"{{ dist_dir }}/js-mate-poe_firefox/docker/entrypoint.sh"
+
 	cd "{{ dist_dir }}" && \
 		tar -cvzf js-mate-poe_firefox.tar.gz js-mate-poe_firefox
 	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"

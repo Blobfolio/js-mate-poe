@@ -27,18 +27,22 @@ document.addEventListener('poe-sound', function(e) {
 	}
 }, { passive: true });
 
-// Toggle the active state anytime the icon is clicked.
-browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	if (request.message === "clickedPoe") {
-		if (Poe.active) {
-			Poe.active = false;
-			console.info('Poe stopped.');
-		}
-		else {
+/**
+ * Toggle State
+ *
+ * Turn Poe on or off for the current page according to the wishes of the
+ * background script.
+ *
+ * @param {Object} request Request.
+ * @return {void} Nothing.
+ */
+browser.runtime.onMessage.addListener(function(request) {
+	if ('startPoe' === request.message) {
+		if (! Poe.active) {
 			Poe.active = true;
-			console.info('Poe started!');
 		}
 	}
-
-	return Promise.resolve({ response: Poe.active });
+	else if (('stopPoe' === request.message) && Poe.active) {
+		Poe.active = false;
+	}
 });
