@@ -1,3 +1,11 @@
+/**
+ * @file Firefox Extension: Options Script.
+ *
+ * This is the entry point for the extension's options page script. It ensures
+ * the checkboxes reflect the current settings when the preferences are first
+ * loaded, and handles form submissions (i.e. saving the settings).
+ */
+
 import { getSettings, saveSettings } from './settings.mjs';
 
 /**
@@ -8,21 +16,35 @@ import { getSettings, saveSettings } from './settings.mjs';
  */
 const saveOptions = function(e) {
 	e.preventDefault();
-	const el = document.getElementById('audio');
-	if (null !== el) {
-		let val = !! el.checked;
-		getSettings().then((s) => {
-			if (s.audio !== val) {
-				s.audio = val;
-				saveSettings(s).then(() => {
-					try {
-						browser.extension.getBackgroundPage().updateTabs(s);
-					}
-					catch (e) {}
-				});
-			}
-		});
-	}
+
+	let val = !! document.getElementById('audio').checked;
+	const btn = document.getElementById('btn');
+	getSettings().then((s) => {
+		if (s.audio !== val) {
+			s.audio = val;
+			saveSettings(s).then(() => {
+				try {
+					browser.extension.getBackgroundPage().updateTabs(s);
+				}
+				catch (e) {}
+
+				// Give a visual indication that something happened.
+				btn.classList.add('saved');
+				setTimeout(function() {
+					btn.classList.remove('saved');
+				}, 1500);
+			});
+		}
+		else {
+			// Give a visual indication that something would have happened, had
+			// the settings actually needed saving. Haha.
+			btn.classList.add('saved');
+			setTimeout(function() {
+				btn.classList.remove('saved');
+			}, 500);
+		}
+	});
+
 	return false;
 };
 
@@ -35,8 +57,7 @@ const saveOptions = function(e) {
  */
 const getOptions = function() {
 	getSettings().then((v) => {
-		const el = document.getElementById('audio');
-		if (null !== el) { el.checked = v.audio; }
+		document.getElementById('audio').checked = v.audio;
 	});
 };
 

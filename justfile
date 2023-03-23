@@ -129,6 +129,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	[ ! -d "{{ dist_dir }}" ] || rm -rf "{{ dist_dir }}"
 	mkdir -p \
 		"{{ dist_dir }}/js-mate-poe_firefox/static/image" \
+		"{{ dist_dir }}/js-mate-poe_firefox/static/options" \
 		"{{ dist_dir }}/js-mate-poe_firefox/static/sound" \
 		"{{ dist_dir }}/js-mate-poe_firefox/js/generated" \
 		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
@@ -141,7 +142,8 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/firefox/build.sh" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/README.txt" "{{ dist_dir }}/js-mate-poe_firefox"
 	cp "{{ skel_dir }}/firefox/manifest.json" "{{ dist_dir }}/js-mate-poe_firefox/static"
-	cp "{{ skel_dir }}/firefox/options.html" "{{ dist_dir }}/js-mate-poe_firefox/static"
+	cp "{{ skel_dir }}/firefox/options.html" "{{ dist_dir }}/js-mate-poe_firefox/static/options"
+	cp "{{ skel_dir }}/firefox/options.css" "{{ dist_dir }}/js-mate-poe_firefox/static/options"
 	cp "{{ skel_dir }}/img/icons/"*.svg "{{ dist_dir }}/js-mate-poe_firefox/static/image"
 	cp "{{ skel_dir }}/sound/"*.flac "{{ dist_dir }}/js-mate-poe_firefox/static/sound"
 

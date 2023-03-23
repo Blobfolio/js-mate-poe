@@ -8,9 +8,9 @@ if [ ! -f "/etc/inside-docker" ]; then
 fi
 
 # Clear previous build artifacts.
-[ ! -d dist ] || rm -rf dist
-[ ! -d js/generated ] || rm -rf js/generated
-[ ! -d target ] || rm -rf target
+[ ! -d "dist" ] || rm -rf dist
+[ ! -d "js/generated" ] || rm -rf js/generated
+[ ! -d "rust/target" ] || rm -rf rust/target
 
 # Regenerate the output folders.
 cp -aR static dist
@@ -92,8 +92,8 @@ google-closure-compiler \
 	--warning_level VERBOSE
 
 # Add a header and move it into place.
-cat js/header.js /tmp/out.js > dist/options.js
-sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options.js
+cat js/header.js /tmp/out.js > dist/options/options.js
+sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options/options.js
 
 # Compile the foreground script.
 google-closure-compiler \

@@ -1,44 +1,22 @@
-const poeFlagActive =  0b0001;        // Let Poe run around the screen.
-const poeFlagAudio =   0b0010;        // Enable audio playback.
-
-const poeFlagMask =    0b0011;        // Mask of possible settings.
-const poeFlagDefault = poeFlagAudio;  // Default value.
-
 /**
- * Get Settings (RAW).
+ * Sanitize Settings.
  *
- * Return the current extension settings as a single bitflag.
- *
- * @return {number} Extension settings.
+ * @param {Object} val Settings.
+ * @return {Object} Sanitized settings.
  */
-const getSettingsRaw = async function() {
-	return browser.storage.local.get(null).then(
-		function(raw) {
-			if (
-				(null !== raw) &&
-				('object' === typeof raw) &&
-				'number' === typeof raw.flags
-			) {
-				return raw.flags & poeFlagMask;
-			}
-			else { return poeFlagDefault; }
-		},
-		function() { return poeFlagDefault; },
-	);
-};
+const sanitizeSettings = function(val) {
+	const out = {
+		active: false,
+		audio: true,
+	};
 
-/**
- * Save Settings (RAW).
- *
- * Save the extension settings, again, as a single bitflag.
- *
- * @param {number} val Value.
- * @return {boolean} True.
- */
-const saveSettingsRaw = async function(val) {
-	val = (Number(val) || 0) & poeFlagMask;
-	await browser.storage.local.set({ flags: val });
-	return Promise.resolve(true);
+	// Copy valid properties from the source, if any.
+	if ((null !== val) && 'object' === typeof val) {
+		if ('undefined' !== typeof val.active) { out.active = !! val.active; }
+		if ('undefined' !== typeof val.audio) { out.audio = !! val.audio; }
+	}
+
+	return out;
 };
 
 /**
@@ -49,12 +27,10 @@ const saveSettingsRaw = async function(val) {
  * @return {Object} Settings.
  */
 export const getSettings = async function() {
-	let flags = await getSettingsRaw();
-	const out = {
-		active: (poeFlagActive === (flags & poeFlagActive)),
-		audio:  (poeFlagAudio === (flags & poeFlagAudio)),
-	};
-	return Promise.resolve(out);
+	return browser.storage.local.get(null).then(
+		(raw) => sanitizeSettings(raw),
+		() => sanitizeSettings(null),
+	);
 };
 
 /**
@@ -62,22 +38,17 @@ export const getSettings = async function() {
  *
  * Update the local settings, returning `true` if changed.
  *
- * @param {Object} settings Settings.
+ * @param {Object} val Settings.
  * @return {boolean} True/false.
  */
-export const saveSettings = async function(settings) {
-	let flags = 0b0000;
-	if ((null !== settings) && ('object' === typeof settings)) {
-		if (settings.active) { flags |= poeFlagActive; }
-		if (settings.audio)  { flags |= poeFlagAudio; }
-	}
-
-	let old = await getSettingsRaw();
-	if (old === flags) {
+export const saveSettings = async function(val) {
+	val = sanitizeSettings(val);
+	let old = await getSettings();
+	if ((old.active === val.active) && (old.audio === val.audio)) {
 		return Promise.resolve(false);
 	}
 	else {
-		await saveSettingsRaw(flags);
+		await browser.storage.local.set(val);
 		return Promise.resolve(true);
 	}
 };

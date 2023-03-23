@@ -1,9 +1,9 @@
 /**
  * @file Firefox Extension: Foreground Script.
  *
- * Unlike the general library, Poe is started/stopped when signals are
- * received from the extension's background script, and the audio is stored
- * and triggered outside the wasm (to avoid CSP issues).
+ * This is the entry point for the extension's "content script". It loads and
+ * initializes the wasm, but manually controls playback (based on signals from
+ * the background script).
  */
 
 // Pull in the two things we need from the glue.
@@ -19,7 +19,18 @@ const Sounds = {
 	'yawn': 'sound/yawn.flac',
 };
 
-// Play Sound.
+/**
+ * Play Sound
+ *
+ * This script has to manually handle audio playback (rather than letting the
+ * wasm do it) to work around potential CSP conflicts.
+ *
+ * The wasm still has to figure out what to play and when, so triggers a
+ * custom "poe-sound" event with the details that this script can react to.
+ *
+ * @param {Event} e Event.
+ * @return {void} Nothing.
+ */
 document.addEventListener('poe-sound', function(e) {
 	if ('string' === typeof Sounds[e.detail]) {
 		const audio = new Audio(browser.runtime.getURL(Sounds[e.detail]));
@@ -30,8 +41,8 @@ document.addEventListener('poe-sound', function(e) {
 /**
  * Toggle State
  *
- * Turn Poe on or off for the current page according to the wishes of the
- * background script.
+ * Turn Poe on or off, and/or the audio on or off, for the page running this
+ * script.
  *
  * @param {Object} request Request.
  * @return {void} Nothing.

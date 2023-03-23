@@ -1,3 +1,11 @@
+/**
+ * @file Firefox Extension: Background Script.
+ *
+ * This is the entry point for the extension's "background script". It handles
+ * the "page_action" — a simple on/off toggle for the "active" settings — and
+ * synchronizes state changes with all the tabs.
+ */
+
 import { getSettings, saveSettings } from './settings.mjs';
 
 /**
@@ -21,7 +29,7 @@ const updateTab = async function(tab, settings) {
 	settings.message = 'updateFg';
 
 	// Try to update the state, but don't worry too much if it fails.
-	browser.tabs.sendMessage(tab, {'message': settings}).catch((e) => {});
+	browser.tabs.sendMessage(tab, {message: settings}).catch(() => {});
 
 	// Try to update the icon/title, independently of the state because some
 	// pages don't support extensions, but may still show the icon.
@@ -47,7 +55,7 @@ const updateTab = async function(tab, settings) {
  */
 const updateTabs = async function(settings) {
 	let tabs = await browser.tabs.query({});
-	for (tab of tabs) { updateTab(tab, settings); }
+	for (const tab of tabs) { updateTab(tab, settings); }
 };
 
 /**
@@ -76,7 +84,7 @@ browser.tabs.onUpdated.addListener(newPage);
  * @param {number|Object} tab Tab.
  * @return {void} Nothing.
  */
-browser.pageAction.onClicked.addListener(async function(tab) {
+browser.pageAction.onClicked.addListener(async function() {
 	let settings = await getSettings();
 	settings.active = ! settings.active;
 	await saveSettings(settings);
