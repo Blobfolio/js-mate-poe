@@ -58,20 +58,10 @@ pub(crate) struct Mate {
 	buf: Buffer,
 }
 
-impl Drop for Mate {
-	/// # Drop.
-	///
-	/// Remove the event listeners, if any, and detach the element from the
-	/// body, hopefully allowing for eventual garbage collection.
-	fn drop(&mut self) {
-		let _res = dom::body().remove_child(&self.el);
-	}
-}
-
 impl Mate {
 	/// # New.
 	///
-	/// Create a new instance, including all of the initial DOM setup.
+	/// Create a new instance (and supporting DOM elements).
 	pub(crate) fn new(primary: bool) -> Self {
 		let el = make_element(primary);
 		Self {
@@ -577,7 +567,7 @@ impl Mate {
 				let _res = CustomEvent::new_with_event_init_dict(
 					"poe-sound",
 					CustomEventInit::new().detail(&(sound as u8).into())
-				).and_then(|e| dom::document().dispatch_event(&e));
+				).and_then(|e| dom::document().dispatch_event(&e)).ok();
 			}
 
 			#[cfg(not(feature = "firefox"))]
@@ -844,7 +834,7 @@ impl Mate {
 
 /// # Make Element.
 ///
-/// Create and append the "mate" elements to the document body.
+/// Create and return the "mate" DOM elements.
 fn make_element(primary: bool) -> Element {
 	let document = dom::document();
 
@@ -868,8 +858,6 @@ fn make_element(primary: bool) -> Element {
 		.and_then(|s| s.append_with_node_2(&style, &wrapper))
 		.unwrap_throw();
 
-	// Append the element to the body and return a reference.
-	dom::body().append_child(&el).unwrap_throw();
 	el
 }
 

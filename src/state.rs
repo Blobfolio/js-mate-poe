@@ -39,12 +39,49 @@ use web_sys::{
 pub(crate) struct State {
 	mates: RefCell<[Mate; 2]>,
 	raf: RefCell<Option<Closure<dyn FnMut(f64)>>>,
-	events: RefCell<StateEvents>,
+	events: StateEvents,
+}
+
+impl Default for State {
+	fn default() -> Self {
+		// Manually set the universe size before registering the elements so we
+		// know where to put them!
+		let (w, h) = size();
+		Universe::resize(w, h);
+
+		// Initialize the mates and add them to the document body.
+		let mut m1 = Mate::new(true);
+		let mut m2 = Mate::new(false);
+		dom::body().append_with_node_2(&m1.el, &m2.el).unwrap_throw();
+
+		// Queue up their starting positions.
+		m1.start();
+		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
+
+		// Set up the event bindings.
+		let events = StateEvents::default();
+		events.bind(&m1.el);
+
+		Self {
+			mates: RefCell::new([m1, m2]),
+			raf: RefCell::new(None),
+			events,
+		}
+	}
 }
 
 impl Drop for State {
 	fn drop(&mut self) {
-		self.events.borrow().unbind(&self.mates.borrow()[0].el);
+		// Unbind events.
+		let m = self.mates.borrow();
+		self.events.unbind(&m[0].el);
+
+		// Remove the mate elements.
+		let body = dom::body();
+		let _res = body.remove_child(&m[0].el).ok();
+		let _res = body.remove_child(&m[1].el).ok();
+
+		// Let the Universe know.
 		Universe::set_state(false);
 		#[cfg(feature = "director")] dom::warn!("Poe deactivated.");
 	}
@@ -53,32 +90,14 @@ impl Drop for State {
 impl State {
 	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
 	/// # New.
+	///
+	/// Initialize a new state and throw it into a `requestAnimationFrame`
+	/// loop.
 	pub(crate) fn init() {
 		Universe::set_state(true);
 
-		// Manually set the universe size before registering the elements so we
-		// know where to put them!
-		let (w, h) = size();
-		Universe::resize(w, h);
-
-		// Initialize the primary mate.
-		let mut m1 = Mate::new(true);
-		m1.start();
-
-		// Initialize the child mate.
-		let mut m2 = Mate::new(false);
-		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
-
-		// Set up the event bindings.
-		let events = StateEvents::default();
-		events.bind(&m1.el);
-
 		// Shove what we've got so far into the state.
-		let state1 = Rc::new(Self {
-			mates: RefCell::new([m1, m2]),
-			raf: RefCell::new(None),
-			events: RefCell::new(events),
-		});
+		let state1 = Rc::new(Self::default());
 
 		// Set up the recursive requestAnimationFrame callback, using a clone
 		// for the setup and initial call. (It will be dropped when the
@@ -187,18 +206,18 @@ impl StateEvents {
 
 		// This one works different from the rest because it was registered
 		// with the capture hint.
-		el.remove_event_listener_with_callback_and_event_listener_options(
+		let _res = el.remove_event_listener_with_callback_and_event_listener_options(
 			"contextmenu",
 			self.contextmenu.as_ref().unchecked_ref(),
 			EventListenerOptions::new().capture(true),
-		).unwrap_throw();
+		).ok();
 
 		macro_rules! unbind {
 			($el:expr, $event:ident) => (
-				$el.remove_event_listener_with_callback(
+				let _res = $el.remove_event_listener_with_callback(
 					stringify!($event),
 					self.$event.as_ref().unchecked_ref(),
-				).unwrap_throw();
+				).ok();
 			);
 		}
 
