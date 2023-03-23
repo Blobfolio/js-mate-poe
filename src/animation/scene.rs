@@ -80,20 +80,24 @@ impl Scene {
 
 	/// # Frame at Step Number.
 	///
-	/// Note: Frames start from zero for the purposes of this method.
-	pub(crate) const fn frame_at_step(&self, idx: usize) -> Frame {
+	/// Note: Steps start from zero for the purposes of this method.
+	pub(crate) const fn frame_at_step(&self, mut idx: usize) -> Frame {
 		let len = self.frames.len();
 
-		if idx < len { self.frames[idx] }
-		else {
-			match self.repeat {
-				None | Some((_, 0)) => self.frames[idx % len],
+		if len <= idx {
+			idx = match self.repeat {
+				None | Some((_, 0)) => idx % len,
 				Some((_, from)) => {
 					let from = from as usize;
-					self.frames[from + (idx - from) % (len - from)]
-				}
-			}
+					from + (idx - from) % (len - from)
+				},
+			};
 		}
+
+		// This won't fail, but the condition lets the compiler omit a panic
+		// handler, saving a lot of space in the compiled binary.
+		if idx < len { self.frames[idx] }
+		else { Frame::None }
 	}
 
 	/// # Sound at Step Number.
