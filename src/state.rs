@@ -46,7 +46,7 @@ impl Default for State {
 	fn default() -> Self {
 		// Manually set the universe size before registering the elements so we
 		// know where to put them!
-		let (w, h) = size().unwrap_throw();
+		let (w, h) = size().expect_throw("!");
 		Universe::resize(w, h);
 
 		// Initialize the mates and add them to the document body.
@@ -55,7 +55,7 @@ impl Default for State {
 		dom::body()
 			.expect_throw("Missing body.")
 			.append_with_node_2(&m1.el, &m2.el)
-			.unwrap_throw();
+			.expect_throw("!");
 
 		// Queue up their starting positions.
 		m1.start();
@@ -192,7 +192,7 @@ impl StateEvents {
 					stringify!($event),
 					self.$event.as_ref().unchecked_ref(),
 					AddEventListenerOptions::new().$opt(true),
-				).unwrap_throw();
+				).expect_throw("!");
 			);
 		}
 

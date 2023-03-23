@@ -36,7 +36,7 @@ thread_local! {
 /// Return an image element populated with the sprite.
 pub(crate) fn sprite_image_element() -> HtmlImageElement {
 	let el = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
-		.unwrap_throw();
+		.expect_throw("!");
 	el.set_id("i");
 	IMG_POE.with(|s| el.set_src(s));
 	el
@@ -78,5 +78,5 @@ fn url(data: &'static [u8], mime: &str) -> String {
 		BlobPropertyBag::new().type_(mime)
 	)
 		.and_then(|b| Url::create_object_url_with_blob(&b))
-		.unwrap_throw()
+		.expect_throw("!")
 }
