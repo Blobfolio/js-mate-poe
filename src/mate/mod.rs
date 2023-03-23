@@ -525,12 +525,12 @@ impl Mate {
 	/// Apply any and all necessary changes to the DOM elements.
 	fn render(&mut self) {
 		if self.flags.changed() {
-			let shadow = self.el.shadow_root().unwrap_throw();
+			let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
 			// Update the wrapper div's class and/or style.
 			if self.flags.class_changed() || self.flags.transform_changed() {
 				let wrapper: HtmlElement = shadow.get_element_by_id("p")
-					.unwrap_throw()
+					.expect_throw("Missing mate wrapper.")
 					.unchecked_into();
 
 				if self.flags.class_changed() {
@@ -556,18 +556,22 @@ impl Mate {
 							.style()
 							.set_property("--c", write_transform(self.frame.offset(), &mut self.buf)).ok()
 					)
-					.unwrap_throw();
+					.expect_throw("Missing mate image.");
 			}
 
 			// Play a sound?
 			#[cfg(feature = "firefox")]
 			if let Some(sound) = self.sound.take() {
-				// Firefox needs to handle playback itself, so trigger an event
-				// to let it know what to do.
-				let _res = CustomEvent::new_with_event_init_dict(
-					"poe-sound",
-					CustomEventInit::new().detail(&(sound as u8).into())
-				).and_then(|e| dom::document().dispatch_event(&e)).ok();
+				if let Some(dd) = dom::document() {
+					// Firefox needs to handle playback itself, so trigger an event
+					// to let it know what to do.
+					let _res = CustomEvent::new_with_event_init_dict(
+						"poe-sound",
+						CustomEventInit::new().detail(&(sound as u8).into())
+					)
+						.and_then(|e| dd.dispatch_event(&e))
+						.ok();
+				}
 			}
 
 			#[cfg(not(feature = "firefox"))]
@@ -836,7 +840,7 @@ impl Mate {
 ///
 /// Create and return the "mate" DOM elements.
 fn make_element(primary: bool) -> Element {
-	let document = dom::document();
+	let document = dom::document().expect_throw("Missing document.");
 
 	// Create the main element, its shadow DOM, and its shadow elements.
 	let el = document.create_element("div").unwrap_throw();

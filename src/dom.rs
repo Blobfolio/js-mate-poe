@@ -2,13 +2,12 @@
 # RS Mate Poe: DOM
 */
 
-use wasm_bindgen::prelude::*;
 use web_sys::{
 	Document,
 	Element,
 	HtmlElement,
-	Window,
 };
+pub(crate) use web_sys::window;
 
 #[cfg(feature = "director")]
 pub(crate) use gloo_console::{
@@ -20,29 +19,21 @@ pub(crate) use gloo_console::{
 
 
 /// # Body.
-pub(crate) fn body() -> HtmlElement {
+pub(crate) fn body() -> Option<HtmlElement> {
 	web_sys::window()
 		.and_then(|w| w.document())
 		.and_then(|d| d.body())
-		.expect_throw("Missing `document.body`.")
 }
 
 /// # Document.
-pub(crate) fn document() -> Document {
+pub(crate) fn document() -> Option<Document> {
 	web_sys::window()
 		.and_then(|w| w.document())
-		.expect_throw("Missing `document`.")
 }
 
 /// # Document Element.
-pub(crate) fn document_element() -> Element {
+pub(crate) fn document_element() -> Option<Element> {
 	web_sys::window()
 		.and_then(|w| w.document())
 		.and_then(|d| d.document_element())
-		.expect_throw("Missing `document.documentElement`.")
-}
-
-/// # Window.
-pub(crate) fn window() -> Window {
-	web_sys::window().expect_throw("Missing `window`.")
 }
