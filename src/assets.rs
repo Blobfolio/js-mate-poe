@@ -44,6 +44,7 @@ pub(crate) fn sprite_image_element() -> HtmlImageElement {
 
 
 
+#[repr(u8)]
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 /// # Sounds.

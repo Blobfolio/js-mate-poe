@@ -13,11 +13,11 @@ import init, { Poe } from './generated/glue.mjs';
 init(browser.runtime.getURL('js-mate-poe.wasm'));
 
 // Sounds.
-const Sounds = {
-	'baa': 'sound/baa.flac',
-	'sneeze': 'sound/sneeze.flac',
-	'yawn': 'sound/yawn.flac',
-};
+const Sounds = [
+	'sound/baa.flac',
+	'sound/sneeze.flac',
+	'sound/yawn.flac',
+];
 
 /**
  * Play Sound
@@ -32,8 +32,9 @@ const Sounds = {
  * @return {void} Nothing.
  */
 document.addEventListener('poe-sound', function(e) {
-	if ('string' === typeof Sounds[e.detail]) {
-		const audio = new Audio(browser.runtime.getURL(Sounds[e.detail]));
+	let idx = Number(e.detail);
+	if (! isNaN(idx) && 0 <= idx && idx < Sounds.length) {
+		const audio = new Audio(browser.runtime.getURL(Sounds[idx]));
 		audio.play().catch(() => {});
 	}
 }, { passive: true });

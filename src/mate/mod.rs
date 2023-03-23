@@ -574,14 +574,9 @@ impl Mate {
 			if let Some(sound) = self.sound.take() {
 				// Firefox needs to handle playback itself, so trigger an event
 				// to let it know what to do.
-				let sound = match sound {
-					Sound::Baa => JsValue::from_str("baa"),
-					Sound::Sneeze => JsValue::from_str("sneeze"),
-					Sound::Yawn => JsValue::from_str("yawn"),
-				};
 				let _res = CustomEvent::new_with_event_init_dict(
 					"poe-sound",
-					CustomEventInit::new().detail(&sound)
+					CustomEventInit::new().detail(&(sound as u8).into())
 				).and_then(|e| dom::document().dispatch_event(&e));
 			}
 
