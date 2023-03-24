@@ -18,18 +18,18 @@ use super::SceneListKind;
 pub(super) const ABDUCTION: &[Scene] = &[
 	Scene::new(254, &[
 		Frame::F009, Frame::F010, Frame::F010,
-		Frame::F010, Frame::F010, Frame::F034,
+		Frame::F010, Frame::F010, Frame::F032,
 	])
 		.with_repeat(11, 5)
 		.with_flags(Scene::GRAVITY),
-	Scene::new(200, &[Frame::F034, Frame::F081])
+	Scene::new(200, &[Frame::F032, Frame::F044])
 		.with_flags(Scene::GRAVITY),
 	Scene::new(83, &[
-		Frame::F088, Frame::F089, Frame::F090, Frame::F088, Frame::F089,
-		Frame::F090, Frame::F088, Frame::F089, Frame::F090, Frame::None,
-		Frame::F089, Frame::None, Frame::F088, Frame::None, Frame::F090,
-		Frame::None, Frame::F089, Frame::None, Frame::F088, Frame::None,
-		Frame::F090, Frame::None, Frame::F089, Frame::None,
+		Frame::F086, Frame::F087, Frame::F088, Frame::F086, Frame::F087,
+		Frame::F088, Frame::F086, Frame::F087, Frame::F088, Frame::None,
+		Frame::F087, Frame::None, Frame::F086, Frame::None, Frame::F088,
+		Frame::None, Frame::F087, Frame::None, Frame::F086, Frame::None,
+		Frame::F088, Frame::None, Frame::F087, Frame::None,
 	])
 		.with_move_to(Position::new(0, -30)),
 	Scene::new(5500, &[Frame::None])
@@ -37,14 +37,14 @@ pub(super) const ABDUCTION: &[Scene] = &[
 
 /// # For `Animation::AbductionChild`.
 pub(super) const ABDUCTION_CHILD: &[Scene] = &[
-	Scene::new(28, &[Frame::F158, Frame::F159, Frame::F160, Frame::F161])
+	Scene::new(28, &[Frame::F148, Frame::F149, Frame::F150, Frame::F151])
 		.with_move_to(Position::new(0, 480))
 		.with_repeat(29, 0)
 		.with_flags(Scene::EASE_OUT | Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F162, Frame::F163, Frame::F164, Frame::F165])
+	Scene::new(50, &[Frame::F152, Frame::F153, Frame::F154, Frame::F155])
 		.with_repeat(18, 0)
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(30, &[Frame::F158, Frame::F159, Frame::F160, Frame::F161])
+	Scene::new(30, &[Frame::F148, Frame::F149, Frame::F150, Frame::F151])
 		.with_move_to(Position::new(600, -480))
 		.with_repeat(29, 0)
 		.with_flags(Scene::EASE_IN | Scene::IGNORE_EDGES),
@@ -53,32 +53,32 @@ pub(super) const ABDUCTION_CHILD: &[Scene] = &[
 /// # For `Animation::BathCoolDown`.
 pub(super) const BATH_COOL_DOWN: &[Scene] = &[
 	Scene::new(100, &[
-		Frame::F169, Frame::F169, Frame::F169, Frame::F170,
-		Frame::F171, Frame::F170, Frame::F169, Frame::F169,
+		Frame::FH32, Frame::FH32, Frame::FH32, Frame::FH33,
+		Frame::FH34, Frame::FH33, Frame::FH32, Frame::FH32,
 	])
 		.with_repeat(2, 0)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(100, &[
-		Frame::F119, Frame::F081, Frame::F081, Frame::F082, Frame::F082, Frame::F010,
+		Frame::F112, Frame::F044, Frame::F044, Frame::F045, Frame::F045, Frame::F010,
 	])
 		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::BathDive`.
 pub(super) const BATH_DIVE: &[Scene] = &[
-	Scene::new(30, &[Frame::F134])
+	Scene::new(30, &[Frame::F124])
 		.with_move_to(Position::new(-588, 441))
 		.with_repeat(144, 0),
 	Scene::new(30, &[
-		Frame::F135, Frame::F135, Frame::F135, Frame::F135, Frame::F136,
-		Frame::F136, Frame::F136, Frame::F136, Frame::F137, Frame::F137,
-		Frame::F137, Frame::F137, Frame::F138, Frame::F138, Frame::F138,
-		Frame::F138, Frame::F139, Frame::F139, Frame::F139, Frame::F139,
-		Frame::F140, Frame::F140, Frame::F140, Frame::F140, Frame::F141,
-		Frame::F141, Frame::F141, Frame::F141, Frame::F142, Frame::F142,
-		Frame::F142, Frame::F142, Frame::F143, Frame::F143, Frame::F143,
-		Frame::F143, Frame::F144, Frame::F144, Frame::F144, Frame::F144,
-		Frame::F145, Frame::F144,
+		Frame::F125, Frame::F125, Frame::F125, Frame::F125, Frame::F126,
+		Frame::F126, Frame::F126, Frame::F126, Frame::F127, Frame::F127,
+		Frame::F127, Frame::F127, Frame::F128, Frame::F128, Frame::F128,
+		Frame::F128, Frame::F129, Frame::F129, Frame::F129, Frame::F129,
+		Frame::F130, Frame::F130, Frame::F130, Frame::F130, Frame::F131,
+		Frame::F131, Frame::F131, Frame::F131, Frame::F132, Frame::F132,
+		Frame::F132, Frame::F132, Frame::F133, Frame::F133, Frame::F133,
+		Frame::F133, Frame::F134, Frame::F134, Frame::F134, Frame::F134,
+		Frame::F135, Frame::F134,
 	])
 		.with_move_to(Position::new(-192, 144))
 		.with_repeat(3, 40),
@@ -86,14 +86,14 @@ pub(super) const BATH_DIVE: &[Scene] = &[
 
 /// # For `Animation::BathDiveChild`.
 pub(super) const BATH_DIVE_CHILD: &[Scene] = &[
-	Scene::new(30, &[Frame::F146])
+	Scene::new(30, &[Frame::F136])
 		.with_repeat(171, 0)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(30, &[
-		Frame::F146, Frame::F146, Frame::F146, Frame::F146, Frame::F146,
-		Frame::F146, Frame::F146, Frame::F146, Frame::F146, Frame::F146,
-		Frame::F146, Frame::F146, Frame::F147, Frame::F147, Frame::F148,
-		Frame::F148, Frame::F148, Frame::F147, Frame::F147, Frame::F146,
+		Frame::F136, Frame::F136, Frame::F136, Frame::F136, Frame::F136,
+		Frame::F136, Frame::F136, Frame::F136, Frame::F136, Frame::F136,
+		Frame::F136, Frame::F136, Frame::F137, Frame::F137, Frame::F138,
+		Frame::F138, Frame::F138, Frame::F137, Frame::F137, Frame::F136,
 	])
 		.with_repeat(70, 19)
 		.with_flags(Scene::GRAVITY),
@@ -103,8 +103,8 @@ pub(super) const BATH_DIVE_CHILD: &[Scene] = &[
 pub(super) const BEG: &[Scene] = &[
 	Scene::new(150, &[
 		Frame::F009, Frame::F010, Frame::F054, Frame::F055, Frame::F054,
-		Frame::F055, Frame::F054, Frame::F055, Frame::F034, Frame::F034,
-		Frame::F034, Frame::F034, Frame::F034, Frame::F034, Frame::F010,
+		Frame::F055, Frame::F054, Frame::F055, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F010,
 		Frame::F009,
 	])
 		.with_flags(Scene::GRAVITY),
@@ -127,16 +127,16 @@ pub(super) const BIG_FISH: &[Scene] = &[
 	Scene::new(2000, &[Frame::None])
 		.with_move_to(Position::new(-100, Frame::SIZE_I))
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F030])
+	Scene::new(50, &[Frame::F028])
 		.with_move_to(Position::new(-5, -30))
 		.with_repeat(4, 0)
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F023])
+	Scene::new(50, &[Frame::F022])
 		.with_move_to(Position::new(0, -10))
 		.with_repeat(1, 0)
 		.with_flags(Scene::IGNORE_EDGES),
 	Scene::new(100, &[
-		Frame::F023, Frame::F023, Frame::F023, Frame::F077, Frame::F078, Frame::F003,
+		Frame::F022, Frame::F022, Frame::F022, Frame::F075, Frame::F076, Frame::F003,
 	])
 		.with_flags(Scene::GRAVITY),
 ];
@@ -184,12 +184,12 @@ pub(super) const BOING: &[Scene] = &[
 
 /// # For `Animation::Bounce`.
 pub(super) const BOUNCE: &[Scene] = &[
-	Scene::new(100, &[Frame::F042, Frame::F049, Frame::F042])
+	Scene::new(100, &[Frame::F038, Frame::F049, Frame::F038])
 		.with_flags(Scene::GRAVITY),
-	Scene::new(100, &[Frame::F131, Frame::F042])
+	Scene::new(100, &[Frame::F041, Frame::F038])
 		.with_move_to(Position::new(0, -6)),
-	Scene::new(100, &[Frame::F132]),
-	Scene::new(100, &[Frame::F042, Frame::F049])
+	Scene::new(100, &[Frame::F042]),
+	Scene::new(100, &[Frame::F038, Frame::F049])
 		.with_move_to(Position::new(0, 6)),
 	Scene::new(100, &[
 		Frame::F013, Frame::F012, Frame::F003, Frame::F009, Frame::F010,
@@ -202,7 +202,7 @@ pub(super) const BOUNCE: &[Scene] = &[
 
 /// # For `Animation::ClimbDown`.
 pub(super) const CLIMB_DOWN: &[Scene] = &[
-	Scene::new(150, &[Frame::F019, Frame::F020])
+	Scene::new(150, &[Frame::F018, Frame::F019])
 		.with_move_to(Position::new(0, 84))
 		.with_repeat(20, 0),
 ];
@@ -222,11 +222,11 @@ pub(super) const DANGLE_FALL: &[Scene] = &[
 
 /// # For `Animation::DangleRecover`.
 pub(super) const DANGLE_RECOVER: &[Scene] = &[
-	Scene::new(200, &[Frame::F088, Frame::F089, Frame::F090])
+	Scene::new(200, &[Frame::F086, Frame::F087, Frame::F088])
 		.with_move_to(Position::new(-30, 0))
 		.with_repeat(1, 0),
 	Scene::new(100, &[
-		Frame::F081, Frame::F081, Frame::F081, Frame::F082,
+		Frame::F044, Frame::F044, Frame::F044, Frame::F045,
 		Frame::F010, Frame::F009, Frame::F003,
 	]),
 ];
@@ -247,7 +247,7 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 /// # For `Animation::Drag`.
 pub(super) const DRAG: &[Scene] = &[
 	Scene::new(150, &[
-		Frame::F042, Frame::F043, Frame::F043, Frame::F042, Frame::F044, Frame::F044,
+		Frame::F038, Frame::F039, Frame::F039, Frame::F038, Frame::F040, Frame::F040,
 	])
 		.with_repeat(2, 0),
 ];
@@ -265,7 +265,7 @@ pub(super) const EAT: &[Scene] = &[
 
 /// # For `Animation::Fall`.
 pub(super) const FALL: &[Scene] = &[
-	Scene::new(20, &[Frame::F133])
+	Scene::new(20, &[Frame::F043])
 		.with_move_to(Position::new(0, 250))
 		.with_repeat(49, 0)
 		.with_flags(Scene::EASE_IN),
@@ -274,13 +274,13 @@ pub(super) const FALL: &[Scene] = &[
 /// # For `Animation::FlowerChild`.
 pub(super) const FLOWER_CHILD: &[Scene] = &[
 	Scene::new(205, &[
-		Frame::F153, Frame::F153, Frame::F153, Frame::F153, Frame::F153,
-		Frame::F153, Frame::F153, Frame::F153, Frame::F153, Frame::F149,
-		Frame::F149, Frame::F149, Frame::F149, Frame::F149, Frame::F149,
-		Frame::F149, Frame::F149, Frame::F149, Frame::F150, Frame::F150,
-		Frame::F150, Frame::F150, Frame::F150, Frame::F150, Frame::F150,
-		Frame::F151, Frame::F151, Frame::F151, Frame::F151, Frame::F151,
-		Frame::F151, Frame::F151, Frame::F152,
+		Frame::F139, Frame::F139, Frame::F139, Frame::F139, Frame::F139,
+		Frame::F139, Frame::F139, Frame::F139, Frame::F139, Frame::F140,
+		Frame::F140, Frame::F140, Frame::F140, Frame::F140, Frame::F140,
+		Frame::F140, Frame::F140, Frame::F140, Frame::F141, Frame::F141,
+		Frame::F141, Frame::F141, Frame::F141, Frame::F141, Frame::F141,
+		Frame::F142, Frame::F142, Frame::F142, Frame::F142, Frame::F142,
+		Frame::F142, Frame::F142, Frame::F143,
 	])
 		.with_repeat(11, 32)
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
@@ -300,8 +300,8 @@ pub(super) const GRASPING_FALL: &[Scene] = &[
 /// # For `Animation::Handstand`.
 pub(super) const HANDSTAND: &[Scene] = &[
 	Scene::new(200, &[
-		Frame::F086, Frame::F087, Frame::F088, Frame::F089, Frame::F090,
-		Frame::F088, Frame::F089, Frame::F090, Frame::F087, Frame::F086,
+		Frame::F084, Frame::F085, Frame::F086, Frame::F087, Frame::F088,
+		Frame::F086, Frame::F087, Frame::F088, Frame::F085, Frame::F084,
 	])
 		.with_move_to(Position::new(-20, 0))
 		.with_flags(Scene::GRAVITY),
@@ -310,13 +310,13 @@ pub(super) const HANDSTAND: &[Scene] = &[
 /// # For `Animation::Jump`.
 pub(super) const JUMP: &[Scene] = &[
 	Scene::new(35, &[
-		Frame::F076, Frame::F076, Frame::F030, Frame::F030, Frame::F030,
-		Frame::F030, Frame::F030, Frame::F030, Frame::F023,
+		Frame::F074, Frame::F074, Frame::F028, Frame::F028, Frame::F028,
+		Frame::F028, Frame::F028, Frame::F028, Frame::F022,
 	])
 		.with_move_to(Position::new(-54, -18)),
 	Scene::new(35, &[
-		Frame::F023, Frame::F023, Frame::F023, Frame::F024, Frame::F024,
-		Frame::F024, Frame::F024, Frame::F077, Frame::F077,
+		Frame::F022, Frame::F022, Frame::F022, Frame::F023, Frame::F023,
+		Frame::F023, Frame::F023, Frame::F075, Frame::F075,
 	])
 		.with_move_to(Position::new(-45, 18)),
 ];
@@ -324,19 +324,19 @@ pub(super) const JUMP: &[Scene] = &[
 /// # For `Animation::PlayDead`.
 pub(super) const PLAY_DEAD: &[Scene] = &[
 	Scene::new(100, &[
-		Frame::F003, Frame::F096, Frame::F096, Frame::F096, Frame::F096,
-		Frame::F096, Frame::F096, Frame::F096, Frame::F096, Frame::F096,
-		Frame::F096, Frame::F095,
+		Frame::F003, Frame::F094, Frame::F094, Frame::F094, Frame::F094,
+		Frame::F094, Frame::F094, Frame::F094, Frame::F094, Frame::F094,
+		Frame::F094, Frame::F093,
 	])
 		.with_repeat(4, 11)
 		.with_flags(Scene::GRAVITY),
-	Scene::new(150, &[Frame::F091, Frame::F081, Frame::F010, Frame::F009, Frame::F003])
+	Scene::new(150, &[Frame::F089, Frame::F044, Frame::F010, Frame::F009, Frame::F003])
 		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ReachCeiling`.
 pub(super) const REACH_CEILING: &[Scene] = &[
-	Scene::new(100, &[Frame::F016, Frame::F017, Frame::F028])
+	Scene::new(100, &[Frame::F016, Frame::F017, Frame::F026])
 		.with_move_to(Position::new(3, 0))
 		.with_flags(Scene::FLIP_X_NEXT),
 ];
@@ -344,32 +344,32 @@ pub(super) const REACH_CEILING: &[Scene] = &[
 /// # For `Animation::ReachFloor`.
 pub(super) const REACH_FLOOR: &[Scene] = &[
 	Scene::new(150, &[
-		Frame::F024, Frame::F006, Frame::F006, Frame::F006, Frame::F006, Frame::F006,
+		Frame::F023, Frame::F006, Frame::F006, Frame::F006, Frame::F006, Frame::F006,
 	])
 ];
 
 /// # For `Animation::ReachSide1`.
 pub(super) const REACH_SIDE1: &[Scene] = &[
-	Scene::new(200, &[Frame::F031, Frame::F030])
+	Scene::new(200, &[Frame::F029, Frame::F028])
 		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ReachSide2`.
 pub(super) const REACH_SIDE2: &[Scene] = &[
-	Scene::new(200, &[Frame::F026])
+	Scene::new(200, &[Frame::F025])
 		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
 /// # For `Animation::Rest`.
 pub(super) const REST: &[Scene] = &[
-	Scene::new(200, &[Frame::F003, Frame::F012, Frame::F092, Frame::F093])
+	Scene::new(200, &[Frame::F003, Frame::F012, Frame::F090, Frame::F091])
 		.with_repeat(20, 3)
 		.with_flags(Scene::GRAVITY),
-	Scene::new(2000, &[Frame::F094])
+	Scene::new(2000, &[Frame::F092])
 		.with_flags(Scene::GRAVITY),
 	Scene::new(200, &[
-		Frame::F093, Frame::F093, Frame::F093, Frame::F093,
-		Frame::F092, Frame::F012, Frame::F003,
+		Frame::F091, Frame::F091, Frame::F091, Frame::F091,
+		Frame::F090, Frame::F012, Frame::F003,
 	])
 		.with_flags(Scene::GRAVITY),
 ];
@@ -379,8 +379,8 @@ pub(super) const ROLL: &[Scene] = &[
 	Scene::new(150, &[Frame::F009, Frame::F010, Frame::F010])
 		.with_flags(Scene::GRAVITY),
 	Scene::new(50, &[
-		Frame::F010, Frame::F118, Frame::F117, Frame::F116,
-		Frame::F115, Frame::F114, Frame::F113, Frame::F112,
+		Frame::F010, Frame::F111, Frame::F110, Frame::F109,
+		Frame::F108, Frame::F107, Frame::F106, Frame::F105,
 	])
 		.with_move_to(Position::new(-128, 0))
 		.with_repeat(1, 0)
@@ -407,14 +407,14 @@ pub(super) const RUN: &[Scene] = &[
 
 /// # For `Animation::RunDown`.
 pub(super) const RUN_DOWN: &[Scene] = &[
-	Scene::new(60, &[Frame::F022, Frame::F022, Frame::F021, Frame::F021, Frame::F021])
+	Scene::new(60, &[Frame::F021, Frame::F021, Frame::F020, Frame::F020, Frame::F020])
 		.with_move_to(Position::new(0, 180))
 		.with_repeat(5, 0),
 ];
 
 /// # For `Animation::RunUpsideDown`.
 pub(super) const RUN_UPSIDE_DOWN: &[Scene] = &[
-	Scene::new(60, &[Frame::F099, Frame::F099, Frame::F100, Frame::F100, Frame::F100])
+	Scene::new(60, &[Frame::F097, Frame::F097, Frame::F098, Frame::F098, Frame::F098])
 		.with_move_to(Position::new(-180, 0))
 		.with_repeat(5, 0),
 ];
@@ -450,8 +450,8 @@ pub(super) const SCREAM: &[Scene] = &[
 /// # For `Animation::Slide`.
 pub(super) const SLIDE: &[Scene] = &[
 	Scene::new(100, &[
-		Frame::F024, Frame::F023, Frame::F023, Frame::F023, Frame::F023,
-		Frame::F023, Frame::F031, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F023, Frame::F022, Frame::F022, Frame::F022, Frame::F022,
+		Frame::F022, Frame::F029, Frame::F003, Frame::F003, Frame::F003,
 		Frame::F003,
 	])
 		.with_move_to(Position::new(-22, 0))
@@ -460,7 +460,7 @@ pub(super) const SLIDE: &[Scene] = &[
 
 /// # For `Animation::SlideDown`.
 pub(super) const SLIDE_DOWN: &[Scene] = &[
-	Scene::new(30, &[Frame::F025])
+	Scene::new(30, &[Frame::F024])
 		.with_move_to(Position::new(0, 260))
 		.with_repeat(25, 0),
 ];
@@ -468,8 +468,8 @@ pub(super) const SLIDE_DOWN: &[Scene] = &[
 /// # For `Animation::Sneeze`.
 pub(super) const SNEEZE: &[Scene] = &[
 	Scene::new(200, &[
-		Frame::F108, Frame::F109, Frame::F110, Frame::F111,
-		Frame::F110, Frame::F111, Frame::F110, Frame::F003,
+		Frame::F080, Frame::F081, Frame::F082, Frame::F083,
+		Frame::F082, Frame::F083, Frame::F082, Frame::F003,
 	])
 		.with_sound(Sound::Sneeze, 0)
 		.with_flags(Scene::GRAVITY),
@@ -477,7 +477,7 @@ pub(super) const SNEEZE: &[Scene] = &[
 
 /// # For `Animation::SneezeShadow`.
 pub(super) const SNEEZE_SHADOW: &[Scene] = &[
-	Scene::new(100, &[Frame::None, Frame::None, Frame::F109])
+	Scene::new(100, &[Frame::None, Frame::None, Frame::F081])
 		.with_move_to(Position::new(60, 0))
 		.with_repeat(3, 2)
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
@@ -487,7 +487,7 @@ pub(super) const SNEEZE_SHADOW: &[Scene] = &[
 pub(super) const SPIN: &[Scene] = &[
 	Scene::new(100, &[
 		Frame::F003, Frame::F009, Frame::F010, Frame::F011, Frame::F014,
-		Frame::F013, Frame::F012, Frame::F007, Frame::F009, Frame::F101,
+		Frame::F013, Frame::F012, Frame::F007, Frame::F009, Frame::F099,
 		Frame::F011, Frame::F014, Frame::F013, Frame::F012,
 	])
 		.with_flags(Scene::GRAVITY),
@@ -514,10 +514,10 @@ pub(super) const STARGAZE: &[Scene] = &[
 
 /// # For `Animation::StargazeChild`.
 pub(super) const STARGAZE_CHILD: &[Scene] = &[
-	Scene::new(52, &[Frame::F158])
+	Scene::new(52, &[Frame::F148])
 		.with_repeat(20, 0)
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(6, &[Frame::F158, Frame::F159, Frame::F160, Frame::F161])
+	Scene::new(6, &[Frame::F148, Frame::F149, Frame::F150, Frame::F151])
 		.with_move_to(Position::new(820, -164))
 		.with_repeat(40, 0)
 		.with_flags(Scene::IGNORE_EDGES),
@@ -533,14 +533,14 @@ pub(super) const WALK: &[Scene] = &[
 
 /// # For `Animation::WalkUpsideDown`.
 pub(super) const WALK_UPSIDE_DOWN: &[Scene] = &[
-	Scene::new(150, &[Frame::F098, Frame::F097])
+	Scene::new(150, &[Frame::F096, Frame::F095])
 		.with_move_to(Position::new(-84, 0))
 		.with_repeat(20, 0),
 ];
 
 /// # For `Animation::WallSlide`.
 pub(super) const WALL_SLIDE: &[Scene] = &[
-	Scene::new(40, &[Frame::F029])
+	Scene::new(40, &[Frame::F027])
 		.with_move_to(Position::new(0, 55))
 		.with_repeat(10, 0),
 ];
@@ -548,30 +548,30 @@ pub(super) const WALL_SLIDE: &[Scene] = &[
 /// # For `Animation::Yoyo`.
 pub(super) const YOYO: &[Scene] = &[
 	Scene::new(16, &[
-		Frame::F119, Frame::F120, Frame::F121, Frame::F122,
-		Frame::F123, Frame::F124, Frame::F125, Frame::F126,
+		Frame::F112, Frame::F113, Frame::F114, Frame::F115,
+		Frame::F116, Frame::F117, Frame::F118, Frame::F119,
 	])
 		.with_move_to(Position::new(0, 528))
 		.with_repeat(5, 0)
 		.with_flags(Scene::EASE_IN | Scene::IGNORE_EDGES),
 	Scene::new(18, &[
-		Frame::F112, Frame::F113, Frame::F114, Frame::F115,
-		Frame::F116, Frame::F117, Frame::F118, Frame::F110,
+		Frame::F105, Frame::F106, Frame::F107, Frame::F108,
+		Frame::F109, Frame::F110, Frame::F111, Frame::F082,
 	])
 		.with_move_to(Position::new(0, -16)),
 	Scene::new(18, &[
-		Frame::F112, Frame::F113, Frame::F114, Frame::F115,
-		Frame::F116, Frame::F117, Frame::F118, Frame::F110,
+		Frame::F105, Frame::F106, Frame::F107, Frame::F108,
+		Frame::F109, Frame::F110, Frame::F111, Frame::F082,
 	])
 		.with_move_to(Position::new(0, 16)),
 	Scene::new(18, &[
-		Frame::F112, Frame::F113, Frame::F114, Frame::F115,
-		Frame::F116, Frame::F117, Frame::F118, Frame::F110,
+		Frame::F105, Frame::F106, Frame::F107, Frame::F108,
+		Frame::F109, Frame::F110, Frame::F111, Frame::F082,
 	])
 		.with_move_to(Position::new(0, -16)),
 	Scene::new(16, &[
-		Frame::F119, Frame::F120, Frame::F121, Frame::F122,
-		Frame::F123, Frame::F124, Frame::F125, Frame::F126,
+		Frame::F112, Frame::F113, Frame::F114, Frame::F115,
+		Frame::F116, Frame::F117, Frame::F118, Frame::F119,
 	])
 		.with_move_to(Position::new(0, -528))
 		.with_repeat(5, 0)
@@ -602,7 +602,7 @@ pub(super) const fn black_sheep_chase_child(w: u16) -> SceneList {
 	let repeat = (w + Frame::SIZE * 2).wrapping_div(30) + 2;
 
 	SceneList::new(SceneListKind::Dynamic1([
-		Scene::new(100, &[Frame::F155, Frame::F154, Frame::F154])
+		Scene::new(100, &[Frame::F145, Frame::F144, Frame::F144])
 			.with_move_to(Position::new(repeat as i32 * 10 * 3, 0))
 			.with_repeat(repeat - 1, 0)
 			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
@@ -623,9 +623,9 @@ pub(super) const fn black_sheep_romance(w: u16) -> SceneList {
 			.with_repeat(second.saturating_sub(1), 0)
 			.with_flags(Scene::EASE_OUT | Scene::GRAVITY),
 		Scene::new(411, &[
-			Frame::F008, Frame::F003, Frame::F003, Frame::F003, Frame::F127,
-			Frame::F128, Frame::F129, Frame::F130, Frame::F130, Frame::F130,
-			Frame::F130, Frame::F129, Frame::F128, Frame::F127, Frame::F003,
+			Frame::F008, Frame::F003, Frame::F003, Frame::F003, Frame::F120,
+			Frame::F121, Frame::F122, Frame::F123, Frame::F123, Frame::F123,
+			Frame::F123, Frame::F122, Frame::F121, Frame::F120, Frame::F003,
 			Frame::F003, Frame::F003,
 		])
 			.with_flags(Scene::GRAVITY),
@@ -637,15 +637,15 @@ pub(super) const fn black_sheep_romance_child(w: u16) -> SceneList {
 	let (first, second) = scale_black_sheep_romance(w);
 
 	SceneList::new(SceneListKind::Dynamic3([
-		Scene::new(100, &[Frame::F155, Frame::F154, Frame::F154])
+		Scene::new(100, &[Frame::F145, Frame::F144, Frame::F144])
 			.with_move_to(Position::new(first as i32 * 10 * 3, 0))
 			.with_repeat(first.saturating_sub(1), 0)
 			.with_flags(Scene::GRAVITY),
-		Scene::new(100, &[Frame::F156, Frame::F157])
+		Scene::new(100, &[Frame::F146, Frame::F147])
 			.with_move_to(Position::new(second as i32 * 3 * 2, 0))
 			.with_repeat(second.saturating_sub(1), 0)
 			.with_flags(Scene::EASE_OUT | Scene::GRAVITY),
-		Scene::new(450, &[Frame::F157])
+		Scene::new(450, &[Frame::F147])
 			.with_repeat(9, 0)
 			.with_flags(Scene::GRAVITY),
 	]))
@@ -659,8 +659,8 @@ pub(super) fn blink() -> SceneList {
 		Scene::new(200, &[Frame::F009, Frame::F010])
 			.with_flags(Scene::GRAVITY),
 		Scene::new(150, &[
-			Frame::F010, Frame::F010, Frame::F010, Frame::F010, Frame::F101,
-			Frame::F102, Frame::F010, Frame::F010, Frame::F010, Frame::F010,
+			Frame::F010, Frame::F010, Frame::F010, Frame::F010, Frame::F099,
+			Frame::F100, Frame::F010, Frame::F010, Frame::F010, Frame::F010,
 			Frame::F010, Frame::F010, Frame::F010, Frame::F010, Frame::F010,
 			Frame::F010, Frame::F010, Frame::F010, Frame::F010, Frame::F010,
 			Frame::F010, Frame::F010, Frame::F010,
@@ -678,14 +678,14 @@ pub(super) fn bored_sleep() -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic2([
 		Scene::new(200, &[
-			Frame::F003, Frame::F009, Frame::F010, Frame::F034, Frame::F035,
-			Frame::F034, Frame::F035, Frame::F036, Frame::F036,
+			Frame::F003, Frame::F009, Frame::F010, Frame::F032, Frame::F033,
+			Frame::F032, Frame::F033, Frame::F034, Frame::F034,
 		])
 			.with_repeat(repeat, 7)
 			.with_flags(Scene::GRAVITY),
 		Scene::new(200, &[
-			Frame::F035, Frame::F036, Frame::F036, Frame::F035, Frame::F034,
-			Frame::F034, Frame::F034, Frame::F010, Frame::F009,
+			Frame::F033, Frame::F034, Frame::F034, Frame::F033, Frame::F032,
+			Frame::F032, Frame::F032, Frame::F010, Frame::F009,
 		])
 			.with_flags(Scene::GRAVITY),
 	]))
@@ -710,7 +710,7 @@ pub(super) const fn chase_a_martian_child(w: u16) -> SceneList {
 	let repeat = w.wrapping_div(48) + 4;
 
 	SceneList::new(SceneListKind::Dynamic1([
-		Scene::new(100, &[Frame::F166, Frame::F167, Frame::F166, Frame::F168])
+		Scene::new(100, &[Frame::F156, Frame::F157, Frame::F156, Frame::F158])
 			.with_move_to(Position::new((repeat as i32 + 1) * -12 * 4, 0))
 			.with_repeat(repeat, 0)
 			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES)
@@ -739,16 +739,16 @@ pub(super) fn sleep() -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic2([
 		Scene::new(300, &[
-			Frame::F003, Frame::F107, Frame::F108, Frame::F107, Frame::F108,
-			Frame::F107, Frame::F031, Frame::F032, Frame::F033, Frame::F000,
+			Frame::F003, Frame::F079, Frame::F080, Frame::F079, Frame::F080,
+			Frame::F079, Frame::F029, Frame::F030, Frame::F031, Frame::F000,
 			Frame::F001,
 		])
 			.with_repeat(repeat, 9)
 			.with_sound(Sound::Yawn, 1)
 			.with_flags(Scene::GRAVITY),
 		Scene::new(300, &[
-			Frame::F000, Frame::F080, Frame::F079, Frame::F078, Frame::F077,
-			Frame::F037, Frame::F038, Frame::F039, Frame::F038, Frame::F037,
+			Frame::F000, Frame::F078, Frame::F077, Frame::F076, Frame::F075,
+			Frame::F035, Frame::F036, Frame::F037, Frame::F036, Frame::F035,
 			Frame::F006,
 		])
 			.with_sound(Sound::Yawn, 5)
@@ -762,14 +762,14 @@ pub(super) fn urinate() -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic2([
 		Scene::new(150, &[
-			Frame::F003, Frame::F012, Frame::F013, Frame::F103,
-			Frame::F104, Frame::F105, Frame::F106,
+			Frame::F003, Frame::F012, Frame::F013, Frame::F101,
+			Frame::F102, Frame::F103, Frame::F104,
 		])
 			.with_repeat(repeat, 5)
 			.with_flags(Scene::GRAVITY),
 		Scene::new(105, &[
-			Frame::F104, Frame::F105, Frame::F104, Frame::F104,
-			Frame::F103, Frame::F013, Frame::F012,
+			Frame::F102, Frame::F103, Frame::F102, Frame::F102,
+			Frame::F101, Frame::F013, Frame::F012,
 		])
 			.with_flags(Scene::GRAVITY),
 	]))
