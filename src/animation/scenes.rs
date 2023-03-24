@@ -330,6 +330,8 @@ pub(super) const PLAY_DEAD: &[Scene] = &[
 	])
 		.with_repeat(4, 11)
 		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[Frame::F091, Frame::F081, Frame::F010, Frame::F009, Frame::F003])
+		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ReachCeiling`.
