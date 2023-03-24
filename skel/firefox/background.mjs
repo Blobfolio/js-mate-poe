@@ -29,7 +29,15 @@ const updateTab = async function(tab, settings) {
 	settings.message = 'updateFg';
 
 	// Try to update the state, but don't worry too much if it fails.
-	browser.tabs.sendMessage(tab, {message: settings}).catch(() => {});
+	browser.tabs.sendMessage(tab, {message: settings})
+		.then((r) => {
+			// Content scripts that detect the library version of JS Mate Poe
+			// on the page will send back "false" as a signal that we should
+			// "disable" the extension for that page. Visually-speaking, that
+			// means hiding the icon, so let's do that!
+			if (false === r) { browser.pageAction.hide(tab); }
+		})
+		.catch((e) => {});
 
 	// Try to update the icon/title, independently of the state because some
 	// pages don't support extensions, but may still show the icon.
@@ -73,7 +81,12 @@ const newPage = async function(tab) {
 };
 
 browser.tabs.onActivated.addListener(newPage);
-browser.tabs.onUpdated.addListener(newPage);
+browser.tabs.onUpdated.addListener(newPage, {
+	properties: [
+		"status",
+		"url",
+	],
+});
 
 /**
  * Toggle State on Icon Click
