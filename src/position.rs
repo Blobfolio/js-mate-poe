@@ -85,10 +85,21 @@ pub(crate) enum Direction {
 }
 
 impl Direction {
+	const BOTH_X: u8 = Self::Left as u8 | Self::Right as u8;
+	const BOTH_Y: u8 = Self::Up as u8 | Self::Down as u8;
+
 	#[allow(unsafe_code)]
 	/// # From U8.
 	const fn from_u8(flag: u8) -> Self {
-		unsafe { std::mem::transmute(flag & 0b0000_1111) }
+		// Treat invalid combinations are none. (This shouldn't ever happen,
+		// but better safe than sorry.)
+		if (Self::BOTH_X == flag & Self::BOTH_X) || (Self::BOTH_Y == flag & Self::BOTH_Y) {
+			Self::None
+		}
+		else {
+			// Safety: all combinations of 0..=1 X and 0..=1 Y are covered.
+			unsafe { std::mem::transmute(flag & (Self::BOTH_X | Self::BOTH_Y)) }
+		}
 	}
 }
 
@@ -111,16 +122,14 @@ impl Direction {
 impl Direction {
 	/// # Invert X.
 	pub(crate) const fn invert_x(self) -> Self {
-		let x = Self::Left as u8 | Self::Right as u8;
-		if 0 == self as u8 & x { self }
-		else { Self::from_u8(self as u8 ^ x) }
+		if 0 == self as u8 & Self::BOTH_X { self }
+		else { Self::from_u8(self as u8 ^ Self::BOTH_X) }
 	}
 
 	/// # Invert Y.
 	pub(crate) const fn invert_y(self) -> Self {
-		let y = Self::Up as u8 | Self::Down as u8;
-		if 0 == self as u8 & y { self }
-		else { Self::from_u8(self as u8 ^ y) }
+		if 0 == self as u8 & Self::BOTH_Y { self }
+		else { Self::from_u8(self as u8 ^ Self::BOTH_Y) }
 	}
 }
 
@@ -173,6 +182,11 @@ mod tests {
 		assert!(matches!(dir.invert_y(), Direction::None));
 		test_x!(dir);
 		test_y!(dir);
+
+		// Bad directions.
+		assert_eq!(Direction::from_u8(0b1111_1111), Direction::None);
+		assert_eq!(Direction::from_u8(Direction::BOTH_X), Direction::None);
+		assert_eq!(Direction::from_u8(Direction::BOTH_Y), Direction::None);
 
 		// Left.
 		let pos = Position::new(-10, 0);
