@@ -75,7 +75,7 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
-			buf: [0_u8; 15],
+			buf: [b'0'; 15],
 		}
 	}
 }
