@@ -34,12 +34,7 @@
     "page_action":
     {
         "default_icon": "image/sleep.svg",
-        "default_title": "Enable JS Mate Poe",
-        "show_matches":
-        [
-            "http://*/*",
-            "https://*/*"
-        ]
+        "default_title": "JS Mate Poe: Disabled"
     },
     "background":
     {

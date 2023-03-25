@@ -23,9 +23,7 @@ const saveOptions = function(e) {
 		if (s.audio !== val) {
 			s.audio = val;
 			saveSettings(s).then(() => {
-				try {
-					browser.extension.getBackgroundPage().updateTabs(s);
-				}
+				try { browser.extension.getBackgroundPage().updateTabs(); }
 				catch (e) {}
 
 				// Give a visual indication that something happened.

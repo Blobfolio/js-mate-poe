@@ -8,85 +8,91 @@
 
 import { getSettings, saveSettings } from './settings.mjs';
 
+// This is used to keep track of all of the connected content scripts.
+const ports = new Map();
+
 /**
- * Update (One) Foreground Tab.
+ * New Connection (with Foreground).
  *
- * Turn Poe on or off, and/or audio on or off, for the given tab.
+ * The content scripts will reach out to form a connection as soon as they have
+ * initialized the wasm. The background, in turn, uses those connections to
+ * synchronize the states.
  *
- * @param {number|Object} tab Tab.
- * @param {Object} settings Settings.
+ * @param {Object} port Port.
  * @return {void} Nothing.
  */
-const updateTab = async function(tab, settings) {
-	// Normalize the "tab" value. (We want a numeric ID.)
-	if ((null !== tab) && ('object' === typeof tab)) {
-		if ('number' === typeof tab.id) { tab = tab.id; }
-		else if ('number' === typeof tab.tabId) { tab = tab.tabId; }
-		else { return; }
-	}
-	else if ('number' !== typeof tab) { return; }
+browser.runtime.onConnect.addListener(async function(port) {
+	// Store the new port, using its random name as the identifier.
+	ports.set(port.name, port);
 
-	settings.message = 'updateFg';
+	/**
+	 * Handle Disconnection.
+	 *
+	 * This removes the port from the list on disconnection so we don't keep
+	 * sending messages to it.
+	 *
+	 * @param {Object} port Port.
+	 * @return {void} Nothing.
+	 */
+	port.onDisconnect.addListener((port) => { ports.delete(port.name); });
 
-	// Try to update the state, but don't worry too much if it fails.
-	browser.tabs.sendMessage(tab, {message: settings})
-		.then((r) => {
-			// Content scripts that detect the library version of JS Mate Poe
-			// on the page will send back "false" as a signal that we should
-			// "disable" the extension for that page. Visually-speaking, that
-			// means hiding the icon, so let's do that!
-			if (false === r) { browser.pageAction.hide(tab); }
-		})
-		.catch((e) => {});
+	// Enable the pageAction icon.
+	await browser.pageAction.show(port.sender.tab.id).catch((e) => {});
 
-	// Try to update the icon/title, independently of the state because some
-	// pages don't support extensions, but may still show the icon.
-	try {
+	// Synchronize the state.
+	await updateTab(port);
+});
+
+/**
+ * Update Tab State.
+ *
+ * This synchronizes the audio/active properties of a single tab with the
+ * current settings, and also adjusts its pageAction icon to match.
+ *
+ * @param {Object} port Port.
+ * @return {Promise} Resolutions.
+ */
+const updateTab = async function(port) {
+	// Pull the current settings, and add an "action" to it.
+	let settings = await getSettings();
+	settings.action = 'poeUpdate';
+
+	// Send the settings to the content script.
+	try { port.postMessage(settings); }
+	catch (e) {}
+
+	// Synchronize the pageAction icon properties, regardless of whether or not
+	// the settings worked.
+	return Promise.allSettled([
 		browser.pageAction.setIcon({
 			path: settings.active ? 'image/sit.svg' : 'image/sleep.svg',
-			tabId: tab,
-		});
+			tabId: port.sender.tab.id,
+		}),
 		browser.pageAction.setTitle({
-			title: settings.active ? 'Disable JS Mate Poe' : 'Enable JS Mate Poe',
-			tabId: tab,
-		});
-	} catch (e) {}
+			title: settings.active ? 'JS Mate Poe: Enabled' : 'JS Mate Poe: Disabled',
+			tabId: port.sender.tab.id,
+		})
+	]);
 };
 
 /**
- * Update (All) Foreground Tabs.
+ * Update All (Connected) Tabs.
  *
- * Turn Poe on or off, and/or audio on or off, for every applicable tab.
+ * Make sure every connected tab is honoring the current settings, and has an
+ * appropriate pageAction icon.
  *
- * @param {Object} settings Settings.
- * @return {void} Nothing.
+ * This is triggered any time a pageAction icon is clicked or the settings are
+ * updated. (Otherwise we only communicate with individual tabs as-needed.)
+ *
+ * @return {Promise} Resolutions.
  */
-const updateTabs = async function(settings) {
-	let tabs = await browser.tabs.query({});
-	for (const tab of tabs) { updateTab(tab, settings); }
+const updateTabs = async function() {
+	let waiting = [];
+	for (const port of ports.values()) {
+		waiting.push(updateTab(port));
+	}
+	return Promise.allSettled(waiting);
 };
-
-/**
- * New/Changed Page Handler.
- *
- * Make sure Poe is synced with the desired state when a new tab is opened or
- * a new page is loaded.
- *
- * @param {number|Object} tab Tab.
- * @return {void} Nothing.
- */
-const newPage = async function(tab) {
-	let settings = await getSettings();
-	updateTab(tab, settings);
-};
-
-browser.tabs.onActivated.addListener(newPage);
-browser.tabs.onUpdated.addListener(newPage, {
-	properties: [
-		"status",
-		"url",
-	],
-});
 
 /**
  * Toggle State on Icon Click
@@ -98,8 +104,13 @@ browser.tabs.onUpdated.addListener(newPage, {
  * @return {void} Nothing.
  */
 browser.pageAction.onClicked.addListener(async function() {
+	// Pull the current settings and invert the "active" property.
 	let settings = await getSettings();
 	settings.active = ! settings.active;
+
+	// Save the settings.
 	await saveSettings(settings);
-	updateTabs(settings);
+
+	// Let the tabs know what changed!
+	await updateTabs();
 });
