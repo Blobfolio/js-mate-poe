@@ -39,8 +39,8 @@ $height: 40px;
 	transition: opacity .5s ease;
 	transform:
 		translate3d(var(--x, 0), var(--y, 0), 0)
-		var(--rx, rotateY(0deg))
-		var(--ry, rotateX(0deg));
+		rotateY(var(--rx, 0deg))
+		rotateX(var(--ry, 0deg));
 }
 
 // The image.
@@ -65,8 +65,8 @@ $height: 40px;
 #p.off { opacity: 0; }
 
 // Reverse the image across one or both planes.
-.rx { --rx: rotateY(180deg); }
-.ry { --ry: rotateX(180deg); }
+.rx { --rx: 180deg; }
+.ry { --ry: 180deg; }
 
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
@@ -81,8 +81,8 @@ $height: 40px;
 #p.a4 {
 	transform:
 		translate3d(var(--x, 0), var(--y, 0), 0)
-		var(--rx, rotateY(0deg))
-		var(--ry, rotateX(0deg))
+		rotateY(var(--rx, 0deg))
+		rotateX(var(--ry, 0deg))
 		scale(3);
 }
 
