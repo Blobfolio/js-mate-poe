@@ -106,7 +106,7 @@ impl State {
 		// for the setup and initial call. (It will be dropped when the
 		// method terminates, leaving only the original reference.)
 		let state2 = state1.clone();
-		state2.raf.borrow_mut().replace(Closure::new(Box::new(move |e: f64| {
+		state2.raf.borrow_mut().replace(Closure::wrap(Box::new(move |e: f64| {
 			if Universe::active() {
 				if ! Universe::paused() { state1.paint(e as u32); } // No change if paused!
 				state1.raf.borrow()
@@ -150,28 +150,28 @@ struct StateEvents {
 impl Default for StateEvents {
 	fn default() -> Self {
 		Self {
-			contextmenu: Closure::new(Box::new(|e: Event| {
+			contextmenu: Closure::wrap(Box::new(|e: Event| {
 				e.prevent_default();
 			})),
 			#[cfg(not(feature = "firefox"))]
-			dblclick: Closure::new(Box::new(|_| {
+			dblclick: Closure::wrap(Box::new(|_| {
 				Universe::set_active(false);
 			})),
-			mousedown: Closure::new(Box::new(|e: MouseEvent|
+			mousedown: Closure::wrap(Box::new(|e: MouseEvent|
 				if 1 == e.buttons() && 0 == e.button() {
 					Universe::set_dragging(true);
 					Universe::set_pos(e.client_x(), e.client_y());
 				}
 			)),
-			mousemove: Closure::new(Box::new(|e: MouseEvent|
+			mousemove: Closure::wrap(Box::new(|e: MouseEvent|
 				if Universe::dragging() {
 					Universe::set_pos(e.client_x(), e.client_y());
 				}
 			)),
-			mouseup: Closure::new(Box::new(|_| {
+			mouseup: Closure::wrap(Box::new(|_| {
 				Universe::set_dragging(false);
 			})),
-			resize: Closure::new(Box::new(|_|
+			resize: Closure::wrap(Box::new(|_|
 				// Update the dimensions.
 				if let Some((w, h)) = size() { Universe::resize(w, h); }
 			)),
