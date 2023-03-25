@@ -19,7 +19,6 @@ use web_sys::{
 	AddEventListenerOptions,
 	Element,
 	Event,
-	EventListenerOptions,
 	MouseEvent,
 };
 
@@ -187,33 +186,25 @@ impl StateEvents {
 		let window = dom::window().expect_throw("Missing window.");
 
 		macro_rules! bind {
-			($el:expr, $event:ident, $opt:ident) => (
+			($el:expr, $event:ident, $passive:literal) => (
 				$el.add_event_listener_with_callback_and_add_event_listener_options(
 					stringify!($event),
 					self.$event.as_ref().unchecked_ref(),
-					AddEventListenerOptions::new().$opt(true),
+					AddEventListenerOptions::new().passive($passive),
 				).expect_throw("!");
 			);
 		}
 
-		bind!(el, contextmenu, capture);
-		#[cfg(not(feature = "firefox"))] bind!(el, dblclick, passive);
-		bind!(el, mousedown, passive);
-		bind!(document_element, mousemove, passive);
-		bind!(document_element, mouseup, passive);
-		bind!(window, resize, passive);
+		bind!(el, contextmenu, false);
+		#[cfg(not(feature = "firefox"))] bind!(el, dblclick, true);
+		bind!(el, mousedown, true);
+		bind!(document_element, mousemove, true);
+		bind!(document_element, mouseup, true);
+		bind!(window, resize, true);
 	}
 
 	/// # Unbind Event Listeners.
 	fn unbind(&self, el: &Element) {
-		// This one works different from the rest because it was registered
-		// with the capture hint.
-		let _res = el.remove_event_listener_with_callback_and_event_listener_options(
-			"contextmenu",
-			self.contextmenu.as_ref().unchecked_ref(),
-			EventListenerOptions::new().capture(true),
-		).ok();
-
 		macro_rules! unbind {
 			($el:expr, $event:ident) => (
 				let _res = $el.remove_event_listener_with_callback(
@@ -223,6 +214,7 @@ impl StateEvents {
 			);
 		}
 
+		unbind!(el, contextmenu);
 		#[cfg(not(feature = "firefox"))] unbind!(el, dblclick);
 		unbind!(el, mousedown);
 		if let Some(document_element) = dom::document_element() {
