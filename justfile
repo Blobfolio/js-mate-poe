@@ -60,7 +60,10 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Remove the unused "fetch" stuff from the glue and move the file to the
 	# generated module directory.
 	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
-	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ skel_dir }}/js/generated/glue.mjs"
+	cat \
+		"{{ skel_dir }}/js/imports.mjs" \
+		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
+		> "{{ skel_dir }}/js/generated/glue.mjs"
 
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
@@ -154,6 +157,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Copy Javascript.
 	cp "{{ skel_dir }}/firefox/"*.mjs "{{ dist_dir }}/js-mate-poe_firefox/js"
 	cp "{{ skel_dir }}/js/header.js" "{{ dist_dir }}/js-mate-poe_firefox/js"
+	cp "{{ skel_dir }}/js/imports.mjs" "{{ dist_dir }}/js-mate-poe_firefox/js"
 
 	# Copy Rust.
 	cp "{{ justfile_directory() }}/build.rs" "{{ dist_dir }}/js-mate-poe_firefox/rust"

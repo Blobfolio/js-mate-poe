@@ -44,7 +44,10 @@ wasm-bindgen \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.wasm
 
 # Copy the glue for later.
-cp target/wasm32-unknown-unknown/release/rs_mate_poe.js ../js/generated/glue.mjs
+cat \
+	../js/imports.mjs \
+	target/wasm32-unknown-unknown/release/rs_mate_poe.js \
+	> ../js/generated/glue.mjs
 
 # Optimize and output the wasm to the dist dir.
 wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \

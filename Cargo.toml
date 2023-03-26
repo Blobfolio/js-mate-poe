@@ -30,10 +30,6 @@ wasm-bindgen = "0.2.*"
 version = "0.2.*"
 optional = true
 
-[dependencies.itoap]
-version = "1.0.*"
-default-features = false
-
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies]
 lol_alloc = "0.3.*"
 
@@ -43,13 +39,11 @@ features = [
 	"AddEventListenerOptions",
 	"Blob",
 	"BlobPropertyBag",
-	"CssStyleDeclaration",
 	"Document",
 	"Element",
 	"Event",
 	"EventTarget",
 	"HtmlAudioElement",
-	"HtmlElement",
 	"HtmlImageElement",
 	"MouseEvent",
 	"ShadowRoot",
