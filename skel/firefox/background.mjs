@@ -87,7 +87,7 @@ const updateTab = async function(port) {
  * @return {Promise} Resolutions.
  */
 const updateTabs = async function() {
-	let waiting = [];
+	const waiting = [];
 	for (const port of ports.values()) {
 		waiting.push(updateTab(port));
 	}
@@ -95,7 +95,7 @@ const updateTabs = async function() {
 };
 
 /**
- * Toggle State on Icon Click
+ * Toggle State on Icon Click.
  *
  * Turn Poe on/off for all tabs whenever the extension icon is clicked, and
  * save the setting for next time.

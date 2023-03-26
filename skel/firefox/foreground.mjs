@@ -42,37 +42,12 @@ document.addEventListener('poe-sound', function(e) {
 			audio.play().catch((e) => {
 				if (! audioWarned) {
 					audioWarned = true;
-					console.info('You might have to click somewhere (anywhere) on the page before Firefox will let audio play.')
+					console.info('You might have to click somewhere (anywhere) on the page before Firefox will let audio play.');
 				}
 			});
 		}, { once: true, passive: true });
 	}
 }, { passive: true });
-
-/**
- * Check for JS Mate Poe Library Script.
- *
- * We aren't allowed to check the existence of a window.Poe object directly.
- * The best we can do is run through the script sources to see if there's
- * anything matching the default script name.
- *
- * This is unlikely to produce any false positives, but will miss scripts that
- * have been renamed or bundled. Still, it's better than nothing…
- *
- * @return {boolean} True/false.
- */
-const hasLibrary = function() {
-	const scripts = document.querySelectorAll('script');
-	if (null !== scripts) {
-		for (script of scripts) {
-			if (-1 !== script.src.indexOf('js-mate-poe.min.js')) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-};
 
 /**
  * Initialize and Connect!
@@ -89,7 +64,7 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
 	setTimeout(function() {
 		// Abort if this page seems to have the library version of JS Mate Poe
 		// enqueued. (It would be confusing have two Poes running around.)
-		if (hasLibrary()) {
+		if (Array.from(document.querySelectorAll('script')).some(s => -1 !== s.src.indexOf('js-mate-poe.min.js'))) {
 			console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
 			Poe.active = false;
 			return Promise.resolve(false);
@@ -98,9 +73,7 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
 		// Firefox produces intermittent "decoding" errors with the audio
 		// files. This seems to happen most often during the first request, so
 		// maybe "priming" will help? It certainly won't hurt…
-		for (let i = 0; i < Sounds.length; i++) {
-			let url = browser.runtime.getURL(Sounds[i]);
-		}
+		for (const sound of Sounds) { browser.runtime.getURL(sound); }
 
 		// Okay, let's connect to the background script now!
 		let port = browser.runtime.connect({ name: 'Poe-' + Math.random().toString() });
@@ -125,19 +98,15 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
 		/**
 		 * Disconnect on Leave.
 		 *
-		 * Pre-emptively ensure the state is unloaded before discarding the
-		 * page. (The browser doesn't always do this, particularly during
-		 * back/next navigation.)
+		 * Make sure Poe is inactive before we leave the page, just in case the
+		 * browser decides to leave back/next history in a weird half-
+		 * remembered state.
 		 *
 		 * @return {void} Nothing.
 		 */
 		window.addEventListener('beforeunload', function() {
-			try {
-				Poe.active = false;
-				port.disconnect();
-			}
-			catch (e) { console.warn('unload failed', e); }
-		}, { once: true, passive: true });
+			Poe.active = false;
+		}, { passive: true });
 
 		/**
 		 * Disconnect Handler.
@@ -148,6 +117,6 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
 		 *
 		 * @return {void} Nothing.
 		 */
-		port.onDisconnect.addListener((p) => { Poe.active = false; });
+		port.onDisconnect.addListener(() => { Poe.active = false; });
 	}, 250);
 });
