@@ -9,7 +9,7 @@
         }
     },
     "name": "JS Mate Poe",
-    "version": "1.4.3",
+    "version": "1.4.4",
     "author": "Blobfolio, LLC",
     "description": "Add Screen Mate Poe to every web site for constant companionship!",
     "homepage_url": "https://github.com/Blobfolio/js-mate-poe",
@@ -26,15 +26,15 @@
         "http://*/*",
         "https://*/*"
     ],
+    "options_ui":
+    {
+        "page": "options/options.html",
+        "browser_style": false
+    },
     "page_action":
     {
         "default_icon": "image/sleep.svg",
-        "default_title": "Enable JS Mate Poe",
-        "show_matches":
-        [
-            "http://*/*",
-            "https://*/*"
-        ]
+        "default_title": "JS Mate Poe: Disabled"
     },
     "background":
     {
@@ -48,7 +48,8 @@
         {
             "matches":
             [
-                "<all_urls>"
+                "http://*/*",
+            	"https://*/*"
             ],
             "js":
             [

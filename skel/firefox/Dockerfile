@@ -1,15 +1,23 @@
-FROM rust:bullseye
+# Stage One.
+FROM rust:1.68-bullseye AS stage1
+RUN set -eux; \
+	mkdir /tmp/cargo && \
+	cargo install --root /tmp/cargo --locked --version 0.2.84 wasm-bindgen-cli && \
+	cargo install --root /tmp/cargo --locked --version 0.112.0 wasm-opt
+
+# Stage Two.
+FROM rust:1.68-bullseye
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
-COPY docker/nodesource-archive-keyring.gpg /usr/share/keyrings/nodesource-archive-keyring.gpg
-COPY docker/nodesource.sources /etc/apt/sources.list.d/nodesource.sources
+COPY docker/nodesource-archive-keyring.gpg /usr/share/keyrings/
+COPY docker/nodesource.sources /etc/apt/sources.list.d/
+COPY docker/entrypoint.sh /opt/
 
-COPY docker/entrypoint.sh /opt/entrypoint.sh
+COPY --from=stage1 /tmp/cargo/bin/wasm* /usr/local/cargo/bin/
 
 RUN set -eux; \
 	rustup target add wasm32-unknown-unknown && \
-	cargo install --locked wasm-bindgen-cli wasm-opt --target-dir "/tmp/cargo" && \
 	\
 	apt-get update && \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
@@ -17,7 +25,6 @@ RUN set -eux; \
 	npm set package-lock false && \
 	npm set save false && \
 	npm set unsafe-perm true && \
-	npm update -g npm && \
 	npm i -g google-closure-compiler@20221102.0.1 web-ext && \
 	\
 	touch /etc/inside-docker && \

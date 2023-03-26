@@ -1,48 +1,122 @@
 /**
  * @file Firefox Extension: Foreground Script.
  *
- * Unlike the general library, Poe is started/stopped when signals are
- * received from the extension's background script, and the audio is stored
- * and triggered outside the wasm (to avoid CSP issues).
+ * This is the entry point for the extension's "content script". It loads and
+ * initializes the wasm, but manually controls playback (based on signals from
+ * the background script).
  */
 
 // Pull in the two things we need from the glue.
 import init, { Poe } from './generated/glue.mjs';
 
-// Let's party like it's 1996!
-init(browser.runtime.getURL('js-mate-poe.wasm'));
+// Relative Audio File Locations.
+const Sounds = [
+	'sound/baa.flac',
+	'sound/sneeze.flac',
+	'sound/yawn.flac',
+];
 
-// Sounds.
-const Sounds = {
-	'baa': 'sound/baa.flac',
-	'sneeze': 'sound/sneeze.flac',
-	'yawn': 'sound/yawn.flac',
-};
+// This flag is used to keep track of whether or not we have let the user know
+// they might need to click the page before Firefox will let audio playback
+// happen. (We don't want to bother them twice.)
+let audioWarned = false;
 
-// Play Sound.
+/**
+ * Play Sound
+ *
+ * This script has to manually handle audio playback (rather than letting the
+ * wasm do it) to work around potential per-site CSP conflicts.
+ *
+ * The wasm still has to figure out what to play and when, so triggers a
+ * custom "poe-sound" event with the details for us.
+ *
+ * @param {Event} e Event.
+ * @return {void} Nothing.
+ */
 document.addEventListener('poe-sound', function(e) {
-	if ('string' === typeof Sounds[e.detail]) {
-		const audio = new Audio(browser.runtime.getURL(Sounds[e.detail]));
-		audio.play().catch(() => {});
+	let idx = parseInt(e.detail);
+	if (! isNaN(idx) && 0 <= idx && idx < Sounds.length) {
+		const url = browser.runtime.getURL(Sounds[idx]);
+		const audio = new Audio(url);
+		audio.addEventListener("canplaythrough", () => {
+			audio.play().catch((e) => {
+				if (! audioWarned) {
+					audioWarned = true;
+					console.info('You might have to click somewhere (anywhere) on the page before Firefox will let audio play.');
+				}
+			});
+		}, { once: true, passive: true });
 	}
 }, { passive: true });
 
 /**
- * Toggle State
+ * Initialize and Connect!
  *
- * Turn Poe on or off for the current page according to the wishes of the
- * background script.
+ * This initializes the wasm binary, then creates a connection to the
+ * background script. (That script will in turn let us know the current
+ * settings, and ping us if there are any updates down the road.)
  *
- * @param {Object} request Request.
  * @return {void} Nothing.
  */
-browser.runtime.onMessage.addListener(function(request) {
-	if ('startPoe' === request.message) {
-		if (! Poe.active) {
-			Poe.active = true;
+init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
+	// Take a brief moment before issuing the connection to help mitigate any
+	// signal criss-crosses from rapid changes.
+	setTimeout(function() {
+		// Abort if this page seems to have the library version of JS Mate Poe
+		// enqueued. (It would be confusing have two Poes running around.)
+		if (Array.from(document.querySelectorAll('script')).some(s => -1 !== s.src.indexOf('js-mate-poe.min.js'))) {
+			console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
+			Poe.active = false;
+			return Promise.resolve(false);
 		}
-	}
-	else if (('stopPoe' === request.message) && Poe.active) {
-		Poe.active = false;
-	}
+
+		// Firefox produces intermittent "decoding" errors with the audio
+		// files. This seems to happen most often during the first request, so
+		// maybe "priming" will help? It certainly won't hurt…
+		for (const sound of Sounds) { browser.runtime.getURL(sound); }
+
+		// Okay, let's connect to the background script now!
+		let port = browser.runtime.connect({ name: 'Poe-' + Math.random().toString() });
+
+		/**
+		 * Synchronize State.
+		 *
+		 * The background script will let us know the current settings after
+		 * connecting, and let us know if they change down the road. This
+		 * synchronizes our state accordingly.
+		 *
+		 * @param {Object} m Message.
+		 * @return {void} Nothing.
+		 */
+		port.onMessage.addListener((m) => {
+			if ((null !== m) && ('object' === typeof m) && ('poeUpdate' === m.action)) {
+				Poe.audio = !! m.audio;
+				Poe.active = !! m.active;
+			}
+		});
+
+		/**
+		 * Disconnect on Leave.
+		 *
+		 * Make sure Poe is inactive before we leave the page, just in case the
+		 * browser decides to leave back/next history in a weird half-
+		 * remembered state.
+		 *
+		 * @return {void} Nothing.
+		 */
+		window.addEventListener('beforeunload', function() {
+			Poe.active = false;
+		}, { passive: true });
+
+		/**
+		 * Disconnect Handler.
+		 *
+		 * This ensures the state is cleaned up in the unlikely event the
+		 * background script cancels us. (Annoyingly, it won't trigger if we
+		 * cancel ourselves, hence all the duplicate code.)
+		 *
+		 * @return {void} Nothing.
+		 */
+		port.onDisconnect.addListener(() => { Poe.active = false; });
+	}, 250);
 });

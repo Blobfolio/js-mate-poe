@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.4.3"
+version = "1.4.4"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.62"
@@ -30,10 +30,6 @@ wasm-bindgen = "0.2.*"
 version = "0.2.*"
 optional = true
 
-[dependencies.itoap]
-version = "1.0.*"
-default-features = false
-
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies]
 lol_alloc = "0.3.*"
 
@@ -43,17 +39,13 @@ features = [
 	"AddEventListenerOptions",
 	"Blob",
 	"BlobPropertyBag",
-	"CssStyleDeclaration",
 	"Document",
 	"Element",
 	"Event",
-	"EventListenerOptions",
 	"EventTarget",
 	"HtmlAudioElement",
-	"HtmlElement",
 	"HtmlImageElement",
 	"MouseEvent",
-	"Node",
 	"ShadowRoot",
 	"ShadowRootInit",
 	"ShadowRootMode",

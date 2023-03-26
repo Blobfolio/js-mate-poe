@@ -15,12 +15,17 @@ use web_sys::{
 	Url,
 };
 
-// Register the Blob/URLs _once_ and hold onto them since garbage collection is
-// iffy.
+
+
+// To avoid runaway memory usage, we register "URLs" for our embedded media
+// data once at startup and share references to them as needed (instead of
+// regenerating them over and over again).
 thread_local! {
 	static IMG_POE: String = url(include_bytes!("../skel/img/poe.png"), "image/png");
 }
 
+// The Firefox Extension cannot use the wasm for audio playback; it has to
+// handle that itself. So we only need these for the regular library version.
 #[cfg(not(feature = "firefox"))]
 thread_local! {
 	static SND_BAA: String = url(include_bytes!("../skel/sound/baa.flac"), "audio/flac");
@@ -33,10 +38,13 @@ thread_local! {
 #[inline]
 /// # Image Sprite.
 ///
-/// Return an image element populated with the sprite.
+/// Create and return an image element for use with our "mate" elements.
 pub(crate) fn sprite_image_element() -> HtmlImageElement {
-	let el = HtmlImageElement::new_with_width_and_height(Frame::SPRITE_WIDTH, Frame::SPRITE_HEIGHT)
-		.unwrap_throw();
+	let el = HtmlImageElement::new_with_width_and_height(
+		Frame::SPRITE_WIDTH,
+		Frame::SPRITE_HEIGHT,
+	)
+		.expect_throw("!");
 	el.set_id("i");
 	IMG_POE.with(|s| el.set_src(s));
 	el
@@ -44,6 +52,7 @@ pub(crate) fn sprite_image_element() -> HtmlImageElement {
 
 
 
+#[repr(u8)]
 #[allow(missing_docs)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 /// # Sounds.
@@ -71,11 +80,15 @@ impl Sound {
 
 
 /// # Slice to Blob to URL.
+///
+/// Note: just as in Javascript, the result is a "String", but the browser will
+/// hold onto all of the memory associated with the source Blob, so this is
+/// called _sparingly_.
 fn url(data: &'static [u8], mime: &str) -> String {
 	Blob::new_with_u8_array_sequence_and_options(
 		&Array::of1(&Uint8Array::from(data)),
 		BlobPropertyBag::new().type_(mime)
 	)
 		.and_then(|b| Url::create_object_url_with_blob(&b))
-		.unwrap_throw()
+		.expect_throw("!")
 }

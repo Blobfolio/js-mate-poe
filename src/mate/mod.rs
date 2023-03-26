@@ -21,7 +21,6 @@ use flags::MateFlags;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	Element,
-	HtmlElement,
 	ShadowRootInit,
 	ShadowRootMode,
 };
@@ -33,12 +32,24 @@ use web_sys::{
 
 
 
-/// # String Buffer.
-///
-/// Each mate instance contains a scratch buffer that can be used to write
-/// data into before passing along to Javascript (to avoid the allocation
-/// overhead of using strings).
-type Buffer = [u8; 15];
+#[wasm_bindgen]
+extern "C" {
+	#[wasm_bindgen(js_name = "poeWriteCssProperty")]
+	fn write_css_property(el: &Element, key: char, value: i32);
+
+	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
+	fn toggle_wrapper_classes(
+		el: &Element,
+		h: bool,
+		rx: bool,
+		ry: bool,
+		off: bool,
+		a1: bool,
+		a2: bool,
+		a3: bool,
+		a4: bool,
+	);
+}
 
 
 
@@ -55,23 +66,12 @@ pub(crate) struct Mate {
 	scenes: Option<SceneList>,
 	next_animation: Option<Animation>,
 	next_tick: u32,
-	buf: Buffer,
-}
-
-impl Drop for Mate {
-	/// # Drop.
-	///
-	/// Remove the event listeners, if any, and detach the element from the
-	/// body, hopefully allowing for eventual garbage collection.
-	fn drop(&mut self) {
-		let _res = dom::body().remove_child(&self.el);
-	}
 }
 
 impl Mate {
 	/// # New.
 	///
-	/// Create a new instance, including all of the initial DOM setup.
+	/// Create a new instance (and supporting DOM elements).
 	pub(crate) fn new(primary: bool) -> Self {
 		let el = make_element(primary);
 		Self {
@@ -85,7 +85,6 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
-			buf: [0_u8; 15],
 		}
 	}
 }
@@ -535,157 +534,62 @@ impl Mate {
 	/// Apply any and all necessary changes to the DOM elements.
 	fn render(&mut self) {
 		if self.flags.changed() {
-			let shadow = self.el.shadow_root().unwrap_throw();
+			let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
 			// Update the wrapper div's class and/or style.
 			if self.flags.class_changed() || self.flags.transform_changed() {
-				let wrapper: HtmlElement = shadow.get_element_by_id("p")
-					.unwrap_throw()
-					.unchecked_into();
+				let wrapper = shadow.get_element_by_id("p")
+					.expect_throw("Missing mate wrapper.");
 
 				if self.flags.class_changed() {
-					wrapper.set_class_name(self.write_classes());
+					toggle_wrapper_classes(
+						&wrapper,
+						self.frame.half_frame(),
+						self.flags.flipped_x(),
+						self.flags.flipped_y(),
+						self.animation.is_none(),
+						matches!(self.animation, Some(Animation::Drag)),
+						matches!(self.animation, Some(Animation::SneezeShadow)),
+						matches!(self.animation, Some(Animation::Abduction)),
+						matches!(self.animation, Some(Animation::BigFishChild)),
+					);
 				}
 
-				if self.flags.transform_changed() {
-					let style = wrapper.style();
-					if self.flags.transform_x_changed() {
-						style.set_property("--x", write_transform(self.pos.x, &mut self.buf)).unwrap_throw();
-					}
-					if self.flags.transform_y_changed() {
-						style.set_property("--y", write_transform(self.pos.y, &mut self.buf)).unwrap_throw();
-					}
+				if self.flags.transform_x_changed() {
+					write_css_property(&wrapper, 'x', self.pos.x);
+				}
+
+				if self.flags.transform_y_changed() {
+					write_css_property(&wrapper, 'y', self.pos.y);
 				}
 			}
 
 			// Update the image frame class.
 			if self.flags.frame_changed() {
-				shadow.get_element_by_id("i")
-					.and_then(|img|
-						img.unchecked_into::<HtmlElement>()
-							.style()
-							.set_property("--c", write_transform(self.frame.offset(), &mut self.buf)).ok()
-					)
-					.unwrap_throw();
+				let img = shadow.get_element_by_id("i")
+					.expect_throw("Missing mate image.");
+				write_css_property(&img, 'c', self.frame.offset());
 			}
 
 			// Play a sound?
 			#[cfg(feature = "firefox")]
 			if let Some(sound) = self.sound.take() {
-				// Firefox needs to handle playback itself, so trigger an event
-				// to let it know what to do.
-				let sound = match sound {
-					Sound::Baa => JsValue::from_str("baa"),
-					Sound::Sneeze => JsValue::from_str("sneeze"),
-					Sound::Yawn => JsValue::from_str("yawn"),
-				};
-				let _res = CustomEvent::new_with_event_init_dict(
-					"poe-sound",
-					CustomEventInit::new().detail(&sound)
-				).and_then(|e| dom::document().dispatch_event(&e));
+				if let Some(dd) = dom::document() {
+					// Firefox needs to handle playback itself, so trigger an event
+					// to let it know what to do.
+					let _res = CustomEvent::new_with_event_init_dict(
+						"poe-sound",
+						CustomEventInit::new().detail(&(sound as u8).into())
+					)
+						.and_then(|e| dd.dispatch_event(&e))
+						.ok();
+				}
 			}
 
 			#[cfg(not(feature = "firefox"))]
 			if let Some(sound) = self.sound.take() { sound.play(); }
 
 			self.flags.clear_changed();
-		}
-	}
-
-	#[allow(unsafe_code)]
-	/// # Write Wrapper Class(es).
-	///
-	/// This writes the applicable wrapper classes to the provided buffer so
-	/// they can be set en masse (versus a half dozen ugly `classList.toggle`
-	/// operations).
-	///
-	/// Classes aren't updated very frequently, but the buffer is also used for
-	/// style transforms, which _are_ updated frequently, so it shouldn't be a
-	/// total waste.
-	///
-	/// ## Safety
-	///
-	/// Only one animation-related class can exist at a time, so the largest
-	/// possible combination of classes is "child rx ry off", 15 bytes.
-	fn write_classes(&mut self) -> &str {
-		// Start with "child" if this is a child sprite.
-		let mut from =
-			if self.flags.primary() {
-				// Half-frame? This only applies to the main mate.
-				if self.frame.half_frame() {
-					unsafe {
-						std::ptr::copy_nonoverlapping(
-							b"h ".as_ptr(),
-							self.buf.as_mut_ptr(),
-							2,
-						);
-					}
-					2
-				}
-				else { 0 }
-			}
-			else {
-				unsafe {
-					std::ptr::copy_nonoverlapping(
-						b"child ".as_ptr(),
-						self.buf.as_mut_ptr(),
-						6,
-					);
-				}
-				6
-			};
-
-		// Add X flip.
-		if self.flags.flipped_x() {
-			unsafe {
-				std::ptr::copy_nonoverlapping(
-					b"rx ".as_ptr(),
-					self.buf.as_mut_ptr().add(from),
-					3,
-				);
-			}
-			from += 3;
-		}
-
-		// Add Y flip.
-		if self.flags.flipped_y() {
-			unsafe {
-				std::ptr::copy_nonoverlapping(
-					b"ry ".as_ptr(),
-					self.buf.as_mut_ptr().add(from),
-					3,
-				);
-			}
-			from += 3;
-		}
-
-		// Add animation-related class.
-		if let Some(rest) = match self.animation {
-			None => Some(b"off".as_slice()),
-			Some(Animation::Abduction) => Some(b"a3".as_slice()),
-			Some(Animation::BigFishChild) => Some(b"a4".as_slice()),
-			Some(Animation::Drag) => Some(b"a1".as_slice()),
-			Some(Animation::SneezeShadow) => Some(b"a2".as_slice()),
-			_ => {
-				// Trim the trailing space, if any, without calling "trim()",
-				// as that bloats the binary. Haha.
-				from = from.saturating_sub(1);
-				None
-			},
-		} {
-			unsafe {
-				std::ptr::copy_nonoverlapping(
-					rest.as_ptr(),
-					self.buf.as_mut_ptr().add(from),
-					rest.len(),
-				);
-			}
-			from += rest.len();
-		}
-
-		// Return the string.
-		unsafe {
-			std::str::from_utf8_unchecked(&self.buf[..from])
 		}
 	}
 }
@@ -849,58 +753,29 @@ impl Mate {
 
 /// # Make Element.
 ///
-/// Create and append the "mate" elements to the document body.
+/// Create and return the "mate" DOM elements.
 fn make_element(primary: bool) -> Element {
-	let document = dom::document();
+	let document = dom::document().expect_throw("Missing document.");
 
 	// Create the main element, its shadow DOM, and its shadow elements.
-	let el = document.create_element("div").unwrap_throw();
-	el.set_attribute("aria-hidden", "true").unwrap_throw();
+	let el = document.create_element("div").expect_throw("!");
+	el.set_attribute("aria-hidden", "true").expect_throw("!");
 
 	// Create its stylesheet.
-	let style = document.create_element("style").unwrap_throw();
+	let style = document.create_element("style").expect_throw("!");
 	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
 	// And the wrapper div (with the image).
-	let wrapper = document.create_element("div").unwrap_throw();
+	let wrapper = document.create_element("div").expect_throw("!");
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
-	wrapper.append_child(&sprite_image_element()).unwrap_throw();
+	wrapper.append_child(&sprite_image_element()).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.and_then(|s| s.append_with_node_2(&style, &wrapper))
-		.unwrap_throw();
+		.expect_throw("!");
 
-	// Append the element to the body and return a reference.
-	dom::body().append_child(&el).unwrap_throw();
 	el
-}
-
-#[allow(unsafe_code)]
-/// # Write Transform.
-///
-/// This writes a given X/Y translate value to a (reusable) buffer and returns
-/// the resulting string slice.
-///
-/// Pointer madness is faster than using `format!()`, but the real reason we're
-/// doing it this way is to reduce the binary size. Even with the extra
-/// dependency, this comes out about `500 KiB` smaller in release mode.
-///
-/// ## Safety
-///
-/// This shares a buffer with the class-writer. That method requires 15 bytes,
-/// but this only requires at most 13 bytes (11 for the integer and 2 for the
-/// unit), so there's sufficient room.
-fn write_transform(v: i32, buf: &mut Buffer) -> &str {
-	// Stringify the value.
-	let len = unsafe { itoap::write_to_ptr(buf.as_mut_ptr(), v) };
-	unsafe {
-		// Add the unit.
-		std::ptr::copy_nonoverlapping(b"px".as_ptr(), buf.as_mut_ptr().add(len), 2);
-
-		// Stringify what we've written.
-		std::str::from_utf8_unchecked(&buf[..len + 2])
-	}
 }
