@@ -47,9 +47,9 @@ jobs:
 
     - name: Clippy
       run: |
-        cargo clippy --release --no-default-features --target --target wasm32-unknown-unknown
-        cargo clippy --release --no-default-features --features director --target --target wasm32-unknown-unknown
-        cargo clippy --release --no-default-features --features firefox --target --target wasm32-unknown-unknown
+        cargo clippy --release --no-default-features --target wasm32-unknown-unknown
+        cargo clippy --release --no-default-features --features director --target wasm32-unknown-unknown
+        cargo clippy --release --no-default-features --features firefox --target wasm32-unknown-unknown
 
     - name: Tests
       run: |
