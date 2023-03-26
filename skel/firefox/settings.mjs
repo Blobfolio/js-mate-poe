@@ -7,7 +7,7 @@
 const sanitizeSettings = function(val) {
 	const out = {
 		active: false,
-		audio: true,
+		audio: false,
 	};
 
 	// Copy valid properties from the source, if any.
