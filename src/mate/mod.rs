@@ -34,9 +34,11 @@ use web_sys::{
 
 #[wasm_bindgen]
 extern "C" {
+	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeWriteCssProperty")]
 	fn write_css_property(el: &Element, key: char, value: i32);
 
+	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
 	fn toggle_wrapper_classes(
 		el: &Element,
