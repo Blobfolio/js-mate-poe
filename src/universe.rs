@@ -209,15 +209,6 @@ impl Universe {
 	set!("Dragging", DRAGGING, set_dragging);
 	set!("State", STATE, set_state);
 
-	/// # Set Width/Height.
-	///
-	/// This updates the cached window dimensions.
-	pub(crate) fn resize(width: u16, height: u16) {
-		let width = width.to_le_bytes();
-		let height = height.to_le_bytes();
-		SIZE.store(u32::from_le_bytes([width[0], width[1], height[0], height[1]]), SeqCst);
-	}
-
 	/// # Set Active.
 	///
 	/// Enable or disable the universe (and Poe, etc.), returning `true` if
@@ -276,6 +267,15 @@ impl Universe {
 			y[0], y[1], y[2], y[3],
 		]);
 		POS.store(pos, SeqCst);
+	}
+
+	/// # Set Width/Height.
+	///
+	/// This updates the cached window dimensions.
+	pub(crate) fn set_size(width: u16, height: u16) {
+		let width = width.to_le_bytes();
+		let height = height.to_le_bytes();
+		SIZE.store(u32::from_le_bytes([width[0], width[1], height[0], height[1]]), SeqCst);
 	}
 }
 

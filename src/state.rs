@@ -46,7 +46,7 @@ impl Default for State {
 		// Manually set the universe size before registering the elements so we
 		// know where to put them!
 		let (w, h) = size().expect_throw("!");
-		Universe::resize(w, h);
+		Universe::set_size(w, h);
 
 		// Initialize the mates and add them to the document body.
 		let mut m1 = Mate::new(true);
@@ -173,7 +173,7 @@ impl Default for StateEvents {
 			})),
 			resize: Closure::wrap(Box::new(|_|
 				// Update the dimensions.
-				if let Some((w, h)) = size() { Universe::resize(w, h); }
+				if let Some((w, h)) = size() { Universe::set_size(w, h); }
 			)),
 		}
 	}
