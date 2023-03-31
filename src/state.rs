@@ -43,8 +43,8 @@ pub(crate) struct State {
 
 impl Default for State {
 	fn default() -> Self {
-		// Manually set the universe size before registering the elements so we
-		// know where to put them!
+		// Update the universe.
+		Universe::set_state(true);
 		size();
 
 		// Initialize the mates and add them to the document body.
@@ -96,8 +96,6 @@ impl State {
 	/// Initialize a new state and throw it into a `requestAnimationFrame`
 	/// loop.
 	pub(crate) fn init() {
-		Universe::set_state(true);
-
 		// Shove what we've got so far into the state.
 		let state1 = Rc::new(Self::default());
 

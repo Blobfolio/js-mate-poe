@@ -223,7 +223,7 @@ impl Universe {
 				// Seed future randomness if we can.
 				#[cfg(target_arch = "wasm32")] Self::reseed();
 
-				// Set up the DOM elements and event bindings, and being the
+				// Set up the DOM elements and event bindings, and begin the
 				// animation frame loop.
 				State::init();
 			}
