@@ -45,8 +45,7 @@ impl Default for State {
 	fn default() -> Self {
 		// Manually set the universe size before registering the elements so we
 		// know where to put them!
-		let (w, h) = size().expect_throw("!");
-		Universe::set_size(w, h);
+		size();
 
 		// Initialize the mates and add them to the document body.
 		let mut m1 = Mate::new(true);
@@ -149,23 +148,19 @@ impl State {
 /// # Event Handlers.
 struct StateEvents {
 	contextmenu: Closure<dyn FnMut(Event)>,
-	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut(Event)>,
+	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut()>,
 	mousedown: Closure<dyn FnMut(MouseEvent)>,
 	mousemove: Closure<dyn FnMut(MouseEvent)>,
-	mouseup: Closure<dyn FnMut(Event)>,
-	resize: Closure<dyn FnMut(Event)>,
+	mouseup: Closure<dyn FnMut()>,
+	resize: Closure<dyn FnMut()>,
 }
 
 impl Default for StateEvents {
 	fn default() -> Self {
 		Self {
-			contextmenu: Closure::wrap(Box::new(|e: Event| {
-				e.prevent_default();
-			})),
+			contextmenu: Closure::wrap(Box::new(|e: Event| { e.prevent_default(); })),
 			#[cfg(not(feature = "firefox"))]
-			dblclick: Closure::wrap(Box::new(|_| {
-				Universe::set_active(false);
-			})),
+			dblclick: Closure::wrap(Box::new(|| { Universe::set_active(false); })),
 			mousedown: Closure::wrap(Box::new(|e: MouseEvent|
 				if 1 == e.buttons() && 0 == e.button() {
 					Universe::set_dragging(true);
@@ -177,13 +172,8 @@ impl Default for StateEvents {
 					Universe::set_pos(e.client_x(), e.client_y());
 				}
 			)),
-			mouseup: Closure::wrap(Box::new(|_| {
-				Universe::set_dragging(false);
-			})),
-			resize: Closure::wrap(Box::new(|_|
-				// Update the dimensions.
-				if let Some((w, h)) = size() { Universe::set_size(w, h); }
-			)),
+			mouseup: Closure::wrap(Box::new(|| { Universe::set_dragging(false); })),
+			resize: Closure::wrap(Box::new(size)),
 		}
 	}
 }
@@ -242,21 +232,22 @@ impl StateEvents {
 /// Pull the closest thing to a window size we can get without injecting our
 /// own 100% fixed element. This may or may not factor the width of the
 /// scrollbar (if any), but most browsers auto-hide them nowadays anyway.
-fn size() -> Option<(u16, u16)> {
+fn size() {
 	const MAX: i32 = u16::MAX as i32;
-	let el = dom::document_element()?;
 
-	let size = el.client_width();
-	let width =
-		if size <= 0 { 0 }
-		else if size < MAX { size as u16 }
-		else { u16::MAX };
+	if let Some(el) = dom::document_element() {
+		let size = el.client_width();
+		let width =
+			if size <= 0 { 0 }
+			else if size < MAX { size as u16 }
+			else { u16::MAX };
 
-	let size = el.client_height();
-	let height =
-		if size <= 0 { 0 }
-		else if size < MAX { size as u16 }
-		else { u16::MAX };
+		let size = el.client_height();
+		let height =
+			if size <= 0 { 0 }
+			else if size < MAX { size as u16 }
+			else { u16::MAX };
 
-	Some((width, height))
+		Universe::set_size(width, height)
+	}
 }
