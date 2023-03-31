@@ -53,7 +53,7 @@ impl Default for State {
 		let mut m2 = Mate::new(false);
 		dom::body()
 			.expect_throw("Missing body.")
-			.append_with_node_2(&m1.el, &m2.el)
+			.append_with_node_2(m1.el(), m2.el())
 			.expect_throw("!");
 
 		// Queue up their starting positions.
@@ -62,7 +62,7 @@ impl Default for State {
 
 		// Set up the event bindings.
 		let events = StateEvents::default();
-		events.bind(&m1.el);
+		events.bind(m1.el());
 
 		Self {
 			mates: RefCell::new([m1, m2]),
@@ -76,12 +76,12 @@ impl Drop for State {
 	fn drop(&mut self) {
 		// Unbind events.
 		let m = self.mates.borrow();
-		self.events.unbind(&m[0].el);
+		self.events.unbind(m[0].el());
 
 		// Remove the mate elements.
 		if let Some(body) = dom::body() {
-			let _res = body.remove_child(&m[0].el).ok();
-			let _res = body.remove_child(&m[1].el).ok();
+			let _res = body.remove_child(m[0].el()).ok();
+			let _res = body.remove_child(m[1].el()).ok();
 		}
 
 		// Let the Universe know.

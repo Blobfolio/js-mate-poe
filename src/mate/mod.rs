@@ -58,7 +58,7 @@ extern "C" {
 #[derive(Debug)]
 /// # Mate.
 pub(crate) struct Mate {
-	pub(crate) el: Element,
+	el: Element,
 	size: (u16, u16),
 	flags: MateFlags,
 	frame: Frame,
@@ -102,6 +102,9 @@ impl Mate {
 		if let Some(a) = self.animation { a.child() }
 		else { None }
 	}
+
+	/// # Element.
+	pub(crate) const fn el(&self) -> &Element { &self.el }
 
 	/*
 	/// # Position.
