@@ -108,18 +108,15 @@ impl State {
 		let state2 = state1.clone();
 		state2.raf.borrow_mut().replace(Closure::wrap(Box::new(move |e: f64| {
 			if Universe::active() {
-				if ! Universe::paused() { state1.paint(e as u32); } // No change if paused!
-				state1.raf.borrow()
-					.as_ref()
-					.and_then(|f| dom::window()?.request_animation_frame(f.as_ref().unchecked_ref()).ok());
+				// Unless we're paused, go ahead and (maybe) repaint.
+				if ! Universe::paused() { state1.paint(e as u32); }
+				state1.raf();
 			}
 			else { state1.raf.borrow_mut().take(); }
 		})));
 
 		// Move the state into a frame request!
-		state2.raf.borrow()
-			.as_ref()
-			.and_then(|f| dom::window()?.request_animation_frame(f.as_ref().unchecked_ref()).ok());
+		state2.raf();
 	}
 
 	/// # Paint!
@@ -132,6 +129,18 @@ impl State {
 		if Universe::no_child() { m2.stop(); }
 		else if Universe::assign_child() { m1.set_child_animation(m2); }
 		m2.paint(now);
+	}
+
+	#[inline]
+	/// # Request Animation Frame.
+	///
+	/// Add ourselves to the next `requestAnimationFrame`.
+	fn raf(&self) {
+		if let Some(cb) = self.raf.borrow().as_ref() {
+			if let Some(w) = dom::window() {
+				let _res = w.request_animation_frame(cb.as_ref().unchecked_ref());
+			}
+		}
 	}
 }
 
