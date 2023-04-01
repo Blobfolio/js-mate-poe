@@ -246,6 +246,6 @@ fn size() {
 			else if size < MAX { size as u16 }
 			else { u16::MAX };
 
-		Universe::set_size(width, height)
+		Universe::set_size(width, height);
 	}
 }
