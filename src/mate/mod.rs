@@ -12,7 +12,6 @@ use crate::{
 	Position,
 	SceneList,
 	Sound,
-	sprite_image_element,
 	Step,
 	Universe,
 };
@@ -23,11 +22,6 @@ use web_sys::{
 	Element,
 	ShadowRootInit,
 	ShadowRootMode,
-};
-#[cfg(feature = "firefox")]
-use web_sys::{
-	CustomEvent,
-	CustomEventInit,
 };
 
 
@@ -51,6 +45,14 @@ extern "C" {
 		a3: bool,
 		a4: bool,
 	);
+
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poePlaySound")]
+	fn play_sound(idx: u8);
+
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poeMakeImage")]
+	fn make_image() -> Element;
 }
 
 
@@ -538,64 +540,50 @@ impl Mate {
 	///
 	/// Apply any and all necessary changes to the DOM elements.
 	fn render(&mut self) {
-		if self.flags.changed() {
-			let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
+		if ! self.flags.changed() { return; }
 
-			// Update the wrapper div's class and/or style.
-			if self.flags.class_changed() || self.flags.transform_changed() {
-				let wrapper = shadow.get_element_by_id("p")
-					.expect_throw("Missing mate wrapper.");
+		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
-				if self.flags.class_changed() {
-					toggle_wrapper_classes(
-						&wrapper,
-						self.frame.half_frame(),
-						self.flags.flipped_x(),
-						self.flags.flipped_y(),
-						self.animation.is_none(),
-						matches!(self.animation, Some(Animation::Drag)),
-						matches!(self.animation, Some(Animation::SneezeShadow)),
-						matches!(self.animation, Some(Animation::Abduction)),
-						matches!(self.animation, Some(Animation::BigFishChild)),
-					);
-				}
+		// Update the wrapper div's class and/or style.
+		if self.flags.class_changed() || self.flags.transform_changed() {
+			let wrapper = shadow.get_element_by_id("p")
+				.expect_throw("Missing mate wrapper.");
 
-				if self.flags.transform_x_changed() {
-					write_css_property(&wrapper, 'x', self.pos.x);
-				}
-
-				if self.flags.transform_y_changed() {
-					write_css_property(&wrapper, 'y', self.pos.y);
-				}
+			if self.flags.class_changed() {
+				toggle_wrapper_classes(
+					&wrapper,
+					self.frame.half_frame(),
+					self.flags.flipped_x(),
+					self.flags.flipped_y(),
+					self.animation.is_none(),
+					matches!(self.animation, Some(Animation::Drag)),
+					matches!(self.animation, Some(Animation::SneezeShadow)),
+					matches!(self.animation, Some(Animation::Abduction)),
+					matches!(self.animation, Some(Animation::BigFishChild)),
+				);
 			}
 
-			// Update the image frame class.
-			if self.flags.frame_changed() {
-				let img = shadow.get_element_by_id("i")
-					.expect_throw("Missing mate image.");
-				write_css_property(&img, 'c', self.frame.offset());
+			if self.flags.transform_x_changed() {
+				write_css_property(&wrapper, 'x', self.pos.x);
 			}
 
-			// Play a sound?
-			#[cfg(feature = "firefox")]
-			if let Some(sound) = self.sound.take() {
-				if let Some(dd) = dom::document() {
-					// Firefox needs to handle playback itself, so trigger an event
-					// to let it know what to do.
-					let _res = CustomEvent::new_with_event_init_dict(
-						"poe-sound",
-						CustomEventInit::new().detail(&(sound as u8).into())
-					)
-						.and_then(|e| dd.dispatch_event(&e))
-						.ok();
-				}
+			if self.flags.transform_y_changed() {
+				write_css_property(&wrapper, 'y', self.pos.y);
 			}
-
-			#[cfg(not(feature = "firefox"))]
-			if let Some(sound) = self.sound.take() { sound.play(); }
-
-			self.flags.clear_changed();
 		}
+
+		// Update the image frame class.
+		if self.flags.frame_changed() {
+			let img = shadow.get_element_by_id("i")
+				.expect_throw("Missing mate image.");
+			write_css_property(&img, 'c', self.frame.offset());
+		}
+
+		// Play a sound?
+		if let Some(sound) = self.sound.take() { play_sound(sound as u8); }
+
+		// Reset the change flags.
+		self.flags.clear_changed();
 	}
 }
 
@@ -776,7 +764,7 @@ fn make_element(primary: bool) -> Element {
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
-	wrapper.append_child(&sprite_image_element()).expect_throw("!");
+	wrapper.append_child(&make_image()).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))

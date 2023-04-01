@@ -45,7 +45,8 @@ wasm-bindgen \
 
 # Copy the glue for later.
 cat \
-	../js/imports.mjs \
+	target/wasm32-unknown-unknown/release/snippets/**/*.js \
+	../js/imports-audio.mjs \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.js \
 	> ../js/generated/glue.mjs
 

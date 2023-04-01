@@ -36,7 +36,6 @@
 static ALLOCATOR: lol_alloc::LockedAllocator<lol_alloc::FreeListAllocator> = lol_alloc::LockedAllocator::new(lol_alloc::FreeListAllocator::new());
 
 mod animation;
-mod assets;
 pub(crate) mod dom;
 mod mate;
 mod position;
@@ -53,10 +52,7 @@ pub(crate) use animation::{
 		SceneList,
 		Step,
 	},
-};
-pub(crate) use assets::{
-	Sound,
-	sprite_image_element,
+	sound::Sound,
 };
 pub(crate) use mate::Mate;
 pub(crate) use position::{
@@ -67,6 +63,11 @@ pub(crate) use state::State;
 pub(crate) use universe::Universe;
 
 use wasm_bindgen::prelude::*;
+
+
+
+// Generated media exports.
+include!(concat!(env!("OUT_DIR"), "/media.rs"));
 
 
 
@@ -191,7 +192,3 @@ impl Poe {
 	/// Cue up a specific animation by its ID. Invalid entries are ignored.
 	pub fn set_play(id: u8) { Universe::set_next_animation(id); }
 }
-
-
-
-

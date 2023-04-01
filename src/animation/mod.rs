@@ -5,6 +5,7 @@
 pub(super) mod frame;
 pub(super) mod scene;
 mod scenes;
+pub(super) mod sound;
 
 use crate::{
 	Direction,

@@ -15,6 +15,21 @@ use std::sync::atomic::{
 	Ordering::SeqCst,
 };
 #[cfg(feature = "director")] use std::sync::atomic::AtomicU16;
+#[cfg(target_arch = "wasm32")] use wasm_bindgen::prelude::*;
+
+
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+extern "C" {
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_namespace = Math, js_name = "random")]
+	/// # Math.random.
+	///
+	/// This is the only `js_sys` thing we'd be using, so may as well handle
+	/// the import manually.
+	fn js_random() -> f64;
+}
 
 
 
@@ -184,7 +199,7 @@ impl Universe {
 	fn reseed() {
 		// Convert the f64 into a decent u64. This misses out on some of the
 		// possible range, but is good enough for our purposes.
-		let seed = (js_sys::Math::random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
+		let seed = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
 		if seed != 0 {
 			SEED.store(seed, SeqCst);
 			#[cfg(feature = "director")] dom::debug!(format!(

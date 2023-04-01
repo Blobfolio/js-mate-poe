@@ -1,26 +1,38 @@
-/**
- * @file Imports and Glue
- *
- * This file contains various Javascript bridges for the JS Mate Poe wasm
- * binary.
- */
+// The Blob-derived image sprite URL.
+let imgUrl = null;
 
 /**
- * Update CSS Property.
+ * Initialize Image.
  *
- * This simply writes an updated numeric (pixel) CSS property to an element's
- * style attribute.
+ * This must be called once as soon as the Wasm has been initialized, and
+ * before Poe is activated.
  *
- * Until wasm gains proper DOM API support, it is significantly more efficient
- * to handle this particular task in JS.
- *
- * @param {!Element} el Element.
- * @param {string} key Key.
- * @param {number} val Value.
+ * @param {Object} wasm Wasm exports.
  * @return {void} Nothing.
  */
-const poeWriteCssProperty = function(el, key, value) {
-	el.style.setProperty(`--${key}`, `${value}px`);
+export const poeInitImage = function(wasm) {
+	if (null === imgUrl) {
+		imgUrl = URL.createObjectURL(
+			new Blob(
+				[new Uint8ClampedArray(wasm.memory.buffer, wasm.img_ptr(), imgLen)],
+				{ type: 'image/png' },
+			)
+		);
+	}
+};
+
+/**
+ * Create Mate Image.
+ *
+ * This generates and returns a mate image element, complete with source.
+ *
+ * @return {Element} Element.
+ */
+const poeMakeImage = function() {
+	const el = new Image(6360, 40);
+	el.id = 'i';
+	if (null !== imgUrl) { el.src = imgUrl; }
+	return el;
 };
 
 /**
@@ -63,4 +75,22 @@ const poeToggleWrapperClasses = function(
 	list.toggle('a2', !! a2);
 	list.toggle('a3', !! a3);
 	list.toggle('a4', !! a4);
+};
+
+/**
+ * Update CSS Property.
+ *
+ * This simply writes an updated numeric (pixel) CSS property to an element's
+ * style attribute.
+ *
+ * Until wasm gains proper DOM API support, it is significantly more efficient
+ * to handle this particular task in JS.
+ *
+ * @param {!Element} el Element.
+ * @param {string} key Key.
+ * @param {number} val Value.
+ * @return {void} Nothing.
+ */
+const poeWriteCssProperty = function(el, key, value) {
+	el.style.setProperty(`--${key}`, `${value}px`);
 };
