@@ -121,10 +121,7 @@ impl Mate {
 		if self.flags.primary() {
 			// Clear some settings.
 			self.flags.clear();
-			self.next_animation.take();
-			self.next_tick = 0;
-			self.animation.take();
-			self.set_animation(Animation::first_choice());
+			self.set_animation(Animation::first_choice(), true);
 		}
 	}
 
@@ -162,8 +159,7 @@ impl Mate {
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
-		child.animation.take();
-		child.set_animation(animation);
+		child.set_animation(animation, true);
 
 		// Some animations require a position override using knowledge of the
 		// primary sprite's position.
@@ -185,15 +181,12 @@ impl Mate {
 		} {
 			child.set_position(pos, true);
 		}
-
-		// Make sure we're going to tick right away.
-		child.next_tick = 0;
 	}
 
 	/// # Set Animation.
 	///
 	/// Change the active animation and all relevant settings.
-	fn set_animation(&mut self, animation: Animation) {
+	fn set_animation(&mut self, animation: Animation, force: bool) {
 		// Primary requires primary sequence, child requires child. Unit tests
 		// ensure all animations are one or the other, but not both, so we can
 		// do a simple match.
@@ -203,8 +196,10 @@ impl Mate {
 		}
 
 		// Clear and store the old animation to prevent recursion.
+		self.next_animation.take();
+		self.next_tick = 0;
 		let old = self.animation.take();
-		let animation_changed = old.map_or(true, |a| a != animation);
+		let animation_changed = force || old.map_or(true, |a| a != animation);
 
 		// Old animation business.
 		if let Some(o) = old {
@@ -380,8 +375,8 @@ impl Mate {
 		// status.
 		else if self.flags.primary() && dragging != Universe::dragging() {
 			Universe::set_no_child();
-			if dragging { self.set_animation(Animation::Fall); }
-			else { self.set_animation(Animation::Drag); }
+			if dragging { self.set_animation(Animation::Fall, false); }
+			else { self.set_animation(Animation::Drag, false); }
 			true
 		}
 		// Tick it if we got it.
@@ -392,8 +387,8 @@ impl Mate {
 			#[cfg(feature = "director")]
 			if self.flags.primary() {
 				if let Some(n) = Universe::next_animation() {
-					self.animation.take();
 					Universe::set_no_child();
+					self.animation.take();
 					self.next_animation.replace(n);
 				}
 			}
@@ -402,7 +397,7 @@ impl Mate {
 			self.flags.apply_next();
 
 			// Switch animations?
-			if let Some(a) = self.next_animation.take() { self.set_animation(a); }
+			if let Some(a) = self.next_animation.take() { self.set_animation(a, false); }
 			// Otherwise if we're dragging, make sure to update the
 			// coordinates.
 			else if dragging { self.set_position(Universe::pos(), true); }
@@ -508,7 +503,7 @@ impl Mate {
 
 		// We need to switch animations or disable the whole shebang.
 		if let Some(animation) = self.tick_next_animation() {
-			self.set_animation(animation);
+			self.set_animation(animation, false);
 			self.scenes.as_mut().and_then(Iterator::next)
 		}
 		else { None }
@@ -622,7 +617,7 @@ impl Mate {
 		// Check gravity.
 		if self.flags.gravity() && self.pos.y != max_y {
 			if self.flags.primary() {
-				self.set_animation(Animation::Fall);
+				self.set_animation(Animation::Fall, false);
 			}
 			else { self.stop(); }
 			return true;
@@ -696,7 +691,8 @@ impl Mate {
 						Universe::set_no_child();
 						Animation::entrance_choice()
 					}
-					else { animation.next_edge().unwrap_or(Animation::Rotate) }
+					else { animation.next_edge().unwrap_or(Animation::Rotate) },
+					false
 				);
 			}
 			else { self.stop(); }
