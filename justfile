@@ -68,7 +68,6 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
-		--enable-multivalue \
 		-O3 \
 		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
 

@@ -52,7 +52,6 @@ cat \
 # Optimize and output the wasm to the dist dir.
 wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
 	--enable-reference-types \
-	--enable-multivalue \
 	-O3 \
 	-o ../dist/js-mate-poe.wasm
 
