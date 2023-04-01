@@ -422,6 +422,7 @@ impl Mate {
 	fn pretick_resize(&mut self) {
 		let (w, h) = Universe::size();
 		if self.size.0 != w || self.size.1 != h {
+			self.flags.mark_size_changed();
 			self.size.0 = w;
 			self.size.1 = h;
 		}
@@ -456,38 +457,42 @@ impl Mate {
 		else { self.sound = None; }
 
 		// Move it?
-		let mut dir = step.direction();
 		if let Some(mut pos) = step.move_to() {
-			if self.flags.flipped_x() {
-				pos = pos.invert_x();
-				dir = dir.invert_x();
-			}
-			if self.flags.flipped_y() {
-				pos = pos.invert_y();
-				dir = dir.invert_y();
-			}
+			if self.flags.flipped_x() { pos = pos.invert_x(); }
+			if self.flags.flipped_y() { pos = pos.invert_y(); }
 			self.set_position(pos, false);
 		}
 
-		// Clamp wall animations to the appropriate side, if necessary.
-		if let Some(mut dir2) = self.animation.and_then(Animation::clamp_x) {
-			if self.flags.flipped_x() { dir2 = dir2.invert_x(); }
-			if dir2.is_left() {
-				if self.pos.x != 0 {
-					self.set_position(Position::new(0, self.pos.y), true);
+		// Edge-related business.
+		if self.flags.edges_changed() {
+			// Clamp wall animations to the appropriate side, if necessary.
+			if let Some(mut side) = self.animation.and_then(Animation::clamp_x) {
+				if self.flags.flipped_x() { side = side.invert_x(); }
+				if side.is_left() {
+					if self.pos.x != 0 {
+						self.set_position(Position::new(0, self.pos.y), true);
+					}
+				}
+				else if side.is_right() && self.pos.x != self.max_x() {
+					self.set_position(Position::new(self.max_x(), self.pos.y), true);
 				}
 			}
-			else if dir2.is_right() && self.pos.x != self.max_x() {
-				self.set_position(Position::new(self.max_x(), self.pos.y), true);
+
+			// Note the direction we're moving.
+			let mut dir = step.direction();
+			if self.flags.flipped_x() { dir = dir.invert_x(); }
+			if self.flags.flipped_y() { dir = dir.invert_y(); }
+
+			// Make sure we didn't crash into an edge, and if we did and the
+			// animation changed, recurse.
+			if self.check_edges(dir) {
+				if self.active() { self.tick(now); }
+				return;
 			}
 		}
 
-		// Rinse and repeat/switch/stop if we've crossed an edge.
-		if self.check_edges(dir) {
-			if self.active() { self.tick(now); }
-		}
-		// Switch animations.
-		else if step.done() {
+		// If this was the last step, queue up the next animation before we go.
+		if step.done() {
 			self.next_animation = self.tick_next_animation();
 		}
 	}
