@@ -176,7 +176,7 @@ pub(super) const BOING: &[Scene] = &[
 	Scene::new(100, &[
 		Frame::F062, Frame::F062, Frame::F063, Frame::F064, Frame::F065,
 		Frame::F066, Frame::F067, Frame::F068, Frame::F069, Frame::F070,
-		Frame::F006,
+		Frame::F003,
 	])
 		.with_move_to(Position::new(55, 0))
 		.with_flags(Scene::EASE_OUT | Scene::GRAVITY),
@@ -255,9 +255,9 @@ pub(super) const DRAG: &[Scene] = &[
 /// # For `Animation::Eat`.
 pub(super) const EAT: &[Scene] = &[
 	Scene::new(190, &[
-		Frame::F006, Frame::F006, Frame::F006, Frame::F006, Frame::F058,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F058,
 		Frame::F059, Frame::F059, Frame::F060, Frame::F061, Frame::F060,
-		Frame::F061, Frame::F006,
+		Frame::F061, Frame::F003,
 	])
 		.with_repeat(5, 5)
 		.with_flags(Scene::GRAVITY),
@@ -354,7 +354,7 @@ pub(super) const REACH_CEILING: &[Scene] = &[
 /// # For `Animation::ReachFloor`.
 pub(super) const REACH_FLOOR: &[Scene] = &[
 	Scene::new(150, &[
-		Frame::F023, Frame::F006, Frame::F006, Frame::F006, Frame::F006, Frame::F006,
+		Frame::F023, Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
 	])
 ];
 
@@ -733,12 +733,28 @@ pub(super) fn doze() -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic2([
 		Scene::new(200, &[
-			Frame::F003, Frame::F006, Frame::F007, Frame::F008,
+			Frame::F003, Frame::F007, Frame::F008,
 			Frame::F008, Frame::F007, Frame::F008, Frame::F008,
 		])
-			.with_repeat(repeat, 6)
+			.with_repeat(repeat, 5)
 			.with_flags(Scene::GRAVITY),
-		Scene::new(200, &[Frame::F008, Frame::F007, Frame::F006])
+		Scene::new(200, &[Frame::F008, Frame::F007, Frame::F003])
+			.with_flags(Scene::GRAVITY),
+	]))
+}
+
+/// # For `Animation::LayDown`.
+pub(super) fn lay_down() -> SceneList {
+	let repeat = 10 + Universe::rand_u16(20);
+
+	SceneList::new(SceneListKind::Dynamic3([
+		Scene::new(200, &[Frame::F029, Frame::F006])
+			.with_repeat(10, 1)
+			.with_flags(Scene::GRAVITY),
+		Scene::new(200, &[Frame::F022])
+			.with_repeat(repeat, 0)
+			.with_flags(Scene::GRAVITY),
+		Scene::new(200, &[Frame::F078, Frame::F007, Frame::F003])
 			.with_flags(Scene::GRAVITY),
 	]))
 }
@@ -759,7 +775,7 @@ pub(super) fn sleep() -> SceneList {
 		Scene::new(300, &[
 			Frame::F000, Frame::F078, Frame::F077, Frame::F076, Frame::F075,
 			Frame::F035, Frame::F036, Frame::F037, Frame::F036, Frame::F035,
-			Frame::F006,
+			Frame::F003,
 		])
 			.with_sound(Sound::Yawn, 5)
 			.with_flags(Scene::GRAVITY),
