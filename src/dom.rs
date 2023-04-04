@@ -12,7 +12,6 @@ pub(crate) use web_sys::window;
 #[cfg(feature = "director")]
 pub(crate) use gloo_console::{
 	debug,
-	info,
 	warn,
 };
 

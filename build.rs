@@ -134,12 +134,13 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 		js_lengths.push(format!("const {k}Len = {};", v.len()));
 	}
 
-	// Load the JS imports, and swap out the two dynamic bits (the URL init
-	// code and the pre-calculated data lengths).
+	// Load the JS imports, and swap out the two dynamic bits.
 	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
 		.expect("Missing imports.mjs")
+		.replace("%ASCII%", &std::fs::read_to_string("skel/img/poe.txt").expect("Missing poe.txt"))
 		.replace("%AUDIO_URLS%", AUDIO_URLS)
-		.replace("%LENGTHS%", &js_lengths.join("\n"));
+		.replace("%LENGTHS%", &js_lengths.join("\n"))
+		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0".to_owned()));
 	js.push('\n');
 
 	// Return what we've built!

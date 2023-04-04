@@ -72,15 +72,20 @@ include!(concat!(env!("OUT_DIR"), "/media.rs"));
 
 
 #[cfg(feature = "director")]
+#[wasm_bindgen]
+extern "C" {
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poeDetails")]
+	fn details();
+}
+
+#[cfg(feature = "director")]
 #[wasm_bindgen(start)]
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Bootstrap.
 ///
-/// Automatically start up the Poe animations as soon as the WASM content has
-/// initialized in the browser.
-pub fn bootstrap() {
-	dom::info!(format!("{}\n{}", Poe::version(), Poe::ascii()));
-}
+/// Print library details after initialization.
+pub fn bootstrap() { details(); }
 
 
 
@@ -105,16 +110,6 @@ impl Poe {
 	///
 	/// Return `true` if active, or `false` if not.
 	pub fn active() -> bool { Universe::active() }
-
-	#[cfg(feature = "director")]
-	#[wasm_bindgen(getter)]
-	#[must_use]
-	/// # ASCII Art.
-	///
-	/// Return an ASCII art representation of Poe.
-	pub fn ascii() -> String {
-		include_str!("../skel/img/poe.txt").to_owned()
-	}
 
 	#[wasm_bindgen(getter)]
 	#[must_use]
@@ -145,16 +140,6 @@ impl Poe {
 			if Universe::paused() { 0.0 }
 			else { 1.0 }
 		)
-	}
-
-	#[cfg(feature = "director")]
-	#[wasm_bindgen(getter)]
-	#[must_use]
-	/// # Version.
-	///
-	/// Return the current version of the program.
-	pub fn version() -> String {
-		concat!("RS Mate Poe v", env!("CARGO_PKG_VERSION")).to_owned()
 	}
 }
 

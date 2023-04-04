@@ -5,6 +5,12 @@
 // Buffer lengths.
 %LENGTHS%
 
+// ASCII Art.
+const imgAscii = `%ASCII%`;
+
+// Library version.
+const version = '%VERSION%';
+
 // A flag to indicate whether or not we've explained how browser autoplay
 // works.
 let audioWarned = false;
@@ -14,6 +20,16 @@ let audioUrls = null;
 
 // The Blob-derived image sprite URL.
 let imgUrl = null;
+
+/**
+ * Import: Print Library Details (Director).
+ *
+ * @return {void} Nothing.
+ */
+const poeDetails = function() {
+	console.info(`%c${imgAscii}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
+	console.info(`%cJS Mate Poe: %c${version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
+};
 
 /**
  * Initialize Media.
