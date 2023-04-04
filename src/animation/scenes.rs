@@ -321,6 +321,16 @@ pub(super) const JUMP: &[Scene] = &[
 		.with_move_to(Position::new(-45, 18)),
 ];
 
+/// # For `Animation::LookDown`.
+pub(super) const LOOK_DOWN: &[Scene] = &[
+	Scene::new(100, &[
+		Frame::F076, Frame::F076, Frame::F076, Frame::F076, Frame::F076,
+		Frame::F077, Frame::F078, Frame::F077,
+		Frame::F076, Frame::F076, Frame::F076, Frame::F076, Frame::F076,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::PlayDead`.
 pub(super) const PLAY_DEAD: &[Scene] = &[
 	Scene::new(100, &[

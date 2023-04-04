@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 62; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 63; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -98,6 +98,7 @@ pub(crate) enum Animation {
 	Eat,
 	Handstand,
 	Jump,
+	LookDown,
 	PlayDead,
 	Rest,
 	Roll,
@@ -181,7 +182,7 @@ impl Animation {
 			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
-			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
+			Self::Doze | Self::Eat | Self::Handstand | Self::Jump | Self::LookDown |
 			Self::PlayDead | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
 			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
 			Self::Slide | Self::Sneeze | Self::Spin | Self::Stargaze |
@@ -251,6 +252,7 @@ impl Animation {
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Jump => "Jump",
+			Self::LookDown => "Look Down",
 			Self::PlayDead => "Play Dead",
 			Self::ReachCeiling => "Reach Ceiling",
 			Self::ReachFloor => "Reach Floor",
@@ -351,13 +353,14 @@ impl Animation {
 			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
 			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
 			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
-			Self::Handstand | Self::Jump | Self::PlayDead | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
-			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
-			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
-			Self::Sleep | Self::Slide | Self::SlideDown | Self::Sneeze |
-			Self::Spin | Self::Splat | Self::Stargaze | Self::Urinate |
-			Self::Walk | Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::Handstand | Self::Jump | Self::LookDown | Self::PlayDead |
+			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
+			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
+			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
+			Self::Stargaze | Self::Urinate | Self::Walk |
+			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -403,9 +406,9 @@ impl Animation {
 				Self::BeginRun,
 			])),
 			Self::Bleat | Self::Blink | Self::BoredSleep | Self::Bounce |
-			Self::EndRun | Self::PlayDead | Self::ReachFloor | Self::Rotate |
-			Self::Sleep | Self::Slide | Self::Sneeze | Self::Splat | Self::Rest |
-			Self::Urinate => Some(Self::Walk),
+			Self::EndRun | Self::LookDown | Self::PlayDead | Self::ReachFloor |
+			Self::Rotate | Self::Sleep | Self::Slide | Self::Sneeze |
+			Self::Splat | Self::Rest | Self::Urinate => Some(Self::Walk),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
 			Self::ClimbUp | Self::ReachSide1 => Some(Self::ClimbUp),
@@ -451,6 +454,7 @@ impl Animation {
 			Self::Walk => Some(choose(&[
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
 				Self::BeginRun, Self::BeginRun, Self::BeginRun, Self::BeginRun,
+				Self::LookDown, Self::LookDown,
 				Self::Beg,
 				Self::Blink,
 				Self::Eat,
@@ -545,6 +549,7 @@ impl Animation {
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Jump => fixed!(JUMP),
+			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::PlayDead => fixed!(PLAY_DEAD),
 			Self::ReachCeiling => fixed!(REACH_CEILING),
 			Self::ReachFloor => fixed!(REACH_FLOOR),
