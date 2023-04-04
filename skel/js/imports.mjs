@@ -1,16 +1,37 @@
+/**
+ * @file Wasm Imports & Glue
+ */
+
+// Buffer lengths.
+%LENGTHS%
+
+// A flag to indicate whether or not we've explained how browser autoplay
+// works.
+let audioWarned = false;
+
+// The Blob-derived audio URLs: baa, sneeze, and yawn, respectively.
+let audioUrls = null;
+
 // The Blob-derived image sprite URL.
 let imgUrl = null;
 
 /**
- * Initialize Image.
+ * Initialize Media.
  *
- * This must be called once as soon as the Wasm has been initialized, and
- * before Poe is activated.
+ * This creates and/or sets "URLs" that can be used to access the embedded
+ * media (the image sprite and audio files).
+ *
+ * Note: This must be called by the MJS entrypoint AFTER init(), and BEFORE
+ * Poe.activate.
  *
  * @param {Object} wasm Wasm exports.
  * @return {void} Nothing.
  */
-export const poeInitImage = function(wasm) {
+export const poeInitMedia = function(wasm) {
+	if (null === audioUrls) {
+		audioUrls = [%AUDIO_URLS%];
+	}
+
 	if (null === imgUrl) {
 		imgUrl = URL.createObjectURL(
 			new Blob(
@@ -22,7 +43,7 @@ export const poeInitImage = function(wasm) {
 };
 
 /**
- * Create Mate Image.
+ * Import: Create Mate Image.
  *
  * This generates and returns a mate image element, complete with source.
  *
@@ -36,7 +57,29 @@ const poeMakeImage = function() {
 };
 
 /**
- * Update Wrapper Classes.
+ * Import: Play Sound.
+ *
+ * @param {number} idx ID.
+ * @return {void} Nothing.
+ */
+const poePlaySound = function(idx) {
+	idx = parseInt(idx);
+	if (! isNaN(idx) && (null !== audioUrls) && undefined !== audioUrls[idx]) {
+		const audio = new Audio();
+		audio.addEventListener('canplaythrough', () => {
+			audio.play().catch((e) => {
+				if (! audioWarned) {
+					audioWarned = true;
+					console.info('Hint: try clicking (anywhere on) the page.');
+				}
+			});
+		}, { once: true, passive: true });
+		audio.src = audioUrls[idx];
+	}
+};
+
+/**
+ * Import: Update Wrapper Classes.
  *
  * This toggles the various (toggleable) wrapper classes to match specific
  * states.
@@ -78,7 +121,7 @@ const poeToggleWrapperClasses = function(
 };
 
 /**
- * Update CSS Property.
+ * Import: Update CSS Property.
  *
  * This simply writes an updated numeric (pixel) CSS property to an element's
  * style attribute.

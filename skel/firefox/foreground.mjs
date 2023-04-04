@@ -7,7 +7,7 @@
  */
 
 // Pull in the two things we need from the glue.
-import init, { poeInitAudio, poeInitImage, Poe } from './generated/glue.mjs';
+import init, { poeInitMedia, Poe } from './generated/glue.mjs';
 
 /**
  * Initialize and Connect!
@@ -20,7 +20,7 @@ import init, { poeInitAudio, poeInitImage, Poe } from './generated/glue.mjs';
  */
 init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
 	// Initialize media.
-	poeInitImage(w);
+	poeInitMedia(w);
 
 	// Take a brief moment before issuing the connection to help mitigate any
 	// signal criss-crosses from rapid changes.
@@ -32,9 +32,6 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
 			Poe.active = false;
 			return Promise.resolve(false);
 		}
-
-		// Initialize more media.
-		poeInitAudio();
 
 		// Okay, let's connect to the background script now!
 		let port = browser.runtime.connect({ name: 'Poe-' + Math.random().toString() });

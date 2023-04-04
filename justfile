@@ -64,7 +64,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Merge the snippet and glue together (in that order), and copy to our
 	# local "generated" directory.
 	cat \
-		"{{ cargo_release_dir }}/snippets/"**/*.js \
+		"$( find "{{ cargo_release_dir }}" -name glue-header.mjs -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
 		> "{{ skel_dir }}/js/generated/glue.mjs"
 
@@ -77,8 +77,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Remove the wasm-bindgen stuff.
 	rm -rf \
 		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
-		"{{ cargo_release_dir }}/snippets"
+		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
 
 	# Base64-encode the optimized wasm and throw it into a quickie JS module
 	# so we can easily access it from our entry point.

@@ -10,6 +10,37 @@ use std::path::{
 
 
 
+#[cfg(not(feature = "firefox"))]
+/// # Audio URLs.
+///
+/// This version teases them out of the shared Wasm memory.
+const AUDIO_URLS: &str = r"
+			URL.createObjectURL(new Blob(
+				[new Uint8ClampedArray(wasm.memory.buffer, wasm.baa_ptr(), baaLen)],
+				{ type: 'audio/flac' },
+			)),
+			URL.createObjectURL(new Blob(
+				[new Uint8ClampedArray(wasm.memory.buffer, wasm.sneeze_ptr(), sneezeLen)],
+				{ type: 'audio/flac' },
+			)),
+			URL.createObjectURL(new Blob(
+				[new Uint8ClampedArray(wasm.memory.buffer, wasm.yawn_ptr(), yawnLen)],
+				{ type: 'audio/flac' },
+			)),
+		";
+
+#[cfg(feature = "firefox")]
+/// # Audio URLs.
+///
+/// This version pulls the audio from the extension assets.
+const AUDIO_URLS: &str = r"
+			browser.runtime.getURL('sound/baa.flac'),
+			browser.runtime.getURL('sound/sneeze.flac'),
+			browser.runtime.getURL('sound/yawn.flac'),
+		";
+
+
+
 /// # Main.
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
@@ -26,8 +57,9 @@ pub fn main() {
 	let css = build_css();
 	write_file(&out_path("poe.css"), css.as_bytes());
 
-	let media = build_media();
-	write_file(&out_path("media.rs"), media.as_bytes());
+	let (media_rust, media_js) = build_media();
+	write_file(&out_path("media.rs"), media_rust.as_bytes());
+	write_file(&out_path("glue-header.mjs"), media_js.as_bytes());
 }
 
 /// # Compile CSS.
@@ -43,23 +75,24 @@ fn build_css() -> String {
 
 /// # Import Media/Glue.
 ///
-/// This generates and returns Rust code containing static arrays and export
-/// pointer methods for each of our embedded media assets, and a wasm-bindgen
-/// "inline_js" snippet binding containing the JS-side media-handling code,
-/// as well as the hardcoded import sources used elsewhere in the program.
+/// This generates and returns Rust code — for lib.rs — that works around a
+/// memory issue when trying to do binary-Uin8Array-Blob-URL.createObjectURL
+/// entirely within Rust. Specifically, it:
+/// * Declares static arrays for each embedded media asset;
+/// * Export methods (for use in JS) returning pointers to said arrays;
 ///
-/// It is worth noting that wasm-bindgen snippets weren't designed for the type
-/// of post-build system this library requires, so the generated snippet and
-/// glue files must be concatenated, in that order, and copied over to the
-/// "generated" directory so the entrypoint can import what it needs.
+/// Note: when the "firefox" feature is enabled, the audio file buffers and
+/// pointer methods are omitted. (The extension bundles those directly, so
+/// they're left out of the Wasm entirely.)
 ///
-/// Also of note, when the "firefox" feature is enabled, the audio bits are
-/// left out, since the extension has to handle those manually. (Its snippet
-/// and glue must also be concatenated post-build, but with its audio helper
-/// injected in between.)
-fn build_media() -> String {
-	use std::fmt::Write;
-
+/// This also generates and returns Javascript code to serve as a "header" for
+/// the glue wasm-bindgen will subsequently generate. (The two files should
+/// be concatenated and saved to skel/js/generated/glue.mjs so Closure
+/// Compiler can do its thing.) Specifically, this contains:
+/// * The four custom import methods used by this library;
+/// * A media initialization method used by the module entrypoint;
+/// * The buffer length data (this just prevents having to export methods from Rust that return the same);
+fn build_media() -> (String, String) {
 	// Individual media.
 	let media = [
 		std::fs::read("skel/img/poe.png").expect("Missing poe.png"),
@@ -76,11 +109,7 @@ fn build_media() -> String {
 
 	// Code holders.
 	let mut out = Vec::new();
-	let mut js = "/**
- * @file Wasm Glue
- */
-
-// Buffer lengths.".to_owned();
+	let mut js_lengths = Vec::new();
 
 	// Handle the media bits.
 	for (k, v) in ["img", "baa", "sneeze", "yawn"].iter().zip(media.iter()) {
@@ -101,26 +130,20 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 			k.to_ascii_uppercase(),
 		));
 
-		// Add the length.
-		write!(&mut js, "\nconst {k}Len = {};", v.len()).unwrap();
+		// Add the length to our collection.
+		js_lengths.push(format!("const {k}Len = {};", v.len()));
 	}
 
-	// Add our hardcoded imports.mjs helper to the JS.
-	js.push_str("\n\n");
-	js.push_str(&std::fs::read_to_string("skel/js/imports.mjs").expect("Missing imports.mjs"));
-
-	#[cfg(not(feature = "firefox"))]
-	{
-		js.push_str("\n\n");
-		js.push_str(&std::fs::read_to_string("skel/js/imports-audio.mjs").expect("Missing imports-audio.mjs"));
-	}
-
-	// Add the JS snippet to the Rust code.
+	// Load the JS imports, and swap out the two dynamic bits (the URL init
+	// code and the pre-calculated data lengths).
+	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
+		.expect("Missing imports.mjs")
+		.replace("%AUDIO_URLS%", AUDIO_URLS)
+		.replace("%LENGTHS%", &js_lengths.join("\n"));
 	js.push('\n');
-	out.push(format!("#[wasm_bindgen(inline_js = {js:?})] extern \"C\" {{}}"));
 
 	// Return what we've built!
-	out.join("\n\n")
+	(out.join("\n\n"), js)
 }
 
 /// # Out path.
@@ -129,7 +152,7 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 fn out_path(name: &str) -> PathBuf {
 	let dir = std::env::var("OUT_DIR").expect("Missing OUT_DIR.");
 	let mut out = std::fs::canonicalize(dir).expect("Missing OUT_DIR.");
-	out.push(name);
+	if ! name.is_empty() { out.push(name); }
 	out
 }
 
