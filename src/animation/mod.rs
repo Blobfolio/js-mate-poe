@@ -739,8 +739,9 @@ mod tests {
 
 		// Make sure the fresh version matches our pre-computed original,
 		// otherwise we'll need to update it.
+		let old = std::fs::read_to_string("skel/playlist.txt").expect("Missing playlist.txt");
 		assert_eq!(
-			crate::Poe::list().trim(),
+			old.trim(),
 			new.trim(),
 			"Playlist has changed:\n\n{new}\n",
 		);

@@ -45,7 +45,9 @@ const AUDIO_URLS: &str = r"
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
 	println!("cargo:rerun-if-changed=skel/img/poe.png");
+	println!("cargo:rerun-if-changed=skel/img/poe.txt");
 	println!("cargo:rerun-if-changed=skel/js/imports.mjs");
+	println!("cargo:rerun-if-changed=skel/playlist.txt");
 	println!("cargo:rerun-if-changed=skel/scss/core.scss");
 	println!("cargo:rerun-if-changed=skel/sound/baa.flac");
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
@@ -140,6 +142,7 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 		.replace("%ASCII%", &std::fs::read_to_string("skel/img/poe.txt").expect("Missing poe.txt"))
 		.replace("%AUDIO_URLS%", AUDIO_URLS)
 		.replace("%LENGTHS%", &js_lengths.join("\n"))
+		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").expect("Missing playlist.txt"))
 		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0".to_owned()));
 	js.push('\n');
 

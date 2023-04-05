@@ -122,16 +122,6 @@ impl Poe {
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(getter)]
 	#[must_use]
-	/// # Playlist.
-	///
-	/// Return all directly-playable animation names and IDs.
-	pub fn list() -> String {
-		include_str!("../skel/playlist.txt").to_owned()
-	}
-
-	#[cfg(feature = "director")]
-	#[wasm_bindgen(getter)]
-	#[must_use]
 	/// # Playback Speed.
 	///
 	/// Return the current playback speed, 100 is "normal".

@@ -8,6 +8,9 @@
 // ASCII Art.
 const imgAscii = `%ASCII%`;
 
+// Playlist.
+const playlist = `%PLAYLIST%`;
+
 // Library version.
 const version = '%VERSION%';
 
@@ -29,6 +32,7 @@ let imgUrl = null;
 const poeDetails = function() {
 	console.info(`%c${imgAscii}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
 	console.info(`%cJS Mate Poe: %c${version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
+	console.info(`%c${playlist}`, 'color:#b2bec3;font-family:monospace;');
 };
 
 /**
