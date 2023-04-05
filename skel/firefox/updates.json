@@ -24,6 +24,11 @@
                     "version": "1.4.4",
                     "update_link": "https://github.com/Blobfolio/js-mate-poe/releases/download/v1.4.4/js-mate-poe_firefox_1.4.4.xpi",
                     "update_hash": "sha512:98cf1cba5fef55a76e4f2e0fa52210f8551e0b5bec56567ef4a8e494e12e9f8895dbaae6806fa3772daf04490ecccd198d17e9975f442db6078ad5bdfd012d6a"
+                },
+                {
+                    "version": "1.4.5",
+                    "update_link": "https://github.com/Blobfolio/js-mate-poe/releases/download/v1.4.5/js-mate-poe_firefox_1.4.5.xpi",
+                    "update_hash": "sha512:567375c806e8da7bd320d733eac5e2fcd527d75e0d196418a8a64da761cca6f90ef887bb0989b29ca72da3664d6afe6f6e62e6463b89ee61b61faf795eaa6639"
                 }
             ]
         }
