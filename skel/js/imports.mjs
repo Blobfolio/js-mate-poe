@@ -79,7 +79,7 @@ const poeMakeImage = function() {
  * @return {void} Nothing.
  */
 const poePlaySound = function(idx) {
-	idx = parseInt(idx);
+	idx = parseInt(idx, 10);
 	if (! isNaN(idx) && (null !== audioUrls) && undefined !== audioUrls[idx]) {
 		const audio = new Audio();
 		audio.addEventListener('canplaythrough', () => {
@@ -100,43 +100,30 @@ const poePlaySound = function(idx) {
  * This toggles the various (toggleable) wrapper classes to match specific
  * states.
  *
- * The JS definition is ugly, but saves us having to pass/decode eight separate
+ * The JS definition is ugly, but saves us having to pass/decode nine separate
  * strings over the wasm/JS boundary every time a class changes.
  *
  * @param {!Element} el Element.
  * @param {boolean} h Half Frame.
  * @param {boolean} rx FlipX.
  * @param {boolean} ry FlipY.
- * @param {boolean} off Hide.
- * @param {boolean} a1 Animation #1.
- * @param {boolean} a2 Animation #2.
- * @param {boolean} a3 Animation #3.
- * @param {boolean} a4 Animation #4.
- * @param {boolean} a5 Animation #5.
+ * @param {number} animation Animation Class.
  * @return {void} Nothing.
  */
-const poeToggleWrapperClasses = function(
-	el,
-	h,
-	rx,
-	ry,
-	off,
-	a1,
-	a2,
-	a3,
-	a4,
-	a5,
-) {
+const poeToggleWrapperClasses = function(el, h, rx, ry, animation) {
 	let list = el.classList;
 	list.toggle('h', !! h);
+
 	list.toggle('rx', !! rx);
 	list.toggle('ry', !! ry);
-	list.toggle('off', !! off);
-	list.toggle('a1', !! a1);
-	list.toggle('a2', !! a2);
-	list.toggle('a3', !! a3);
-	list.toggle('a4', !! a4);
-	list.toggle('a5', !! a5);
+
+	animation = parseInt(animation, 10);
+	list.toggle('off', 0 === animation);
+	list.toggle('a1', 1 === animation);
+	list.toggle('a2', 2 === animation);
+	list.toggle('a3', 3 === animation);
+	list.toggle('a4', 4 === animation);
+	list.toggle('a5', 5 === animation);
 };
 
 /**

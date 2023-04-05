@@ -34,18 +34,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(
-		el: &Element,
-		h: bool,
-		rx: bool,
-		ry: bool,
-		off: bool,
-		a1: bool,
-		a2: bool,
-		a3: bool,
-		a4: bool,
-		a5: bool,
-	);
+	fn toggle_wrapper_classes(el: &Element, h: bool, rx: bool, ry: bool, animation: i8);
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poePlaySound")]
@@ -556,12 +545,15 @@ impl Mate {
 					self.frame.half_frame(),
 					self.flags.flipped_x(),
 					self.flags.flipped_y(),
-					self.animation.is_none(),
-					matches!(self.animation, Some(Animation::Drag)),
-					matches!(self.animation, Some(Animation::SneezeShadow)),
-					matches!(self.animation, Some(Animation::Abduction)),
-					matches!(self.animation, Some(Animation::BigFishChild)),
-					matches!(self.animation, Some(Animation::SplatGhost)),
+					match self.animation {
+						None => 0,
+						Some(Animation::Drag) => 1,
+						Some(Animation::SneezeShadow) => 2,
+						Some(Animation::Abduction) => 3,
+						Some(Animation::BigFishChild) => 4,
+						Some(Animation::SplatGhost) => 5,
+						_ => -1,
+					}
 				);
 			}
 
