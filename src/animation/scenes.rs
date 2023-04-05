@@ -344,6 +344,91 @@ pub(super) const PLAY_DEAD: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::Popcorn`.
+pub(super) const POPCORN: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F009, Frame::F010, Frame::F032,
+		Frame::F112, Frame::F112, Frame::F112,
+		Frame::F112, Frame::F112,
+	])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F112])
+		.with_move_to(Position::new(-1, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(25, &[
+		Frame::F010, Frame::F010, Frame::F010, Frame::F010,
+		Frame::F112, Frame::F112, Frame::F112,
+		Frame::F112, Frame::F112, Frame::F112,
+	])
+		.with_move_to(Position::new(0, -100))
+		.with_flags(Scene::EASE_OUT),
+	Scene::new(25, &[
+		Frame::F112, Frame::F112, Frame::F112, Frame::F112, Frame::F112, Frame::F112,
+		Frame::F010, Frame::F010, Frame::F010, Frame::F010,
+	])
+		.with_move_to(Position::new(0, 100))
+		.with_flags(Scene::EASE_IN),
+	Scene::new(200, &[Frame::F112, Frame::F032, Frame::F010, Frame::F009])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::ReachCeiling`.
 pub(super) const REACH_CEILING: &[Scene] = &[
 	Scene::new(100, &[Frame::F016, Frame::F017, Frame::F026])

@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 64; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 65; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -38,6 +38,7 @@ const DEFAULT: &[Animation] = &[
 	Animation::Doze,
 	Animation::Jump,
 	Animation::PlayDead,
+	Animation::Popcorn,
 	Animation::Rest,
 	Animation::Rotate,
 	Animation::Scoot,
@@ -101,6 +102,7 @@ pub(crate) enum Animation {
 	LayDown,
 	LookDown,
 	PlayDead,
+	Popcorn,
 	Rest,
 	Roll,
 	Rotate,
@@ -184,8 +186,8 @@ impl Animation {
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
 			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
-			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Rest |
-			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
+			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
 			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
 			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Urinate |
 			Self::Walk | Self::Yoyo
@@ -257,6 +259,7 @@ impl Animation {
 			Self::LayDown => "Lay Down",
 			Self::LookDown => "Look Down",
 			Self::PlayDead => "Play Dead",
+			Self::Popcorn => "Popcorn",
 			Self::ReachCeiling => "Reach Ceiling",
 			Self::ReachFloor => "Reach Floor",
 			Self::ReachSide1 => "Reach Side (From Floor)",
@@ -357,13 +360,13 @@ impl Animation {
 			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
 			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
 			Self::Handstand | Self::Jump | Self::LayDown | Self::LookDown |
-			Self::PlayDead | Self::ReachCeiling | Self::ReachFloor |
-			Self::ReachSide1 | Self::ReachSide2 | Self::Rest | Self::Roll |
-			Self::Rotate | Self::Run | Self::RunDown | Self::RunUpsideDown |
-			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
-			Self::Slide | Self::SlideDown | Self::Sneeze | Self::Spin |
-			Self::Splat | Self::Stargaze | Self::Urinate | Self::Walk |
-			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
+			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
+			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
+			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
+			Self::Sleep | Self::Slide | Self::SlideDown | Self::Sneeze |
+			Self::Spin | Self::Splat | Self::Stargaze | Self::Urinate |
+			Self::Walk | Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -412,6 +415,7 @@ impl Animation {
 				Self::LayDown |
 				Self::LookDown |
 				Self::PlayDead |
+				Self::Popcorn |
 				Self::ReachFloor |
 				Self::Rotate |
 				Self::Sleep |
@@ -475,12 +479,13 @@ impl Animation {
 			Self::Walk => Some(choose(&[
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
 				Self::BeginRun, Self::BeginRun, Self::BeginRun, Self::BeginRun,
-				Self::LookDown, Self::LookDown,
 				Self::Beg,
 				Self::Blink,
 				Self::Eat,
 				Self::Handstand,
 				Self::LayDown,
+				Self::LookDown,
+				Self::Popcorn,
 				Self::Roll,
 			])),
 			Self::WalkUpsideDown => Some(choose(&[
@@ -580,6 +585,7 @@ impl Animation {
 			Self::LayDown => scenes::lay_down(),
 			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::PlayDead => fixed!(PLAY_DEAD),
+			Self::Popcorn => fixed!(POPCORN),
 			Self::ReachCeiling => fixed!(REACH_CEILING),
 			Self::ReachFloor => fixed!(REACH_FLOOR),
 			Self::ReachSide1 => fixed!(REACH_SIDE1),
@@ -711,6 +717,12 @@ mod tests {
 	#[cfg(feature = "director")]
 	#[test]
 	fn dbg_list() {
+		assert_eq!(
+			Animation::StargazeChild as u8,
+			MAX_ANIMATION_ID,
+			"MAX_ANIMATION_ID is wrong!"
+		);
+
 		// Manually generate the playlist outputted by Poe::list() using the
 		// current animation details as reference.
 		let new = Animation::all().filter_map(|a|

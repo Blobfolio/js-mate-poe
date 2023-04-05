@@ -189,6 +189,7 @@
 
 		// setInterval ID, if any.
 		let timerId = 0;
+		let movieSpeed = 200;
 
 		// Repopulate the playlist from the `list` variable, and (re)start the
 		// movie timer if applicable. (If not, kill the timer and do nothing.)
@@ -222,7 +223,7 @@
 			}
 
 			// Animate!
-			timerId = setInterval(renderMovie, 150);
+			timerId = setInterval(renderMovie, movieSpeed);
 		};
 
 		// Switch movie frames (if playing).
