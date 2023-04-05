@@ -641,8 +641,8 @@ pub(super) const WALK: &[Scene] = &[
 /// # For `Animation::WalkUpsideDown`.
 pub(super) const WALK_UPSIDE_DOWN: &[Scene] = &[
 	Scene::new(150, &[Frame::F096, Frame::F095])
-		.with_move_to(Position::new(-84, 0))
-		.with_repeat(20, 0),
+		.with_move_to(Position::new(-336, 0))
+		.with_repeat(83, 0),
 ];
 
 /// # For `Animation::WallSlide`.
