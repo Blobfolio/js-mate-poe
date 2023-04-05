@@ -43,17 +43,16 @@ pub(crate) struct State {
 
 impl Default for State {
 	fn default() -> Self {
-		// Manually set the universe size before registering the elements so we
-		// know where to put them!
-		let (w, h) = size().expect_throw("!");
-		Universe::resize(w, h);
+		// Update the universe.
+		Universe::set_state(true);
+		size();
 
 		// Initialize the mates and add them to the document body.
 		let mut m1 = Mate::new(true);
 		let mut m2 = Mate::new(false);
 		dom::body()
 			.expect_throw("Missing body.")
-			.append_with_node_2(&m1.el, &m2.el)
+			.append_with_node_2(m1.el(), m2.el())
 			.expect_throw("!");
 
 		// Queue up their starting positions.
@@ -62,7 +61,7 @@ impl Default for State {
 
 		// Set up the event bindings.
 		let events = StateEvents::default();
-		events.bind(&m1.el);
+		events.bind(m1.el());
 
 		Self {
 			mates: RefCell::new([m1, m2]),
@@ -76,12 +75,12 @@ impl Drop for State {
 	fn drop(&mut self) {
 		// Unbind events.
 		let m = self.mates.borrow();
-		self.events.unbind(&m[0].el);
+		self.events.unbind(m[0].el());
 
 		// Remove the mate elements.
 		if let Some(body) = dom::body() {
-			let _res = body.remove_child(&m[0].el).ok();
-			let _res = body.remove_child(&m[1].el).ok();
+			let _res = body.remove_child(m[0].el()).ok();
+			let _res = body.remove_child(m[1].el()).ok();
 		}
 
 		// Let the Universe know.
@@ -97,8 +96,6 @@ impl State {
 	/// Initialize a new state and throw it into a `requestAnimationFrame`
 	/// loop.
 	pub(crate) fn init() {
-		Universe::set_state(true);
-
 		// Shove what we've got so far into the state.
 		let state1 = Rc::new(Self::default());
 
@@ -108,18 +105,15 @@ impl State {
 		let state2 = state1.clone();
 		state2.raf.borrow_mut().replace(Closure::wrap(Box::new(move |e: f64| {
 			if Universe::active() {
-				if ! Universe::paused() { state1.paint(e as u32); } // No change if paused!
-				state1.raf.borrow()
-					.as_ref()
-					.and_then(|f| dom::window()?.request_animation_frame(f.as_ref().unchecked_ref()).ok());
+				// Unless we're paused, go ahead and (maybe) repaint.
+				if ! Universe::paused() { state1.paint(e as u32); }
+				state1.raf();
 			}
 			else { state1.raf.borrow_mut().take(); }
 		})));
 
 		// Move the state into a frame request!
-		state2.raf.borrow()
-			.as_ref()
-			.and_then(|f| dom::window()?.request_animation_frame(f.as_ref().unchecked_ref()).ok());
+		state2.raf();
 	}
 
 	/// # Paint!
@@ -133,6 +127,18 @@ impl State {
 		else if Universe::assign_child() { m1.set_child_animation(m2); }
 		m2.paint(now);
 	}
+
+	#[inline]
+	/// # Request Animation Frame.
+	///
+	/// Add ourselves to the next `requestAnimationFrame`.
+	fn raf(&self) {
+		if let Some(cb) = self.raf.borrow().as_ref() {
+			if let Some(w) = dom::window() {
+				let _res = w.request_animation_frame(cb.as_ref().unchecked_ref());
+			}
+		}
+	}
 }
 
 
@@ -140,23 +146,19 @@ impl State {
 /// # Event Handlers.
 struct StateEvents {
 	contextmenu: Closure<dyn FnMut(Event)>,
-	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut(Event)>,
+	#[cfg(not(feature = "firefox"))] dblclick: Closure<dyn FnMut()>,
 	mousedown: Closure<dyn FnMut(MouseEvent)>,
 	mousemove: Closure<dyn FnMut(MouseEvent)>,
-	mouseup: Closure<dyn FnMut(Event)>,
-	resize: Closure<dyn FnMut(Event)>,
+	mouseup: Closure<dyn FnMut()>,
+	resize: Closure<dyn FnMut()>,
 }
 
 impl Default for StateEvents {
 	fn default() -> Self {
 		Self {
-			contextmenu: Closure::wrap(Box::new(|e: Event| {
-				e.prevent_default();
-			})),
+			contextmenu: Closure::wrap(Box::new(|e: Event| { e.prevent_default(); })),
 			#[cfg(not(feature = "firefox"))]
-			dblclick: Closure::wrap(Box::new(|_| {
-				Universe::set_active(false);
-			})),
+			dblclick: Closure::wrap(Box::new(|| { Universe::set_active(false); })),
 			mousedown: Closure::wrap(Box::new(|e: MouseEvent|
 				if 1 == e.buttons() && 0 == e.button() {
 					Universe::set_dragging(true);
@@ -168,13 +170,8 @@ impl Default for StateEvents {
 					Universe::set_pos(e.client_x(), e.client_y());
 				}
 			)),
-			mouseup: Closure::wrap(Box::new(|_| {
-				Universe::set_dragging(false);
-			})),
-			resize: Closure::wrap(Box::new(|_|
-				// Update the dimensions.
-				if let Some((w, h)) = size() { Universe::resize(w, h); }
-			)),
+			mouseup: Closure::wrap(Box::new(|| { Universe::set_dragging(false); })),
+			resize: Closure::wrap(Box::new(size)),
 		}
 	}
 }
@@ -233,21 +230,22 @@ impl StateEvents {
 /// Pull the closest thing to a window size we can get without injecting our
 /// own 100% fixed element. This may or may not factor the width of the
 /// scrollbar (if any), but most browsers auto-hide them nowadays anyway.
-fn size() -> Option<(u16, u16)> {
+fn size() {
 	const MAX: i32 = u16::MAX as i32;
-	let el = dom::document_element()?;
 
-	let size = el.client_width();
-	let width =
-		if size <= 0 { 0 }
-		else if size < MAX { size as u16 }
-		else { u16::MAX };
+	if let Some(el) = dom::document_element() {
+		let size = el.client_width();
+		let width =
+			if size <= 0 { 0 }
+			else if size < MAX { size as u16 }
+			else { u16::MAX };
 
-	let size = el.client_height();
-	let height =
-		if size <= 0 { 0 }
-		else if size < MAX { size as u16 }
-		else { u16::MAX };
+		let size = el.client_height();
+		let height =
+			if size <= 0 { 0 }
+			else if size < MAX { size as u16 }
+			else { u16::MAX };
 
-	Some((width, height))
+		Universe::set_size(width, height);
+	}
 }

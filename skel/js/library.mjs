@@ -6,7 +6,7 @@
  */
 
 // Pull in the two things we need from the glue.
-import init, { Poe } from './generated/glue.mjs';
+import init, { poeInitMedia, Poe } from './generated/glue.mjs';
 
 // Pull in the wasm payload.
 import { wasmBase64 } from './generated/wasm_base64.mjs';
@@ -15,7 +15,10 @@ import { wasmBase64 } from './generated/wasm_base64.mjs';
 import { base64toUint8 } from './base64_to_uint8.mjs';
 
 // Let's party like it's 1996!
-init(base64toUint8(wasmBase64).buffer).then(() => {
+init(base64toUint8(wasmBase64).buffer).then((w) => {
+	// Initialize media.
+	poeInitMedia(w);
+
 	// Make the Poe instance public.
 	window.Poe = Poe;
 

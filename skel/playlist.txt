@@ -13,19 +13,22 @@
 #13  Eat
 #14  Handstand
 #15  Jump
-#16  Play Dead
-#17  Rest
-#18  Roll
-#19  Rotate
-#20  Run
-#21  Scoot
-#22  Scratch
-#23  Scream
-#24  Sleep
-#25  Slide
-#26  Sneeze
-#27  Spin
-#28  Stargaze
-#29  Urinate
-#30  Walk
-#31  Yo-Yo
+#16  Lay Down
+#17  Look Down
+#18  Play Dead
+#19  Popcorn
+#20  Rest
+#21  Roll
+#22  Rotate
+#23  Run
+#24  Scoot
+#25  Scratch
+#26  Scream
+#27  Sleep
+#28  Slide
+#29  Sneeze
+#30  Spin
+#31  Stargaze
+#32  Urinate
+#33  Walk
+#34  Yo-Yo

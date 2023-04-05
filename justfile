@@ -29,6 +29,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 # Build Library!
 @build FEATURES="": _init
+	# Dependency checks.
 	just _require-app cargo
 	just _require-app google-closure-compiler
 	just _require-app terser
@@ -57,30 +58,34 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--reference-types \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
-	# Remove the unused "fetch" stuff from the glue and move the file to the
-	# generated module directory.
+	# Remove the unused "fetch" stuff from the glue.
 	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
+
+	# Merge the snippet and glue together (in that order), and copy to our
+	# local "generated" directory.
 	cat \
-		"{{ skel_dir }}/js/imports.mjs" \
+		"$( find "{{ cargo_release_dir }}" -name glue-header.mjs -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
 		> "{{ skel_dir }}/js/generated/glue.mjs"
 
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
-		--enable-multivalue \
 		-O3 \
 		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
 
-	# Remove for next time around.
-	rm "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm"
+	# Remove the wasm-bindgen stuff.
+	rm -rf \
+		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
+		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
 
-	# Jam a base64-encoded wasm into a simple module script.
+	# Base64-encode the optimized wasm and throw it into a quickie JS module
+	# so we can easily access it from our entry point.
 	echo -n "export const wasmBase64 = '" > "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 
-	# Transpile the JS.
+	# Transpile the JS to a temporary location.
 	google-closure-compiler \
 		--env BROWSER \
 		--language_in STABLE \
@@ -98,7 +103,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--module_resolution BROWSER \
 		--warning_level VERBOSE
 
-	# Compress and enclose the JS.
+	# Compress and enclose the temporary JS into _another_ temporary file.
 	cat "/tmp/library.js" | \
 		terser \
 			-c ecma=2021,passes=25 \
@@ -106,10 +111,12 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 			-m \
 			-o "/tmp/library.min.js"
 
-	# Stick a header onto the JS and move it into place, along with a demo
-	# index.
+	# Add a header to the JS and move it into place, along with the demo HTML
+	# index file.
 	cat "{{ skel_dir }}/js/header.js" "/tmp/library.min.js" > "{{ dist_dir }}/js-mate-poe.min.js"
 	cp "{{ skel_dir }}/html/index.html" "{{ dist_dir }}"
+
+	# Gzip/Brotli the JS.
 	[ ! $(command -v channelz) ] || channelz "{{ dist_dir }}/js-mate-poe.min.js"
 
 	# Clean up.
@@ -121,11 +128,12 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 # Build Firefox Extension Build Environment.
 @build-firefox-src:
+	# Dependency check.
 	just _require-app cargo
 
 	[ ! $(command -v fyi) ] || fyi task "Building Firefox Extension Build Environment…"
 
-	# Make sure there's a Cargo lock.
+	# Make sure there's an up-to-date Cargo lock file.
 	cargo update
 
 	# Reset the output directories.
@@ -135,7 +143,8 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		"{{ dist_dir }}/js-mate-poe_firefox/static/options" \
 		"{{ dist_dir }}/js-mate-poe_firefox/static/sound" \
 		"{{ dist_dir }}/js-mate-poe_firefox/js/generated" \
-		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
+		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img" \
+		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
 
 	# Copy docker bits.
 	cp "{{ skel_dir }}/firefox/Dockerfile" "{{ dist_dir }}/js-mate-poe_firefox"
@@ -154,20 +163,23 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	sed -i 's/## THIS IS ONLY A MESSAGE TEMPLATE  ##//g' "{{ dist_dir }}/js-mate-poe_firefox/README.txt"
 	sed -i 's/## DO NOT FOLLOW THESE INSTRUCTIONS ##//g' "{{ dist_dir }}/js-mate-poe_firefox/README.txt"
 
-	# Copy Javascript.
+	# Copy the remaining Javascript sources.
 	cp "{{ skel_dir }}/firefox/"*.mjs "{{ dist_dir }}/js-mate-poe_firefox/js"
 	cp "{{ skel_dir }}/js/header.js" "{{ dist_dir }}/js-mate-poe_firefox/js"
-	cp "{{ skel_dir }}/js/imports.mjs" "{{ dist_dir }}/js-mate-poe_firefox/js"
 
-	# Copy Rust.
+	# Copy the Rust sources we'll need (including anything build.rs cares
+	# about).
 	cp "{{ justfile_directory() }}/build.rs" "{{ dist_dir }}/js-mate-poe_firefox/rust"
 	cp "{{ justfile_directory() }}/Cargo.toml" "{{ dist_dir }}/js-mate-poe_firefox/rust"
 	cp "{{ justfile_directory() }}/Cargo.lock" "{{ dist_dir }}/js-mate-poe_firefox/rust"
+	cp "{{ skel_dir }}/playlist.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp "{{ skel_dir }}/img/poe.png" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
+	cp "{{ skel_dir }}/img/poe.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
+	cp "{{ skel_dir }}/js/imports.mjs" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
 	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/scss"
 	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust/src"
 
-	# Fix the permissions and package it up.
+	# Fix the permissions and ownership.
 	just _fix-chown "{{ dist_dir }}/js-mate-poe_firefox"
 	just _fix-chmod "{{ dist_dir }}/js-mate-poe_firefox"
 
@@ -175,11 +187,14 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		"{{ dist_dir }}/js-mate-poe_firefox/build.sh" \
 		"{{ dist_dir }}/js-mate-poe_firefox/docker/entrypoint.sh"
 
+	# Package it up!
 	cd "{{ dist_dir }}" && \
 		tar -cvzf js-mate-poe_firefox.tar.gz js-mate-poe_firefox
-	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"
 
+	# Clean up.
+	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"
 	just _fix-chown "{{ dist_dir }}"
+
 	[ ! $(command -v fyi) ] || fyi success "Built Firefox Extension Build Environment!"
 
 

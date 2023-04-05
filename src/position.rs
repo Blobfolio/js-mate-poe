@@ -260,4 +260,31 @@ mod tests {
 		test_x!(dir);
 		test_y!(dir, false, true);
 	}
+
+	#[test]
+	fn t_pos() {
+		// Invert X.
+		assert_eq!(Position::new(0, 0).invert_x(), Position::new(0, 0));
+		assert_eq!(Position::new(1, 1).invert_x(), Position::new(-1, 1));
+		assert_eq!(Position::new(-1, -1).invert_x(), Position::new(1, -1));
+
+		// Invert Y.
+		assert_eq!(Position::new(0, 0).invert_y(), Position::new(0, 0));
+		assert_eq!(Position::new(1, 1).invert_y(), Position::new(1, -1));
+		assert_eq!(Position::new(-1, -1).invert_y(), Position::new(-1, 1));
+
+		// Move absolute.
+		let mut pos = Position::new(0, 0);
+		assert_eq!(pos.move_to(Position::new(0, 0)), false);
+		assert_eq!(pos, Position::new(0, 0));
+
+		assert_eq!(pos.move_to(Position::new(1, 1)), true);
+		assert_eq!(pos, Position::new(1, 1));
+
+		assert_eq!(pos.move_to(Position::new(i32::MAX, 10)), true);
+		assert_eq!(pos, Position::new(i32::MAX, 11));
+
+		assert_eq!(pos.move_to(Position::new(0, 0)), false);
+		assert_eq!(pos, Position::new(i32::MAX, 11));
+	}
 }

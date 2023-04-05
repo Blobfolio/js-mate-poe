@@ -12,7 +12,6 @@ use crate::{
 	Position,
 	SceneList,
 	Sound,
-	sprite_image_element,
 	Step,
 	Universe,
 };
@@ -23,11 +22,6 @@ use web_sys::{
 	Element,
 	ShadowRootInit,
 	ShadowRootMode,
-};
-#[cfg(feature = "firefox")]
-use web_sys::{
-	CustomEvent,
-	CustomEventInit,
 };
 
 
@@ -40,17 +34,15 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(
-		el: &Element,
-		h: bool,
-		rx: bool,
-		ry: bool,
-		off: bool,
-		a1: bool,
-		a2: bool,
-		a3: bool,
-		a4: bool,
-	);
+	fn toggle_wrapper_classes(el: &Element, h: bool, rx: bool, ry: bool, animation: i8);
+
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poePlaySound")]
+	fn play_sound(idx: u8);
+
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poeMakeImage")]
+	fn make_image() -> Element;
 }
 
 
@@ -58,7 +50,7 @@ extern "C" {
 #[derive(Debug)]
 /// # Mate.
 pub(crate) struct Mate {
-	pub(crate) el: Element,
+	el: Element,
 	size: (u16, u16),
 	flags: MateFlags,
 	frame: Frame,
@@ -103,6 +95,9 @@ impl Mate {
 		else { None }
 	}
 
+	/// # Element.
+	pub(crate) const fn el(&self) -> &Element { &self.el }
+
 	/*
 	/// # Position.
 	pub(crate) const fn pos(&self) -> Position { self.pos }
@@ -118,10 +113,7 @@ impl Mate {
 		if self.flags.primary() {
 			// Clear some settings.
 			self.flags.clear();
-			self.next_animation.take();
-			self.next_tick = 0;
-			self.animation.take();
-			self.set_animation(Animation::first_choice());
+			self.set_animation(Animation::first_choice(), true);
 		}
 	}
 
@@ -159,8 +151,7 @@ impl Mate {
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
-		child.animation.take();
-		child.set_animation(animation);
+		child.set_animation(animation, true);
 
 		// Some animations require a position override using knowledge of the
 		// primary sprite's position.
@@ -177,20 +168,17 @@ impl Mate {
 					self.pos.y - Frame::SIZE_I * 2 - 480,
 				))
 			},
-			Animation::SneezeShadow => Some(self.pos),
+			Animation::SneezeShadow | Animation::SplatGhost => Some(self.pos),
 			_ => None,
 		} {
 			child.set_position(pos, true);
 		}
-
-		// Make sure we're going to tick right away.
-		child.next_tick = 0;
 	}
 
 	/// # Set Animation.
 	///
 	/// Change the active animation and all relevant settings.
-	fn set_animation(&mut self, animation: Animation) {
+	fn set_animation(&mut self, animation: Animation, force: bool) {
 		// Primary requires primary sequence, child requires child. Unit tests
 		// ensure all animations are one or the other, but not both, so we can
 		// do a simple match.
@@ -200,8 +188,10 @@ impl Mate {
 		}
 
 		// Clear and store the old animation to prevent recursion.
+		self.next_animation.take();
+		self.next_tick = 0;
 		let old = self.animation.take();
-		let animation_changed = old.map_or(true, |a| a != animation);
+		let animation_changed = force || old.map_or(true, |a| a != animation);
 
 		// Old animation business.
 		if let Some(o) = old {
@@ -377,8 +367,8 @@ impl Mate {
 		// status.
 		else if self.flags.primary() && dragging != Universe::dragging() {
 			Universe::set_no_child();
-			if dragging { self.set_animation(Animation::Fall); }
-			else { self.set_animation(Animation::Drag); }
+			if dragging { self.set_animation(Animation::Fall, false); }
+			else { self.set_animation(Animation::Drag, false); }
 			true
 		}
 		// Tick it if we got it.
@@ -389,8 +379,8 @@ impl Mate {
 			#[cfg(feature = "director")]
 			if self.flags.primary() {
 				if let Some(n) = Universe::next_animation() {
-					self.animation.take();
 					Universe::set_no_child();
+					self.animation.take();
 					self.next_animation.replace(n);
 				}
 			}
@@ -399,7 +389,7 @@ impl Mate {
 			self.flags.apply_next();
 
 			// Switch animations?
-			if let Some(a) = self.next_animation.take() { self.set_animation(a); }
+			if let Some(a) = self.next_animation.take() { self.set_animation(a, false); }
 			// Otherwise if we're dragging, make sure to update the
 			// coordinates.
 			else if dragging { self.set_position(Universe::pos(), true); }
@@ -424,6 +414,7 @@ impl Mate {
 	fn pretick_resize(&mut self) {
 		let (w, h) = Universe::size();
 		if self.size.0 != w || self.size.1 != h {
+			self.flags.mark_size_changed();
 			self.size.0 = w;
 			self.size.1 = h;
 		}
@@ -458,38 +449,42 @@ impl Mate {
 		else { self.sound = None; }
 
 		// Move it?
-		let mut dir = step.direction();
 		if let Some(mut pos) = step.move_to() {
-			if self.flags.flipped_x() {
-				pos = pos.invert_x();
-				dir = dir.invert_x();
-			}
-			if self.flags.flipped_y() {
-				pos = pos.invert_y();
-				dir = dir.invert_y();
-			}
+			if self.flags.flipped_x() { pos = pos.invert_x(); }
+			if self.flags.flipped_y() { pos = pos.invert_y(); }
 			self.set_position(pos, false);
 		}
 
-		// Clamp wall animations to the appropriate side, if necessary.
-		if let Some(mut dir2) = self.animation.and_then(Animation::clamp_x) {
-			if self.flags.flipped_x() { dir2 = dir2.invert_x(); }
-			if dir2.is_left() {
-				if self.pos.x != 0 {
-					self.set_position(Position::new(0, self.pos.y), true);
+		// Edge-related business.
+		if self.flags.edges_changed() {
+			// Clamp wall animations to the appropriate side, if necessary.
+			if let Some(mut side) = self.animation.and_then(Animation::clamp_x) {
+				if self.flags.flipped_x() { side = side.invert_x(); }
+				if side.is_left() {
+					if self.pos.x != 0 {
+						self.set_position(Position::new(0, self.pos.y), true);
+					}
+				}
+				else if side.is_right() && self.pos.x != self.max_x() {
+					self.set_position(Position::new(self.max_x(), self.pos.y), true);
 				}
 			}
-			else if dir2.is_right() && self.pos.x != self.max_x() {
-				self.set_position(Position::new(self.max_x(), self.pos.y), true);
+
+			// Note the direction we're moving.
+			let mut dir = step.direction();
+			if self.flags.flipped_x() { dir = dir.invert_x(); }
+			if self.flags.flipped_y() { dir = dir.invert_y(); }
+
+			// Make sure we didn't crash into an edge, and if we did and the
+			// animation changed, recurse.
+			if self.check_edges(dir) {
+				if self.active() { self.tick(now); }
+				return;
 			}
 		}
 
-		// Rinse and repeat/switch/stop if we've crossed an edge.
-		if self.check_edges(dir) {
-			if self.active() { self.tick(now); }
-		}
-		// Switch animations.
-		else if step.done() {
+		// If this was the last step, queue up the next animation before we go.
+		if step.done() {
 			self.next_animation = self.tick_next_animation();
 		}
 	}
@@ -505,7 +500,7 @@ impl Mate {
 
 		// We need to switch animations or disable the whole shebang.
 		if let Some(animation) = self.tick_next_animation() {
-			self.set_animation(animation);
+			self.set_animation(animation, false);
 			self.scenes.as_mut().and_then(Iterator::next)
 		}
 		else { None }
@@ -535,64 +530,54 @@ impl Mate {
 	///
 	/// Apply any and all necessary changes to the DOM elements.
 	fn render(&mut self) {
-		if self.flags.changed() {
-			let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
+		if ! self.flags.changed() { return; }
 
-			// Update the wrapper div's class and/or style.
-			if self.flags.class_changed() || self.flags.transform_changed() {
-				let wrapper = shadow.get_element_by_id("p")
-					.expect_throw("Missing mate wrapper.");
+		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
-				if self.flags.class_changed() {
-					toggle_wrapper_classes(
-						&wrapper,
-						self.frame.half_frame(),
-						self.flags.flipped_x(),
-						self.flags.flipped_y(),
-						self.animation.is_none(),
-						matches!(self.animation, Some(Animation::Drag)),
-						matches!(self.animation, Some(Animation::SneezeShadow)),
-						matches!(self.animation, Some(Animation::Abduction)),
-						matches!(self.animation, Some(Animation::BigFishChild)),
-					);
-				}
+		// Update the wrapper div's class and/or style.
+		if self.flags.class_changed() || self.flags.transform_changed() {
+			let wrapper = shadow.get_element_by_id("p")
+				.expect_throw("Missing mate wrapper.");
 
-				if self.flags.transform_x_changed() {
-					write_css_property(&wrapper, 'x', self.pos.x);
-				}
-
-				if self.flags.transform_y_changed() {
-					write_css_property(&wrapper, 'y', self.pos.y);
-				}
+			if self.flags.class_changed() {
+				toggle_wrapper_classes(
+					&wrapper,
+					self.frame.half_frame(),
+					self.flags.flipped_x(),
+					self.flags.flipped_y(),
+					match self.animation {
+						None => 0,
+						Some(Animation::Drag) => 1,
+						Some(Animation::SneezeShadow) => 2,
+						Some(Animation::Abduction) => 3,
+						Some(Animation::BigFishChild) => 4,
+						Some(Animation::SplatGhost) => 5,
+						_ => -1,
+					}
+				);
 			}
 
-			// Update the image frame class.
-			if self.flags.frame_changed() {
-				let img = shadow.get_element_by_id("i")
-					.expect_throw("Missing mate image.");
-				write_css_property(&img, 'c', self.frame.offset());
+			if self.flags.transform_x_changed() {
+				write_css_property(&wrapper, 'x', self.pos.x);
 			}
 
-			// Play a sound?
-			#[cfg(feature = "firefox")]
-			if let Some(sound) = self.sound.take() {
-				if let Some(dd) = dom::document() {
-					// Firefox needs to handle playback itself, so trigger an event
-					// to let it know what to do.
-					let _res = CustomEvent::new_with_event_init_dict(
-						"poe-sound",
-						CustomEventInit::new().detail(&(sound as u8).into())
-					)
-						.and_then(|e| dd.dispatch_event(&e))
-						.ok();
-				}
+			if self.flags.transform_y_changed() {
+				write_css_property(&wrapper, 'y', self.pos.y);
 			}
-
-			#[cfg(not(feature = "firefox"))]
-			if let Some(sound) = self.sound.take() { sound.play(); }
-
-			self.flags.clear_changed();
 		}
+
+		// Update the image frame class.
+		if self.flags.frame_changed() {
+			let img = shadow.get_element_by_id("i")
+				.expect_throw("Missing mate image.");
+			write_css_property(&img, 'c', self.frame.offset());
+		}
+
+		// Play a sound?
+		if let Some(sound) = self.sound.take() { play_sound(sound as u8); }
+
+		// Reset the change flags.
+		self.flags.clear_changed();
 	}
 }
 
@@ -619,7 +604,7 @@ impl Mate {
 		// Check gravity.
 		if self.flags.gravity() && self.pos.y != max_y {
 			if self.flags.primary() {
-				self.set_animation(Animation::Fall);
+				self.set_animation(Animation::Fall, false);
 			}
 			else { self.stop(); }
 			return true;
@@ -693,7 +678,8 @@ impl Mate {
 						Universe::set_no_child();
 						Animation::entrance_choice()
 					}
-					else { animation.next_edge().unwrap_or(Animation::Rotate) }
+					else { animation.next_edge().unwrap_or(Animation::Rotate) },
+					false
 				);
 			}
 			else { self.stop(); }
@@ -772,7 +758,7 @@ fn make_element(primary: bool) -> Element {
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
-	wrapper.append_child(&sprite_image_element()).expect_throw("!");
+	wrapper.append_child(&make_image()).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))

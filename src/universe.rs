@@ -15,6 +15,21 @@ use std::sync::atomic::{
 	Ordering::SeqCst,
 };
 #[cfg(feature = "director")] use std::sync::atomic::AtomicU16;
+#[cfg(target_arch = "wasm32")] use wasm_bindgen::prelude::*;
+
+
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+extern "C" {
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_namespace = Math, js_name = "random")]
+	/// # Math.random.
+	///
+	/// This is the only `js_sys` thing we'd be using, so may as well handle
+	/// the import manually.
+	fn js_random() -> f64;
+}
 
 
 
@@ -184,7 +199,7 @@ impl Universe {
 	fn reseed() {
 		// Convert the f64 into a decent u64. This misses out on some of the
 		// possible range, but is good enough for our purposes.
-		let seed = (js_sys::Math::random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
+		let seed = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
 		if seed != 0 {
 			SEED.store(seed, SeqCst);
 			#[cfg(feature = "director")] dom::debug!(format!(
@@ -209,15 +224,6 @@ impl Universe {
 	set!("Dragging", DRAGGING, set_dragging);
 	set!("State", STATE, set_state);
 
-	/// # Set Width/Height.
-	///
-	/// This updates the cached window dimensions.
-	pub(crate) fn resize(width: u16, height: u16) {
-		let width = width.to_le_bytes();
-		let height = height.to_le_bytes();
-		SIZE.store(u32::from_le_bytes([width[0], width[1], height[0], height[1]]), SeqCst);
-	}
-
 	/// # Set Active.
 	///
 	/// Enable or disable the universe (and Poe, etc.), returning `true` if
@@ -232,7 +238,7 @@ impl Universe {
 				// Seed future randomness if we can.
 				#[cfg(target_arch = "wasm32")] Self::reseed();
 
-				// Set up the DOM elements and event bindings, and being the
+				// Set up the DOM elements and event bindings, and begin the
 				// animation frame loop.
 				State::init();
 			}
@@ -276,6 +282,15 @@ impl Universe {
 			y[0], y[1], y[2], y[3],
 		]);
 		POS.store(pos, SeqCst);
+	}
+
+	/// # Set Width/Height.
+	///
+	/// This updates the cached window dimensions.
+	pub(crate) fn set_size(width: u16, height: u16) {
+		let width = width.to_le_bytes();
+		let height = height.to_le_bytes();
+		SIZE.store(u32::from_le_bytes([width[0], width[1], height[0], height[1]]), SeqCst);
 	}
 }
 

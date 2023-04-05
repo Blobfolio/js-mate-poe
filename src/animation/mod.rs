@@ -5,6 +5,7 @@
 pub(super) mod frame;
 pub(super) mod scene;
 mod scenes;
+pub(super) mod sound;
 
 use crate::{
 	Direction,
@@ -16,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 62; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 66; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -37,6 +38,7 @@ const DEFAULT: &[Animation] = &[
 	Animation::Doze,
 	Animation::Jump,
 	Animation::PlayDead,
+	Animation::Popcorn,
 	Animation::Rest,
 	Animation::Rotate,
 	Animation::Scoot,
@@ -97,7 +99,10 @@ pub(crate) enum Animation {
 	Eat,
 	Handstand,
 	Jump,
+	LayDown,
+	LookDown,
 	PlayDead,
+	Popcorn,
 	Rest,
 	Roll,
 	Rotate,
@@ -147,6 +152,7 @@ pub(crate) enum Animation {
 	ChaseAMartianChild,
 	FlowerChild,
 	SneezeShadow,
+	SplatGhost,
 	StargazeChild,
 }
 
@@ -181,10 +187,11 @@ impl Animation {
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
 			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
-			Self::PlayDead | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
-			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
-			Self::Slide | Self::Sneeze | Self::Spin | Self::Stargaze |
-			Self::Urinate | Self::Walk | Self::Yoyo
+			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
+			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Urinate |
+			Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -250,7 +257,10 @@ impl Animation {
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Jump => "Jump",
+			Self::LayDown => "Lay Down",
+			Self::LookDown => "Look Down",
 			Self::PlayDead => "Play Dead",
+			Self::Popcorn => "Popcorn",
 			Self::ReachCeiling => "Reach Ceiling",
 			Self::ReachFloor => "Reach Floor",
 			Self::ReachSide1 => "Reach Side (From Floor)",
@@ -271,6 +281,7 @@ impl Animation {
 			Self::SneezeShadow => "Sneeze Shadow (Child)",
 			Self::Spin => "Spin",
 			Self::Splat => "Splat",
+			Self::SplatGhost => "Splat (Ghost)",
 			Self::Stargaze => "Stargaze",
 			Self::StargazeChild => "Stargaze (Child)",
 			Self::Urinate => "Urinate",
@@ -291,7 +302,8 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BigFishChild | Self::Drag | Self::SneezeShadow
+			Self::Abduction | Self::BigFishChild | Self::Drag |
+			Self::SneezeShadow | Self::SplatGhost
 		)
 	}
 
@@ -350,7 +362,8 @@ impl Animation {
 			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
 			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
 			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
-			Self::Handstand | Self::Jump | Self::PlayDead | Self::ReachCeiling |
+			Self::Handstand | Self::Jump | Self::LayDown | Self::LookDown |
+			Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
 			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
 			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
 			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
@@ -375,6 +388,7 @@ impl Animation {
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
 			Self::Eat => Some(Self::FlowerChild),
 			Self::Sneeze => Some(Self::SneezeShadow),
+			Self::Splat => Some(Self::SplatGhost),
 			Self::Stargaze => Some(Self::StargazeChild),
 			_ => None,
 		}
@@ -393,37 +407,56 @@ impl Animation {
 		match self {
 			Self::Abduction => Some(Self::ChaseAMartian),
 			Self::BathDive => Some(Self::BathCoolDown),
-			Self::BeginRun | Self::BlackSheepChase | Self::Scream => Some(Self::Run),
+			Self::BeginRun |
+				Self::BlackSheepChase |
+				Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
+			Self::Bleat |
+				Self::Blink |
+				Self::BoredSleep |
+				Self::Bounce |
+				Self::EndRun |
+				Self::LayDown |
+				Self::LookDown |
+				Self::PlayDead |
+				Self::Popcorn |
+				Self::ReachFloor |
+				Self::Rotate |
+				Self::Sleep |
+				Self::Slide |
+				Self::Sneeze |
+				Self::Splat |
+				Self::Rest |
+				Self::Urinate => Some(Self::Walk),
 			Self::Boing => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk,
 				Self::BeginRun,
 			])),
-			Self::Bleat | Self::Blink | Self::BoredSleep | Self::Bounce |
-			Self::EndRun | Self::PlayDead | Self::ReachFloor | Self::Rotate |
-			Self::Sleep | Self::Slide | Self::Sneeze | Self::Splat | Self::Rest |
-			Self::Urinate => Some(Self::Walk),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
-			Self::ClimbUp | Self::ReachSide1 => Some(Self::ClimbUp),
+			Self::ClimbUp |
+				Self::ReachSide1 => Some(Self::ClimbUp),
 			Self::DangleFall => Some(choose(&[
 				Self::DangleRecover, Self::DangleRecover, Self::DangleRecover,
 				Self::GraspingFall,
 			])),
-			Self::DeepThoughts | Self::RunUpsideDown => Some(Self::RunUpsideDown),
+			Self::DangleRecover |
+				Self::ReachCeiling => Some(choose(&[
+					Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
+					Self::DeepThoughts,
+				])),
+			Self::DeepThoughts |
+				Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
-			Self::Fall | Self::GraspingFall => Some(Self::GraspingFall),
+			Self::Fall |
+				Self::GraspingFall => Some(Self::GraspingFall),
 			Self::Jump => Some(choose(&[
 				Self::Run, Self::Run,
 				Self::Slide, Self::Slide,
 				Self::Jump,
-			])),
-			Self::DangleRecover | Self::ReachCeiling => Some(choose(&[
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::DeepThoughts,
 			])),
 			Self::ReachSide2 => Some(choose(&[
 				Self::RunDown, Self::RunDown, Self::RunDown,
@@ -454,6 +487,9 @@ impl Animation {
 				Self::Blink,
 				Self::Eat,
 				Self::Handstand,
+				Self::LayDown,
+				Self::LookDown,
+				Self::Popcorn,
 				Self::Roll,
 			])),
 			Self::WalkUpsideDown => Some(choose(&[
@@ -475,18 +511,24 @@ impl Animation {
 	pub(crate) fn next_edge(self) -> Option<Self> {
 		match self {
 			Self::BathDive => Some(Self::BathCoolDown),
-			Self::ClimbDown | Self::RunDown | Self::SlideDown => Some(Self::ReachFloor),
+			Self::BeginRun |
+				Self::EndRun |
+				Self::Run => Some(Self::Boing),
+			Self::ClimbDown |
+				Self::RunDown |
+				Self::SlideDown => Some(Self::ReachFloor),
 			Self::ClimbUp => Some(Self::ReachCeiling),
-			Self::DangleRecover | Self::DeepThoughts | Self::RunUpsideDown |
-			Self::WalkUpsideDown => Some(Self::ReachSide2),
+			Self::DangleRecover |
+				Self::DeepThoughts |
+				Self::RunUpsideDown |
+				Self::WalkUpsideDown => Some(Self::ReachSide2),
+			Self::Fall => Some(Self::Bounce),
 			Self::GraspingFall => Some(choose(&[
 				Self::Splat, Self::Splat, Self::Splat,
 				Self::Bounce,
 				Self::PlayDead,
 			])),
-			Self::Fall => Some(Self::Bounce),
 			Self::Jump => Some(Self::WallSlide),
-			Self::BeginRun | Self::EndRun | Self::Run => Some(Self::Boing),
 			Self::Walk => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Scoot, Self::Scoot,
@@ -544,7 +586,10 @@ impl Animation {
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Jump => fixed!(JUMP),
+			Self::LayDown => scenes::lay_down(),
+			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::PlayDead => fixed!(PLAY_DEAD),
+			Self::Popcorn => fixed!(POPCORN),
 			Self::ReachCeiling => fixed!(REACH_CEILING),
 			Self::ReachFloor => fixed!(REACH_FLOOR),
 			Self::ReachSide1 => fixed!(REACH_SIDE1),
@@ -565,6 +610,7 @@ impl Animation {
 			Self::SneezeShadow => fixed!(SNEEZE_SHADOW),
 			Self::Spin => fixed!(SPIN),
 			Self::Splat => fixed!(SPLAT),
+			Self::SplatGhost => fixed!(SPLAT_GHOST),
 			Self::Stargaze => fixed!(STARGAZE),
 			Self::StargazeChild => fixed!(STARGAZE_CHILD),
 			Self::Urinate => scenes::urinate(),
@@ -676,6 +722,12 @@ mod tests {
 	#[cfg(feature = "director")]
 	#[test]
 	fn dbg_list() {
+		assert_eq!(
+			Animation::StargazeChild as u8,
+			MAX_ANIMATION_ID,
+			"MAX_ANIMATION_ID is wrong!"
+		);
+
 		// Manually generate the playlist outputted by Poe::list() using the
 		// current animation details as reference.
 		let new = Animation::all().filter_map(|a|
@@ -687,8 +739,9 @@ mod tests {
 
 		// Make sure the fresh version matches our pre-computed original,
 		// otherwise we'll need to update it.
+		let old = std::fs::read_to_string("skel/playlist.txt").expect("Missing playlist.txt");
 		assert_eq!(
-			crate::Poe::list().trim(),
+			old.trim(),
 			new.trim(),
 			"Playlist has changed:\n\n{new}\n",
 		);

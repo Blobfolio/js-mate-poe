@@ -22,13 +22,17 @@ impl MateFlags {
 
 	const CHANGED_CLASS: u16 =     0b0000_0001_0000_0000; // Class-affecting property changed.
 	const CHANGED_FRAME: u16 =     0b0000_0010_0000_0000; // Image frame changed.
-	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000; // Need to play a sound.
-	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000; // X position changed.
-	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000; // Y position changed.
+	const CHANGED_SIZE: u16 =      0b0000_0100_0000_0000; // Screen resized.
+	const CHANGED_SOUND: u16 =     0b0000_1000_0000_0000; // Need to play a sound.
+	const CHANGED_TRANS_X: u16 =   0b0001_0000_0000_0000; // X position changed.
+	const CHANGED_TRANS_Y: u16 =   0b0010_0000_0000_0000; // Y position changed.
 
 	// Transform-related changes.
 	const CHANGED_TRANSFORM: u16 =
 		Self::CHANGED_TRANS_X | Self::CHANGED_TRANS_Y;
+
+	// Edge-related changes.
+	const CHANGED_EDGES: u16 = Self::CHANGED_SIZE | Self::CHANGED_TRANSFORM;
 
 	// All change-related settings.
 	const CHANGED: u16 =
@@ -72,6 +76,19 @@ impl MateFlags {
 	get!("Transform (X) Changed", CHANGED_TRANS_X, transform_x_changed);
 	get!("Transform (Y) Changed", CHANGED_TRANS_Y, transform_y_changed);
 
+	/// # Any Edge-related Changes?
+	///
+	/// Note: calling this will reset the size-changed flag, so unless there's
+	/// movement (or the screen size changes again), this won't return true
+	/// twice.
+	pub(crate) fn edges_changed(&mut self) -> bool {
+		if 0 == self.0 & Self::CHANGED_EDGES { false }
+		else {
+			self.0 &= ! Self::CHANGED_SIZE;
+			true
+		}
+	}
+
 	/// # Any Transform Changed?
 	pub(crate) const fn transform_changed(self) -> bool {
 		0 != self.0 & Self::CHANGED_TRANSFORM
@@ -100,6 +117,9 @@ impl MateFlags {
 
 	/// # Mark Frame Changed.
 	pub(crate) fn mark_frame_changed(&mut self) { self.0 |= Self::CHANGED_FRAME; }
+
+	/// # Mark Size Changed.
+	pub(crate) fn mark_size_changed(&mut self) { self.0 |= Self::CHANGED_SIZE; }
 
 	/// # Mark Sound Changed.
 	pub(crate) fn mark_sound_changed(&mut self) { self.0 |= Self::CHANGED_SOUND; }
