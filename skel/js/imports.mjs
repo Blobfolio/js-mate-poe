@@ -112,6 +112,7 @@ const poePlaySound = function(idx) {
  * @param {boolean} a2 Animation #2.
  * @param {boolean} a3 Animation #3.
  * @param {boolean} a4 Animation #4.
+ * @param {boolean} a5 Animation #5.
  * @return {void} Nothing.
  */
 const poeToggleWrapperClasses = function(
@@ -123,7 +124,8 @@ const poeToggleWrapperClasses = function(
 	a1,
 	a2,
 	a3,
-	a4
+	a4,
+	a5,
 ) {
 	let list = el.classList;
 	list.toggle('h', !! h);
@@ -134,6 +136,7 @@ const poeToggleWrapperClasses = function(
 	list.toggle('a2', !! a2);
 	list.toggle('a3', !! a3);
 	list.toggle('a4', !! a4);
+	list.toggle('a5', !! a5);
 };
 
 /**

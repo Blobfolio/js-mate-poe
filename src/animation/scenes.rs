@@ -594,6 +594,18 @@ pub(super) const SPLAT: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::SplatGhost`.
+pub(super) const SPLAT_GHOST: &[Scene] = &[
+	Scene::new(50, &[
+		Frame::F054, Frame::F054, Frame::F054, Frame::F054, Frame::F054,
+		Frame::F055, Frame::F055, Frame::F055, Frame::F055, Frame::F055,
+		Frame::F054, Frame::F054, Frame::F054, Frame::F054, Frame::F054,
+		Frame::F055, Frame::F055,
+	])
+		.with_move_to(Position::new(0, -102))
+		.with_flags(Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::Stargaze`.
 pub(super) const STARGAZE: &[Scene] = &[
 	Scene::new(50, &[Frame::F002, Frame::F003])

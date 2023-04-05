@@ -44,6 +44,7 @@ extern "C" {
 		a2: bool,
 		a3: bool,
 		a4: bool,
+		a5: bool,
 	);
 
 	#[allow(unsafe_code)]
@@ -178,7 +179,7 @@ impl Mate {
 					self.pos.y - Frame::SIZE_I * 2 - 480,
 				))
 			},
-			Animation::SneezeShadow => Some(self.pos),
+			Animation::SneezeShadow | Animation::SplatGhost => Some(self.pos),
 			_ => None,
 		} {
 			child.set_position(pos, true);
@@ -560,6 +561,7 @@ impl Mate {
 					matches!(self.animation, Some(Animation::SneezeShadow)),
 					matches!(self.animation, Some(Animation::Abduction)),
 					matches!(self.animation, Some(Animation::BigFishChild)),
+					matches!(self.animation, Some(Animation::SplatGhost)),
 				);
 			}
 

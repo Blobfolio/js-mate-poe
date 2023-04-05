@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 65; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 66; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -152,6 +152,7 @@ pub(crate) enum Animation {
 	ChaseAMartianChild,
 	FlowerChild,
 	SneezeShadow,
+	SplatGhost,
 	StargazeChild,
 }
 
@@ -280,6 +281,7 @@ impl Animation {
 			Self::SneezeShadow => "Sneeze Shadow (Child)",
 			Self::Spin => "Spin",
 			Self::Splat => "Splat",
+			Self::SplatGhost => "Splat (Ghost)",
 			Self::Stargaze => "Stargaze",
 			Self::StargazeChild => "Stargaze (Child)",
 			Self::Urinate => "Urinate",
@@ -300,7 +302,8 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BigFishChild | Self::Drag | Self::SneezeShadow
+			Self::Abduction | Self::BigFishChild | Self::Drag |
+			Self::SneezeShadow | Self::SplatGhost
 		)
 	}
 
@@ -385,6 +388,7 @@ impl Animation {
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
 			Self::Eat => Some(Self::FlowerChild),
 			Self::Sneeze => Some(Self::SneezeShadow),
+			Self::Splat => Some(Self::SplatGhost),
 			Self::Stargaze => Some(Self::StargazeChild),
 			_ => None,
 		}
@@ -606,6 +610,7 @@ impl Animation {
 			Self::SneezeShadow => fixed!(SNEEZE_SHADOW),
 			Self::Spin => fixed!(SPIN),
 			Self::Splat => fixed!(SPLAT),
+			Self::SplatGhost => fixed!(SPLAT_GHOST),
 			Self::Stargaze => fixed!(STARGAZE),
 			Self::StargazeChild => fixed!(STARGAZE_CHILD),
 			Self::Urinate => scenes::urinate(),
