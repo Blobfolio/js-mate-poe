@@ -70,7 +70,7 @@ export const poeInitMedia = function(wasm) {
  * @return {Element} Element.
  */
 const poeMakeImage = function() {
-	const el = new Image(6360, 40);
+	const el = new Image(imgWidth, imgHeight);
 	el.id = 'i';
 	if (null !== imgUrl) { el.src = imgUrl; }
 	return el;

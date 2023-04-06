@@ -113,6 +113,13 @@ fn build_media() -> (String, String) {
 	let mut out = Vec::new();
 	let mut js_lengths = Vec::new();
 
+	// Add the image dimensions to the JS lengths.
+	let (w, h) = img_size();
+	assert_eq!(w, 6360, "Image width has changed!");
+	assert_eq!(h, 40, "Image height has changed!");
+	js_lengths.push(format!("const imgWidth = {w};"));
+	js_lengths.push(format!("const imgHeight = {h};"));
+
 	// Handle the media bits.
 	for (k, v) in ["img", "baa", "sneeze", "yawn"].iter().zip(media.iter()) {
 		// Add the buffer.
@@ -148,6 +155,14 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 
 	// Return what we've built!
 	(out.join("\n\n"), js)
+}
+
+/// # Image Dimensions.
+fn img_size() -> (u32, u32) {
+	let dim = imagesize::size("skel/img/poe.png").expect("Failed to read poe.png dimensions.");
+	let w = u32::try_from(dim.width).expect("Failed to read poe.png dimensions.");
+	let h = u32::try_from(dim.height).expect("Failed to read poe.png dimensions.");
+	(w, h)
 }
 
 /// # Out path.
