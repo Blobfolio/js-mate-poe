@@ -254,12 +254,12 @@ pub(super) const DRAG: &[Scene] = &[
 
 /// # For `Animation::Eat`.
 pub(super) const EAT: &[Scene] = &[
-	Scene::new(190, &[
+	Scene::new(200, &[
 		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F058,
 		Frame::F059, Frame::F059, Frame::F060, Frame::F061, Frame::F060,
 		Frame::F061, Frame::F003,
 	])
-		.with_repeat(5, 5)
+		.with_repeat(4, 5)
 		.with_flags(Scene::GRAVITY),
 ];
 
@@ -273,16 +273,22 @@ pub(super) const FALL: &[Scene] = &[
 
 /// # For `Animation::FlowerChild`.
 pub(super) const FLOWER_CHILD: &[Scene] = &[
-	Scene::new(205, &[
+	Scene::new(200, &[
 		Frame::F139, Frame::F139, Frame::F139, Frame::F139, Frame::F139,
-		Frame::F139, Frame::F139, Frame::F139, Frame::F139, Frame::F140,
+		Frame::F139, Frame::F139,
+
 		Frame::F140, Frame::F140, Frame::F140, Frame::F140, Frame::F140,
-		Frame::F140, Frame::F140, Frame::F140, Frame::F141, Frame::F141,
+		Frame::F140, Frame::F140,
+
 		Frame::F141, Frame::F141, Frame::F141, Frame::F141, Frame::F141,
+		Frame::F141, Frame::F141,
+
 		Frame::F142, Frame::F142, Frame::F142, Frame::F142, Frame::F142,
-		Frame::F142, Frame::F142, Frame::F143,
+		Frame::F142, Frame::F142,
+
+		Frame::F143, Frame::F143, Frame::F143, Frame::F143, Frame::F143,
+		Frame::F143, Frame::F143,
 	])
-		.with_repeat(11, 32)
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 ];
 
