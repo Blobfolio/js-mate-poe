@@ -491,7 +491,7 @@ impl Animation {
 				Self::Walk,
 			])),
 			Self::SlideDown => Some(Self::SlideDown),
-			Self::Spin => Some(choose(&[Self::PlayDead, Self::Sneeze])),
+			Self::Spin => Some(Self::PlayDead),
 			Self::Stargaze => Some(Self::Scream),
 			Self::Tornado => Some(Self::TornadoExit),
 			Self::Walk => Some(choose(&[
