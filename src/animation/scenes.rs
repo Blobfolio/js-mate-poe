@@ -700,8 +700,8 @@ pub(super) const TORNADO: &[Scene] = &[
 /// # For `Animation::Walk`.
 pub(super) const WALK: &[Scene] = &[
 	Scene::new(150, &[Frame::F002, Frame::F003])
-		.with_move_to(Position::new(-84, 0))
-		.with_repeat(20, 0)
+		.with_move_to(Position::new(-168, 0))
+		.with_repeat(41, 0)
 		.with_flags(Scene::GRAVITY),
 ];
 
