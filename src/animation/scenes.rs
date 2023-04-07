@@ -313,6 +313,18 @@ pub(super) const HANDSTAND: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::Hop`.
+pub(super) const HOP: &[Scene] = &[
+	Scene::new(75, &[
+		Frame::F002, Frame::F002, Frame::F004,
+	])
+		.with_move_to(Position::new(-12, -6)),
+	Scene::new(75, &[
+		Frame::F004, Frame::F005, Frame::F005,
+	])
+		.with_move_to(Position::new(-12, 6)),
+];
+
 /// # For `Animation::Jump`.
 pub(super) const JUMP: &[Scene] = &[
 	Scene::new(35, &[

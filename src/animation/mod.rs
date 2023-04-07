@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 66; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 67; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -36,6 +36,7 @@ const DEFAULT: &[Animation] = &[
 	Animation::Bleat,
 	Animation::BoredSleep,
 	Animation::Doze,
+	Animation::Hop,
 	Animation::Jump,
 	Animation::PlayDead,
 	Animation::Popcorn,
@@ -98,6 +99,7 @@ pub(crate) enum Animation {
 	Doze,
 	Eat,
 	Handstand,
+	Hop,
 	Jump,
 	LayDown,
 	LookDown,
@@ -185,13 +187,14 @@ impl Animation {
 			self,
 			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
-			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
-			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
-			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
-			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
-			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
-			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Urinate |
-			Self::Walk | Self::Yoyo
+			Self::Bleat | Self::Blink | Self::BoredSleep |
+			Self::ChaseAMartian | Self::Doze | Self::Eat | Self::Handstand |
+			Self::Hop | Self::Jump | Self::LayDown | Self::LookDown |
+			Self::PlayDead | Self::Popcorn | Self::Rest | Self::Roll |
+			Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
+			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze |
+			Self::Spin | Self::Stargaze | Self::Urinate | Self::Walk |
+			Self::Yoyo
 		)
 	}
 }
@@ -256,6 +259,7 @@ impl Animation {
 			Self::FlowerChild => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
+			Self::Hop => "Hop",
 			Self::Jump => "Jump",
 			Self::LayDown => "Lay Down",
 			Self::LookDown => "Look Down",
@@ -360,16 +364,17 @@ impl Animation {
 			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
 			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
 			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
-			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
-			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
-			Self::Handstand | Self::Jump | Self::LayDown | Self::LookDown |
-			Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
-			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
-			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
-			Self::Sleep | Self::Slide | Self::SlideDown | Self::Sneeze |
-			Self::Spin | Self::Splat | Self::Stargaze | Self::Urinate |
-			Self::Walk | Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::DangleRecover | Self::DeepThoughts | Self::Doze |
+			Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
+			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
+			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
+			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
+			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
+			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
+			Self::Stargaze | Self::Urinate | Self::Walk |
+			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -487,6 +492,7 @@ impl Animation {
 				Self::Blink,
 				Self::Eat,
 				Self::Handstand,
+				Self::Hop,
 				Self::LayDown,
 				Self::LookDown,
 				Self::Popcorn,
@@ -528,7 +534,7 @@ impl Animation {
 				Self::Bounce,
 				Self::PlayDead,
 			])),
-			Self::Jump => Some(Self::WallSlide),
+			Self::Jump | Self::Hop => Some(Self::WallSlide),
 			Self::Walk => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Scoot, Self::Scoot,
@@ -585,6 +591,7 @@ impl Animation {
 			Self::FlowerChild => fixed!(FLOWER_CHILD),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
+			Self::Hop => fixed!(HOP),
 			Self::Jump => fixed!(JUMP),
 			Self::LayDown => scenes::lay_down(),
 			Self::LookDown => fixed!(LOOK_DOWN),
