@@ -54,12 +54,17 @@ static NEXT_ANIMATION: AtomicU8 = AtomicU8::new(0);
 /// or updated as a pair, they're stored within a single 64-bit atomic.
 static POS: AtomicU64 = AtomicU64::new(0);
 
-/// # Random Seed.
-///
-/// This holds the seed for our ~~weak~~ simple, local PNRG. The default value
-/// is only for testing; in browser contexts it is reseeded with `Math.random`
-/// during initialization.
-static SEED: AtomicU64 = AtomicU64::new(0x8a5c_d789_635d_2dff);
+/// # Xoshi Seed #1.
+static SEED1: AtomicU64 = AtomicU64::new(0x8596_cc44_bef0_1aa0);
+
+/// # Xoshi Seed #2.
+static SEED2: AtomicU64 = AtomicU64::new(0x98d4_0948_da60_19ae);
+
+/// # Xoshi Seed #3.
+static SEED3: AtomicU64 = AtomicU64::new(0x49f1_3013_c503_a6aa);
+
+/// # Xoshi Seed #4.
+static SEED4: AtomicU64 = AtomicU64::new(0xc4d7_82ff_3c9f_7bef);
 
 #[cfg(feature = "director")]
 /// # Speed.
@@ -174,14 +179,13 @@ impl Universe {
 impl Universe {
 	/// # Random Value.
 	///
-	/// Return a random `u64`.
+	/// Return a random `u64`, using the xoshiro256 algorithm.
 	pub(crate) fn rand() -> u64 {
-		let mut seed = SEED.load(SeqCst);
-		seed ^= seed << 13;
-		seed ^= seed >> 7;
-		seed ^= seed << 17;
-		SEED.store(seed, SeqCst);
-		seed
+		let mut seeds = get_seeds();
+		let out = seeds[1].overflowing_mul(5).0.rotate_left(7).overflowing_mul(9).0;
+		update_seeds(&mut seeds);
+		set_seeds(&mut seeds);
+		out
 	}
 
 	#[allow(clippy::cast_possible_truncation)]
@@ -197,15 +201,26 @@ impl Universe {
 	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_precision_loss)]
 	/// # Reseed Randomness.
 	fn reseed() {
-		// Convert the f64 into a decent u64. This misses out on some of the
-		// possible range, but is good enough for our purposes.
-		let seed = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
-		if seed != 0 {
-			SEED.store(seed, SeqCst);
-			#[cfg(feature = "director")] dom::debug!(format!(
-				"Resseded PRNG with {seed}."
-			));
-		}
+		// Use the JS Math.random() to give us a starting point. We can't
+		// cover the full u64 range because f64 isn't big enough, but the pool
+		// is large enough to get us started.
+		let mut seed: u64 = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
+
+		// Splitmix that seed four times to derive the four Xoshi seeds we'll
+		// actually be using for randomness, and save the result!
+		let mut seeds = [0_u64; 4];
+		for i in &mut seeds { *i = splitmix(&mut seed); }
+		set_seeds(&mut seeds);
+
+		// Print a debug message if we care about that sort of thing.
+		#[cfg(feature = "director")]
+		dom::debug!(format!(
+			"PNRG1: {:16x}\nPNRG2: {:16x}\nPNRG3: {:16x}\nPNRG4: {:16x}",
+			seeds[0],
+			seeds[1],
+			seeds[2],
+			seeds[3],
+		));
 	}
 }
 
@@ -337,6 +352,60 @@ impl Universe {
 	pub(crate) fn set_next_animation(next: u8) {
 		NEXT_ANIMATION.store(next, SeqCst);
 	}
+}
+
+
+
+/// # Get Seeds.
+fn get_seeds() -> [u64; 4] {
+	[
+		SEED1.load(SeqCst),
+		SEED2.load(SeqCst),
+		SEED3.load(SeqCst),
+		SEED4.load(SeqCst),
+	]
+}
+
+/// # Set Seeds.
+fn set_seeds(seeds: &mut [u64; 4]) {
+	// If everything is zero, fill with reasonable defaults.
+	if seeds[0] == 0 && seeds[1] == 0 && seeds[2] == 0 && seeds[3] == 0 {
+		SEED1.store(0x8596_cc44_bef0_1aa0, SeqCst);
+		SEED2.store(0x98d4_0948_da60_19ae, SeqCst);
+		SEED3.store(0x49f1_3013_c503_a6aa, SeqCst);
+		SEED4.store(0xc4d7_82ff_3c9f_7bef, SeqCst);
+	}
+	else {
+		SEED1.store(seeds[0], SeqCst);
+		SEED2.store(seeds[1], SeqCst);
+		SEED3.store(seeds[2], SeqCst);
+		SEED4.store(seeds[3], SeqCst);
+	}
+}
+
+/// # Update Seeds.
+fn update_seeds(seeds: &mut[u64; 4]) {
+	let t = seeds[1] << 17;
+	seeds[2] ^= seeds[0];
+	seeds[3] ^= seeds[1];
+	seeds[1] ^= seeds[2];
+	seeds[0] ^= seeds[3];
+	seeds[2] ^= t;
+	seeds[3] =  seeds[3].rotate_left(45);
+}
+
+#[cfg(target_arch = "wasm32")]
+/// # Split/Mix.
+///
+/// This is used to generate our Xoshi256 seeds from a single source `u64`.
+fn splitmix(seed: &mut u64) -> u64 {
+	// Update the source seed.
+	*seed = seed.overflowing_add(0x9e37_79b9_7f4a_7c15).0;
+
+	// Calculate and return a random value.
+	let mut z: u64 = (*seed ^ (*seed >> 30)).overflowing_mul(0xbf58_476d_1ce4_e5b9).0;
+	z = (z ^ (z >> 27)).overflowing_mul(0x94d0_49bb_1331_11eb).0;
+	z ^ (z >> 31)
 }
 
 
