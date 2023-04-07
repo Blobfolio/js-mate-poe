@@ -151,6 +151,7 @@ impl Mate {
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
+		child.animation.take();
 		child.set_animation(animation, true);
 
 		// Some animations require a position override using knowledge of the
