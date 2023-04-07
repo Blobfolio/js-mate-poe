@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 69; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 70; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -40,6 +40,7 @@ const DEFAULT: &[Animation] = &[
 	Animation::Jump,
 	Animation::PlayDead,
 	Animation::Popcorn,
+	Animation::Really,
 	Animation::Rest,
 	Animation::Rotate,
 	Animation::Scoot,
@@ -106,6 +107,7 @@ pub(crate) enum Animation {
 	LookDown,
 	PlayDead,
 	Popcorn,
+	Really,
 	Rest,
 	Roll,
 	Rotate,
@@ -193,11 +195,11 @@ impl Animation {
 			Self::Bleat | Self::Blink | Self::BoredSleep |
 			Self::ChaseAMartian | Self::Doze | Self::Eat | Self::Handstand |
 			Self::Hop | Self::Jump | Self::LayDown | Self::LookDown |
-			Self::PlayDead | Self::Popcorn | Self::Rest | Self::Roll |
-			Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze |
-			Self::Spin | Self::Stargaze | Self::Tornado | Self::Urinate |
-			Self::Walk | Self::Yoyo
+			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
+			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Tornado |
+			Self::Urinate | Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -272,6 +274,7 @@ impl Animation {
 			Self::ReachFloor => "Reach Floor",
 			Self::ReachSide1 => "Reach Side (From Floor)",
 			Self::ReachSide2 => "Reach Side (From Ceiling)",
+			Self::Really => "Really?!",
 			Self::Rest => "Rest",
 			Self::Roll => "Roll",
 			Self::Rotate => "Rotate",
@@ -374,11 +377,11 @@ impl Animation {
 			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
 			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
 			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
-			Self::ReachSide2 | Self::Rest | Self::Roll | Self::Rotate |
-			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
-			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
-			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
-			Self::Stargaze | Self::Tornado | Self::TornadoExit |
+			Self::ReachSide2 | Self::Really | Self::Rest | Self::Roll |
+			Self::Rotate | Self::Run | Self::RunDown | Self::RunUpsideDown |
+			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
+			Self::Slide | Self::SlideDown | Self::Sneeze | Self::Spin |
+			Self::Splat | Self::Stargaze | Self::Tornado | Self::TornadoExit |
 			Self::Urinate | Self::Walk | Self::WalkUpsideDown |
 			Self::WallSlide | Self::Yoyo
 		)
@@ -405,6 +408,7 @@ impl Animation {
 		}
 	}
 
+	#[allow(clippy::too_many_lines)]
 	/// # Next Animation.
 	///
 	/// Switch to this animation when the sequence finishes. Some of these
@@ -504,6 +508,8 @@ impl Animation {
 				Self::LookDown,
 				Self::Popcorn,
 				Self::Roll,
+				Self::Rotate,
+				Self::Spin,
 			])),
 			Self::WalkUpsideDown => Some(choose(&[
 				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
@@ -608,6 +614,7 @@ impl Animation {
 			Self::ReachFloor => fixed!(REACH_FLOOR),
 			Self::ReachSide1 => fixed!(REACH_SIDE1),
 			Self::ReachSide2 => fixed!(REACH_SIDE2),
+			Self::Really => fixed!(REALLY),
 			Self::Rest => fixed!(REST),
 			Self::Roll => fixed!(ROLL),
 			Self::Rotate => fixed!(ROTATE),

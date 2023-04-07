@@ -473,6 +473,32 @@ pub(super) const REACH_SIDE2: &[Scene] = &[
 		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
+/// # For `Animation::Really`.
+pub(super) const REALLY: &[Scene] = &[
+	Scene::new(100, &[Frame::F009, Frame::F010])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(250, &[Frame::F010, Frame::F010, Frame::F010, Frame::F099])
+		.with_repeat(15, 3)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(250, &[
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F034, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F034, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+	])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[
+		Frame::F099, Frame::F099, Frame::F099, Frame::F099,
+		Frame::F009, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Rest`.
 pub(super) const REST: &[Scene] = &[
 	Scene::new(200, &[Frame::F003, Frame::F012, Frame::F090, Frame::F091])
