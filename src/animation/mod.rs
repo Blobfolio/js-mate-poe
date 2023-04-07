@@ -19,38 +19,6 @@ use scene::SceneListKind;
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
 #[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 70; // The highest Animation ID.
 
-/// # Default Animations.
-const DEFAULT: &[Animation] = &[
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun,
-	Animation::Beg, Animation::Beg,
-	Animation::Blink, Animation::Blink,
-	Animation::Eat, Animation::Eat,
-	Animation::Handstand, Animation::Handstand,
-	Animation::Roll, Animation::Roll,
-	Animation::Scratch, Animation::Scratch,
-	Animation::Spin, Animation::Spin,
-	Animation::Abduction,
-	Animation::Bleat,
-	Animation::BoredSleep,
-	Animation::Doze,
-	Animation::Hop,
-	Animation::Jump,
-	Animation::PlayDead,
-	Animation::Popcorn,
-	Animation::Really,
-	Animation::Rest,
-	Animation::Rotate,
-	Animation::Scoot,
-	Animation::Scream,
-	Animation::Sleep,
-	Animation::Sneeze,
-	Animation::Tornado,
-	Animation::Urinate,
-];
-
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
 	Animation::BathDive,
@@ -207,7 +175,71 @@ impl Animation {
 	///
 	/// Return a generic default animation for use in contexts where an
 	/// explicit one is unspecified.
-	pub(crate) fn default_choice() -> Self { choose(DEFAULT) }
+	pub(crate) fn default_choice() -> Self {
+		let rand = Universe::rand() % 100;
+		if rand < 40 { Self::Walk }
+		else if rand < 65 { Self::BeginRun }
+		else if rand < 90 { Self::default_common() }
+		else if rand < 99 { Self::default_rare() }
+		else { Self::default_secret() }
+	}
+
+	/// # Default Common Animations.
+	///
+	/// This class of animations has a 25% chance of happening, meaning each
+	/// individually occurs about 2.7% of the time.
+	fn default_common() -> Self {
+		match Universe::rand() % 9 {
+			0 => Self::Beg,
+			1 => Self::Eat,
+			2 => Self::Handstand,
+			3 => Self::Hop,
+			4 => Self::LayDown,
+			5 => Self::LookDown,
+			6 => Self::Roll,
+			7 => Self::Rotate,
+			_ => Self::Spin,
+		}
+	}
+
+	/// # Default Rare Animations.
+	///
+	/// These are a little more noticeable than the "common" animations, so
+	/// should play less often.
+	///
+	/// This class of animations has a 9% chance of happening, meaning each
+	/// individually occurs about 0.9% of the time.
+	fn default_rare() -> Self {
+		match Universe::rand() % 10 {
+			0 => Self::Blink,
+			1 => Self::BoredSleep,
+			2 => Self::Doze,
+			3 => Self::PlayDead,
+			4 => Self::Popcorn,
+			5 => Self::Really,
+			6 => Self::Rest,
+			7 => Self::Scoot,
+			8 => Self::Scratch,
+			_ => Self::Scream,
+		}
+	}
+
+	/// # Default Very Rare Animations.
+	///
+	/// These animations are meant to be surprising, and so are tuned down low.
+	///
+	/// This class has only a 1% chance of occuring, meaning each individually
+	/// occurs about 0.16% of the time.
+	fn default_secret() -> Self {
+		match Universe::rand() % 6 {
+			0 => Self::Abduction, // Exit/Sound.
+			1 => Self::Bleat,     // Sound.
+			2 => Self::Sleep,     // Sound.
+			3 => Self::Sneeze,    // Sound.
+			4 => Self::Tornado,   // Exit.
+			_ => Self::Urinate,   // Uncivilized.
+		}
+	}
 
 	/// # Entrance Choice.
 	///
@@ -406,7 +438,6 @@ impl Animation {
 		}
 	}
 
-	#[allow(clippy::too_many_lines)]
 	/// # Next Animation.
 	///
 	/// Switch to this animation when the sequence finishes. Some of these
@@ -424,22 +455,18 @@ impl Animation {
 				Self::BlackSheepChase |
 				Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
-			Self::Bleat |
-				Self::Blink |
-				Self::BoredSleep |
+			Self::BoredSleep |
 				Self::Bounce |
 				Self::EndRun |
 				Self::LayDown |
 				Self::LookDown |
 				Self::PlayDead |
-				Self::Popcorn |
 				Self::ReachFloor |
+				Self::Rest |
 				Self::Rotate |
 				Self::Sleep |
 				Self::Slide |
-				Self::Sneeze |
 				Self::Splat |
-				Self::Rest |
 				Self::Urinate => Some(Self::Walk),
 			Self::Boing => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
@@ -494,21 +521,6 @@ impl Animation {
 			Self::Spin => Some(Self::PlayDead),
 			Self::Stargaze => Some(Self::Scream),
 			Self::Tornado => Some(Self::TornadoExit),
-			Self::Walk => Some(choose(&[
-				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
-				Self::BeginRun, Self::BeginRun, Self::BeginRun, Self::BeginRun,
-				Self::Beg,
-				Self::Blink,
-				Self::Eat,
-				Self::Handstand,
-				Self::Hop,
-				Self::LayDown,
-				Self::LookDown,
-				Self::Popcorn,
-				Self::Roll,
-				Self::Rotate,
-				Self::Spin,
-			])),
 			Self::WalkUpsideDown => Some(choose(&[
 				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
 				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
@@ -689,6 +701,7 @@ fn choose(set: &[Animation]) -> Animation {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::collections::HashSet;
 
 	#[test]
 	fn t_choose() {
@@ -709,6 +722,20 @@ mod tests {
 			all.len(),
 			set.len(),
 			"Failed to choose all {} possibilities in 5000 tries.", set.len()
+		);
+	}
+
+	#[test]
+	fn t_default() {
+		let mut set = HashSet::<u8>::default();
+		for _ in 0..5_000 {
+			let next = Animation::default_choice() as u8;
+			set.insert(next);
+		}
+		assert_eq!(
+			set.len(),
+			27,
+			"Failed to choose all 27 default possibilities in 5000 tries."
 		);
 	}
 
