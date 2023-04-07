@@ -648,6 +648,29 @@ pub(super) const STARGAZE_CHILD: &[Scene] = &[
 		.with_flags(Scene::IGNORE_EDGES),
 ];
 
+/// # For `Animation::Tornado`.
+pub(super) const TORNADO: &[Scene] = &[
+	Scene::new(150, &[Frame::F003, Frame::F009, Frame::F010])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F011, Frame::F014, Frame::F013, Frame::F012])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(75, &[Frame::F003, Frame::F009, Frame::F010])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F011, Frame::F014, Frame::F013, Frame::F012])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(25, &[
+		Frame::F003, Frame::F009, Frame::F010, Frame::F011, Frame::F014,
+		Frame::F013, Frame::F012,
+	])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(15, &[
+		Frame::F003, Frame::F009, Frame::F010, Frame::F011, Frame::F014,
+		Frame::F013, Frame::F012, Frame::F007, Frame::F009, Frame::F099,
+		Frame::F011, Frame::F014, Frame::F013, Frame::F012,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Walk`.
 pub(super) const WALK: &[Scene] = &[
 	Scene::new(150, &[Frame::F002, Frame::F003])
@@ -894,6 +917,22 @@ pub(super) fn sleep() -> SceneList {
 		])
 			.with_sound(Sound::Yawn, 5)
 			.with_flags(Scene::GRAVITY),
+	]))
+}
+
+/// # For `Animation::TornadoExit`.
+pub(super) const fn tornado_exit(w: u16) -> SceneList {
+	let repeat = w.wrapping_div(14 * 8) + 1;
+
+	SceneList::new(SceneListKind::Dynamic1([
+		Scene::new(15, &[
+			Frame::F003, Frame::F009, Frame::F010, Frame::F011, Frame::F014,
+			Frame::F013, Frame::F012, Frame::F007, Frame::F009, Frame::F099,
+			Frame::F011, Frame::F014, Frame::F013, Frame::F012,
+		])
+			.with_move_to(Position::new((repeat as i32 + 1) * 14 * -8, 0))
+			.with_repeat(repeat, 0)
+			.with_flags(Scene::EASE_IN | Scene::GRAVITY | Scene::IGNORE_EDGES),
 	]))
 }
 

@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 67; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 69; // The highest Animation ID.
 
 /// # Default Animations.
 const DEFAULT: &[Animation] = &[
@@ -46,6 +46,7 @@ const DEFAULT: &[Animation] = &[
 	Animation::Scream,
 	Animation::Sleep,
 	Animation::Sneeze,
+	Animation::Tornado,
 	Animation::Urinate,
 ];
 
@@ -117,6 +118,7 @@ pub(crate) enum Animation {
 	Sneeze,
 	Spin,
 	Stargaze,
+	Tornado,
 	Urinate,
 	Walk,
 	Yoyo,
@@ -142,6 +144,7 @@ pub(crate) enum Animation {
 	RunUpsideDown,
 	SlideDown,
 	Splat,
+	TornadoExit,
 	WalkUpsideDown,
 	WallSlide,
 
@@ -193,8 +196,8 @@ impl Animation {
 			Self::PlayDead | Self::Popcorn | Self::Rest | Self::Roll |
 			Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
 			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze |
-			Self::Spin | Self::Stargaze | Self::Urinate | Self::Walk |
-			Self::Yoyo
+			Self::Spin | Self::Stargaze | Self::Tornado | Self::Urinate |
+			Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -288,6 +291,8 @@ impl Animation {
 			Self::SplatGhost => "Splat (Ghost)",
 			Self::Stargaze => "Stargaze",
 			Self::StargazeChild => "Stargaze (Child)",
+			Self::Tornado => "Tornado",
+			Self::TornadoExit => "Tornado (Exit)",
 			Self::Urinate => "Urinate",
 			Self::Walk => "Walk",
 			Self::WalkUpsideDown => "Walk Upside Down",
@@ -347,7 +352,7 @@ impl Animation {
 		matches!(
 			self,
 			Self::BlackSheepChase | Self::ChaseAMartian | Self::Run |
-			Self::SneezeShadow | Self::Walk
+			Self::SneezeShadow | Self::Tornado | Self::Walk
 		)
 	}
 
@@ -373,8 +378,9 @@ impl Animation {
 			Self::Run | Self::RunDown | Self::RunUpsideDown | Self::Scoot |
 			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
 			Self::SlideDown | Self::Sneeze | Self::Spin | Self::Splat |
-			Self::Stargaze | Self::Urinate | Self::Walk |
-			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::Stargaze | Self::Tornado | Self::TornadoExit |
+			Self::Urinate | Self::Walk | Self::WalkUpsideDown |
+			Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -485,6 +491,7 @@ impl Animation {
 			Self::SlideDown => Some(Self::SlideDown),
 			Self::Spin => Some(choose(&[Self::PlayDead, Self::Sneeze])),
 			Self::Stargaze => Some(Self::Scream),
+			Self::Tornado => Some(Self::TornadoExit),
 			Self::Walk => Some(choose(&[
 				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
 				Self::BeginRun, Self::BeginRun, Self::BeginRun, Self::BeginRun,
@@ -535,12 +542,12 @@ impl Animation {
 				Self::PlayDead,
 			])),
 			Self::Jump | Self::Hop => Some(Self::WallSlide),
+			Self::Tornado | Self::WallSlide => Some(Self::Rotate),
 			Self::Walk => Some(choose(&[
 				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
 				Self::Scoot, Self::Scoot,
 				Self::ReachSide1,
 			])),
-			Self::WallSlide => Some(Self::Rotate),
 			_ => None,
 		}
 	}
@@ -620,6 +627,8 @@ impl Animation {
 			Self::SplatGhost => fixed!(SPLAT_GHOST),
 			Self::Stargaze => fixed!(STARGAZE),
 			Self::StargazeChild => fixed!(STARGAZE_CHILD),
+			Self::Tornado => fixed!(TORNADO),
+			Self::TornadoExit => scenes::tornado_exit(width),
 			Self::Urinate => scenes::urinate(),
 			Self::Walk => fixed!(WALK),
 			Self::WalkUpsideDown => fixed!(WALK_UPSIDE_DOWN),
