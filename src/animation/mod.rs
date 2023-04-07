@@ -57,7 +57,6 @@ const ENTRANCE: &[Animation] = &[
 	Animation::BigFish,
 	Animation::BlackSheepChase,
 	Animation::BlackSheepRomance,
-	Animation::ChaseAMartian,
 	Animation::Stargaze,
 	Animation::Yoyo,
 ];
@@ -69,7 +68,6 @@ const FIRST: &[Animation] = &[
 	Animation::BigFish,
 	Animation::BlackSheepChase,
 	Animation::BlackSheepRomance,
-	Animation::ChaseAMartian,
 	Animation::Stargaze,
 	Animation::Yoyo,
 ];
