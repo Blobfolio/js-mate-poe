@@ -362,6 +362,19 @@ pub(super) const LOOK_DOWN: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::NoThankYou`.
+pub(super) const NO_THANK_YOU: &[Scene] = &[
+	Scene::new(100, &[
+		Frame::F009, Frame::F003, Frame::F012, Frame::F003,
+		Frame::F009, Frame::F003, Frame::F012, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(16, 0))
+		.with_repeat(3, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::PlayDead`.
 pub(super) const PLAY_DEAD: &[Scene] = &[
 	Scene::new(100, &[
