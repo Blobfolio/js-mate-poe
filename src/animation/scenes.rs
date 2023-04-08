@@ -352,6 +352,23 @@ pub(super) const JUMP: &[Scene] = &[
 		.with_move_to(Position::new(-45, 18)),
 ];
 
+/// # For `Animation::LegLifts`.
+pub(super) const LEG_LIFTS: &[Scene] = &[
+	Scene::new(125, &[
+		Frame::F012,
+		Frame::F013, Frame::F101, Frame::F102, Frame::F101,
+		Frame::F013, Frame::F101, Frame::F102, Frame::F101,
+	])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+	Scene::new(125, &[
+		Frame::F013, Frame::F101, Frame::F102, Frame::F101,
+		Frame::F013, Frame::F101, Frame::F102, Frame::F101,
+	])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+	Scene::new(125, &[Frame::F013, Frame::F012])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::LookDown`.
 pub(super) const LOOK_DOWN: &[Scene] = &[
 	Scene::new(100, &[

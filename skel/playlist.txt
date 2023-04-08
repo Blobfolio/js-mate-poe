@@ -16,24 +16,25 @@
 #16  Hop
 #17  Jump
 #18  Lay Down
-#19  Look Down
-#20  No Thank You!
-#21  Play Dead
-#22  Popcorn
-#23  Really?!
-#24  Rest
-#25  Roll
-#26  Rotate
-#27  Run
-#28  Scoot
-#29  Scratch
-#30  Scream
-#31  Sleep
-#32  Slide
-#33  Sneeze
-#34  Spin
-#35  Stargaze
-#36  Tornado
-#37  Urinate
-#38  Walk
-#39  Yo-Yo
+#19  Leg Lifts
+#20  Look Down
+#21  No Thank You!
+#22  Play Dead
+#23  Popcorn
+#24  Really?!
+#25  Rest
+#26  Roll
+#27  Rotate
+#28  Run
+#29  Scoot
+#30  Scratch
+#31  Scream
+#32  Sleep
+#33  Slide
+#34  Sneeze
+#35  Spin
+#36  Stargaze
+#37  Tornado
+#38  Urinate
+#39  Walk
+#40  Yo-Yo

@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 72; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 73; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -71,6 +71,7 @@ pub(crate) enum Animation {
 	Hop,
 	Jump,
 	LayDown,
+	LegLifts,
 	LookDown,
 	NoThankYou,
 	PlayDead,
@@ -163,12 +164,12 @@ impl Animation {
 			Self::Bleat | Self::Blink | Self::BoredSleep |
 			Self::ChaseAMartian | Self::Dance | Self::Doze | Self::Eat |
 			Self::Handstand | Self::Hop | Self::Jump | Self::LayDown |
-			Self::LookDown | Self::NoThankYou | Self::PlayDead |
-			Self::Popcorn | Self::Really | Self::Rest | Self::Roll |
-			Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze |
-			Self::Spin | Self::Stargaze | Self::Tornado | Self::Urinate |
-			Self::Walk | Self::Yoyo
+			Self::LegLifts | Self::LookDown | Self::NoThankYou |
+			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
+			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Tornado |
+			Self::Urinate | Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -212,19 +213,20 @@ impl Animation {
 	/// should play less often.
 	///
 	/// This class of animations has a 9% chance of happening, meaning each
-	/// individually occurs about 0.8% of the time.
+	/// individually occurs about 0.75% of the time.
 	fn default_rare() -> Self {
-		match Universe::rand() % 11 {
+		match Universe::rand() % 12 {
 			0 => Self::Blink,
 			1 => Self::BoredSleep,
 			2 => Self::Doze,
-			3 => Self::NoThankYou,
-			4 => Self::PlayDead,
-			5 => Self::Popcorn,
-			6 => Self::Really,
-			7 => Self::Rest,
-			8 => Self::Scoot,
-			9 => Self::Scratch,
+			3 => Self::LegLifts,
+			4 => Self::NoThankYou,
+			5 => Self::PlayDead,
+			6 => Self::Popcorn,
+			7 => Self::Really,
+			8 => Self::Rest,
+			9 => Self::Scoot,
+			10 => Self::Scratch,
 			_ => Self::Scream,
 		}
 	}
@@ -303,6 +305,7 @@ impl Animation {
 			Self::Hop => "Hop",
 			Self::Jump => "Jump",
 			Self::LayDown => "Lay Down",
+			Self::LegLifts => "Leg Lifts",
 			Self::LookDown => "Look Down",
 			Self::NoThankYou => "No Thank You!",
 			Self::PlayDead => "Play Dead",
@@ -412,15 +415,16 @@ impl Animation {
 			Self::DangleRecover | Self::DeepThoughts | Self::Doze |
 			Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
 			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
-			Self::LayDown | Self::LookDown | Self::NoThankYou |
-			Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
-			Self::Really | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
-			Self::RunDown | Self::RunUpsideDown | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::SlideDown |
-			Self::Sneeze | Self::Spin | Self::Splat | Self::Stargaze |
-			Self::Tornado | Self::TornadoExit | Self::Urinate | Self::Walk |
-			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::LayDown | Self::LegLifts | Self::LookDown |
+			Self::NoThankYou | Self::PlayDead | Self::Popcorn |
+			Self::ReachCeiling | Self::ReachFloor | Self::ReachSide1 |
+			Self::ReachSide2 | Self::Really | Self::Rest | Self::Roll |
+			Self::Rotate | Self::Run | Self::RunDown | Self::RunUpsideDown |
+			Self::Scoot | Self::Scratch | Self::Scream | Self::Sleep |
+			Self::Slide | Self::SlideDown | Self::Sneeze | Self::Spin |
+			Self::Splat | Self::Stargaze | Self::Tornado | Self::TornadoExit |
+			Self::Urinate | Self::Walk | Self::WalkUpsideDown |
+			Self::WallSlide | Self::Yoyo
 		)
 	}
 }
@@ -459,8 +463,7 @@ impl Animation {
 			Self::Abduction => Some(Self::ChaseAMartian),
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::BeginRun |
-				Self::BlackSheepChase |
-				Self::NoThankYou => Some(Self::Run),
+				Self::BlackSheepChase => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
 			Self::BoredSleep |
 				Self::Bounce |
@@ -505,6 +508,8 @@ impl Animation {
 				Self::Slide, Self::Slide,
 				Self::Jump,
 			])),
+			Self::LegLifts |
+				Self::NoThankYou => Some(Self::BeginRun),
 			Self::ReachSide2 => Some(choose(&[
 				Self::RunDown, Self::RunDown, Self::RunDown,
 				Self::ClimbDown,
@@ -626,6 +631,7 @@ impl Animation {
 			Self::Hop => fixed!(HOP),
 			Self::Jump => fixed!(JUMP),
 			Self::LayDown => scenes::lay_down(),
+			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::NoThankYou => fixed!(NO_THANK_YOU),
 			Self::PlayDead => fixed!(PLAY_DEAD),
@@ -744,8 +750,8 @@ mod tests {
 		}
 		assert_eq!(
 			set.len(),
-			29,
-			"Failed to choose all 29 default possibilities in 5000 tries."
+			30,
+			"Failed to choose all 30 default possibilities in 5000 tries."
 		);
 	}
 
