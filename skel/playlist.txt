@@ -9,29 +9,30 @@
 #9   Blink
 #10  Bored Sleep
 #11  Chase a Martian
-#12  Doze
-#13  Eat
-#14  Handstand
-#15  Hop
-#16  Jump
-#17  Lay Down
-#18  Look Down
-#19  Play Dead
-#20  Popcorn
-#21  Really?!
-#22  Rest
-#23  Roll
-#24  Rotate
-#25  Run
-#26  Scoot
-#27  Scratch
-#28  Scream
-#29  Sleep
-#30  Slide
-#31  Sneeze
-#32  Spin
-#33  Stargaze
-#34  Tornado
-#35  Urinate
-#36  Walk
-#37  Yo-Yo
+#12  Dance
+#13  Doze
+#14  Eat
+#15  Handstand
+#16  Hop
+#17  Jump
+#18  Lay Down
+#19  Look Down
+#20  Play Dead
+#21  Popcorn
+#22  Really?!
+#23  Rest
+#24  Roll
+#25  Rotate
+#26  Run
+#27  Scoot
+#28  Scratch
+#29  Scream
+#30  Sleep
+#31  Slide
+#32  Sneeze
+#33  Spin
+#34  Stargaze
+#35  Tornado
+#36  Urinate
+#37  Walk
+#38  Yo-Yo

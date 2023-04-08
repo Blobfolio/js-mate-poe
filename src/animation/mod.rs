@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 70; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 71; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -64,6 +64,7 @@ pub(crate) enum Animation {
 	Blink,
 	BoredSleep,
 	ChaseAMartian,
+	Dance,
 	Doze,
 	Eat,
 	Handstand,
@@ -159,10 +160,10 @@ impl Animation {
 			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep |
-			Self::ChaseAMartian | Self::Doze | Self::Eat | Self::Handstand |
-			Self::Hop | Self::Jump | Self::LayDown | Self::LookDown |
-			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
-			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::ChaseAMartian | Self::Dance | Self::Doze | Self::Eat |
+			Self::Handstand | Self::Hop | Self::Jump | Self::LayDown |
+			Self::LookDown | Self::PlayDead | Self::Popcorn | Self::Really |
+			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
 			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
 			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Tornado |
 			Self::Urinate | Self::Walk | Self::Yoyo
@@ -189,15 +190,16 @@ impl Animation {
 	/// This class of animations has a 25% chance of happening, meaning each
 	/// individually occurs about 2.7% of the time.
 	fn default_common() -> Self {
-		match Universe::rand() % 9 {
+		match Universe::rand() % 10 {
 			0 => Self::Beg,
-			1 => Self::Eat,
-			2 => Self::Handstand,
-			3 => Self::Hop,
-			4 => Self::LayDown,
-			5 => Self::LookDown,
-			6 => Self::Roll,
-			7 => Self::Rotate,
+			1 => Self::Dance,
+			2 => Self::Eat,
+			3 => Self::Handstand,
+			4 => Self::Hop,
+			5 => Self::LayDown,
+			6 => Self::LookDown,
+			7 => Self::Roll,
+			8 => Self::Rotate,
 			_ => Self::Spin,
 		}
 	}
@@ -283,6 +285,7 @@ impl Animation {
 			Self::ChaseAMartianChild => "Chase a Martian (Child)",
 			Self::ClimbDown => "Climb Down",
 			Self::ClimbUp => "Climb Up",
+			Self::Dance => "Dance",
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
 			Self::DeepThoughts => "Deep Thoughts",
@@ -401,7 +404,7 @@ impl Animation {
 			Self::BeginRun | Self::BigFish | Self::BlackSheepChase |
 			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
 			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
-			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
+			Self::ClimbDown | Self::ClimbUp | Self::Dance | Self::DangleFall |
 			Self::DangleRecover | Self::DeepThoughts | Self::Doze |
 			Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
 			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
@@ -604,6 +607,7 @@ impl Animation {
 			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
 			Self::ClimbDown => fixed!(CLIMB_DOWN),
 			Self::ClimbUp => fixed!(CLIMB_UP),
+			Self::Dance => fixed!(DANCE),
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
 			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
@@ -734,8 +738,8 @@ mod tests {
 		}
 		assert_eq!(
 			set.len(),
-			27,
-			"Failed to choose all 27 default possibilities in 5000 tries."
+			28,
+			"Failed to choose all 28 default possibilities in 5000 tries."
 		);
 	}
 
