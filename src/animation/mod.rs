@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 75; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 76; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -73,6 +73,7 @@ pub(crate) enum Animation {
 	LayDown,
 	LegLifts,
 	LookDown,
+	LookUp,
 	Nah,
 	PlayDead,
 	Popcorn,
@@ -181,6 +182,7 @@ impl Animation {
 			Self::LayDown |
 			Self::LegLifts |
 			Self::LookDown |
+			Self::LookUp |
 			Self::Nah |
 			Self::PlayDead |
 			Self::Popcorn |
@@ -224,9 +226,9 @@ impl Animation {
 	/// # Default Common Animations.
 	///
 	/// This class of animations has a 25% chance of happening, meaning each
-	/// individually occurs about 2.27% of the time.
+	/// individually occurs about 2.08% of the time.
 	fn default_common() -> Self {
-		match Universe::rand() % 11 {
+		match Universe::rand() % 12 {
 			0 => Self::Beg,
 			1 => Self::Dance,
 			2 => Self::Eat,
@@ -235,8 +237,9 @@ impl Animation {
 			5 => Self::Hop,
 			6 => Self::LayDown,
 			7 => Self::LookDown,
-			8 => Self::Roll,
-			9 => Self::Rotate,
+			8 => Self::LookUp,
+			9 => Self::Roll,
+			10 => Self::Rotate,
 			_ => Self::Spin,
 		}
 	}
@@ -342,6 +345,7 @@ impl Animation {
 			Self::LayDown => "Lay Down",
 			Self::LegLifts => "Leg Lifts",
 			Self::LookDown => "Look Down",
+			Self::LookUp => "Look Up",
 			Self::Nah => "Nah…",
 			Self::PlayDead => "Play Dead",
 			Self::Popcorn => "Popcorn",
@@ -476,6 +480,7 @@ impl Animation {
 			Self::LayDown |
 			Self::LegLifts |
 			Self::LookDown |
+			Self::LookUp |
 			Self::Nah |
 			Self::PlayDead |
 			Self::Popcorn |
@@ -555,6 +560,7 @@ impl Animation {
 				Self::EndRun |
 				Self::LayDown |
 				Self::LookDown |
+				Self::LookUp |
 				Self::PlayDead |
 				Self::ReachFloor |
 				Self::Rest |
@@ -718,6 +724,7 @@ impl Animation {
 			Self::LayDown => scenes::lay_down(),
 			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
+			Self::LookUp => fixed!(LOOK_UP),
 			Self::Nah => fixed!(NAH),
 			Self::PlayDead => fixed!(PLAY_DEAD),
 			Self::Popcorn => fixed!(POPCORN),
@@ -833,8 +840,8 @@ mod tests {
 
 		assert_eq!(
 			set.len(),
-			32,
-			"Failed to choose all 32 default possibilities in 5000 tries."
+			33,
+			"Failed to choose all 33 default possibilities in 5000 tries."
 		);
 	}
 

@@ -123,8 +123,8 @@ const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
 	frame = parseInt(frame, 10);
 	list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
 	list.toggle('m021', 21 === frame);
-	list.toggle('m101', 101 === frame);
-	list.toggle('m134', 134 === frame);
+	list.toggle('m103', 103 === frame);
+	list.toggle('m136', 136 === frame);
 
 	scene = parseInt(scene, 10);
 	list.toggle('off', 0 === scene);
