@@ -17,10 +17,11 @@ use super::SceneListKind;
 /// # For `Animation::Abduction`.
 pub(super) const ABDUCTION: &[Scene] = &[
 	Scene::new(254, &[
-		Frame::F008, Frame::F009, Frame::F009,
-		Frame::F009, Frame::F009, Frame::F031,
+		Frame::F008, Frame::F009, Frame::F009, Frame::F009, Frame::F009,
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F031, Frame::F031,
 	])
-		.with_repeat(11, 5)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(200, &[Frame::F031, Frame::F043])
 		.with_flags(Scene::GRAVITY),
@@ -78,10 +79,10 @@ pub(super) const BATH_DIVE: &[Scene] = &[
 		Frame::F129, Frame::F129, Frame::F129, Frame::F130, Frame::F130,
 		Frame::F130, Frame::F130, Frame::F131, Frame::F131, Frame::F131,
 		Frame::F131, Frame::F132, Frame::F132, Frame::F132, Frame::F132,
-		Frame::F133, Frame::F132,
+		Frame::F133, Frame::F132, Frame::F133, Frame::F132, Frame::F133,
+		Frame::F132, Frame::F133, Frame::F132,
 	])
-		.with_move_to(Position::new(-192, 144))
-		.with_repeat(3, 40),
+		.with_move_to(Position::new(-192, 144)),
 ];
 
 /// # For `Animation::BathDiveChild`.
@@ -112,9 +113,11 @@ pub(super) const BEG: &[Scene] = &[
 
 /// # For `Animation::BeginRun`.
 pub(super) const BEGIN_END_RUN: &[Scene] = &[
-	Scene::new(100, &[Frame::F002, Frame::F003])
+	Scene::new(100, &[
+		Frame::F002, Frame::F003, Frame::F002, Frame::F003,
+		Frame::F002, Frame::F003,
+	])
 		.with_move_to(Position::new(-24, 0))
-		.with_repeat(2, 0)
 		.with_flags(Scene::GRAVITY),
 ];
 
@@ -337,13 +340,9 @@ pub(super) const HANDSTAND: &[Scene] = &[
 
 /// # For `Animation::Hop`.
 pub(super) const HOP: &[Scene] = &[
-	Scene::new(75, &[
-		Frame::F002, Frame::F002, Frame::F004,
-	])
+	Scene::new(75, &[Frame::F002, Frame::F002, Frame::F004])
 		.with_move_to(Position::new(-12, -6)),
-	Scene::new(75, &[
-		Frame::F004, Frame::F005, Frame::F005,
-	])
+	Scene::new(75, &[Frame::F004, Frame::F005, Frame::F005])
 		.with_move_to(Position::new(-12, 6)),
 ];
 
@@ -412,11 +411,8 @@ pub(super) const PLAY_DEAD: &[Scene] = &[
 
 /// # For `Animation::Popcorn`.
 pub(super) const POPCORN: &[Scene] = &[
-	Scene::new(200, &[
-		Frame::F008, Frame::F009, Frame::F031,
-		Frame::F110, Frame::F110, Frame::F110,
-		Frame::F110, Frame::F110,
-	])
+	Scene::new(200, &[Frame::F008, Frame::F009, Frame::F031, Frame::F110])
+		.with_repeat(4, 3)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(50, &[Frame::F110])
 		.with_move_to(Position::new(1, 0))
@@ -479,9 +475,8 @@ pub(super) const POPCORN: &[Scene] = &[
 		.with_move_to(Position::new(-1, 0))
 		.with_flags(Scene::GRAVITY),
 	Scene::new(25, &[
-		Frame::F009, Frame::F009, Frame::F009, Frame::F009,
-		Frame::F110, Frame::F110, Frame::F110,
-		Frame::F110, Frame::F110, Frame::F110,
+		Frame::F009, Frame::F009, Frame::F009, Frame::F009, Frame::F110,
+		Frame::F110, Frame::F110, Frame::F110, Frame::F110, Frame::F110,
 	])
 		.with_move_to(Position::new(0, -100))
 		.with_flags(Scene::EASE_OUT),
