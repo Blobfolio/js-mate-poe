@@ -939,15 +939,12 @@ pub(super) const fn chase_a_martian(w: u16) -> SceneList {
 
 /// # For `Animation::ChaseAMartianChild`.
 pub(super) const fn chase_a_martian_child(w: u16) -> SceneList {
-	let repeat = w.wrapping_div(64) + 4;
+	let repeat = w.wrapping_div(80) + 4;
 
 	SceneList::new(SceneListKind::Dynamic1([
-		Scene::new(50, &[
-			Frame::F153, Frame::F153, Frame::F154, Frame::F154,
-			Frame::F153, Frame::F153, Frame::F155, Frame::F155,
-		])
-			.with_move_to(Position::new((repeat as i32 + 1) * -8 * 8, 0))
-			.with_repeat(repeat, 0)
+		Scene::new(25, &[Frame::F153, Frame::F154, Frame::F153, Frame::F155])
+			.with_move_to(Position::new((repeat as i32 + 1) * -20 * 4, 0))
+			.with_repeat(repeat * 4, 0)
 			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES)
 	]))
 }
