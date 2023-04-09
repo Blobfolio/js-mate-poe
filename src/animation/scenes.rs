@@ -266,7 +266,7 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 		.with_repeat(12, 0),
 	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009])
 		.with_flags(Scene::FLIP_X_NEXT),
-	Scene::new(50, &[Frame::F009, Frame::F008, Frame::F003]),
+	Scene::new(50, &[Frame::F008, Frame::F003]),
 ];
 
 /// # For `Animation::Drag`.
@@ -591,7 +591,7 @@ pub(super) const ROLL: &[Scene] = &[
 pub(super) const ROTATE: &[Scene] = &[
 	Scene::new(150, &[Frame::F003, Frame::F008, Frame::F009])
 		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
-	Scene::new(150, &[Frame::F009, Frame::F008, Frame::F003])
+	Scene::new(150, &[Frame::F008, Frame::F003])
 		.with_flags(Scene::GRAVITY),
 ];
 
