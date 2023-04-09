@@ -65,7 +65,6 @@ pub(crate) enum Animation {
 	ChaseAMartian,
 	Cry,
 	Dance,
-	Doze,
 	Eat,
 	Flop,
 	Handstand,
@@ -87,6 +86,7 @@ pub(crate) enum Animation {
 	Scream,
 	Sleep,
 	SleepSitting,
+	SleepStanding,
 	Slide,
 	Sneeze,
 	Spin,
@@ -173,7 +173,6 @@ impl Animation {
 			Self::ChaseAMartian |
 			Self::Cry |
 			Self::Dance |
-			Self::Doze |
 			Self::Eat |
 			Self::Flop |
 			Self::Handstand |
@@ -193,8 +192,9 @@ impl Animation {
 			Self::Scoot |
 			Self::Scratch |
 			Self::Scream |
-			Self::SleepSitting |
 			Self::Sleep |
+			Self::SleepSitting |
+			Self::SleepStanding |
 			Self::Slide |
 			Self::Sneeze |
 			Self::Spin |
@@ -252,17 +252,17 @@ impl Animation {
 		match Universe::rand() % 13 {
 			0 => Self::Blink,
 			1 => Self::Cry,
-			2 => Self::Doze,
-			3 => Self::LegLifts,
-			4 => Self::Nah,
-			5 => Self::PlayDead,
-			6 => Self::Popcorn,
-			7 => Self::Really,
-			8 => Self::Rest,
-			9 => Self::Scoot,
-			10 => Self::Scratch,
-			11 => Self::Scream,
-			_ => Self::SleepSitting,
+			2 => Self::LegLifts,
+			3 => Self::Nah,
+			4 => Self::PlayDead,
+			5 => Self::Popcorn,
+			6 => Self::Really,
+			7 => Self::Rest,
+			8 => Self::Scoot,
+			9 => Self::Scratch,
+			10 => Self::Scream,
+			11 => Self::SleepSitting,
+			_ => Self::SleepStanding,
 		}
 	}
 
@@ -329,7 +329,6 @@ impl Animation {
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
 			Self::DeepThoughts => "Deep Thoughts",
-			Self::Doze => "Doze",
 			Self::Drag => "Drag",
 			Self::Eat => "Eat",
 			Self::EndRun => "End Run",
@@ -362,6 +361,7 @@ impl Animation {
 			Self::Scream => "Scream",
 			Self::Sleep => "Sleep",
 			Self::SleepSitting => "Sleep (Sitting)",
+			Self::SleepStanding => "Sleep (Standing)",
 			Self::Slide => "Slide",
 			Self::SlideDown => "Slide Down",
 			Self::Sneeze => "Sneeze",
@@ -464,7 +464,6 @@ impl Animation {
 			Self::DangleFall |
 			Self::DangleRecover |
 			Self::DeepThoughts |
-			Self::Doze |
 			Self::Drag |
 			Self::Eat |
 			Self::EndRun |
@@ -496,6 +495,7 @@ impl Animation {
 			Self::Scream |
 			Self::Sleep |
 			Self::SleepSitting |
+			Self::SleepStanding |
 			Self::Slide |
 			Self::SlideDown |
 			Self::Sneeze |
@@ -586,8 +586,8 @@ impl Animation {
 			Self::DeepThoughts |
 				Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Drag => Some(Self::Drag),
-			Self::Doze |
-				Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
+			Self::Eat |
+				Self::SleepStanding => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
 			Self::Fall |
 				Self::GraspingFall => Some(Self::GraspingFall),
 			Self::Jump => Some(choose(&[
@@ -706,7 +706,6 @@ impl Animation {
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
 			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
-			Self::Doze => scenes::doze(),
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
 			Self::Fall => fixed!(FALL),
@@ -738,6 +737,7 @@ impl Animation {
 			Self::Scream => fixed!(SCREAM),
 			Self::Sleep => scenes::sleep(),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
+			Self::SleepStanding => fixed!(SLEEP_STANDING),
 			Self::Slide => fixed!(SLIDE),
 			Self::SlideDown => fixed!(SLIDE_DOWN),
 			Self::Sneeze => fixed!(SNEEZE),

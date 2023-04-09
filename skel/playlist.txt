@@ -10,28 +10,28 @@
 #10  Chase a Martian
 #11  Cry
 #12  Dance
-#13  Doze
-#14  Eat
-#15  Flop
-#16  Handstand
-#17  Hop
-#18  Jump
-#19  Lay Down
-#20  Leg Lifts
-#21  Look Down
-#22  Nah…
-#23  Play Dead
-#24  Popcorn
-#25  Really?!
-#26  Rest
-#27  Roll
-#28  Rotate
-#29  Run
-#30  Scoot
-#31  Scratch
-#32  Scream
-#33  Sleep
-#34  Sleep (Sitting)
+#13  Eat
+#14  Flop
+#15  Handstand
+#16  Hop
+#17  Jump
+#18  Lay Down
+#19  Leg Lifts
+#20  Look Down
+#21  Nah…
+#22  Play Dead
+#23  Popcorn
+#24  Really?!
+#25  Rest
+#26  Roll
+#27  Rotate
+#28  Run
+#29  Scoot
+#30  Scratch
+#31  Scream
+#32  Sleep
+#33  Sleep (Sitting)
+#34  Sleep (Standing)
 #35  Slide
 #36  Sneeze
 #37  Spin

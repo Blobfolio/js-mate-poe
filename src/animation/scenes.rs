@@ -659,6 +659,21 @@ pub(super) const SLEEP_SITTING: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::SleepStanding`.
+pub(super) const SLEEP_STANDING: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F003, Frame::F003, Frame::F006, Frame::F003, Frame::F006,
+		Frame::F007,
+	])
+		.with_repeat(45, 5)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(200, &[
+		Frame::F006, Frame::F007, Frame::F007, Frame::F006, Frame::F003,
+		Frame::F003, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Slide`.
 pub(super) const SLIDE: &[Scene] = &[
 	Scene::new(100, &[
@@ -957,22 +972,6 @@ pub(super) const fn chase_a_martian_child(w: u16) -> SceneList {
 			.with_move_to(Position::new((repeat as i32 + 1) * -20 * 4, 0))
 			.with_repeat(repeat * 4, 0)
 			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES)
-	]))
-}
-
-/// # For `Animation::Doze`.
-pub(super) fn doze() -> SceneList {
-	let repeat = 20 + Universe::rand_u16(10);
-
-	SceneList::new(SceneListKind::Dynamic2([
-		Scene::new(200, &[
-			Frame::F003, Frame::F006, Frame::F007,
-			Frame::F007, Frame::F006, Frame::F007, Frame::F007,
-		])
-			.with_repeat(repeat, 5)
-			.with_flags(Scene::GRAVITY),
-		Scene::new(200, &[Frame::F007, Frame::F006, Frame::F003])
-			.with_flags(Scene::GRAVITY),
 	]))
 }
 
