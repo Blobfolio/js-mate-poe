@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 74; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 75; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -68,6 +68,7 @@ pub(crate) enum Animation {
 	Dance,
 	Doze,
 	Eat,
+	Flop,
 	Handstand,
 	Hop,
 	Jump,
@@ -164,7 +165,7 @@ impl Animation {
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep |
 			Self::ChaseAMartian | Self::Cry | Self::Dance | Self::Doze |
-			Self::Eat | Self::Handstand | Self::Hop | Self::Jump |
+			Self::Eat | Self::Flop | Self::Handstand | Self::Hop | Self::Jump |
 			Self::LayDown | Self::LegLifts | Self::LookDown | Self::Nah |
 			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
 			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
@@ -192,18 +193,19 @@ impl Animation {
 	/// # Default Common Animations.
 	///
 	/// This class of animations has a 25% chance of happening, meaning each
-	/// individually occurs about 2.5% of the time.
+	/// individually occurs about 2.27% of the time.
 	fn default_common() -> Self {
-		match Universe::rand() % 10 {
+		match Universe::rand() % 11 {
 			0 => Self::Beg,
 			1 => Self::Dance,
 			2 => Self::Eat,
-			3 => Self::Handstand,
-			4 => Self::Hop,
-			5 => Self::LayDown,
-			6 => Self::LookDown,
-			7 => Self::Roll,
-			8 => Self::Rotate,
+			3 => Self::Flop,
+			4 => Self::Handstand,
+			5 => Self::Hop,
+			6 => Self::LayDown,
+			7 => Self::LookDown,
+			8 => Self::Roll,
+			9 => Self::Rotate,
 			_ => Self::Spin,
 		}
 	}
@@ -302,6 +304,7 @@ impl Animation {
 			Self::Eat => "Eat",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
+			Self::Flop => "Flop",
 			Self::FlowerChild => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
@@ -417,8 +420,8 @@ impl Animation {
 			Self::ClimbDown | Self::ClimbUp | Self::Cry | Self::Dance |
 			Self::DangleFall | Self::DangleRecover | Self::DeepThoughts |
 			Self::Doze | Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
-			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
-			Self::LayDown | Self::LegLifts | Self::LookDown |
+			Self::Flop | Self::GraspingFall | Self::Handstand | Self::Hop |
+			Self::Jump | Self::LayDown | Self::LegLifts | Self::LookDown |
 			Self::Nah | Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
 			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
 			Self::Really | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
@@ -628,6 +631,7 @@ impl Animation {
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
 			Self::Fall => fixed!(FALL),
+			Self::Flop => fixed!(FLOP),
 			Self::FlowerChild => fixed!(FLOWER_CHILD),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
@@ -749,8 +753,8 @@ mod tests {
 
 		assert_eq!(
 			set.len(),
-			31,
-			"Failed to choose all 31 default possibilities in 5000 tries."
+			32,
+			"Failed to choose all 32 default possibilities in 5000 tries."
 		);
 	}
 

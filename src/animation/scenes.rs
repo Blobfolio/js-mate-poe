@@ -296,6 +296,22 @@ pub(super) const FALL: &[Scene] = &[
 		.with_flags(Scene::EASE_IN),
 ];
 
+/// # For `Animation::Flop`.
+pub(super) const FLOP: &[Scene] = &[
+	Scene::new(100, &[Frame::F008, Frame::F009, Frame::F009, Frame::F009])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F109, Frame::F088])
+		.with_move_to(Position::new(-12, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(5000, &[Frame::F088])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F117, Frame::F109])
+		.with_move_to(Position::new(12, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F009, Frame::F008])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::FlowerChild`.
 pub(super) const FLOWER_CHILD: &[Scene] = &[
 	Scene::new(200, &[
