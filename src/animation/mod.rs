@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 73; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 74; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -64,6 +64,7 @@ pub(crate) enum Animation {
 	Blink,
 	BoredSleep,
 	ChaseAMartian,
+	Cry,
 	Dance,
 	Doze,
 	Eat,
@@ -162,14 +163,14 @@ impl Animation {
 			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
 			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
 			Self::Bleat | Self::Blink | Self::BoredSleep |
-			Self::ChaseAMartian | Self::Dance | Self::Doze | Self::Eat |
-			Self::Handstand | Self::Hop | Self::Jump | Self::LayDown |
-			Self::LegLifts | Self::LookDown | Self::Nah | Self::PlayDead |
-			Self::Popcorn | Self::Really | Self::Rest | Self::Roll |
-			Self::Rotate | Self::Run | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::Sneeze |
-			Self::Spin | Self::Stargaze | Self::Tornado | Self::Urinate |
-			Self::Walk | Self::Yoyo
+			Self::ChaseAMartian | Self::Cry | Self::Dance | Self::Doze |
+			Self::Eat | Self::Handstand | Self::Hop | Self::Jump |
+			Self::LayDown | Self::LegLifts | Self::LookDown | Self::Nah |
+			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
+			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
+			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
+			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Tornado |
+			Self::Urinate | Self::Walk | Self::Yoyo
 		)
 	}
 }
@@ -213,20 +214,21 @@ impl Animation {
 	/// should play less often.
 	///
 	/// This class of animations has a 9% chance of happening, meaning each
-	/// individually occurs about 0.75% of the time.
+	/// individually occurs about 0.69% of the time.
 	fn default_rare() -> Self {
-		match Universe::rand() % 12 {
+		match Universe::rand() % 13 {
 			0 => Self::Blink,
 			1 => Self::BoredSleep,
-			2 => Self::Doze,
-			3 => Self::LegLifts,
-			4 => Self::Nah,
-			5 => Self::PlayDead,
-			6 => Self::Popcorn,
-			7 => Self::Really,
-			8 => Self::Rest,
-			9 => Self::Scoot,
-			10 => Self::Scratch,
+			2 => Self::Cry,
+			3 => Self::Doze,
+			4 => Self::LegLifts,
+			5 => Self::Nah,
+			6 => Self::PlayDead,
+			7 => Self::Popcorn,
+			8 => Self::Really,
+			9 => Self::Rest,
+			10 => Self::Scoot,
+			11 => Self::Scratch,
 			_ => Self::Scream,
 		}
 	}
@@ -290,6 +292,7 @@ impl Animation {
 			Self::ChaseAMartianChild => "Chase a Martian (Child)",
 			Self::ClimbDown => "Climb Down",
 			Self::ClimbUp => "Climb Up",
+			Self::Cry => "Cry",
 			Self::Dance => "Dance",
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
@@ -411,9 +414,9 @@ impl Animation {
 			Self::BeginRun | Self::BigFish | Self::BlackSheepChase |
 			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
 			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
-			Self::ClimbDown | Self::ClimbUp | Self::Dance | Self::DangleFall |
-			Self::DangleRecover | Self::DeepThoughts | Self::Doze |
-			Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
+			Self::ClimbDown | Self::ClimbUp | Self::Cry | Self::Dance |
+			Self::DangleFall | Self::DangleRecover | Self::DeepThoughts |
+			Self::Doze | Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
 			Self::GraspingFall | Self::Handstand | Self::Hop | Self::Jump |
 			Self::LayDown | Self::LegLifts | Self::LookDown |
 			Self::Nah | Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
@@ -616,6 +619,7 @@ impl Animation {
 			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
 			Self::ClimbDown => fixed!(CLIMB_DOWN),
 			Self::ClimbUp => fixed!(CLIMB_UP),
+			Self::Cry => fixed!(CRY),
 			Self::Dance => fixed!(DANCE),
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
@@ -720,37 +724,33 @@ mod tests {
 
 	#[test]
 	fn t_choose() {
-		let set = &[
+		let possible = &[
 			Animation::Abduction,
 			Animation::ClimbUp,
 			Animation::Run,
 			Animation::Splat,
 		];
-		let mut all = Vec::with_capacity(5000);
-		for _ in 0..5000 {
-			all.push(choose(set) as u8);
-		}
+		let set = (0..5_000_u16).into_iter()
+			.map(|_| choose(possible) as u8)
+			.collect::<HashSet::<u8>>();
 
-		all.sort_unstable();
-		all.dedup();
 		assert_eq!(
-			all.len(),
+			possible.len(),
 			set.len(),
-			"Failed to choose all {} possibilities in 5000 tries.", set.len()
+			"Failed to choose all {} possibilities in 5000 tries.", possible.len()
 		);
 	}
 
 	#[test]
 	fn t_default() {
-		let mut set = HashSet::<u8>::default();
-		for _ in 0..5_000 {
-			let next = Animation::default_choice() as u8;
-			set.insert(next);
-		}
+		let set = (0..5_000_u16).into_iter()
+			.map(|_| Animation::default_choice() as u8)
+			.collect::<HashSet::<u8>>();
+
 		assert_eq!(
 			set.len(),
-			30,
-			"Failed to choose all 30 default possibilities in 5000 tries."
+			31,
+			"Failed to choose all 31 default possibilities in 5000 tries."
 		);
 	}
 

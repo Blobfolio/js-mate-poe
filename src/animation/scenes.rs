@@ -214,6 +214,15 @@ pub(super) const CLIMB_UP: &[Scene] = &[
 		.with_repeat(20, 0),
 ];
 
+/// # For `Animation::Cry`.
+pub(super) const CRY: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F081, Frame::F082, Frame::F081, Frame::F082,
+		Frame::F081, Frame::F082, Frame::F081, Frame::F082,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Dance`.
 pub(super) const DANCE: &[Scene] = &[
 	Scene::new(150, &[Frame::F072, Frame::F072, Frame::F073])
