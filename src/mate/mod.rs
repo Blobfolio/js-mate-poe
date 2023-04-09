@@ -34,7 +34,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, h: bool, rx: bool, ry: bool, animation: i8);
+	fn toggle_wrapper_classes(el: &Element, rx: bool, ry: bool, frame: i16, scene: i8);
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poePlaySound")]
@@ -307,7 +307,7 @@ impl Mate {
 		if frame as u8 != self.frame as u8 {
 			// Mark the class as having changed too if the old or new frame is
 			// a halfsie.
-			if frame.half_frame() || self.frame.half_frame() {
+			if -1 != frame.dba() || -1 != self.frame.dba() {
 				self.flags.mark_class_changed();
 			}
 
@@ -543,9 +543,9 @@ impl Mate {
 			if self.flags.class_changed() {
 				toggle_wrapper_classes(
 					&wrapper,
-					self.frame.half_frame(),
 					self.flags.flipped_x(),
 					self.flags.flipped_y(),
+					self.frame.dba(),
 					match self.animation {
 						None => 0,
 						Some(Animation::Drag) => 1,
