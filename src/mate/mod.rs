@@ -145,6 +145,9 @@ impl Mate {
 			if let Some(a) = self.child() { a }
 			else { return };
 
+		// Make sure the mate has the correct geometry.
+		child.pretick_resize();
+
 		// Flip to match.
 		child.flags.clear_flips();
 		child.flags.flip_x(Some(self.flags.flipped_x()));
