@@ -465,7 +465,8 @@ impl Animation {
 				Self::BlackSheepChase |
 				Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
-			Self::BoredSleep |
+			Self::Bleat |
+				Self::BoredSleep |
 				Self::Bounce |
 				Self::EndRun |
 				Self::LayDown |
