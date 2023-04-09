@@ -264,9 +264,8 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 		.with_repeat(15, 5),
 	Scene::new(50, &[Frame::F049, Frame::F050])
 		.with_repeat(12, 0),
-	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009])
+	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
 		.with_flags(Scene::FLIP_X_NEXT),
-	Scene::new(50, &[Frame::F008, Frame::F003]),
 ];
 
 /// # For `Animation::Drag`.
@@ -553,7 +552,7 @@ pub(super) const REALLY: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 	Scene::new(150, &[
 		Frame::F098, Frame::F098, Frame::F098, Frame::F098,
-		Frame::F008, Frame::F003,
+		Frame::F008,
 	])
 		.with_flags(Scene::GRAVITY),
 ];
