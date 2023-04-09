@@ -507,7 +507,8 @@ impl Animation {
 			Self::DeepThoughts |
 				Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Drag => Some(Self::Drag),
-			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
+			Self::Doze |
+				Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
 			Self::Fall |
 				Self::GraspingFall => Some(Self::GraspingFall),
 			Self::Jump => Some(choose(&[
