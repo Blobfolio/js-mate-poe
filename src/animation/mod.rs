@@ -62,7 +62,6 @@ pub(crate) enum Animation {
 	BlackSheepRomance,
 	Bleat,
 	Blink,
-	BoredSleep,
 	ChaseAMartian,
 	Cry,
 	Dance,
@@ -87,6 +86,7 @@ pub(crate) enum Animation {
 	Scratch,
 	Scream,
 	Sleep,
+	SleepSitting,
 	Slide,
 	Sneeze,
 	Spin,
@@ -161,17 +161,48 @@ impl Animation {
 	pub(crate) const fn playable(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
-			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
-			Self::Bleat | Self::Blink | Self::BoredSleep |
-			Self::ChaseAMartian | Self::Cry | Self::Dance | Self::Doze |
-			Self::Eat | Self::Flop | Self::Handstand | Self::Hop | Self::Jump |
-			Self::LayDown | Self::LegLifts | Self::LookDown | Self::Nah |
-			Self::PlayDead | Self::Popcorn | Self::Really | Self::Rest |
-			Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
-			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
-			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Tornado |
-			Self::Urinate | Self::Walk | Self::Yoyo
+			Self::Abduction |
+			Self::BathDive |
+			Self::BeginRun |
+			Self::Beg |
+			Self::BigFish |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::Bleat |
+			Self::Blink |
+			Self::ChaseAMartian |
+			Self::Cry |
+			Self::Dance |
+			Self::Doze |
+			Self::Eat |
+			Self::Flop |
+			Self::Handstand |
+			Self::Hop |
+			Self::Jump |
+			Self::LayDown |
+			Self::LegLifts |
+			Self::LookDown |
+			Self::Nah |
+			Self::PlayDead |
+			Self::Popcorn |
+			Self::Really |
+			Self::Rest |
+			Self::Roll |
+			Self::Rotate |
+			Self::Run |
+			Self::Scoot |
+			Self::Scratch |
+			Self::Scream |
+			Self::SleepSitting |
+			Self::Sleep |
+			Self::Slide |
+			Self::Sneeze |
+			Self::Spin |
+			Self::Stargaze |
+			Self::Tornado |
+			Self::Urinate |
+			Self::Walk |
+			Self::Yoyo
 		)
 	}
 }
@@ -220,18 +251,18 @@ impl Animation {
 	fn default_rare() -> Self {
 		match Universe::rand() % 13 {
 			0 => Self::Blink,
-			1 => Self::BoredSleep,
-			2 => Self::Cry,
-			3 => Self::Doze,
-			4 => Self::LegLifts,
-			5 => Self::Nah,
-			6 => Self::PlayDead,
-			7 => Self::Popcorn,
-			8 => Self::Really,
-			9 => Self::Rest,
-			10 => Self::Scoot,
-			11 => Self::Scratch,
-			_ => Self::Scream,
+			1 => Self::Cry,
+			2 => Self::Doze,
+			3 => Self::LegLifts,
+			4 => Self::Nah,
+			5 => Self::PlayDead,
+			6 => Self::Popcorn,
+			7 => Self::Really,
+			8 => Self::Rest,
+			9 => Self::Scoot,
+			10 => Self::Scratch,
+			11 => Self::Scream,
+			_ => Self::SleepSitting,
 		}
 	}
 
@@ -288,7 +319,6 @@ impl Animation {
 			Self::Bleat => "Bleat",
 			Self::Blink => "Blink",
 			Self::Boing => "Boing!",
-			Self::BoredSleep => "Bored Sleep",
 			Self::Bounce => "Bounce",
 			Self::ChaseAMartian => "Chase a Martian",
 			Self::ChaseAMartianChild => "Chase a Martian (Child)",
@@ -331,6 +361,7 @@ impl Animation {
 			Self::Scratch => "Scratch",
 			Self::Scream => "Scream",
 			Self::Sleep => "Sleep",
+			Self::SleepSitting => "Sleep (Sitting)",
 			Self::Slide => "Slide",
 			Self::SlideDown => "Slide Down",
 			Self::Sneeze => "Sneeze",
@@ -413,23 +444,71 @@ impl Animation {
 	pub(crate) const fn primary(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BathCoolDown | Self::BathDive | Self::Beg |
-			Self::BeginRun | Self::BigFish | Self::BlackSheepChase |
-			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
-			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
-			Self::ClimbDown | Self::ClimbUp | Self::Cry | Self::Dance |
-			Self::DangleFall | Self::DangleRecover | Self::DeepThoughts |
-			Self::Doze | Self::Drag | Self::Eat | Self::EndRun | Self::Fall |
-			Self::Flop | Self::GraspingFall | Self::Handstand | Self::Hop |
-			Self::Jump | Self::LayDown | Self::LegLifts | Self::LookDown |
-			Self::Nah | Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
-			Self::Really | Self::Rest | Self::Roll | Self::Rotate | Self::Run |
-			Self::RunDown | Self::RunUpsideDown | Self::Scoot | Self::Scratch |
-			Self::Scream | Self::Sleep | Self::Slide | Self::SlideDown |
-			Self::Sneeze | Self::Spin | Self::Splat | Self::Stargaze |
-			Self::Tornado | Self::TornadoExit | Self::Urinate | Self::Walk |
-			Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::Abduction |
+			Self::BathCoolDown |
+			Self::BathDive |
+			Self::Beg |
+			Self::BeginRun |
+			Self::BigFish |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::Bleat |
+			Self::Blink |
+			Self::Boing |
+			Self::Bounce |
+			Self::ChaseAMartian |
+			Self::ClimbDown |
+			Self::ClimbUp |
+			Self::Cry |
+			Self::Dance |
+			Self::DangleFall |
+			Self::DangleRecover |
+			Self::DeepThoughts |
+			Self::Doze |
+			Self::Drag |
+			Self::Eat |
+			Self::EndRun |
+			Self::Fall |
+			Self::Flop |
+			Self::GraspingFall |
+			Self::Handstand |
+			Self::Hop |
+			Self::Jump |
+			Self::LayDown |
+			Self::LegLifts |
+			Self::LookDown |
+			Self::Nah |
+			Self::PlayDead |
+			Self::Popcorn |
+			Self::ReachCeiling |
+			Self::ReachFloor |
+			Self::ReachSide1 |
+			Self::ReachSide2 |
+			Self::Really |
+			Self::Rest |
+			Self::Roll |
+			Self::Rotate |
+			Self::Run |
+			Self::RunDown |
+			Self::RunUpsideDown |
+			Self::Scoot |
+			Self::Scratch |
+			Self::Scream |
+			Self::Sleep |
+			Self::SleepSitting |
+			Self::Slide |
+			Self::SlideDown |
+			Self::Sneeze |
+			Self::Spin |
+			Self::Splat |
+			Self::Stargaze |
+			Self::Tornado |
+			Self::TornadoExit |
+			Self::Urinate |
+			Self::Walk |
+			Self::WalkUpsideDown |
+			Self::WallSlide |
+			Self::Yoyo
 		)
 	}
 }
@@ -472,7 +551,6 @@ impl Animation {
 				Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
 			Self::Bleat |
-				Self::BoredSleep |
 				Self::Bounce |
 				Self::EndRun |
 				Self::LayDown |
@@ -482,6 +560,7 @@ impl Animation {
 				Self::Rest |
 				Self::Rotate |
 				Self::Sleep |
+				Self::SleepSitting |
 				Self::Slide |
 				Self::Splat |
 				Self::Urinate => Some(Self::Walk),
@@ -617,7 +696,6 @@ impl Animation {
 			Self::Bleat => fixed!(BLEAT),
 			Self::Blink => scenes::blink(),
 			Self::Boing => fixed!(BOING),
-			Self::BoredSleep => scenes::bored_sleep(),
 			Self::Bounce => fixed!(BOUNCE),
 			Self::ChaseAMartian => scenes::chase_a_martian(width),
 			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
@@ -659,6 +737,7 @@ impl Animation {
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
 			Self::Sleep => scenes::sleep(),
+			Self::SleepSitting => fixed!(SLEEP_SITTING),
 			Self::Slide => fixed!(SLIDE),
 			Self::SlideDown => fixed!(SLIDE_DOWN),
 			Self::Sneeze => fixed!(SNEEZE),

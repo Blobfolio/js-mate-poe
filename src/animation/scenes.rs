@@ -644,6 +644,21 @@ pub(super) const SCREAM: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::SleepSitting`.
+pub(super) const SLEEP_SITTING: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F003, Frame::F008, Frame::F009, Frame::F031, Frame::F032,
+		Frame::F031, Frame::F032, Frame::F033
+	])
+		.with_repeat(45, 7)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(200, &[
+		Frame::F032, Frame::F033, Frame::F033, Frame::F032, Frame::F031,
+		Frame::F031, Frame::F031, Frame::F009, Frame::F008,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Slide`.
 pub(super) const SLIDE: &[Scene] = &[
 	Scene::new(100, &[
@@ -912,25 +927,6 @@ pub(super) fn blink() -> SceneList {
 			.with_repeat(repeat, 0)
 			.with_flags(Scene::GRAVITY),
 		Scene::new(200, &[Frame::F009, Frame::F008])
-			.with_flags(Scene::GRAVITY),
-	]))
-}
-
-/// # For `Animation::BoredSleep`.
-pub(super) fn bored_sleep() -> SceneList {
-	let repeat = 30 + Universe::rand_u16(10);
-
-	SceneList::new(SceneListKind::Dynamic2([
-		Scene::new(200, &[
-			Frame::F003, Frame::F008, Frame::F009, Frame::F031, Frame::F032,
-			Frame::F031, Frame::F032, Frame::F033, Frame::F033,
-		])
-			.with_repeat(repeat, 7)
-			.with_flags(Scene::GRAVITY),
-		Scene::new(200, &[
-			Frame::F032, Frame::F033, Frame::F033, Frame::F032, Frame::F031,
-			Frame::F031, Frame::F031, Frame::F009, Frame::F008,
-		])
 			.with_flags(Scene::GRAVITY),
 	]))
 }
