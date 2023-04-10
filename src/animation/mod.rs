@@ -13,32 +13,29 @@ use crate::{
 	Universe,
 };
 use scene::SceneListKind;
+use std::sync::atomic::{
+	AtomicU16,
+	Ordering::SeqCst,
+};
 
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
 #[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 77; // The highest Animation ID.
 
-/// # Entrance Animations.
-const ENTRANCE: &[Animation] = &[
-	Animation::BathDive,
-	Animation::BigFish,
-	Animation::BlackSheepChase,
-	Animation::BlackSheepRomance,
-	Animation::Stargaze,
-	Animation::Yoyo,
-];
 
-/// # Start-Up Animations.
-const FIRST: &[Animation] = &[
-	Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall,
-	Animation::BathDive,
-	Animation::BigFish,
-	Animation::BlackSheepChase,
-	Animation::BlackSheepRomance,
-	Animation::Stargaze,
-	Animation::Yoyo,
-];
+
+/// # Special Default.
+///
+/// Keep track of the "special" default animation selections so we don't end up
+/// playing the same thing back-to-back.
+static LAST_SPECIAL: AtomicU16 = AtomicU16::new(0);
+
+/// # Last Entrance Choice.
+///
+/// Same as for the "special" defaults, we want to ensure that entrances are
+/// unique for at least two slots.
+static LAST_ENTRANCE: AtomicU16 = AtomicU16::new(0);
 
 
 
@@ -211,93 +208,59 @@ impl Animation {
 	}
 }
 
+// Generates Animation::default_choice.
+include!(concat!(env!("OUT_DIR"), "/default-animations.rs"));
+
 impl Animation {
-	/// # Default Choice.
-	///
-	/// Return a generic default animation for use in contexts where an
-	/// explicit one is unspecified.
-	pub(crate) fn default_choice() -> Self {
-		let rand = Universe::rand() % 100;
-		if rand < 40 { Self::Walk }
-		else if rand < 65 { Self::BeginRun }
-		else if rand < 90 { Self::default_common() }
-		else if rand < 99 { Self::default_rare() }
-		else { Self::default_secret() }
-	}
-
-	/// # Default Common Animations.
-	///
-	/// This class of animations has a 25% chance of happening, meaning each
-	/// individually occurs about 2.08% of the time.
-	fn default_common() -> Self {
-		match Universe::rand() % 12 {
-			0 => Self::Beg,
-			1 => Self::Dance,
-			2 => Self::Eat,
-			3 => Self::Flop,
-			4 => Self::Handstand,
-			5 => Self::Hop,
-			6 => Self::LayDown,
-			7 => Self::LookDown,
-			8 => Self::LookUp,
-			9 => Self::Roll,
-			10 => Self::Rotate,
-			_ => Self::Spin,
-		}
-	}
-
-	/// # Default Rare Animations.
-	///
-	/// These are a little more noticeable than the "common" animations, so
-	/// should play less often.
-	///
-	/// This class of animations has a 9% chance of happening, meaning each
-	/// individually occurs about 0.69% of the time.
-	fn default_rare() -> Self {
-		match Universe::rand() % 13 {
-			0 => Self::Blink,
-			1 => Self::Cry,
-			2 => Self::LegLifts,
-			3 => Self::Nah,
-			4 => Self::PlayDead,
-			5 => Self::Popcorn,
-			6 => Self::Really,
-			7 => Self::Rest,
-			8 => Self::Scoot,
-			9 => Self::Scratch,
-			10 => Self::Scream,
-			11 => Self::SleepSitting,
-			_ => Self::SleepStanding,
-		}
-	}
-
-	/// # Default Very Rare Animations.
-	///
-	/// These animations are meant to be surprising, and so are tuned down low.
-	///
-	/// This class has only a 1% chance of occuring, meaning each individually
-	/// occurs about 0.16% of the time.
-	fn default_secret() -> Self {
-		match Universe::rand() % 6 {
-			0 => Self::Abduction, // Exit/Sound.
-			1 => Self::Bleat,     // Sound.
-			2 => Self::Sneeze,    // Sound.
-			3 => Self::Tornado,   // Exit.
-			4 => Self::Urinate,   // Uncivilized.
-			_ => Self::Yawn,      // Sound.
-		}
-	}
-
 	/// # Entrance Choice.
 	///
-	/// Same as `Animation::default_choice`, but for cases where the mate is
-	/// currently positioned off-screen.
-	pub(crate) fn entrance_choice() -> Self { choose(ENTRANCE) }
+	/// Return a default entrance animation (for when the mate is offscreen).
+	pub(crate) fn entrance_choice() -> Self {
+		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
+		loop {
+			let next = match Universe::rand_mod(6) {
+				0 => Self::BathDive,
+				1 => Self::BigFish,
+				2 => Self::BlackSheepChase,
+				3 => Self::BlackSheepRomance,
+				4 => Self::Stargaze,
+				_ => Self::Yoyo,
+			};
+
+			if next as u8 != last[0] && next as u8 != last[1] {
+				last.rotate_right(1);
+				last[0] = next as u8;
+				LAST_ENTRANCE.store(u16::from_le_bytes(last), SeqCst);
+				return next;
+			}
+		}
+	}
 
 	/// # First Choice.
 	///
-	/// Return a random start-up animation for a newly-created (primary) mate.
-	pub(crate) fn first_choice() -> Self { choose(FIRST) }
+	/// This is the same as `Animation::entrance_choice`, but with the
+	/// additional, weighted possibility of falling from above.
+	pub(crate) fn first_choice() -> Self {
+		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
+		loop {
+			let next = match Universe::rand_mod(12) {
+				0 => Self::BathDive,
+				1 => Self::BigFish,
+				2 => Self::BlackSheepChase,
+				3 => Self::BlackSheepRomance,
+				4 => Self::Stargaze,
+				5 => Self::Yoyo,
+				_ => Self::Fall,
+			};
+
+			if next as u8 != last[0] && next as u8 != last[1] {
+				last.rotate_right(1);
+				last[0] = next as u8;
+				LAST_ENTRANCE.store(u16::from_le_bytes(last), SeqCst);
+				return next;
+			}
+		}
+	}
 }
 
 #[cfg(any(test, feature = "director"))]
@@ -558,7 +521,10 @@ impl Animation {
 			Self::BeginRun |
 				Self::BlackSheepChase |
 				Self::Scream => Some(Self::Run),
-			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
+			Self::BigFish => Some(
+				if 0 == Universe::rand_mod(3) { Self::Sneeze }
+				else { Self::Walk }
+			),
 			Self::Bleat |
 				Self::Bounce |
 				Self::EndRun |
@@ -574,68 +540,71 @@ impl Animation {
 				Self::Slide |
 				Self::Splat |
 				Self::Urinate => Some(Self::Walk),
-			Self::Boing => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Walk, Self::Walk, Self::Walk, Self::Walk,
-				Self::BeginRun,
-			])),
+			Self::Boing => Some(match Universe::rand_mod(13) {
+				0..=7 => Self::Rotate,
+				8..=11 => Self::Walk,
+				_ => Self::BeginRun,
+			}),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
 			Self::ClimbUp |
 				Self::ReachSide1 => Some(Self::ClimbUp),
-			Self::DangleFall => Some(choose(&[
-				Self::DangleRecover, Self::DangleRecover, Self::DangleRecover,
-				Self::GraspingFall,
-			])),
+			Self::DangleFall => Some(
+				if 0 == Universe::rand_mod(4) { Self::GraspingFall }
+				else { Self::DangleRecover }
+			),
 			Self::DangleRecover |
-				Self::ReachCeiling => Some(choose(&[
-					Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-					Self::DeepThoughts,
-				])),
+				Self::ReachCeiling => Some(
+					if 0 == Universe::rand_mod(5) { Self::DeepThoughts }
+					else { Self::WalkUpsideDown }
+				),
 			Self::DeepThoughts |
 				Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat |
-				Self::SleepStanding => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
+				Self::SleepStanding => Some(
+					if 0 == Universe::rand_mod(3) { Self::Rest }
+					else { Self::Walk }
+				),
 			Self::Fall |
 				Self::GraspingFall => Some(Self::GraspingFall),
-			Self::Jump => Some(choose(&[
-				Self::Run, Self::Run,
-				Self::Slide, Self::Slide,
-				Self::Jump,
-			])),
+			Self::Jump => Some(match Universe::rand_mod(5) {
+				0..=1 => Self::Run,
+				2..=3 => Self::Slide,
+				_ => Self::Jump,
+			}),
 			Self::LegLifts => Some(Self::BeginRun),
-			Self::ReachSide2 => Some(choose(&[
-				Self::RunDown, Self::RunDown, Self::RunDown,
-				Self::ClimbDown,
-				Self::SlideDown,
-			])),
-			Self::Run => Some(choose(&[
-				Self::EndRun, Self::EndRun, Self::EndRun, Self::EndRun,
-				Self::Jump, Self::Jump, Self::Jump,
-				Self::Run, Self::Run,
-			])),
-			Self::RunDown => Some(choose(&[
-				Self::RunDown, Self::RunDown,
-				Self::SlideDown,
-			])),
-			Self::Scoot => Some(choose(&[
-				Self::Scoot, Self::Scoot, Self::Scoot, Self::Scoot,
-				Self::Rotate, Self::Rotate,
-				Self::Walk,
-			])),
+			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
+				0 => Self::ClimbDown,
+				1 => Self::SlideDown,
+				_ => Self::RunDown,
+			}),
+			Self::Run => Some(match Universe::rand_mod(8) {
+				0..=3 => Self::EndRun,
+				4..=5 => Self::Jump,
+				_ => Self::Run,
+			}),
+			Self::RunDown => Some(
+				if 0 == Universe::rand_mod(3) { Self::SlideDown }
+				else { Self::RunDown }
+			),
+			Self::Scoot => Some(match Universe::rand_mod(7) {
+				0..=3 => Self::Scoot,
+				4..=5 => Self::Rotate,
+				_ => Self::Walk,
+			}),
 			Self::SlideDown => Some(Self::SlideDown),
 			Self::Spin => Some(Self::PlayDead),
-			Self::Stargaze => Some(choose(&[Self::Nah, Self::Scream])),
+			Self::Stargaze => Some(
+				if 0 == Universe::rand() & 1 { Self::Nah }
+				else { Self::Scream }
+			),
 			Self::Tornado => Some(Self::TornadoExit),
-			Self::WalkUpsideDown => Some(choose(&[
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::DangleFall,
-				Self::DeepThoughts,
-			])),
+			Self::WalkUpsideDown => Some(match Universe::rand_mod(15) {
+				0 => Self::DangleFall,
+				1 => Self::DeepThoughts,
+				_ => Self::WalkUpsideDown,
+			}),
 			Self::WallSlide => Some(Self::WallSlide),
 			Self::Yawn => Some(Self::Sleep),
 			_ => None,
@@ -661,18 +630,18 @@ impl Animation {
 				Self::RunUpsideDown |
 				Self::WalkUpsideDown => Some(Self::ReachSide2),
 			Self::Fall => Some(Self::Bounce),
-			Self::GraspingFall => Some(choose(&[
-				Self::Splat, Self::Splat, Self::Splat,
-				Self::Bounce,
-				Self::PlayDead,
-			])),
+			Self::GraspingFall => Some(match Universe::rand_mod(5) {
+				0 => Self::Bounce,
+				1 => Self::PlayDead,
+				_ => Self::Splat,
+			}),
 			Self::Jump | Self::Hop => Some(Self::WallSlide),
 			Self::Tornado | Self::WallSlide => Some(Self::Rotate),
-			Self::Walk => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Scoot, Self::Scoot,
-				Self::ReachSide1,
-			])),
+			Self::Walk => Some(match Universe::rand_mod(8) {
+				0..=4 => Self::Rotate,
+				5..=6 => Self::Scoot,
+				_ => Self::ReachSide1,
+			}),
 			_ => None,
 		}
 	}
@@ -802,41 +771,10 @@ impl ExactSizeIterator for Animations {
 
 
 
-#[allow(clippy::cast_possible_truncation, unsafe_code)]
-/// # Random Choice.
-///
-/// Return a random animation from the set, or `None` if for some reason the
-/// set is empty.
-fn choose(set: &[Animation]) -> Animation {
-	let idx = (Universe::rand() % set.len() as u64) as usize;
-	unsafe { *(set.get_unchecked(idx)) }
-}
-
-
-
 #[cfg(test)]
 mod tests {
 	use super::*;
 	use std::collections::HashSet;
-
-	#[test]
-	fn t_choose() {
-		let possible = &[
-			Animation::Abduction,
-			Animation::ClimbUp,
-			Animation::Run,
-			Animation::Splat,
-		];
-		let set = (0..5_000_u16).into_iter()
-			.map(|_| choose(possible) as u8)
-			.collect::<HashSet::<u8>>();
-
-		assert_eq!(
-			possible.len(),
-			set.len(),
-			"Failed to choose all {} possibilities in 5000 tries.", possible.len()
-		);
-	}
 
 	#[test]
 	fn t_default() {

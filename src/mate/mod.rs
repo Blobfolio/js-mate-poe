@@ -225,7 +225,7 @@ impl Mate {
 		// it.
 		let animation_exit = animation.may_exit();
 		if animation_changed || ! animation_exit { self.flags.set_may_exit(false); }
-		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand() % 15 {
+		if animation_exit && ! self.flags.may_exit() && 10 == Universe::rand_mod(15) {
 			self.flags.set_may_exit(true);
 		}
 
@@ -241,9 +241,7 @@ impl Mate {
 		if animation.child().is_some() { Universe::set_assign_child(); }
 
 		#[cfg(feature = "director")]
-		if animation_changed {
-			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
-		}
+		debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
 	}
 
 	/// # Set Animation Starting Position.
@@ -708,7 +706,7 @@ impl Mate {
 	/// Return a random horizontal position within the boundaries of the
 	/// screen, used by some start-up/entrance animations.
 	fn random_x(&self) -> i32 {
-		i32::from(Universe::rand_u16(self.max_x() as u16 + 1))
+		i32::from(Universe::rand_mod(self.max_x() as u16 + 1))
 	}
 
 	/// # Mate Visibility.

@@ -177,9 +177,10 @@ impl Universe {
 }
 
 impl Universe {
+	#[inline]
 	/// # Random Value.
 	///
-	/// Return a random `u64`, using the xoshiro256 algorithm.
+	/// Return a random `u64` (xoshiro256).
 	pub(crate) fn rand() -> u64 {
 		let mut seeds = get_seeds();
 		let out = seeds[1].overflowing_mul(5).0.rotate_left(7).overflowing_mul(9).0;
@@ -191,36 +192,21 @@ impl Universe {
 	#[allow(clippy::cast_possible_truncation)]
 	/// # Random (Capped) U16.
 	///
-	/// Return a random number between `0..max`.
-	pub(crate) fn rand_u16(max: u16) -> u16 {
-		if max == 0 { 0 }
-		else { (Self::rand() % u64::from(max)) as u16 }
-	}
-
-	#[cfg(target_arch = "wasm32")]
-	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-	/// # Reseed Randomness.
-	fn reseed() {
-		// Use the JS Math.random() to give us a starting point. We can't
-		// cover the full u64 range because f64 isn't big enough, but the pool
-		// is large enough to get us started.
-		let mut seed: u64 = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
-
-		// Splitmix that seed four times to derive the four Xoshi seeds we'll
-		// actually be using for randomness, and save the result!
-		let mut seeds = [0_u64; 4];
-		for i in &mut seeds { *i = splitmix(&mut seed); }
-		set_seeds(&mut seeds);
-
-		// Print a debug message if we care about that sort of thing.
-		#[cfg(feature = "director")]
-		dom::debug!(format!(
-			"PNRG1: {:16x}\nPNRG2: {:16x}\nPNRG3: {:16x}\nPNRG4: {:16x}",
-			seeds[0],
-			seeds[1],
-			seeds[2],
-			seeds[3],
-		));
+	/// Return a random number between `0..max`, mitigating bias the same way
+	/// as `fastrand` (i.e. <https://lemire.me/blog/2016/06/30/fast-random-shuffling/>).
+	pub(crate) fn rand_mod(n: u16) -> u16 {
+		let mut r = Self::rand() as u16;
+		let mut hi = mul_high_u16(r, n);
+		let mut lo = r.wrapping_mul(n);
+		if lo < n {
+			let t = n.wrapping_neg() % n;
+			while lo < t {
+				r = Self::rand() as u16;
+				hi = mul_high_u16(r, n);
+				lo = r.wrapping_mul(n);
+			}
+		}
+		hi
 	}
 }
 
@@ -251,7 +237,7 @@ impl Universe {
 				FLAGS.fetch_or(Self::ACTIVE, SeqCst);
 
 				// Seed future randomness if we can.
-				#[cfg(target_arch = "wasm32")] Self::reseed();
+				#[cfg(target_arch = "wasm32")] reseed();
 
 				// Set up the DOM elements and event bindings, and begin the
 				// animation frame loop.
@@ -356,6 +342,7 @@ impl Universe {
 
 
 
+#[inline]
 /// # Get Seeds.
 fn get_seeds() -> [u64; 4] {
 	[
@@ -366,9 +353,36 @@ fn get_seeds() -> [u64; 4] {
 	]
 }
 
+#[inline]
+/// # High 16 Product.
+const fn mul_high_u16(a: u16, b: u16) -> u16 {
+	(((a as u32) * (b as u32)) >> 16) as u16
+}
+
+#[cfg(target_arch = "wasm32")]
+/// # Reseed Randomness.
+fn reseed() {
+	// Splitmix Math.random to give us a reasonable starting point for the
+	// subsequent Xoshi randomness.
+	let mut seed: u64 = js_random().to_bits();
+	let mut seeds = [0_u64; 4];
+	for i in &mut seeds { *i = splitmix(&mut seed); }
+	set_seeds(&mut seeds);
+
+	// Print a debug message if we care about that sort of thing.
+	#[cfg(feature = "director")]
+	dom::debug!(format!(
+		"PNRG1: {:016x}\nPNRG2: {:016x}\nPNRG3: {:016x}\nPNRG4: {:016x}",
+		seeds[0],
+		seeds[1],
+		seeds[2],
+		seeds[3],
+	));
+}
+
 /// # Set Seeds.
 fn set_seeds(seeds: &mut [u64; 4]) {
-	// If everything is zero, fill with reasonable defaults.
+	// We are unlikely to wind up with all zeroes, but just in case…
 	if seeds[0] == 0 && seeds[1] == 0 && seeds[2] == 0 && seeds[3] == 0 {
 		SEED1.store(0x8596_cc44_bef0_1aa0, SeqCst);
 		SEED2.store(0x98d4_0948_da60_19ae, SeqCst);
@@ -413,20 +427,19 @@ fn splitmix(seed: &mut u64) -> u64 {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::collections::HashSet;
 
 	#[test]
-	fn t_rand_u16() {
-		let mut all = Vec::with_capacity(5000);
-		for _ in 0..5000 {
-			let x = Universe::rand_u16(100);
-			assert!((0..100).contains(&x), "Random u16 out of range: {x}");
-			all.push(x);
-		}
+	fn t_rand() {
+		assert_eq!(Universe::rand_mod(0), 0, "Random zero broke!");
 
-		all.sort_unstable();
-		all.dedup();
+		let set = (0..5000_u16).into_iter()
+			.map(|_| Universe::rand_mod(100))
+			.collect::<HashSet<u16>>();
+
+		assert!(set.iter().all(|n| *n < 100), "Value(s) out of range.");
 		assert_eq!(
-			all.len(),
+			set.len(),
 			100,
 			"Failed to collect 100/100 possibilities in 5000 tries."
 		);
