@@ -40,4 +40,5 @@
 #40  Tornado
 #41  Urinate
 #42  Walk
-#43  Yo-Yo
+#43  Yawn
+#44  Yo-Yo

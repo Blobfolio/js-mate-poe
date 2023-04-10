@@ -155,7 +155,7 @@
 	<script>
 		// Render each individual frame in a grid.
 		// Add the masks.
-		const masks = ['m021', 'm103', 'm136'];
+		const masks = ['m021', 'm100', 'm133'];
 		const sprite = document.getElementById('sprite');
 		for (let i = 0; i < 173; ++i) {
 			// Check for a matching mask.
@@ -180,7 +180,7 @@
 
 			// Special/unused frames.
 			if (166 <= i) { frame.classList.add('empty'); }
-			else if (158 <= i) { frame.classList.add('unused'); }
+			else if (155 <= i) { frame.classList.add('unused'); }
 
 			frame.style.backgroundPosition = col + 'px 0px';
 			frame.setAttribute('data-frame', i);

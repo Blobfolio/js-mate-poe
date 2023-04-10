@@ -17,7 +17,7 @@ use scene::SceneListKind;
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 76; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 77; // The highest Animation ID.
 
 /// # Entrance Animations.
 const ENTRANCE: &[Animation] = &[
@@ -95,6 +95,7 @@ pub(crate) enum Animation {
 	Tornado,
 	Urinate,
 	Walk,
+	Yawn,
 	Yoyo,
 
 	// Primary animations of a special/supporting nature.
@@ -204,6 +205,7 @@ impl Animation {
 			Self::Tornado |
 			Self::Urinate |
 			Self::Walk |
+			Self::Yawn |
 			Self::Yoyo
 		)
 	}
@@ -279,10 +281,10 @@ impl Animation {
 		match Universe::rand() % 6 {
 			0 => Self::Abduction, // Exit/Sound.
 			1 => Self::Bleat,     // Sound.
-			2 => Self::Sleep,     // Sound.
-			3 => Self::Sneeze,    // Sound.
-			4 => Self::Tornado,   // Exit.
-			_ => Self::Urinate,   // Uncivilized.
+			2 => Self::Sneeze,    // Sound.
+			3 => Self::Tornado,   // Exit.
+			4 => Self::Urinate,   // Uncivilized.
+			_ => Self::Yawn,      // Sound.
 		}
 	}
 
@@ -381,6 +383,7 @@ impl Animation {
 			Self::Walk => "Walk",
 			Self::WalkUpsideDown => "Walk Upside Down",
 			Self::WallSlide => "Wall Slide",
+			Self::Yawn => "Yawn",
 			Self::Yoyo => "Yo-Yo",
 		}
 	}
@@ -513,6 +516,7 @@ impl Animation {
 			Self::Walk |
 			Self::WalkUpsideDown |
 			Self::WallSlide |
+			Self::Yawn |
 			Self::Yoyo
 		)
 	}
@@ -633,6 +637,7 @@ impl Animation {
 				Self::DeepThoughts,
 			])),
 			Self::WallSlide => Some(Self::WallSlide),
+			Self::Yawn => Some(Self::Sleep),
 			_ => None,
 		}
 	}
@@ -680,7 +685,7 @@ impl Animation {
 	///
 	/// Most of these are completely static, identical from run-to-run, but a
 	/// few have randomized or environmental modifiers, tweaking them slightly.
-	pub(crate) fn scenes(self, width: u16) -> SceneList {
+	pub(crate) const fn scenes(self, width: u16) -> SceneList {
 		macro_rules! fixed {
 			($var:ident) => (SceneList::new(SceneListKind::Fixed(scenes::$var)));
 		}
@@ -700,7 +705,7 @@ impl Animation {
 			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
 			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
 			Self::Bleat => fixed!(BLEAT),
-			Self::Blink => scenes::blink(),
+			Self::Blink => fixed!(BLINK),
 			Self::Boing => fixed!(BOING),
 			Self::Bounce => fixed!(BOUNCE),
 			Self::ChaseAMartian => scenes::chase_a_martian(width),
@@ -721,7 +726,7 @@ impl Animation {
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Hop => fixed!(HOP),
 			Self::Jump => fixed!(JUMP),
-			Self::LayDown => scenes::lay_down(),
+			Self::LayDown => fixed!(LAY_DOWN),
 			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::LookUp => fixed!(LOOK_UP),
@@ -742,7 +747,7 @@ impl Animation {
 			Self::Scoot => fixed!(SCOOT),
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
-			Self::Sleep => scenes::sleep(),
+			Self::Sleep => fixed!(SLEEP),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
 			Self::SleepStanding => fixed!(SLEEP_STANDING),
 			Self::Slide => fixed!(SLIDE),
@@ -756,10 +761,11 @@ impl Animation {
 			Self::StargazeChild => fixed!(STARGAZE_CHILD),
 			Self::Tornado => fixed!(TORNADO),
 			Self::TornadoExit => scenes::tornado_exit(width),
-			Self::Urinate => scenes::urinate(),
+			Self::Urinate => fixed!(URINATE),
 			Self::Walk => fixed!(WALK),
 			Self::WalkUpsideDown => fixed!(WALK_UPSIDE_DOWN),
 			Self::WallSlide => fixed!(WALL_SLIDE),
+			Self::Yawn => fixed!(YAWN),
 			Self::Yoyo => fixed!(YOYO),
 		}
 	}
