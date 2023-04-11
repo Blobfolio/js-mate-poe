@@ -15,13 +15,14 @@
 # recipes.
 ##
 
-pkg_id        := "rs_mate_poe"
-pkg_name      := "RS Mate Poe"
+pkg_id         := "rs_mate_poe"
+pkg_name       := "RS Mate Poe"
 
-cargo_dir     := "/tmp/" + pkg_id + "-cargo"
-doc_dir       := justfile_directory() + "/doc"
-dist_dir      := justfile_directory() + "/dist"
-skel_dir      := justfile_directory() + "/skel"
+cargo_dir      := "/tmp/" + pkg_id + "-cargo"
+demo_dir       := justfile_directory() + "/demo"
+dist_dir       := justfile_directory() + "/dist"
+skel_dir       := justfile_directory() + "/skel"
+demo_asset_dir := demo_dir + "/assets"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
@@ -234,6 +235,23 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--features firefox \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
+
+
+# Build Demo.
+@demo:
+	just _require-app "guff"
+
+	[ ! $(command -v fyi) ] || fyi task "Build: Reference pages"
+
+	[ ! -d "{{ demo_asset_dir }}" ] || rm -rf "{{ demo_asset_dir }}"
+	mkdir -p "{{ demo_asset_dir }}"
+
+	# Tiles first.
+	cp "{{ skel_dir }}/html/tiles.html" "{{ demo_dir }}"
+	cp "{{ skel_dir }}/img/poe-full.png" "{{ demo_asset_dir }}/poe.png"
+	guff -i "{{ skel_dir }}/scss/tiles.scss" -o "{{ demo_asset_dir }}/tiles.css"
+
+	just _fix-chown "{{ demo_dir }}"
 
 
 # Unit tests!
