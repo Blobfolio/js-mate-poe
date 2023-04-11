@@ -225,7 +225,7 @@ impl Mate {
 		// it.
 		let animation_exit = animation.may_exit();
 		if animation_changed || ! animation_exit { self.flags.set_may_exit(false); }
-		if animation_exit && ! self.flags.may_exit() && 10 == Universe::rand_mod(15) {
+		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand_mod(15) {
 			self.flags.set_may_exit(true);
 		}
 

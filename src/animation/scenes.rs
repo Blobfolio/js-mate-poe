@@ -855,7 +855,7 @@ pub(super) const URINATE: &[Scene] = &[
 
 /// # For `Animation::Walk`.
 pub(super) const WALK: &[Scene] = &[
-	Scene::new(150, &[Frame::F002, Frame::F003])
+	Scene::new(100, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(-168, 0))
 		.with_repeat(41, 0)
 		.with_flags(Scene::GRAVITY),
@@ -863,7 +863,7 @@ pub(super) const WALK: &[Scene] = &[
 
 /// # For `Animation::WalkUpsideDown`.
 pub(super) const WALK_UPSIDE_DOWN: &[Scene] = &[
-	Scene::new(150, &[Frame::F094, Frame::F093])
+	Scene::new(100, &[Frame::F094, Frame::F093])
 		.with_move_to(Position::new(-336, 0))
 		.with_repeat(83, 0),
 ];
