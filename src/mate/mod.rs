@@ -160,10 +160,10 @@ impl Mate {
 		// Some animations require a position override using knowledge of the
 		// primary sprite's position.
 		if let Some(pos) = match animation {
-			Animation::FlowerChild => {
+			Animation::Flower | Animation::MagicFlower1 => {
 				let x =
-					if self.flags.flipped_x() { self.pos.x + 36 }
-					else { self.pos.x - 36 };
+					if self.flags.flipped_x() { self.pos.x + 38 }
+					else { self.pos.x - 38 };
 				Some(Position::new(x, self.pos.y))
 			},
 			Animation::AbductionChild => {
@@ -554,6 +554,9 @@ impl Mate {
 						Some(Animation::Abduction) => 3,
 						Some(Animation::BigFishChild) => 4,
 						Some(Animation::SplatGhost) => 5,
+						Some(Animation::EatingMagicFlower) => 6,
+						Some(Animation::MagicFlower1 | Animation::MagicFlower2) => 7,
+						Some(Animation::DigestMagicFlower1) => 8,
 						_ => -1,
 					}
 				);

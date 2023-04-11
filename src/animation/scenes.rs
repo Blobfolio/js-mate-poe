@@ -284,6 +284,23 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
+/// # For `Animation::DigestMagicFlower1`.
+pub(super) const DIGEST_MAGIC_FLOWER1: &[Scene] = &[
+	Scene::new(100, &[
+		Frame::F003, Frame::F092, Frame::F092, Frame::F092, Frame::F092,
+		Frame::F092, Frame::F092, Frame::F092, Frame::F092, Frame::F092,
+		Frame::F092, Frame::F091,
+	])
+		.with_repeat(4, 11)
+		.with_flags(Scene::GRAVITY),
+];
+
+/// # For `Animation::DigestMagicFlower2`.
+pub(super) const DIGEST_MAGIC_FLOWER2: &[Scene] = &[
+	Scene::new(150, &[Frame::F087, Frame::F040, Frame::F009, Frame::F008])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Drag`.
 pub(super) const DRAG: &[Scene] = &[
 	Scene::new(150, &[
@@ -303,6 +320,40 @@ pub(super) const EAT: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::EatMagicFlower`.
+pub(super) const EAT_MAGIC_FLOWER: &[Scene] = &[
+	Scene::new(200, &[Frame::F003, Frame::F003, Frame::F003])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(21, 0))
+		.with_repeat(4, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[Frame::F052, Frame::F053])
+		.with_repeat(3, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(-21, 0))
+		.with_repeat(4, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(200, &[Frame::F003, Frame::F054])
+		.with_flags(Scene::GRAVITY),
+];
+
+/// # For `Animation::EatingMagicFlower`.
+pub(super) const EATING_MAGIC_FLOWER: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F055, Frame::F055, Frame::F056, Frame::F057,
+		Frame::F056, Frame::F057, Frame::F003,
+	])
+		.with_repeat(4, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(200, &[
+		Frame::F003, Frame::F003, Frame::F003, Frame::F006, Frame::F007,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Fall`.
 pub(super) const FALL: &[Scene] = &[
 	Scene::new(20, &[Frame::F039])
@@ -311,8 +362,8 @@ pub(super) const FALL: &[Scene] = &[
 		.with_flags(Scene::EASE_IN),
 ];
 
-/// # For `Animation::FlowerChild`.
-pub(super) const FLOWER_CHILD: &[Scene] = &[
+/// # For `Animation::Flower`.
+pub(super) const FLOWER: &[Scene] = &[
 	Scene::new(200, &[
 		Frame::F135, Frame::F135, Frame::F135, Frame::F135, Frame::F135,
 		Frame::F135, Frame::F135,
@@ -424,6 +475,43 @@ pub(super) const LOOK_UP: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::MagicFlower1`.
+pub(super) const MAGIC_FLOWER1: &[Scene] = &[
+	Scene::new(200, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(100, &[Frame::F135])
+		.with_repeat(9, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(150, &[Frame::F135])
+		.with_repeat(7, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(100, &[Frame::F135])
+		.with_repeat(9, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(200, &[Frame::F135, Frame::F135])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
+/// # For `Animation::MagicFlower2`.
+pub(super) const MAGIC_FLOWER2: &[Scene] = &[
+	Scene::new(200, &[
+		Frame::F135, Frame::F135,
+
+		Frame::F136, Frame::F136, Frame::F136, Frame::F136, Frame::F136,
+		Frame::F136, Frame::F136,
+
+		Frame::F137, Frame::F137, Frame::F137, Frame::F137, Frame::F137,
+		Frame::F137, Frame::F137,
+
+		Frame::F138, Frame::F138, Frame::F138, Frame::F138, Frame::F138,
+		Frame::F138, Frame::F138,
+
+		Frame::F139, Frame::F139, Frame::F139, Frame::F139, Frame::F139,
+		Frame::F139, Frame::F139,
+	])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::Nah`.
 pub(super) const NAH: &[Scene] = &[
 	Scene::new(150, &[
@@ -442,7 +530,7 @@ pub(super) const PLAY_DEAD: &[Scene] = &[
 	])
 		.with_repeat(4, 11)
 		.with_flags(Scene::GRAVITY),
-	Scene::new(150, &[Frame::F087, Frame::F040, Frame::F009, Frame::F008, Frame::F003])
+	Scene::new(150, &[Frame::F087, Frame::F040, Frame::F009, Frame::F008])
 		.with_flags(Scene::GRAVITY),
 ];
 
@@ -580,14 +668,14 @@ pub(super) const REALLY: &[Scene] = &[
 
 /// # For `Animation::Rest`.
 pub(super) const REST: &[Scene] = &[
-	Scene::new(200, &[Frame::F003, Frame::F011, Frame::F088, Frame::F089])
-		.with_repeat(20, 3)
+	Scene::new(200, &[Frame::F011, Frame::F088, Frame::F089])
+		.with_repeat(20, 2)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(2000, &[Frame::F090])
 		.with_flags(Scene::GRAVITY),
 	Scene::new(200, &[
 		Frame::F089, Frame::F089, Frame::F089, Frame::F089,
-		Frame::F088, Frame::F011, Frame::F003,
+		Frame::F088, Frame::F011,
 	])
 		.with_flags(Scene::GRAVITY),
 ];

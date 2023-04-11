@@ -89,15 +89,11 @@ $rotate: rotateY(var(--rx, 0deg)) rotateX(var(--ry, 0deg));
 	animation: a5 0.8s;
 }
 
-// Color-shift the sprite to make the abduction more dramatic.
-@keyframes a3 {
-	from { filter: saturate(5); }
-	to { filter: saturate(5) hue-rotate(359deg); }
-}
+// Animation: Eating/MagicFlower.
+#p.a6,
+#p.a7 { filter: hue-rotate(250deg); }
 
-// Fade out the ghost a bit early.
-@keyframes a5 {
-	0% { opacity: 0.5; }
-	50% { opacity: 0.5; }
-	100% { opacity: 0; }
-}
+#p.a6 { transition: filter 3s .8s ease-out; }
+
+// Animation: DigestMagicFlower1.
+#p.a8 { transition: filter 1.5s ease-out; }

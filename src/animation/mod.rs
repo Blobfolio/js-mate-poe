@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 76; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 82; // The highest Animation ID.
 
 
 
@@ -63,6 +63,7 @@ pub(crate) enum Animation {
 	Cry,
 	Dance,
 	Eat,
+	EatMagicFlower,
 	Handstand,
 	Hop,
 	Jump,
@@ -103,7 +104,10 @@ pub(crate) enum Animation {
 	DangleFall,
 	DangleRecover,
 	DeepThoughts,
+	DigestMagicFlower1,
+	DigestMagicFlower2,
 	Drag,
+	EatingMagicFlower,
 	EndRun,
 	Fall,
 	GraspingFall,
@@ -126,7 +130,9 @@ pub(crate) enum Animation {
 	BlackSheepChaseChild,
 	BlackSheepRomanceChild,
 	ChaseAMartianChild,
-	FlowerChild,
+	Flower,
+	MagicFlower1,
+	MagicFlower2,
 	SneezeShadow,
 	SplatGhost,
 	StargazeChild,
@@ -172,6 +178,7 @@ impl Animation {
 			Self::Cry |
 			Self::Dance |
 			Self::Eat |
+			Self::EatMagicFlower |
 			Self::Handstand |
 			Self::Hop |
 			Self::Jump |
@@ -295,11 +302,14 @@ impl Animation {
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
 			Self::DeepThoughts => "Deep Thoughts",
+			Self::DigestMagicFlower1 | Self::DigestMagicFlower2 => "Digesting (Magic Flower)",
 			Self::Drag => "Drag",
 			Self::Eat => "Eat",
+			Self::EatMagicFlower => "Eat (Magic Flower)",
+			Self::EatingMagicFlower => "Eating (Magic Flower)",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
-			Self::FlowerChild => "Flower (Child)",
+			Self::Flower => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Hop => "Hop",
@@ -308,6 +318,7 @@ impl Animation {
 			Self::LegLifts => "Leg Lifts",
 			Self::LookDown => "Look Down",
 			Self::LookUp => "Look Up",
+			Self::MagicFlower1 | Self::MagicFlower2 => "Magic Flower (Child)",
 			Self::Nah => "Nah…",
 			Self::PlayDead => "Play Dead",
 			Self::Popcorn => "Popcorn",
@@ -358,8 +369,9 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BigFishChild | Self::Drag |
-			Self::SneezeShadow | Self::SplatGhost
+			Self::Abduction | Self::BigFishChild | Self::DigestMagicFlower1 |
+			Self::Drag | Self::EatingMagicFlower | Self::MagicFlower1 |
+			Self::MagicFlower2 | Self::SneezeShadow | Self::SplatGhost
 		)
 	}
 
@@ -431,8 +443,12 @@ impl Animation {
 			Self::DangleFall |
 			Self::DangleRecover |
 			Self::DeepThoughts |
+			Self::DigestMagicFlower1 |
+			Self::DigestMagicFlower2 |
 			Self::Drag |
 			Self::Eat |
+			Self::EatMagicFlower |
+			Self::EatingMagicFlower |
 			Self::EndRun |
 			Self::Fall |
 			Self::GraspingFall |
@@ -493,7 +509,8 @@ impl Animation {
 			Self::BlackSheepChase => Some(Self::BlackSheepChaseChild),
 			Self::BlackSheepRomance => Some(Self::BlackSheepRomanceChild),
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
-			Self::Eat => Some(Self::FlowerChild),
+			Self::Eat => Some(Self::Flower),
+			Self::EatMagicFlower => Some(Self::MagicFlower1),
 			Self::Sneeze => Some(Self::SneezeShadow),
 			Self::Splat => Some(Self::SplatGhost),
 			Self::Stargaze => Some(Self::StargazeChild),
@@ -501,6 +518,7 @@ impl Animation {
 		}
 	}
 
+	#[allow(clippy::too_many_lines)]
 	/// # Next Animation.
 	///
 	/// Switch to this animation when the sequence finishes. Some of these
@@ -521,15 +539,23 @@ impl Animation {
 				if 0 == Universe::rand_mod(3) { Self::Sneeze }
 				else { Self::Walk }
 			),
-			Self::Bleat |
+			Self::BathCoolDown |
+				Self::Beg |
+				Self::Bleat |
+				Self::Blink |
 				Self::Bounce |
+				Self::DigestMagicFlower2 |
 				Self::EndRun |
 				Self::LayDown |
 				Self::LookDown |
 				Self::LookUp |
+				Self::Nah |
 				Self::PlayDead |
+				Self::Popcorn |
 				Self::ReachFloor |
+				Self::Really |
 				Self::Rest |
+				Self::Roll |
 				Self::Rotate |
 				Self::Sleep |
 				Self::SleepSitting |
@@ -556,12 +582,15 @@ impl Animation {
 				),
 			Self::DeepThoughts |
 				Self::RunUpsideDown => Some(Self::RunUpsideDown),
+			Self::DigestMagicFlower1 => Some(Self::DigestMagicFlower2),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat |
 				Self::SleepStanding => Some(
 					if 0 == Universe::rand_mod(3) { Self::Rest }
 					else { Self::Walk }
 				),
+			Self::EatMagicFlower => Some(Self::EatingMagicFlower),
+			Self::EatingMagicFlower => Some(Self::DigestMagicFlower1),
 			Self::Fall |
 				Self::GraspingFall => Some(Self::GraspingFall),
 			Self::Jump => Some(match Universe::rand_mod(5) {
@@ -570,6 +599,7 @@ impl Animation {
 				_ => Self::Jump,
 			}),
 			Self::LegLifts => Some(Self::BeginRun),
+			Self::MagicFlower1 => Some(Self::MagicFlower2),
 			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
 				0 => Self::ClimbDown,
 				1 => Self::SlideDown,
@@ -682,10 +712,14 @@ impl Animation {
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
 			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
+			Self::DigestMagicFlower1 => fixed!(DIGEST_MAGIC_FLOWER1),
+			Self::DigestMagicFlower2 => fixed!(DIGEST_MAGIC_FLOWER2),
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
+			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
+			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
 			Self::Fall => fixed!(FALL),
-			Self::FlowerChild => fixed!(FLOWER_CHILD),
+			Self::Flower => fixed!(FLOWER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Hop => fixed!(HOP),
@@ -694,6 +728,8 @@ impl Animation {
 			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
 			Self::LookUp => fixed!(LOOK_UP),
+			Self::MagicFlower1 => fixed!(MAGIC_FLOWER1),
+			Self::MagicFlower2 => fixed!(MAGIC_FLOWER2),
 			Self::Nah => fixed!(NAH),
 			Self::PlayDead => fixed!(PLAY_DEAD),
 			Self::Popcorn => fixed!(POPCORN),
@@ -773,14 +809,16 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		let set = (0..5_000_u16).into_iter()
+		const TOTAL: usize = 33;
+
+		let set = (0..10_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)
 			.collect::<HashSet::<u8>>();
 
 		assert_eq!(
 			set.len(),
-			32,
-			"Failed to choose all 32 default possibilities in 5000 tries."
+			TOTAL,
+			"Failed to choose all {TOTAL} default possibilities in 10K tries."
 		);
 	}
 

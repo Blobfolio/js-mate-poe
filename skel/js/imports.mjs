@@ -133,6 +133,9 @@ const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
 	list.toggle('a3', 3 === scene);
 	list.toggle('a4', 4 === scene);
 	list.toggle('a5', 5 === scene);
+	list.toggle('a6', 6 === scene);
+	list.toggle('a7', 7 === scene);
+	list.toggle('a8', 8 === scene);
 };
 
 /**

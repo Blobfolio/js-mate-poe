@@ -176,6 +176,7 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 	(8, "Really"),
 	(8, "Rest"),
 
+	(4, "EatMagicFlower"),
 	(4, "PlayDead"),
 	(4, "Rotate"),
 	(4, "Scoot"),
@@ -192,11 +193,11 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 /// # Build Default Animation List.
 ///
 /// This exports an Animation::default_choice method for choosing a default
-/// animation. It will return one of Walk/Run/Special in a 40/30/30 split.
+/// animation. It will return one of Walk/Run/Special.
 ///
 /// The special animations are relatively weighted to prioritize certain
-/// sequences over others, and come with the additional constraint that any
-/// such selection will be different than the previous two specials.
+/// sequences over others, and will always ensure the selection does not match
+/// the previous two specials.
 fn build_default_animations() -> String {
 	// Secret has no weighting, rare is 8x, common is 24x.
 	let total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
@@ -235,9 +236,9 @@ fn build_default_animations() -> String {
 	/// Return a generic default animation for use in contexts where no
 	/// explicit choice is supplied.
 	pub(crate) fn default_choice() -> Self {{
-		match Universe::rand_mod(10) {{
-			0..=3 => Self::Walk,
-			4..=6 => Self::BeginRun,
+		match Universe::rand_mod(3) {{
+			0 => Self::Walk,
+			1 => Self::BeginRun,
 			_ => {{
 				let mut last = LAST_SPECIAL.load(SeqCst).to_le_bytes();
 				loop {{
