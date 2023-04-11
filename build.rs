@@ -150,47 +150,43 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 	out.join("\n\n")
 }
 
-/// # Common Animations.
-const DEFAULT_COMMON: &[&str] = &[
-	"Beg",
-	"Blink",
-	"Dance",
-	"Eat",
-	"Handstand",
-	"Hop",
-	"LayDown",
-	"LookDown",
-	"LookUp",
-	"Roll",
-	"Spin",
-];
+/// # Default Animations w/ Weightings.
+const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
+	(36, "Hop"),
+	(36, "LookDown"),
+	(36, "LookUp"),
 
-/// # Rare Animations.
-const DEFAULT_RARE: &[&str] = &[
-	"Cry",
-	"Flop",
-	"LegLifts",
-	"Nah",
-	"PlayDead",
-	"Popcorn",
-	"Really",
-	"Rest",
-	"Rotate",
-	"Scoot",
-	"Scratch",
-	"Scream",
-	"SleepSitting",
-	"SleepStanding",
-];
+	(24, "Beg"),
+	(24, "Dance"),
+	(24, "Eat"),
+	(24, "Handstand"),
+	(24, "LayDown"),
+	(24, "LegLifts"),
+	(24, "Roll"),
+	(24, "Scratch"),
+	(24, "Spin"),
 
-/// # Very Rare Animations.
-const DEFAULT_SECRET: &[&str] = &[
-	"Abduction",
-	"Bleat",
-	"Sneeze",
-	"Tornado",
-	"Urinate",
-	"Yawn",
+	(12, "SleepSitting"),
+	(12, "SleepStanding"),
+
+	(8, "Blink"),
+	(8, "Cry"),
+	(8, "Nah"),
+	(8, "Popcorn"),
+	(8, "Really"),
+	(8, "Rest"),
+
+	(4, "PlayDead"),
+	(4, "Rotate"),
+	(4, "Scoot"),
+	(4, "Scream"),
+
+	(1, "Abduction"),
+	(1, "Bleat"),
+	(1, "Sneeze"),
+	(1, "Tornado"),
+	(1, "Urinate"),
+	(1, "Yawn"),
 ];
 
 /// # Build Default Animation List.
@@ -203,10 +199,7 @@ const DEFAULT_SECRET: &[&str] = &[
 /// such selection will be different than the previous two specials.
 fn build_default_animations() -> String {
 	// Secret has no weighting, rare is 8x, common is 24x.
-	let total: usize =
-		DEFAULT_SECRET.len() +
-		DEFAULT_RARE.len() * 8 +
-		DEFAULT_COMMON.len() * 24;
+	let total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
 
 	// We use u16 for capped randomization; make sure this fits before we do
 	// anything else.
@@ -219,22 +212,16 @@ fn build_default_animations() -> String {
 	let mut from = 0;
 	let mut arms = Vec::new();
 
-	for a in DEFAULT_COMMON {
-		let to = from + 24;
-		arms.push(format!("\t\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
-		from = to;
-	}
-	for a in DEFAULT_RARE {
-		let to = from + 8;
-		arms.push(format!("\t\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
-		from = to;
-	}
-	for a in DEFAULT_SECRET {
+	for (n, a) in DEFAULT_ANIMATIONS {
+		let to = from + n;
 		if from + 1 == total { arms.push(format!("\t\t\t\t\t\t_ => Self::{a},")); }
-		else {
+		else if *n == 1 {
 			arms.push(format!("\t\t\t\t\t\t{from} => Self::{a},"));
 		}
-		from += 1;
+		else {
+			arms.push(format!("\t\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
+		}
+		from = to;
 	}
 
 	// Make sure we got 'em all.

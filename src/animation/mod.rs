@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 77; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 76; // The highest Animation ID.
 
 
 
@@ -63,7 +63,6 @@ pub(crate) enum Animation {
 	Cry,
 	Dance,
 	Eat,
-	Flop,
 	Handstand,
 	Hop,
 	Jump,
@@ -173,7 +172,6 @@ impl Animation {
 			Self::Cry |
 			Self::Dance |
 			Self::Eat |
-			Self::Flop |
 			Self::Handstand |
 			Self::Hop |
 			Self::Jump |
@@ -301,7 +299,6 @@ impl Animation {
 			Self::Eat => "Eat",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
-			Self::Flop => "Flop",
 			Self::FlowerChild => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
@@ -438,7 +435,6 @@ impl Animation {
 			Self::Eat |
 			Self::EndRun |
 			Self::Fall |
-			Self::Flop |
 			Self::GraspingFall |
 			Self::Handstand |
 			Self::Hop |
@@ -689,7 +685,6 @@ impl Animation {
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
 			Self::Fall => fixed!(FALL),
-			Self::Flop => fixed!(FLOP),
 			Self::FlowerChild => fixed!(FLOWER_CHILD),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
@@ -784,8 +779,8 @@ mod tests {
 
 		assert_eq!(
 			set.len(),
-			33,
-			"Failed to choose all 33 default possibilities in 5000 tries."
+			32,
+			"Failed to choose all 32 default possibilities in 5000 tries."
 		);
 	}
 
