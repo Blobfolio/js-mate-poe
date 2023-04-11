@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.4.5"
+version = "1.4.6"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.62"
@@ -21,6 +21,7 @@ crate-type = ["cdylib"]
 
 [build-dependencies]
 guff_css = "0.1.*"
+imagesize = "0.11.*"
 
 [dependencies]
 wasm-bindgen = "0.2.*"

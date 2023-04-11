@@ -53,15 +53,14 @@ pub fn main() {
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
 	println!("cargo:rerun-if-changed=skel/sound/yawn.flac");
 
-	#[cfg(not(feature = "firefox"))]
-	println!("cargo:rerun-if-changed=skel/js/imports-audio.mjs");
-
 	let css = build_css();
 	write_file(&out_path("poe.css"), css.as_bytes());
 
-	let (media_rust, media_js) = build_media();
-	write_file(&out_path("media.rs"), media_rust.as_bytes());
-	write_file(&out_path("glue-header.mjs"), media_js.as_bytes());
+	let media = build_media();
+	write_file(&out_path("media.rs"), media.as_bytes());
+
+	let def = build_default_animations();
+	write_file(&out_path("default-animations.rs"), def.as_bytes());
 }
 
 /// # Compile CSS.
@@ -79,22 +78,13 @@ fn build_css() -> String {
 ///
 /// This generates and returns Rust code — for lib.rs — that works around a
 /// memory issue when trying to do binary-Uin8Array-Blob-URL.createObjectURL
-/// entirely within Rust. Specifically, it:
-/// * Declares static arrays for each embedded media asset;
-/// * Export methods (for use in JS) returning pointers to said arrays;
+/// entirely within Rust, and adds a JS "snippet" for wasm-bindgen.
 ///
-/// Note: when the "firefox" feature is enabled, the audio file buffers and
-/// pointer methods are omitted. (The extension bundles those directly, so
-/// they're left out of the Wasm entirely.)
-///
-/// This also generates and returns Javascript code to serve as a "header" for
-/// the glue wasm-bindgen will subsequently generate. (The two files should
-/// be concatenated and saved to skel/js/generated/glue.mjs so Closure
-/// Compiler can do its thing.) Specifically, this contains:
-/// * The four custom import methods used by this library;
-/// * A media initialization method used by the module entrypoint;
-/// * The buffer length data (this just prevents having to export methods from Rust that return the same);
-fn build_media() -> (String, String) {
+/// It is worth noting we aren't actually using snippets correctly. Before
+/// transpiling the Javascript modules with Google Closure Compiler, the
+/// snippet and main glue file need to be merged together and saved to
+/// skel/generated/glue.mjs.
+fn build_media() -> String {
 	// Individual media.
 	let media = [
 		std::fs::read("skel/img/poe.png").expect("Missing poe.png"),
@@ -112,6 +102,13 @@ fn build_media() -> (String, String) {
 	// Code holders.
 	let mut out = Vec::new();
 	let mut js_lengths = Vec::new();
+
+	// Add the image dimensions to the JS lengths.
+	let (w, h) = img_size();
+	assert_eq!(w, 6200, "Image width has changed!");
+	assert_eq!(h, 40, "Image height has changed!");
+	js_lengths.push(format!("const imgWidth = {w};"));
+	js_lengths.push(format!("const imgHeight = {h};"));
 
 	// Handle the media bits.
 	for (k, v) in ["img", "baa", "sneeze", "yawn"].iter().zip(media.iter()) {
@@ -139,15 +136,139 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 	// Load the JS imports, and swap out the two dynamic bits.
 	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
 		.expect("Missing imports.mjs")
-		.replace("%ASCII%", &std::fs::read_to_string("skel/img/poe.txt").expect("Missing poe.txt"))
+		.replace("%ASCII%", &std::fs::read_to_string("skel/img/poe.txt").unwrap_or_default())
 		.replace("%AUDIO_URLS%", AUDIO_URLS)
 		.replace("%LENGTHS%", &js_lengths.join("\n"))
-		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").expect("Missing playlist.txt"))
-		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0".to_owned()));
+		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").unwrap_or_default())
+		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_default());
 	js.push('\n');
 
+	// Add the JS to the Rust in a roundabout way so wasm-bindgen can find it.
+	out.push(format!("#[wasm_bindgen(inline_js = {js:?})] extern \"C\" {{}}"));
+
 	// Return what we've built!
-	(out.join("\n\n"), js)
+	out.join("\n\n")
+}
+
+/// # Default Animations w/ Weightings.
+const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
+	(36, "Hop"),
+	(36, "LookDown"),
+	(36, "LookUp"),
+
+	(24, "Beg"),
+	(24, "Dance"),
+	(24, "Eat"),
+	(24, "Handstand"),
+	(24, "LayDown"),
+	(24, "LegLifts"),
+	(24, "Roll"),
+	(24, "Scratch"),
+	(24, "Spin"),
+
+	(12, "SleepSitting"),
+	(12, "SleepStanding"),
+
+	(8, "Blink"),
+	(8, "Cry"),
+	(8, "Nah"),
+	(8, "Popcorn"),
+	(8, "Really"),
+	(8, "Rest"),
+
+	(4, "EatMagicFlower"),
+	(4, "PlayDead"),
+	(4, "Rotate"),
+	(4, "Scoot"),
+	(4, "Scream"),
+
+	(1, "Abduction"),
+	(1, "Bleat"),
+	(1, "Sneeze"),
+	(1, "Tornado"),
+	(1, "Urinate"),
+	(1, "Yawn"),
+];
+
+/// # Build Default Animation List.
+///
+/// This exports an Animation::default_choice method for choosing a default
+/// animation. It will return one of Walk/Run/Special.
+///
+/// The special animations are relatively weighted to prioritize certain
+/// sequences over others, and will always ensure the selection does not match
+/// the previous two specials.
+fn build_default_animations() -> String {
+	// Secret has no weighting, rare is 8x, common is 24x.
+	let total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
+
+	// We use u16 for capped randomization; make sure this fits before we do
+	// anything else.
+	assert!(
+		total < usize::from(u16::MAX),
+		"Default special animation total is too big: {total}"
+	);
+
+	// Convert everything to match arms.
+	let mut from = 0;
+	let mut arms = Vec::new();
+
+	for (n, a) in DEFAULT_ANIMATIONS {
+		let to = from + n;
+		if from + 1 == total { arms.push(format!("\t\t\t\t\t\t_ => Self::{a},")); }
+		else if *n == 1 {
+			arms.push(format!("\t\t\t\t\t\t{from} => Self::{a},"));
+		}
+		else {
+			arms.push(format!("\t\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
+		}
+		from = to;
+	}
+
+	// Make sure we got 'em all.
+	assert_eq!(from, total, "Missing a default animation match arm.");
+
+	// Build the statement!
+	format!(
+		r"impl Animation {{
+	/// # Default Choice.
+	///
+	/// Return a generic default animation for use in contexts where no
+	/// explicit choice is supplied.
+	pub(crate) fn default_choice() -> Self {{
+		match Universe::rand_mod(3) {{
+			0 => Self::Walk,
+			1 => Self::BeginRun,
+			_ => {{
+				let mut last = LAST_SPECIAL.load(SeqCst).to_le_bytes();
+				loop {{
+					let next = match Universe::rand_mod({total}) {{
+{}
+					}};
+
+					// Keep the selection if we haven't seen it recently.
+					if next as u8 != last[0] && next as u8 != last[1] {{
+						last.rotate_right(1);
+						last[0] = next as u8;
+						LAST_SPECIAL.store(u16::from_le_bytes(last), SeqCst);
+						return next;
+					}}
+				}}
+
+			}}
+		}}
+	}}
+}}",
+		arms.join("\n")
+	)
+}
+
+/// # Image Dimensions.
+fn img_size() -> (u32, u32) {
+	let dim = imagesize::size("skel/img/poe.png").expect("Failed to read poe.png dimensions.");
+	let w = u32::try_from(dim.width).expect("Failed to read poe.png dimensions.");
+	let h = u32::try_from(dim.height).expect("Failed to read poe.png dimensions.");
+	(w, h)
 }
 
 /// # Out path.

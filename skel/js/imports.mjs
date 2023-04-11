@@ -70,7 +70,7 @@ export const poeInitMedia = function(wasm) {
  * @return {Element} Element.
  */
 const poeMakeImage = function() {
-	const el = new Image(6360, 40);
+	const el = new Image(imgWidth, imgHeight);
 	el.id = 'i';
 	if (null !== imgUrl) { el.src = imgUrl; }
 	return el;
@@ -108,26 +108,34 @@ const poePlaySound = function(idx) {
  * strings over the wasm/JS boundary every time a class changes.
  *
  * @param {!Element} el Element.
- * @param {boolean} h Half Frame.
  * @param {boolean} rx FlipX.
  * @param {boolean} ry FlipY.
- * @param {number} animation Animation Class.
+ * @param {number} frame Frame Class.
+ * @param {number} scene Animation Class.
  * @return {void} Nothing.
  */
-const poeToggleWrapperClasses = function(el, h, rx, ry, animation) {
+const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
 	let list = el.classList;
-	list.toggle('h', !! h);
 
 	list.toggle('rx', !! rx);
 	list.toggle('ry', !! ry);
 
-	animation = parseInt(animation, 10);
-	list.toggle('off', 0 === animation);
-	list.toggle('a1', 1 === animation);
-	list.toggle('a2', 2 === animation);
-	list.toggle('a3', 3 === animation);
-	list.toggle('a4', 4 === animation);
-	list.toggle('a5', 5 === animation);
+	frame = parseInt(frame, 10);
+	list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
+	list.toggle('m021', 21 === frame);
+	list.toggle('m100', 100 === frame);
+	list.toggle('m133', 133 === frame);
+
+	scene = parseInt(scene, 10);
+	list.toggle('off', 0 === scene);
+	list.toggle('a1', 1 === scene);
+	list.toggle('a2', 2 === scene);
+	list.toggle('a3', 3 === scene);
+	list.toggle('a4', 4 === scene);
+	list.toggle('a5', 5 === scene);
+	list.toggle('a6', 6 === scene);
+	list.toggle('a7', 7 === scene);
+	list.toggle('a8', 8 === scene);
 };
 
 /**

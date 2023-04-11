@@ -13,63 +13,29 @@ use crate::{
 	Universe,
 };
 use scene::SceneListKind;
+use std::sync::atomic::{
+	AtomicU16,
+	Ordering::SeqCst,
+};
 
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 66; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 82; // The highest Animation ID.
 
-/// # Default Animations.
-const DEFAULT: &[Animation] = &[
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk, Animation::Walk,
-	Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun, Animation::BeginRun,
-	Animation::Beg, Animation::Beg,
-	Animation::Blink, Animation::Blink,
-	Animation::Eat, Animation::Eat,
-	Animation::Handstand, Animation::Handstand,
-	Animation::Roll, Animation::Roll,
-	Animation::Scratch, Animation::Scratch,
-	Animation::Spin, Animation::Spin,
-	Animation::Abduction,
-	Animation::Bleat,
-	Animation::BoredSleep,
-	Animation::Doze,
-	Animation::Jump,
-	Animation::PlayDead,
-	Animation::Popcorn,
-	Animation::Rest,
-	Animation::Rotate,
-	Animation::Scoot,
-	Animation::Scream,
-	Animation::Sleep,
-	Animation::Sneeze,
-	Animation::Urinate,
-];
 
-/// # Entrance Animations.
-const ENTRANCE: &[Animation] = &[
-	Animation::BathDive,
-	Animation::BigFish,
-	Animation::BlackSheepChase,
-	Animation::BlackSheepRomance,
-	Animation::ChaseAMartian,
-	Animation::Stargaze,
-	Animation::Yoyo,
-];
 
-/// # Start-Up Animations.
-const FIRST: &[Animation] = &[
-	Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall, Animation::Fall,
-	Animation::BathDive,
-	Animation::BigFish,
-	Animation::BlackSheepChase,
-	Animation::BlackSheepRomance,
-	Animation::ChaseAMartian,
-	Animation::Stargaze,
-	Animation::Yoyo,
-];
+/// # Special Default.
+///
+/// Keep track of the "special" default animation selections so we don't end up
+/// playing the same thing back-to-back.
+static LAST_SPECIAL: AtomicU16 = AtomicU16::new(0);
+
+/// # Last Entrance Choice.
+///
+/// Same as for the "special" defaults, we want to ensure that entrances are
+/// unique for at least two slots.
+static LAST_ENTRANCE: AtomicU16 = AtomicU16::new(0);
 
 
 
@@ -93,16 +59,22 @@ pub(crate) enum Animation {
 	BlackSheepRomance,
 	Bleat,
 	Blink,
-	BoredSleep,
 	ChaseAMartian,
-	Doze,
+	Cry,
+	Dance,
 	Eat,
+	EatMagicFlower,
 	Handstand,
+	Hop,
 	Jump,
 	LayDown,
+	LegLifts,
 	LookDown,
+	LookUp,
+	Nah,
 	PlayDead,
 	Popcorn,
+	Really,
 	Rest,
 	Roll,
 	Rotate,
@@ -111,12 +83,16 @@ pub(crate) enum Animation {
 	Scratch,
 	Scream,
 	Sleep,
+	SleepSitting,
+	SleepStanding,
 	Slide,
 	Sneeze,
 	Spin,
 	Stargaze,
+	Tornado,
 	Urinate,
 	Walk,
+	Yawn,
 	Yoyo,
 
 	// Primary animations of a special/supporting nature.
@@ -128,7 +104,10 @@ pub(crate) enum Animation {
 	DangleFall,
 	DangleRecover,
 	DeepThoughts,
+	DigestMagicFlower1,
+	DigestMagicFlower2,
 	Drag,
+	EatingMagicFlower,
 	EndRun,
 	Fall,
 	GraspingFall,
@@ -140,6 +119,7 @@ pub(crate) enum Animation {
 	RunUpsideDown,
 	SlideDown,
 	Splat,
+	TornadoExit,
 	WalkUpsideDown,
 	WallSlide,
 
@@ -150,7 +130,9 @@ pub(crate) enum Animation {
 	BlackSheepChaseChild,
 	BlackSheepRomanceChild,
 	ChaseAMartianChild,
-	FlowerChild,
+	Flower,
+	MagicFlower1,
+	MagicFlower2,
 	SneezeShadow,
 	SplatGhost,
 	StargazeChild,
@@ -183,36 +165,107 @@ impl Animation {
 	pub(crate) const fn playable(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BathDive | Self::Beg | Self::BeginRun |
-			Self::BigFish | Self::BlackSheepChase | Self::BlackSheepRomance |
-			Self::Bleat | Self::Blink | Self::BoredSleep | Self::ChaseAMartian |
-			Self::Doze | Self::Eat | Self::Handstand | Self::Jump |
-			Self::LayDown | Self::LookDown | Self::PlayDead | Self::Popcorn |
-			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::Scoot |
-			Self::Scratch | Self::Scream | Self::Sleep | Self::Slide |
-			Self::Sneeze | Self::Spin | Self::Stargaze | Self::Urinate |
-			Self::Walk | Self::Yoyo
+			Self::Abduction |
+			Self::BathDive |
+			Self::BeginRun |
+			Self::Beg |
+			Self::BigFish |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::Bleat |
+			Self::Blink |
+			Self::ChaseAMartian |
+			Self::Cry |
+			Self::Dance |
+			Self::Eat |
+			Self::EatMagicFlower |
+			Self::Handstand |
+			Self::Hop |
+			Self::Jump |
+			Self::LayDown |
+			Self::LegLifts |
+			Self::LookDown |
+			Self::LookUp |
+			Self::Nah |
+			Self::PlayDead |
+			Self::Popcorn |
+			Self::Really |
+			Self::Rest |
+			Self::Roll |
+			Self::Rotate |
+			Self::Run |
+			Self::Scoot |
+			Self::Scratch |
+			Self::Scream |
+			Self::Sleep |
+			Self::SleepSitting |
+			Self::SleepStanding |
+			Self::Slide |
+			Self::Sneeze |
+			Self::Spin |
+			Self::Stargaze |
+			Self::Tornado |
+			Self::Urinate |
+			Self::Walk |
+			Self::Yawn |
+			Self::Yoyo
 		)
 	}
 }
 
-impl Animation {
-	/// # Default Choice.
-	///
-	/// Return a generic default animation for use in contexts where an
-	/// explicit one is unspecified.
-	pub(crate) fn default_choice() -> Self { choose(DEFAULT) }
+// Generates Animation::default_choice.
+include!(concat!(env!("OUT_DIR"), "/default-animations.rs"));
 
+impl Animation {
 	/// # Entrance Choice.
 	///
-	/// Same as `Animation::default_choice`, but for cases where the mate is
-	/// currently positioned off-screen.
-	pub(crate) fn entrance_choice() -> Self { choose(ENTRANCE) }
+	/// Return a default entrance animation (for when the mate is offscreen).
+	pub(crate) fn entrance_choice() -> Self {
+		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
+		loop {
+			let next = match Universe::rand_mod(6) {
+				0 => Self::BathDive,
+				1 => Self::BigFish,
+				2 => Self::BlackSheepChase,
+				3 => Self::BlackSheepRomance,
+				4 => Self::Stargaze,
+				_ => Self::Yoyo,
+			};
+
+			if next as u8 != last[0] && next as u8 != last[1] {
+				last.rotate_right(1);
+				last[0] = next as u8;
+				LAST_ENTRANCE.store(u16::from_le_bytes(last), SeqCst);
+				return next;
+			}
+		}
+	}
 
 	/// # First Choice.
 	///
-	/// Return a random start-up animation for a newly-created (primary) mate.
-	pub(crate) fn first_choice() -> Self { choose(FIRST) }
+	/// This is the same as `Animation::entrance_choice`, but with the
+	/// additional, weighted possibility of falling from above.
+	pub(crate) fn first_choice() -> Self {
+		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
+		loop {
+			let next = match Universe::rand_mod(12) {
+				0 => Self::BathDive,
+				1 => Self::BigFish,
+				2 => Self::BlackSheepChase,
+				3 => Self::BlackSheepRomance,
+				4 => Self::Stargaze,
+				5 => Self::Yoyo,
+				_ => Self::Fall,
+			};
+
+			if next as u8 != last[0] && next as u8 != last[1] {
+				last.rotate_right(1);
+				last[0] = next as u8;
+				LAST_ENTRANCE.store(u16::from_le_bytes(last), SeqCst);
+				return next;
+			}
+		}
+	}
 }
 
 #[cfg(any(test, feature = "director"))]
@@ -239,32 +292,41 @@ impl Animation {
 			Self::Bleat => "Bleat",
 			Self::Blink => "Blink",
 			Self::Boing => "Boing!",
-			Self::BoredSleep => "Bored Sleep",
 			Self::Bounce => "Bounce",
 			Self::ChaseAMartian => "Chase a Martian",
 			Self::ChaseAMartianChild => "Chase a Martian (Child)",
 			Self::ClimbDown => "Climb Down",
 			Self::ClimbUp => "Climb Up",
+			Self::Cry => "Cry",
+			Self::Dance => "Dance",
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
 			Self::DeepThoughts => "Deep Thoughts",
-			Self::Doze => "Doze",
+			Self::DigestMagicFlower1 | Self::DigestMagicFlower2 => "Digesting (Magic Flower)",
 			Self::Drag => "Drag",
 			Self::Eat => "Eat",
+			Self::EatMagicFlower => "Eat (Magic Flower)",
+			Self::EatingMagicFlower => "Eating (Magic Flower)",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
-			Self::FlowerChild => "Flower (Child)",
+			Self::Flower => "Flower (Child)",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
+			Self::Hop => "Hop",
 			Self::Jump => "Jump",
 			Self::LayDown => "Lay Down",
+			Self::LegLifts => "Leg Lifts",
 			Self::LookDown => "Look Down",
+			Self::LookUp => "Look Up",
+			Self::MagicFlower1 | Self::MagicFlower2 => "Magic Flower (Child)",
+			Self::Nah => "Nah…",
 			Self::PlayDead => "Play Dead",
 			Self::Popcorn => "Popcorn",
 			Self::ReachCeiling => "Reach Ceiling",
 			Self::ReachFloor => "Reach Floor",
 			Self::ReachSide1 => "Reach Side (From Floor)",
 			Self::ReachSide2 => "Reach Side (From Ceiling)",
+			Self::Really => "Really?!",
 			Self::Rest => "Rest",
 			Self::Roll => "Roll",
 			Self::Rotate => "Rotate",
@@ -275,6 +337,8 @@ impl Animation {
 			Self::Scratch => "Scratch",
 			Self::Scream => "Scream",
 			Self::Sleep => "Sleep",
+			Self::SleepSitting => "Sleep (Sitting)",
+			Self::SleepStanding => "Sleep (Standing)",
 			Self::Slide => "Slide",
 			Self::SlideDown => "Slide Down",
 			Self::Sneeze => "Sneeze",
@@ -284,10 +348,13 @@ impl Animation {
 			Self::SplatGhost => "Splat (Ghost)",
 			Self::Stargaze => "Stargaze",
 			Self::StargazeChild => "Stargaze (Child)",
+			Self::Tornado => "Tornado",
+			Self::TornadoExit => "Tornado (Exit)",
 			Self::Urinate => "Urinate",
 			Self::Walk => "Walk",
 			Self::WalkUpsideDown => "Walk Upside Down",
 			Self::WallSlide => "Wall Slide",
+			Self::Yawn => "Yawn",
 			Self::Yoyo => "Yo-Yo",
 		}
 	}
@@ -302,8 +369,9 @@ impl Animation {
 	pub(crate) const fn change_class(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BigFishChild | Self::Drag |
-			Self::SneezeShadow | Self::SplatGhost
+			Self::Abduction | Self::BigFishChild | Self::DigestMagicFlower1 |
+			Self::Drag | Self::EatingMagicFlower | Self::MagicFlower1 |
+			Self::MagicFlower2 | Self::SneezeShadow | Self::SplatGhost
 		)
 	}
 
@@ -343,7 +411,7 @@ impl Animation {
 		matches!(
 			self,
 			Self::BlackSheepChase | Self::ChaseAMartian | Self::Run |
-			Self::SneezeShadow | Self::Walk
+			Self::SneezeShadow | Self::Tornado | Self::Walk
 		)
 	}
 
@@ -355,21 +423,76 @@ impl Animation {
 	pub(crate) const fn primary(self) -> bool {
 		matches!(
 			self,
-			Self::Abduction | Self::BathCoolDown | Self::BathDive | Self::Beg |
-			Self::BeginRun | Self::BigFish | Self::BlackSheepChase |
-			Self::BlackSheepRomance | Self::Bleat | Self::Blink | Self::Boing |
-			Self::BoredSleep | Self::Bounce | Self::ChaseAMartian |
-			Self::ClimbDown | Self::ClimbUp | Self::DangleFall |
-			Self::DangleRecover | Self::DeepThoughts | Self::Doze | Self::Drag |
-			Self::Eat | Self::EndRun | Self::Fall | Self::GraspingFall |
-			Self::Handstand | Self::Jump | Self::LayDown | Self::LookDown |
-			Self::PlayDead | Self::Popcorn | Self::ReachCeiling |
-			Self::ReachFloor | Self::ReachSide1 | Self::ReachSide2 |
-			Self::Rest | Self::Roll | Self::Rotate | Self::Run | Self::RunDown |
-			Self::RunUpsideDown | Self::Scoot | Self::Scratch | Self::Scream |
-			Self::Sleep | Self::Slide | Self::SlideDown | Self::Sneeze |
-			Self::Spin | Self::Splat | Self::Stargaze | Self::Urinate |
-			Self::Walk | Self::WalkUpsideDown | Self::WallSlide | Self::Yoyo
+			Self::Abduction |
+			Self::BathCoolDown |
+			Self::BathDive |
+			Self::Beg |
+			Self::BeginRun |
+			Self::BigFish |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::Bleat |
+			Self::Blink |
+			Self::Boing |
+			Self::Bounce |
+			Self::ChaseAMartian |
+			Self::ClimbDown |
+			Self::ClimbUp |
+			Self::Cry |
+			Self::Dance |
+			Self::DangleFall |
+			Self::DangleRecover |
+			Self::DeepThoughts |
+			Self::DigestMagicFlower1 |
+			Self::DigestMagicFlower2 |
+			Self::Drag |
+			Self::Eat |
+			Self::EatMagicFlower |
+			Self::EatingMagicFlower |
+			Self::EndRun |
+			Self::Fall |
+			Self::GraspingFall |
+			Self::Handstand |
+			Self::Hop |
+			Self::Jump |
+			Self::LayDown |
+			Self::LegLifts |
+			Self::LookDown |
+			Self::LookUp |
+			Self::Nah |
+			Self::PlayDead |
+			Self::Popcorn |
+			Self::ReachCeiling |
+			Self::ReachFloor |
+			Self::ReachSide1 |
+			Self::ReachSide2 |
+			Self::Really |
+			Self::Rest |
+			Self::Roll |
+			Self::Rotate |
+			Self::Run |
+			Self::RunDown |
+			Self::RunUpsideDown |
+			Self::Scoot |
+			Self::Scratch |
+			Self::Scream |
+			Self::Sleep |
+			Self::SleepSitting |
+			Self::SleepStanding |
+			Self::Slide |
+			Self::SlideDown |
+			Self::Sneeze |
+			Self::Spin |
+			Self::Splat |
+			Self::Stargaze |
+			Self::Tornado |
+			Self::TornadoExit |
+			Self::Urinate |
+			Self::Walk |
+			Self::WalkUpsideDown |
+			Self::WallSlide |
+			Self::Yawn |
+			Self::Yoyo
 		)
 	}
 }
@@ -386,7 +509,8 @@ impl Animation {
 			Self::BlackSheepChase => Some(Self::BlackSheepChaseChild),
 			Self::BlackSheepRomance => Some(Self::BlackSheepRomanceChild),
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
-			Self::Eat => Some(Self::FlowerChild),
+			Self::Eat => Some(Self::Flower),
+			Self::EatMagicFlower => Some(Self::MagicFlower1),
 			Self::Sneeze => Some(Self::SneezeShadow),
 			Self::Splat => Some(Self::SplatGhost),
 			Self::Stargaze => Some(Self::StargazeChild),
@@ -394,6 +518,7 @@ impl Animation {
 		}
 	}
 
+	#[allow(clippy::too_many_lines)]
 	/// # Next Animation.
 	///
 	/// Switch to this animation when the sequence finishes. Some of these
@@ -410,96 +535,104 @@ impl Animation {
 			Self::BeginRun |
 				Self::BlackSheepChase |
 				Self::Scream => Some(Self::Run),
-			Self::BigFish => Some(choose(&[Self::Walk, Self::Walk, Self::Sneeze])),
-			Self::Bleat |
+			Self::BigFish => Some(
+				if 0 == Universe::rand_mod(3) { Self::Sneeze }
+				else { Self::Walk }
+			),
+			Self::BathCoolDown |
+				Self::Beg |
+				Self::Bleat |
 				Self::Blink |
-				Self::BoredSleep |
 				Self::Bounce |
+				Self::DigestMagicFlower2 |
 				Self::EndRun |
 				Self::LayDown |
 				Self::LookDown |
+				Self::LookUp |
+				Self::Nah |
 				Self::PlayDead |
 				Self::Popcorn |
 				Self::ReachFloor |
+				Self::Really |
+				Self::Rest |
+				Self::Roll |
 				Self::Rotate |
 				Self::Sleep |
+				Self::SleepSitting |
 				Self::Slide |
-				Self::Sneeze |
 				Self::Splat |
-				Self::Rest |
 				Self::Urinate => Some(Self::Walk),
-			Self::Boing => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Walk, Self::Walk, Self::Walk, Self::Walk,
-				Self::BeginRun,
-			])),
+			Self::Boing => Some(match Universe::rand_mod(13) {
+				0..=7 => Self::Rotate,
+				8..=11 => Self::Walk,
+				_ => Self::BeginRun,
+			}),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
 			Self::ClimbUp |
 				Self::ReachSide1 => Some(Self::ClimbUp),
-			Self::DangleFall => Some(choose(&[
-				Self::DangleRecover, Self::DangleRecover, Self::DangleRecover,
-				Self::GraspingFall,
-			])),
+			Self::DangleFall => Some(
+				if 0 == Universe::rand_mod(4) { Self::GraspingFall }
+				else { Self::DangleRecover }
+			),
 			Self::DangleRecover |
-				Self::ReachCeiling => Some(choose(&[
-					Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-					Self::DeepThoughts,
-				])),
+				Self::ReachCeiling => Some(
+					if 0 == Universe::rand_mod(5) { Self::DeepThoughts }
+					else { Self::WalkUpsideDown }
+				),
 			Self::DeepThoughts |
 				Self::RunUpsideDown => Some(Self::RunUpsideDown),
+			Self::DigestMagicFlower1 => Some(Self::DigestMagicFlower2),
 			Self::Drag => Some(Self::Drag),
-			Self::Eat => Some(choose(&[Self::Rest, Self::Walk, Self::Walk])),
+			Self::Eat |
+				Self::SleepStanding => Some(
+					if 0 == Universe::rand_mod(3) { Self::Rest }
+					else { Self::Walk }
+				),
+			Self::EatMagicFlower => Some(Self::EatingMagicFlower),
+			Self::EatingMagicFlower => Some(Self::DigestMagicFlower1),
 			Self::Fall |
 				Self::GraspingFall => Some(Self::GraspingFall),
-			Self::Jump => Some(choose(&[
-				Self::Run, Self::Run,
-				Self::Slide, Self::Slide,
-				Self::Jump,
-			])),
-			Self::ReachSide2 => Some(choose(&[
-				Self::RunDown, Self::RunDown, Self::RunDown,
-				Self::ClimbDown,
-				Self::SlideDown,
-			])),
-			Self::Run => Some(choose(&[
-				Self::EndRun, Self::EndRun, Self::EndRun, Self::EndRun,
-				Self::Jump, Self::Jump, Self::Jump,
-				Self::Run, Self::Run,
-			])),
-			Self::RunDown => Some(choose(&[
-				Self::RunDown, Self::RunDown,
-				Self::SlideDown,
-			])),
-			Self::Scoot => Some(choose(&[
-				Self::Scoot, Self::Scoot, Self::Scoot, Self::Scoot,
-				Self::Rotate, Self::Rotate,
-				Self::Walk,
-			])),
+			Self::Jump => Some(match Universe::rand_mod(5) {
+				0..=1 => Self::Run,
+				2..=3 => Self::Slide,
+				_ => Self::Jump,
+			}),
+			Self::LegLifts => Some(Self::BeginRun),
+			Self::MagicFlower1 => Some(Self::MagicFlower2),
+			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
+				0 => Self::ClimbDown,
+				1 => Self::SlideDown,
+				_ => Self::RunDown,
+			}),
+			Self::Run => Some(match Universe::rand_mod(3) {
+				0 => Self::EndRun,
+				1 => Self::Jump,
+				_ => Self::Run,
+			}),
+			Self::RunDown => Some(
+				if 0 == Universe::rand_mod(3) { Self::SlideDown }
+				else { Self::RunDown }
+			),
+			Self::Scoot => Some(match Universe::rand_mod(7) {
+				0..=3 => Self::Scoot,
+				4..=5 => Self::Rotate,
+				_ => Self::Walk,
+			}),
 			Self::SlideDown => Some(Self::SlideDown),
-			Self::Spin => Some(choose(&[Self::PlayDead, Self::Sneeze])),
-			Self::Stargaze => Some(Self::Scream),
-			Self::Walk => Some(choose(&[
-				Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk, Self::Walk,
-				Self::BeginRun, Self::BeginRun, Self::BeginRun, Self::BeginRun,
-				Self::Beg,
-				Self::Blink,
-				Self::Eat,
-				Self::Handstand,
-				Self::LayDown,
-				Self::LookDown,
-				Self::Popcorn,
-				Self::Roll,
-			])),
-			Self::WalkUpsideDown => Some(choose(&[
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown, Self::WalkUpsideDown,
-				Self::DangleFall,
-				Self::DeepThoughts,
-			])),
+			Self::Spin => Some(Self::PlayDead),
+			Self::Stargaze => Some(
+				if 0 == Universe::rand() & 1 { Self::Nah }
+				else { Self::Scream }
+			),
+			Self::Tornado => Some(Self::TornadoExit),
+			Self::WalkUpsideDown => Some(match Universe::rand_mod(15) {
+				0 => Self::DangleFall,
+				1 => Self::DeepThoughts,
+				_ => Self::WalkUpsideDown,
+			}),
 			Self::WallSlide => Some(Self::WallSlide),
+			Self::Yawn => Some(Self::Sleep),
 			_ => None,
 		}
 	}
@@ -523,18 +656,18 @@ impl Animation {
 				Self::RunUpsideDown |
 				Self::WalkUpsideDown => Some(Self::ReachSide2),
 			Self::Fall => Some(Self::Bounce),
-			Self::GraspingFall => Some(choose(&[
-				Self::Splat, Self::Splat, Self::Splat,
-				Self::Bounce,
-				Self::PlayDead,
-			])),
-			Self::Jump => Some(Self::WallSlide),
-			Self::Walk => Some(choose(&[
-				Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate, Self::Rotate,
-				Self::Scoot, Self::Scoot,
-				Self::ReachSide1,
-			])),
-			Self::WallSlide => Some(Self::Rotate),
+			Self::GraspingFall => Some(match Universe::rand_mod(5) {
+				0 => Self::Bounce,
+				1 => Self::PlayDead,
+				_ => Self::Splat,
+			}),
+			Self::Jump | Self::Hop => Some(Self::WallSlide),
+			Self::Tornado | Self::WallSlide => Some(Self::Rotate),
+			Self::Walk => Some(match Universe::rand_mod(8) {
+				0..=4 => Self::Rotate,
+				5..=6 => Self::Scoot,
+				_ => Self::ReachSide1,
+			}),
 			_ => None,
 		}
 	}
@@ -547,7 +680,7 @@ impl Animation {
 	///
 	/// Most of these are completely static, identical from run-to-run, but a
 	/// few have randomized or environmental modifiers, tweaking them slightly.
-	pub(crate) fn scenes(self, width: u16) -> SceneList {
+	pub(crate) const fn scenes(self, width: u16) -> SceneList {
 		macro_rules! fixed {
 			($var:ident) => (SceneList::new(SceneListKind::Fixed(scenes::$var)));
 		}
@@ -567,33 +700,44 @@ impl Animation {
 			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
 			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
 			Self::Bleat => fixed!(BLEAT),
-			Self::Blink => scenes::blink(),
+			Self::Blink => fixed!(BLINK),
 			Self::Boing => fixed!(BOING),
-			Self::BoredSleep => scenes::bored_sleep(),
 			Self::Bounce => fixed!(BOUNCE),
 			Self::ChaseAMartian => scenes::chase_a_martian(width),
 			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
 			Self::ClimbDown => fixed!(CLIMB_DOWN),
 			Self::ClimbUp => fixed!(CLIMB_UP),
+			Self::Cry => fixed!(CRY),
+			Self::Dance => fixed!(DANCE),
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
 			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
-			Self::Doze => scenes::doze(),
+			Self::DigestMagicFlower1 => fixed!(DIGEST_MAGIC_FLOWER1),
+			Self::DigestMagicFlower2 => fixed!(DIGEST_MAGIC_FLOWER2),
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
+			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
+			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
 			Self::Fall => fixed!(FALL),
-			Self::FlowerChild => fixed!(FLOWER_CHILD),
+			Self::Flower => fixed!(FLOWER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
+			Self::Hop => fixed!(HOP),
 			Self::Jump => fixed!(JUMP),
-			Self::LayDown => scenes::lay_down(),
+			Self::LayDown => fixed!(LAY_DOWN),
+			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
+			Self::LookUp => fixed!(LOOK_UP),
+			Self::MagicFlower1 => fixed!(MAGIC_FLOWER1),
+			Self::MagicFlower2 => fixed!(MAGIC_FLOWER2),
+			Self::Nah => fixed!(NAH),
 			Self::PlayDead => fixed!(PLAY_DEAD),
 			Self::Popcorn => fixed!(POPCORN),
 			Self::ReachCeiling => fixed!(REACH_CEILING),
 			Self::ReachFloor => fixed!(REACH_FLOOR),
 			Self::ReachSide1 => fixed!(REACH_SIDE1),
 			Self::ReachSide2 => fixed!(REACH_SIDE2),
+			Self::Really => fixed!(REALLY),
 			Self::Rest => fixed!(REST),
 			Self::Roll => fixed!(ROLL),
 			Self::Rotate => fixed!(ROTATE),
@@ -603,7 +747,9 @@ impl Animation {
 			Self::Scoot => fixed!(SCOOT),
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
-			Self::Sleep => scenes::sleep(),
+			Self::Sleep => fixed!(SLEEP),
+			Self::SleepSitting => fixed!(SLEEP_SITTING),
+			Self::SleepStanding => fixed!(SLEEP_STANDING),
 			Self::Slide => fixed!(SLIDE),
 			Self::SlideDown => fixed!(SLIDE_DOWN),
 			Self::Sneeze => fixed!(SNEEZE),
@@ -613,10 +759,13 @@ impl Animation {
 			Self::SplatGhost => fixed!(SPLAT_GHOST),
 			Self::Stargaze => fixed!(STARGAZE),
 			Self::StargazeChild => fixed!(STARGAZE_CHILD),
-			Self::Urinate => scenes::urinate(),
+			Self::Tornado => fixed!(TORNADO),
+			Self::TornadoExit => scenes::tornado_exit(width),
+			Self::Urinate => fixed!(URINATE),
 			Self::Walk => fixed!(WALK),
 			Self::WalkUpsideDown => fixed!(WALK_UPSIDE_DOWN),
 			Self::WallSlide => fixed!(WALL_SLIDE),
+			Self::Yawn => fixed!(YAWN),
 			Self::Yoyo => fixed!(YOYO),
 		}
 	}
@@ -653,41 +802,23 @@ impl ExactSizeIterator for Animations {
 
 
 
-#[allow(clippy::cast_possible_truncation, unsafe_code)]
-/// # Random Choice.
-///
-/// Return a random animation from the set, or `None` if for some reason the
-/// set is empty.
-fn choose(set: &[Animation]) -> Animation {
-	let idx = (Universe::rand() % set.len() as u64) as usize;
-	unsafe { *(set.get_unchecked(idx)) }
-}
-
-
-
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::collections::HashSet;
 
 	#[test]
-	fn t_choose() {
-		let set = &[
-			Animation::Abduction,
-			Animation::ClimbUp,
-			Animation::Run,
-			Animation::Splat,
-		];
-		let mut all = Vec::with_capacity(5000);
-		for _ in 0..5000 {
-			all.push(choose(set) as u8);
-		}
+	fn t_default() {
+		const TOTAL: usize = 33;
 
-		all.sort_unstable();
-		all.dedup();
+		let set = (0..10_000_u16).into_iter()
+			.map(|_| Animation::default_choice() as u8)
+			.collect::<HashSet::<u8>>();
+
 		assert_eq!(
-			all.len(),
 			set.len(),
-			"Failed to choose all {} possibilities in 5000 tries.", set.len()
+			TOTAL,
+			"Failed to choose all {TOTAL} default possibilities in 10K tries."
 		);
 	}
 

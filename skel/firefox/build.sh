@@ -45,7 +45,7 @@ wasm-bindgen \
 
 # Copy the glue for later.
 cat \
-	"$( find target/wasm32-unknown-unknown/release -name glue-header.mjs -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n 1 )" \
+	target/wasm32-unknown-unknown/release/snippets/**/*.js \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.js \
 	> ../js/generated/glue.mjs
 

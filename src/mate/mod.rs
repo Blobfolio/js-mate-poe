@@ -34,7 +34,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, h: bool, rx: bool, ry: bool, animation: i8);
+	fn toggle_wrapper_classes(el: &Element, rx: bool, ry: bool, frame: i16, scene: i8);
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poePlaySound")]
@@ -145,21 +145,25 @@ impl Mate {
 			if let Some(a) = self.child() { a }
 			else { return };
 
+		// Make sure the mate has the correct geometry.
+		child.pretick_resize();
+
 		// Flip to match.
 		child.flags.clear_flips();
 		child.flags.flip_x(Some(self.flags.flipped_x()));
 		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
+		child.animation.take();
 		child.set_animation(animation, true);
 
 		// Some animations require a position override using knowledge of the
 		// primary sprite's position.
 		if let Some(pos) = match animation {
-			Animation::FlowerChild => {
+			Animation::Flower | Animation::MagicFlower1 => {
 				let x =
-					if self.flags.flipped_x() { self.pos.x + 36 }
-					else { self.pos.x - 36 };
+					if self.flags.flipped_x() { self.pos.x + 38 }
+					else { self.pos.x - 38 };
 				Some(Position::new(x, self.pos.y))
 			},
 			Animation::AbductionChild => {
@@ -221,7 +225,7 @@ impl Mate {
 		// it.
 		let animation_exit = animation.may_exit();
 		if animation_changed || ! animation_exit { self.flags.set_may_exit(false); }
-		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand() % 15 {
+		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand_mod(15) {
 			self.flags.set_may_exit(true);
 		}
 
@@ -237,9 +241,7 @@ impl Mate {
 		if animation.child().is_some() { Universe::set_assign_child(); }
 
 		#[cfg(feature = "director")]
-		if animation_changed {
-			debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
-		}
+		debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
 	}
 
 	/// # Set Animation Starting Position.
@@ -306,7 +308,7 @@ impl Mate {
 		if frame as u8 != self.frame as u8 {
 			// Mark the class as having changed too if the old or new frame is
 			// a halfsie.
-			if frame.half_frame() || self.frame.half_frame() {
+			if -1 != frame.dba() || -1 != self.frame.dba() {
 				self.flags.mark_class_changed();
 			}
 
@@ -542,9 +544,9 @@ impl Mate {
 			if self.flags.class_changed() {
 				toggle_wrapper_classes(
 					&wrapper,
-					self.frame.half_frame(),
 					self.flags.flipped_x(),
 					self.flags.flipped_y(),
+					self.frame.dba(),
 					match self.animation {
 						None => 0,
 						Some(Animation::Drag) => 1,
@@ -552,6 +554,9 @@ impl Mate {
 						Some(Animation::Abduction) => 3,
 						Some(Animation::BigFishChild) => 4,
 						Some(Animation::SplatGhost) => 5,
+						Some(Animation::EatingMagicFlower) => 6,
+						Some(Animation::MagicFlower1 | Animation::MagicFlower2) => 7,
+						Some(Animation::DigestMagicFlower1) => 8,
 						_ => -1,
 					}
 				);
@@ -704,7 +709,7 @@ impl Mate {
 	/// Return a random horizontal position within the boundaries of the
 	/// screen, used by some start-up/entrance animations.
 	fn random_x(&self) -> i32 {
-		i32::from(Universe::rand_u16(self.max_x() as u16 + 1))
+		i32::from(Universe::rand_mod(self.max_x() as u16 + 1))
 	}
 
 	/// # Mate Visibility.

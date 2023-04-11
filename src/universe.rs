@@ -54,12 +54,17 @@ static NEXT_ANIMATION: AtomicU8 = AtomicU8::new(0);
 /// or updated as a pair, they're stored within a single 64-bit atomic.
 static POS: AtomicU64 = AtomicU64::new(0);
 
-/// # Random Seed.
-///
-/// This holds the seed for our ~~weak~~ simple, local PNRG. The default value
-/// is only for testing; in browser contexts it is reseeded with `Math.random`
-/// during initialization.
-static SEED: AtomicU64 = AtomicU64::new(0x8a5c_d789_635d_2dff);
+/// # Xoshi Seed #1.
+static SEED1: AtomicU64 = AtomicU64::new(0x8596_cc44_bef0_1aa0);
+
+/// # Xoshi Seed #2.
+static SEED2: AtomicU64 = AtomicU64::new(0x98d4_0948_da60_19ae);
+
+/// # Xoshi Seed #3.
+static SEED3: AtomicU64 = AtomicU64::new(0x49f1_3013_c503_a6aa);
+
+/// # Xoshi Seed #4.
+static SEED4: AtomicU64 = AtomicU64::new(0xc4d7_82ff_3c9f_7bef);
 
 #[cfg(feature = "director")]
 /// # Speed.
@@ -172,40 +177,36 @@ impl Universe {
 }
 
 impl Universe {
+	#[inline]
 	/// # Random Value.
 	///
-	/// Return a random `u64`.
+	/// Return a random `u64` (xoshiro256).
 	pub(crate) fn rand() -> u64 {
-		let mut seed = SEED.load(SeqCst);
-		seed ^= seed << 13;
-		seed ^= seed >> 7;
-		seed ^= seed << 17;
-		SEED.store(seed, SeqCst);
-		seed
+		let mut seeds = get_seeds();
+		let out = seeds[1].overflowing_mul(5).0.rotate_left(7).overflowing_mul(9).0;
+		update_seeds(&mut seeds);
+		set_seeds(&mut seeds);
+		out
 	}
 
 	#[allow(clippy::cast_possible_truncation)]
 	/// # Random (Capped) U16.
 	///
-	/// Return a random number between `0..max`.
-	pub(crate) fn rand_u16(max: u16) -> u16 {
-		if max == 0 { 0 }
-		else { (Self::rand() % u64::from(max)) as u16 }
-	}
-
-	#[cfg(target_arch = "wasm32")]
-	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation, clippy::cast_precision_loss)]
-	/// # Reseed Randomness.
-	fn reseed() {
-		// Convert the f64 into a decent u64. This misses out on some of the
-		// possible range, but is good enough for our purposes.
-		let seed = (js_random() * (1u64 << f64::MANTISSA_DIGITS) as f64) as u64;
-		if seed != 0 {
-			SEED.store(seed, SeqCst);
-			#[cfg(feature = "director")] dom::debug!(format!(
-				"Resseded PRNG with {seed}."
-			));
+	/// Return a random number between `0..max`, mitigating bias the same way
+	/// as `fastrand` (i.e. <https://lemire.me/blog/2016/06/30/fast-random-shuffling/>).
+	pub(crate) fn rand_mod(n: u16) -> u16 {
+		let mut r = Self::rand() as u16;
+		let mut hi = mul_high_u16(r, n);
+		let mut lo = r.wrapping_mul(n);
+		if lo < n {
+			let t = n.wrapping_neg() % n;
+			while lo < t {
+				r = Self::rand() as u16;
+				hi = mul_high_u16(r, n);
+				lo = r.wrapping_mul(n);
+			}
 		}
+		hi
 	}
 }
 
@@ -236,7 +237,7 @@ impl Universe {
 				FLAGS.fetch_or(Self::ACTIVE, SeqCst);
 
 				// Seed future randomness if we can.
-				#[cfg(target_arch = "wasm32")] Self::reseed();
+				#[cfg(target_arch = "wasm32")] reseed();
 
 				// Set up the DOM elements and event bindings, and begin the
 				// animation frame loop.
@@ -341,23 +342,104 @@ impl Universe {
 
 
 
+#[inline]
+/// # Get Seeds.
+fn get_seeds() -> [u64; 4] {
+	[
+		SEED1.load(SeqCst),
+		SEED2.load(SeqCst),
+		SEED3.load(SeqCst),
+		SEED4.load(SeqCst),
+	]
+}
+
+#[inline]
+/// # High 16 Product.
+const fn mul_high_u16(a: u16, b: u16) -> u16 {
+	(((a as u32) * (b as u32)) >> 16) as u16
+}
+
+#[cfg(target_arch = "wasm32")]
+/// # Reseed Randomness.
+fn reseed() {
+	// Splitmix Math.random to give us a reasonable starting point for the
+	// subsequent Xoshi randomness.
+	let mut seed: u64 = js_random().to_bits();
+	let mut seeds = [0_u64; 4];
+	for i in &mut seeds { *i = splitmix(&mut seed); }
+	set_seeds(&mut seeds);
+
+	// Print a debug message if we care about that sort of thing.
+	#[cfg(feature = "director")]
+	dom::debug!(format!(
+		"PNRG1: {:016x}\nPNRG2: {:016x}\nPNRG3: {:016x}\nPNRG4: {:016x}",
+		seeds[0],
+		seeds[1],
+		seeds[2],
+		seeds[3],
+	));
+}
+
+/// # Set Seeds.
+fn set_seeds(seeds: &mut [u64; 4]) {
+	// We are unlikely to wind up with all zeroes, but just in case…
+	if seeds[0] == 0 && seeds[1] == 0 && seeds[2] == 0 && seeds[3] == 0 {
+		SEED1.store(0x8596_cc44_bef0_1aa0, SeqCst);
+		SEED2.store(0x98d4_0948_da60_19ae, SeqCst);
+		SEED3.store(0x49f1_3013_c503_a6aa, SeqCst);
+		SEED4.store(0xc4d7_82ff_3c9f_7bef, SeqCst);
+	}
+	else {
+		SEED1.store(seeds[0], SeqCst);
+		SEED2.store(seeds[1], SeqCst);
+		SEED3.store(seeds[2], SeqCst);
+		SEED4.store(seeds[3], SeqCst);
+	}
+}
+
+/// # Update Seeds.
+fn update_seeds(seeds: &mut[u64; 4]) {
+	let t = seeds[1] << 17;
+	seeds[2] ^= seeds[0];
+	seeds[3] ^= seeds[1];
+	seeds[1] ^= seeds[2];
+	seeds[0] ^= seeds[3];
+	seeds[2] ^= t;
+	seeds[3] =  seeds[3].rotate_left(45);
+}
+
+#[cfg(target_arch = "wasm32")]
+/// # Split/Mix.
+///
+/// This is used to generate our Xoshi256 seeds from a single source `u64`.
+fn splitmix(seed: &mut u64) -> u64 {
+	// Update the source seed.
+	*seed = seed.overflowing_add(0x9e37_79b9_7f4a_7c15).0;
+
+	// Calculate and return a random value.
+	let mut z: u64 = (*seed ^ (*seed >> 30)).overflowing_mul(0xbf58_476d_1ce4_e5b9).0;
+	z = (z ^ (z >> 27)).overflowing_mul(0x94d0_49bb_1331_11eb).0;
+	z ^ (z >> 31)
+}
+
+
+
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use std::collections::HashSet;
 
 	#[test]
-	fn t_rand_u16() {
-		let mut all = Vec::with_capacity(5000);
-		for _ in 0..5000 {
-			let x = Universe::rand_u16(100);
-			assert!((0..100).contains(&x), "Random u16 out of range: {x}");
-			all.push(x);
-		}
+	fn t_rand() {
+		assert_eq!(Universe::rand_mod(0), 0, "Random zero broke!");
 
-		all.sort_unstable();
-		all.dedup();
+		let set = (0..5000_u16).into_iter()
+			.map(|_| Universe::rand_mod(100))
+			.collect::<HashSet<u16>>();
+
+		assert!(set.iter().all(|n| *n < 100), "Value(s) out of range.");
 		assert_eq!(
-			all.len(),
+			set.len(),
 			100,
 			"Failed to collect 100/100 possibilities in 5000 tries."
 		);
