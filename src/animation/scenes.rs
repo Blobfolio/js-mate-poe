@@ -122,7 +122,11 @@ pub(super) const BEGIN_END_RUN: &[Scene] = &[
 
 /// # For `Animation::BigFish`.
 pub(super) const BIG_FISH: &[Scene] = &[
-	Scene::new(60, &[Frame::F005, Frame::F005, Frame::F004, Frame::F004, Frame::F004])
+	Scene::new(30, &[
+		Frame::F005, Frame::F005, Frame::F005, Frame::F005,
+		Frame::F004, Frame::F004, Frame::F004, Frame::F004,
+		Frame::F004, Frame::F004,
+	])
 		.with_move_to(Position::new(-210, 0))
 		.with_repeat(6, 0)
 		.with_flags(Scene::GRAVITY),
@@ -145,19 +149,17 @@ pub(super) const BIG_FISH: &[Scene] = &[
 
 /// # For `Animation::BigFishChild`.
 pub(super) const BIG_FISH_CHILD: &[Scene] = &[
-	Scene::new(1000, &[Frame::F054])
+	Scene::new(30, &[Frame::F054])
+		.with_repeat(34, 0)
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(25, &[Frame::F054])
+	Scene::new(30, &[Frame::F054])
 		.with_move_to(Position::new(-175, -75))
 		.with_repeat(24, 0)
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(25, &[
-		Frame::F055, Frame::F055, Frame::F055, Frame::F055, Frame::F055,
-		Frame::F054, Frame::F054, Frame::F056, Frame::F056, Frame::F057,
-	])
+	Scene::new(30, &[Frame::F055, Frame::F055, Frame::F054, Frame::F056, Frame::F057])
 		.with_move_to(Position::new(-40, 0))
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(25, &[Frame::F057, Frame::F056, Frame::F057, Frame::F056, Frame::F057])
+	Scene::new(30, &[Frame::F057, Frame::F056, Frame::F057, Frame::F056, Frame::F057])
 		.with_move_to(Position::new(-150, 75))
 		.with_repeat(4, 0)
 		.with_flags(Scene::IGNORE_EDGES),
