@@ -196,8 +196,8 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 /// animation. It will return one of Walk/Run/Special.
 ///
 /// The special animations are relatively weighted to prioritize certain
-/// sequences over others, and will always ensure the selection does not match
-/// the previous two specials.
+/// sequences over others, and are additionally constrained to ensure a given
+/// selection is different than the previous two (special) selections.
 fn build_default_animations() -> String {
 	// Secret has no weighting, rare is 8x, common is 24x.
 	let total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
@@ -246,7 +246,8 @@ fn build_default_animations() -> String {
 {}
 					}};
 
-					// Keep the selection if we haven't seen it recently.
+					// Accept and return the choice so long as it is different
+					// than the previous two (special) responses.
 					if next as u8 != last[0] && next as u8 != last[1] {{
 						last.rotate_right(1);
 						last[0] = next as u8;
