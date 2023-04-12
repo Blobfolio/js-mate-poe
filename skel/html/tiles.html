@@ -4,270 +4,139 @@
 	<meta charset="utf-8">
 	<title>RS Mate Poe: Sprite Reference</title>
 
-	<style type="text/css">
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-
-		body {
-			font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Fira Mono", "Liberation Mono", "Courier New", monospace;
-		}
-
-		#sprite {
-			margin: 10px auto 0;
-			width: 790px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			flex-wrap: wrap;
-		}
-
-		.frame {
-			position: relative;
-			width: 40px;
-			height: 40px;
-			margin-bottom: 10px;
-
-			background-image: url('../img/poe-full.png');
-			background-repeat: no-repeat;
-			cursor: pointer;
-			transition: transform .3s ease;
-		}
-
-		.frame + .frame { margin-left: 10px; }
-		.frame:nth-child(16n + 1) { margin-left: 0; }
-
-		/* Unused frames. */
-		.frame.unused {
-			filter: grayscale(1);
-			opacity: .5;
-		}
-
-		/* Empty (non-existent) frames. */
-		.frame.empty { pointer-events: none; }
-		.frame.empty:before {
-			content: '×';
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 40px;
-			height: 40px;
-			line-height: 40px;
-			text-align: center;
-			color: red;
-			font-size: 20px;
-		}
-
-		.frame.mask { cursor: not-allowed; }
-
-		/* Readable Tile Number. */
-		.frame:after {
-			content: '#' attr(data-frame);
-			position: absolute;
-			top: 0;
-			left: 0;
-			height: 40px;
-			width: 40px;
-
-			color: white;
-			background-color: #1f1f1f;
-			font-size: 11px;
-			font-weight: bold;
-			text-align: center;
-			line-height: 40px;
-
-			opacity: 0;
-			transition: opacity .3s ease;
-		}
-		.frame.mask:after {
-			content: attr(data-frame);
-			background-color: #ff1f1f;
-		}
-
-		/* Enable Said Tile. */
-		.frame:hover {
-			transform: scale(1.25);
-			z-index: 1;
-		}
-		.frame:hover:after { opacity: 1; }
-
-		#playlist {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-
-			display: flex;
-			align-items: flex-start;
-			justify-content: flex-start;
-
-			width: 100%;
-			height: 60px;
-			padding: 10px 5px 10px 70px;
-
-			background-color: black;
-		}
-
-		#playlist .frame {
-			background-color: white;
-			margin: 0 5px 0 0!important;
-		}
-
-		#playlist .frame:before {
-			content: '#' attr(data-frame);
-			position: absolute;
-			left: 0;
-			top: -30px;
-			width: 40px;
-			line-height: 1;
-			text-align: center;
-			font-size: 12px;
-		}
-
-		#playlist .frame:hover { transform: scale(1)!important; }
-		#playlist .frame:hover:after { display: none!important; }
-
-		#movie {
-			position: fixed;
-			left: 0;
-			bottom: 0;
-			width: 60px;
-			height: 60px;
-			background-color: white;
-			border: 10px solid #ff1493;
-
-			pointer-events: none;
-			opacity: 0;
-			transition: opacity .3s ease;
-		}
-
-		#movie.play { opacity: 1 }
-	</style>
+	<link rel="stylesheet" href="assets/tiles.css">
 </head>
 <body>
 	<div id="sprite"></div>
-
-	<div id="playlist">
-	</div>
+	<div id="playlist"></div>
 	<div id="movie"><div class="frame"></div></div>
+	<select id="fps">
+		<option value="50">50ms</option>
+		<option value="75">75ms</option>
+		<option value="100">100ms</option>
+		<option value="125">125ms</option>
+		<option value="150">150ms</option>
+		<option value="175">175ms</option>
+		<option value="200" selected>200ms</option>
+		<option value="225">225ms</option>
+		<option value="250">250ms</option>
+		<option value="275">275ms</option>
+		<option value="300">300ms</option>
+		<option value="325">325ms</option>
+		<option value="350">350ms</option>
+	</select>
 
 	<script>
-		// Render each individual frame in a grid.
-		// Add the masks.
-		const masks = ['m021', 'm100', 'm133'];
+		// DOM elements of note.
 		const sprite = document.getElementById('sprite');
-		for (let i = 0; i < 173; ++i) {
-			// Check for a matching mask.
-			let mask = i.toString();
-			while (mask.length < 3) { mask = '0' + mask; }
-			mask = 'm' + mask;
-			if (-1 !== masks.indexOf(mask)) {
-				let frame = document.createElement('div');
-				frame.classList.add('frame');
-				frame.classList.add('mask');
-				frame.setAttribute('data-frame', mask);
-				frame.style.backgroundImage = `url('../img/masks/${mask}.svg')`;
-				sprite.appendChild(frame);
-			}
-
-			// Handle the actual frame.
-			let frame = document.createElement('div');
-			frame.classList.add('frame');
-
-			// Each tile is 40 pixels, laid out in one long line.
-			let col = i * -40;
-
-			// Special/unused frames.
-			if (166 <= i) { frame.classList.add('empty'); }
-			else if (155 <= i) { frame.classList.add('unused'); }
-
-			frame.style.backgroundPosition = col + 'px 0px';
-			frame.setAttribute('data-frame', i);
-
-			sprite.appendChild(frame);
-		}
-
-		// More DOM elements worth remembering.
 		const playlist = document.getElementById('playlist');
 		const movie = document.getElementById('movie');
+		const movieFrame = movie.querySelector('.frame');
+		const fps = document.getElementById('fps');
 
-		// Queued frames (for playlist).
-		const list = [];
+		// Special frames.
+		const masks = [21, 100, 133];
+		const halves = [31, 32, 33];
 
-		// Current frame ID (for movie).
-		let listId = 0;
+		// "Movie" playback details.
+		let frameId = 0;
+		let rafNext = 0;
 
-		// setInterval ID, if any.
-		let timerId = 0;
-		let movieSpeed = 200;
-
-		// Repopulate the playlist from the `list` variable, and (re)start the
-		// movie timer if applicable. (If not, kill the timer and do nothing.)
-		const startMovie = function() {
-			// Reset the list id and timer.
-			if (timerId !== 0) {
-				clearInterval(timerId);
-				timerId = 0;
+		/**
+		 * Start/Stop/Re-initialize Movie.
+		 *
+		 * @return {void} Nothing.
+		 */
+		const initMovie = function() {
+			let active = !! playlist.children.length;
+			if (active !== document.body.classList.contains('is-playing')) {
+				document.body.classList.toggle('is-playing', active);
+				if (active) {
+					frameId = 0;
+					rafNext = 0;
+					window.requestAnimationFrame(renderMovie);
+				}
 			}
-			listId = 0;
-
-			// Clear old playlist frames.
-			while (0 < playlist.children.length) {
-				playlist.removeChild(playlist.children[playlist.children.length - 1]);
-			}
-
-			// If the list is empty, we're done.
-			if (0 === list.length) {
-				movie.classList.remove('play');
-				return;
-			}
-
-			// Populate the current playlist frames.
-			for (let i = 0; i < list.length; ++i) {
-				let frame = document.createElement('div');
-				frame.classList.add('frame');
-				frame.style.backgroundPosition = (list[i] * -40) + 'px 0px';
-				frame.setAttribute('data-id', i);
-				frame.setAttribute('data-frame', list[i]);
-				playlist.appendChild(frame);
-			}
-
-			// Animate!
-			timerId = setInterval(renderMovie, movieSpeed);
 		};
 
-		// Switch movie frames (if playing).
-		const renderMovie = function() {
-			// Do nothing if empty.
-			if (0 === list.length) { return; }
+		/**
+		 * Make Frame Element.
+		 *
+		 * @param {string} cls Class (other than .frame).
+		 * @return {Element} Element.
+		 */
+		const makeFrame = function(cls) {
+			let frame = document.createElement('div');
+			frame.classList.add('frame');
+			frame.classList.add(cls);
+			frame.setAttribute('data-class', cls);
 
-			// Loop the list id if needed.
-			if (listId >= list.length) { listId = 0; }
+			let id = cls;
+			if (0 === cls.indexOf('f')) { id = cls.slice(1); }
+			frame.setAttribute('data-frame', id);
 
-			// Update the frame.
-			movie.querySelector('.frame').style.backgroundPosition = (list[listId] * -40) + 'px 0px';
-			movie.classList.add('play');
+			return frame;
+		};
 
-			// Increment the list id for next time.
-			listId += 1;
+		/**
+		 * Render Movie.
+		 *
+		 * Advance the movie frame and set the corresponding playlist entry to
+		 * active, if applicable.
+		 *
+		 * @param {number} now Now.
+		 * @return {void} Nothing.
+		 */
+		const renderMovie = function(now) {
+			// Abort if the list is empty.
+			if (0 === playlist.children.length) { return; }
+
+			// Do stuff!
+			if (rafNext <= now) {
+				// Loop the frameId back around if needed.
+				if (frameId >= playlist.children.length) { frameId = 0; }
+
+				// Set the frame.
+				let cls = playlist.children[frameId].getAttribute('data-class');
+				movieFrame.className = `frame ${cls}`;
+
+				// Update active classes.
+				for (let i = 0; i < playlist.children.length; ++i) {
+					playlist.children[i].classList.toggle('is-current', i === frameId);
+				}
+
+				// Set ourselves up for next time.
+				frameId += 1;
+				rafNext = now + (parseInt(fps.value, 10) || 200);
+			}
+
+			// And again.
+			window.requestAnimationFrame(renderMovie);
+		};
+
+		// Add each frame to the sprite table.
+		for (let i = 0; i <= 165; ++i) {
+			// If there's a corresponding mask, add it first.
+			if (-1 !== masks.indexOf(i)) { sprite.appendChild(makeFrame(`fm${i}`)); }
+			sprite.appendChild(makeFrame(`f${i}`));
 		}
 
-		// Clicking a frame in the sprite table queues it up.
+		// Save the halfsies for last because they look weird.
+		for (let i of halves) { sprite.appendChild(makeFrame(`fh${i}`)); }
+
+		// Copy frames from the sprite table to the playlist on click.
 		sprite.addEventListener('click', function(e) {
-			if (e.target.classList.contains('frame') && ! e.target.classList.contains('mask')) {
-				let id = parseInt(e.target.getAttribute('data-frame')) || 0;
-				list.push(id);
-				startMovie();
+			if (e.target.classList.contains('frame')) {
+				playlist.appendChild(e.target.cloneNode(true));
+				initMovie();
 			}
 		}, { passive: true });
 
-		// Clicking a frame in the playlist table removes it.
+		// Remove frames from the playlist on click.
 		playlist.addEventListener('click', function(e) {
 			if (e.target.classList.contains('frame')) {
-				let id = parseInt(e.target.getAttribute('data-id')) || 0;
-				list.splice(id, 1);
-				startMovie();
+				playlist.removeChild(e.target);
+				initMovie();
 			}
 		}, { passive: true });
 	</script>

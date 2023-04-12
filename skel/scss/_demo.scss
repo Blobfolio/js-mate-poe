@@ -1,0 +1,78 @@
+/**
+ * RS Mate Poe: Demo CSS (base)
+ */
+
+@import "_base";
+
+*, *:after, *:before {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: $mono;
+	image-rendering: pixelated;
+}
+
+.frame {
+	position: relative;
+	width: $tile_size;
+	height: $tile_size;
+
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: $tile_size;
+		height: $tile_size;
+
+		background-image: url('poe.png');
+		background-repeat: no-repeat;
+		background-position: var(--x, 0) var(--y, 0);
+
+		pointer-events: none;
+	}
+}
+
+// Used frames.
+@for $frame from 1 through $max_frame {
+	$x: (0 - $tile_size) * $frame;
+	.f#{$frame} { --x: #{$x}; }
+}
+
+// Unused frames.
+@for $frame from $max_frame + 1 through $max_unused_frame {
+	$x: (0 - $tile_size) * $frame;
+	.f#{$frame} {
+		--x: #{$x};
+		&:before {
+			filter: grayscale(1);
+			opacity: .5;
+		}
+	}
+}
+
+// Half Frames.
+.fh31 { @extend .f31; }
+.fh32 { @extend .f32; }
+.fh33 { @extend .f33; }
+.fh31, .fh32, .fh33 {
+	--y: -2px;
+	&:before { clip-path: inset(0 0 50% 0); }
+}
+
+// Maked Frames.
+.fm21 {
+	@extend .f21;
+	&:before { clip-path: $m021; }
+}
+.fm100 {
+	@extend .f100;
+	&:before { clip-path: $m100; }
+}
+.fm133 {
+	@extend .f133;
+	&:before { clip-path: $m133; }
+}

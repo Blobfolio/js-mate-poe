@@ -1,6 +1,7 @@
 **/*.br
 **/*.gz
 /Cargo.lock
+/demo/
 /dist/
 /skel/js/generated/
 /target/

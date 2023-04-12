@@ -113,7 +113,7 @@ impl Mate {
 		if self.flags.primary() {
 			// Clear some settings.
 			self.flags.clear();
-			self.set_animation(Animation::first_choice(), true);
+			self.set_animation(Animation::entrance_choice(true), true);
 		}
 	}
 
@@ -516,7 +516,7 @@ impl Mate {
 		if self.flags.primary() {
 			match self.visibility() {
 				// If hidden, go with an entrance animation.
-				0 => Some(Animation::entrance_choice()),
+				0 => Some(Animation::entrance_choice(false)),
 				// If partially visible and exiting, keep going.
 				1 if self.flags.may_exit() => self.animation,
 				// Otherwise go with the animation's named successor.
@@ -681,7 +681,7 @@ impl Mate {
 				self.set_animation(
 					if 0 == self.visibility() {
 						Universe::set_no_child();
-						Animation::entrance_choice()
+						Animation::entrance_choice(false)
 					}
 					else { animation.next_edge().unwrap_or(Animation::Rotate) },
 					false

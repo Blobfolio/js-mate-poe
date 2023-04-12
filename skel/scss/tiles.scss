@@ -1,0 +1,129 @@
+/**
+ * RS Mate Poe: Demo CSS (tiles)
+ */
+
+@import "_base";
+@import "_demo";
+
+#sprite {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+
+	width: 790px;
+	margin: 10px auto 0;
+}
+
+.frame {
+	margin-bottom: 10px;
+
+	cursor: cell;
+	transition: transform .3s ease;
+
+	& + .frame { margin-left: 10px; }
+	&:nth-child(16n + 1) { margin-left: 0; }
+
+	&:after {
+		content: attr(data-frame);
+
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: $tile_size;
+		width: $tile_size;
+
+		color: white;
+		background-color: black;
+		font-size: 11px;
+		font-weight: bold;
+		text-align: center;
+		line-height: $tile_size;
+
+		opacity: 0;
+		transition: opacity .3s ease;
+		pointer-events: none;
+	}
+
+	&:hover {
+		transform: scale(1.25);
+		z-index: 1;
+	}
+	&:hover:after { opacity: 1; }
+}
+
+#playlist,
+#movie {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+}
+
+#playlist {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+
+	width: 100%;
+	height: $tile_size + 20px;
+	padding: 10px 80px 10px 70px;
+
+	background-color: black;
+
+	& > .frame {
+		background-color: white;
+		margin: 0 5px 0 0!important;
+		cursor: not-allowed;
+
+		&:after {
+			top: -30px;
+			color: black;
+			background-color: transparent;
+			line-height: 1;
+			font-size: 12px;
+			opacity: 1;
+			transition: color .3s ease;
+		}
+		&:hover { transform: scale(1)!important; }
+
+		&.is-current:after { color: #ff1493; }
+	}
+}
+
+#movie {
+	width: 60px;
+	height: 60px;
+	background-color: white;
+	border: 10px solid #ff1493;
+
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity .3s ease;
+}
+
+#fps {
+	position: fixed;
+	right: 10px;
+	bottom: 15px;
+
+	width: 60px;
+	height: 30px;
+	padding-left: 5px;
+
+	border-radius: 0;
+	border: 0;
+	background-color: white;
+
+	color: black;
+	font-family: $mono;
+	font-size: 11px;
+
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity .3s ease;
+}
+
+body.is-playing {
+	#movie, #fps { opacity: 1; }
+	#fps { pointer-events: auto; }
+}
