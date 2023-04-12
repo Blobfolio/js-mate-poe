@@ -34,7 +34,7 @@
 		width: $tile_size;
 
 		color: white;
-		background-color: #1f1f1f;
+		background-color: black;
 		font-size: 11px;
 		font-weight: bold;
 		text-align: center;
@@ -52,18 +52,21 @@
 	&:hover:after { opacity: 1; }
 }
 
-#playlist {
+#playlist,
+#movie {
 	position: fixed;
 	bottom: 0;
 	left: 0;
+}
 
+#playlist {
 	display: flex;
 	align-items: flex-start;
 	justify-content: flex-start;
 
 	width: 100%;
 	height: $tile_size + 20px;
-	padding: 10px 95px 10px 70px;
+	padding: 10px 80px 10px 70px;
 
 	background-color: black;
 
@@ -74,10 +77,10 @@
 
 		&:after {
 			top: -30px;
-			color: #1f1f1f;
+			color: black;
 			background-color: transparent;
 			line-height: 1;
-			font-weight: normal;
+			font-size: 12px;
 			opacity: 1;
 			transition: color .3s ease;
 		}
@@ -88,9 +91,6 @@
 }
 
 #movie {
-	position: fixed;
-	left: 0;
-	bottom: 0;
 	width: 60px;
 	height: 60px;
 	background-color: white;
@@ -99,8 +99,6 @@
 	pointer-events: none;
 	opacity: 0;
 	transition: opacity .3s ease;
-
-	&.play { opacity: 1; }
 }
 
 #fps {
@@ -108,7 +106,24 @@
 	right: 10px;
 	bottom: 15px;
 
-	width: 75px;
+	width: 60px;
 	height: 30px;
 	padding-left: 5px;
+
+	border-radius: 0;
+	border: 0;
+	background-color: white;
+
+	color: black;
+	font-family: $mono;
+	font-size: 11px;
+
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity .3s ease;
+}
+
+body.is-playing {
+	#movie, #fps { opacity: 1; }
+	#fps { pointer-events: auto; }
 }

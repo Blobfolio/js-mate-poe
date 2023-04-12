@@ -27,11 +27,44 @@
 	</select>
 
 	<script>
-		// Place each frame in a grid.
+		// DOM elements of note.
+		const sprite = document.getElementById('sprite');
+		const playlist = document.getElementById('playlist');
+		const movie = document.getElementById('movie');
+		const movieFrame = movie.querySelector('.frame');
+		const fps = document.getElementById('fps');
+
+		// Special frames.
 		const masks = [21, 100, 133];
 		const halves = [31, 32, 33];
 
-		// Make a frame.
+		// "Movie" playback details.
+		let frameId = 0;
+		let rafNext = 0;
+
+		/**
+		 * Start/Stop/Re-initialize Movie.
+		 *
+		 * @return {void} Nothing.
+		 */
+		const initMovie = function() {
+			let active = !! playlist.children.length;
+			if (active !== document.body.classList.contains('is-playing')) {
+				document.body.classList.toggle('is-playing', active);
+				if (active) {
+					frameId = 0;
+					rafNext = 0;
+					window.requestAnimationFrame(renderMovie);
+				}
+			}
+		};
+
+		/**
+		 * Make Frame Element.
+		 *
+		 * @param {string} cls Class (other than .frame).
+		 * @return {Element} Element.
+		 */
 		const makeFrame = function(cls) {
 			let frame = document.createElement('div');
 			frame.classList.add('frame');
@@ -45,103 +78,67 @@
 			return frame;
 		};
 
-		// Add each frame to the table.
-		for (let i = 0; i <= 165; ++i) {
-			// Add the mask?
-			if (-1 !== masks.indexOf(i)) {
-				let frame = makeFrame(`fm${i}`);
-				sprite.appendChild(frame);
-			}
-
-			let frame = makeFrame(`f${i}`);
-			sprite.appendChild(frame);
-		}
-
-		// Add the halfsies to the end.
-		for (let i of halves) {
-			let frame = makeFrame(`fh${i}`);
-			sprite.appendChild(frame);
-		}
-
-		// More DOM elements worth remembering.
-		const playlist = document.getElementById('playlist');
-		const movie = document.getElementById('movie');
-		const movieFrame = movie.querySelector('.frame');
-		const fps = document.getElementById('fps');
-
-		// Current frame ID (for movie).
-		let nowPlaying = 0;
-
-		// setInterval ID, if any.
-		let timerId = 0;
-		let movieSpeed = 200;
-
-		// Repopulate the playlist from the `list` variable, and (re)start the
-		// movie timer if applicable. (If not, kill the timer and do nothing.)
-		const startMovie = function() {
-			// Reset the list id and timer.
-			if (timerId !== 0) {
-				clearInterval(timerId);
-				timerId = 0;
-			}
-			nowPlaying = 0;
-
-			// If the list is empty, we're done.
-			if (0 === playlist.children.length) {
-				movie.classList.remove('play');
-				return;
-			}
-
-			// Animate!
-			timerId = setInterval(renderMovie, parseInt(fps.value, 10));
-		};
-
-		// Switch movie frames (if playing).
-		const renderMovie = function() {
-			// Do nothing if empty.
+		/**
+		 * Render Movie.
+		 *
+		 * Advance the movie frame and set the corresponding playlist entry to
+		 * active, if applicable.
+		 *
+		 * @param {number} now Now.
+		 * @return {void} Nothing.
+		 */
+		const renderMovie = function(now) {
+			// Abort if the list is empty.
 			if (0 === playlist.children.length) { return; }
 
-			// Loop the list id if needed.
-			if (nowPlaying >= playlist.children.length) { nowPlaying = 0; }
+			// Do stuff!
+			if (rafNext <= now) {
+				// Loop the frameId back around if needed.
+				if (frameId >= playlist.children.length) { frameId = 0; }
 
-			// Pull the playlist frame and class.
-			let frame1 = playlist.children[nowPlaying];
-			if (null === frame1) { return; }
-			let cls = frame1.getAttribute('data-class');
-			if (('string' !== typeof cls) || ! cls) { return; }
+				// Set the frame.
+				let cls = playlist.children[frameId].getAttribute('data-class');
+				movieFrame.className = `frame ${cls}`;
 
-			// Pull the movie frame.
-			movieFrame.className = `frame ${cls}`;
+				// Update active classes.
+				for (let i = 0; i < playlist.children.length; ++i) {
+					playlist.children[i].classList.toggle('is-current', i === frameId);
+				}
 
-			// Update classes.
-			movie.classList.add('play');
-			for (let i = 0; i < playlist.children.length; ++i) {
-				playlist.children[i].classList.toggle('is-current', i === nowPlaying);
+				// Set ourselves up for next time.
+				frameId += 1;
+				rafNext = now + (parseInt(fps.value, 10) || 200);
 			}
 
-			// Increment the list id for next time.
-			nowPlaying += 1;
+			// And again.
+			window.requestAnimationFrame(renderMovie);
+		};
+
+		// Add each frame to the sprite table.
+		for (let i = 0; i <= 165; ++i) {
+			// If there's a corresponding mask, add it first.
+			if (-1 !== masks.indexOf(i)) { sprite.appendChild(makeFrame(`fm${i}`)); }
+			sprite.appendChild(makeFrame(`f${i}`));
 		}
 
-		// Clicking a frame in the sprite table queues it up.
+		// Save the halfsies for last because they look weird.
+		for (let i of halves) { sprite.appendChild(makeFrame(`fh${i}`)); }
+
+		// Copy frames from the sprite table to the playlist on click.
 		sprite.addEventListener('click', function(e) {
 			if (e.target.classList.contains('frame')) {
-				let frame = e.target.cloneNode(true);
-				playlist.appendChild(frame);
-				startMovie();
+				playlist.appendChild(e.target.cloneNode(true));
+				initMovie();
 			}
 		}, { passive: true });
 
-		// Clicking a frame in the playlist table removes it.
+		// Remove frames from the playlist on click.
 		playlist.addEventListener('click', function(e) {
 			if (e.target.classList.contains('frame')) {
 				playlist.removeChild(e.target);
-				startMovie();
+				initMovie();
 			}
 		}, { passive: true });
-
-		// Changing the speed resets the playlist.
-		fps.addEventListener('change', function(e) { startMovie(); })
 	</script>
 </body>
 </html>
