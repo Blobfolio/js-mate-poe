@@ -90,3 +90,16 @@
 
 // Animation: DigestMagicFlower1.
 #p.a8 { transition: filter 1.5s ease-out; }
+
+// Color-shift the sprite to make the abduction more dramatic.
+@keyframes a3 {
+	from { filter: saturate(5); }
+	to { filter: saturate(5) hue-rotate(359deg); }
+}
+
+// Fade out the ghost a bit early.
+@keyframes a5 {
+	0% { opacity: 0.5; }
+	50% { opacity: 0.5; }
+	100% { opacity: 0; }
+}
