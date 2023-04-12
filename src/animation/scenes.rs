@@ -15,34 +15,64 @@ use super::SceneListKind;
 
 /// # For `Animation::Abduction`.
 pub(super) const ABDUCTION: &[Scene] = &[
-	Scene::new(254, &[
-		Frame::F008, Frame::F009, Frame::F009, Frame::F009, Frame::F009,
+	Scene::new(30, &[
+		Frame::F008, Frame::F008, Frame::F008, Frame::F008, Frame::F008,
+		Frame::F008, Frame::F008,
+
+		Frame::F009, Frame::F009, Frame::F009, Frame::F009, Frame::F009,
+		Frame::F009, Frame::F009, Frame::F009, Frame::F009, Frame::F009,
+		Frame::F009, Frame::F009, Frame::F009,
+
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+
 		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
 		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
-		Frame::F031, Frame::F031,
+		Frame::F031, Frame::F032, Frame::F032, Frame::F032, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F031, Frame::F031,
+
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+	])
+		.with_repeat(2, 24)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(30, &[
+		Frame::F031, Frame::F031, Frame::F031, Frame::F031, Frame::F031,
+		Frame::F040, Frame::F040, Frame::F040, Frame::F040, Frame::F040,
 	])
 		.with_flags(Scene::GRAVITY),
-	Scene::new(200, &[Frame::F031, Frame::F040])
-		.with_flags(Scene::GRAVITY),
-	Scene::new(83, &[
-		Frame::F084, Frame::F085, Frame::F086, Frame::F084, Frame::F085,
-		Frame::F086, Frame::F084, Frame::F085, Frame::F086, Frame::None,
-		Frame::F085, Frame::None, Frame::F084, Frame::None, Frame::F086,
-		Frame::None, Frame::F085, Frame::None, Frame::F084, Frame::None,
-		Frame::F086, Frame::None, Frame::F085, Frame::None,
+	Scene::new(30, &[
+		Frame::F084, Frame::F084, Frame::F084, Frame::F084,
+		Frame::F085, Frame::F085, Frame::F085, Frame::F085,
+		Frame::F086, Frame::F086, Frame::None, Frame::F086,
+
+		Frame::F084, Frame::F084, Frame::None, Frame::None,
+		Frame::F085, Frame::None, Frame::F085, Frame::F085,
+		Frame::F086, Frame::F086, Frame::F086, Frame::F086,
+
+		Frame::F084, Frame::None, Frame::None, Frame::None,
+		Frame::F085, Frame::None, Frame::F085, Frame::None,
+		Frame::F086, Frame::None, Frame::F086, Frame::None,
 	])
-		.with_move_to(Position::new(0, -30)),
-	Scene::new(5500, &[Frame::None])
+		.with_move_to(Position::new(0, -36)),
+	Scene::new(30, &[Frame::None])
+		.with_repeat(220, 0),
 ];
 
 /// # For `Animation::AbductionChild`.
 pub(super) const ABDUCTION_CHILD: &[Scene] = &[
-	Scene::new(28, &[Frame::F144, Frame::F145, Frame::F146, Frame::F147])
+	Scene::new(30, &[Frame::F144, Frame::F145, Frame::F146, Frame::F147])
 		.with_move_to(Position::new(0, 480))
 		.with_repeat(29, 0)
 		.with_flags(Scene::EASE_OUT | Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F148, Frame::F149, Frame::F150, Frame::F151])
-		.with_repeat(18, 0)
+	Scene::new(30, &[
+		Frame::F148, Frame::F148,
+		Frame::F149, Frame::F149,
+		Frame::F150, Frame::F150,
+		Frame::F151, Frame::F151,
+	])
+		.with_repeat(14, 0)
 		.with_flags(Scene::IGNORE_EDGES),
 	Scene::new(30, &[Frame::F144, Frame::F145, Frame::F146, Frame::F147])
 		.with_move_to(Position::new(0, -2000))
