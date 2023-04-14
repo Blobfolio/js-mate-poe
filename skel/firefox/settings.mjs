@@ -27,7 +27,7 @@ const sanitizeSettings = function(val) {
  * @return {Object} Settings.
  */
 export const getSettings = async function() {
-	return browser.storage.local.get(['active','audio']).then(
+	return browser.storage.local.get(['active', 'audio']).then(
 		(raw) => sanitizeSettings(raw),
 		() => sanitizeSettings(null),
 	);

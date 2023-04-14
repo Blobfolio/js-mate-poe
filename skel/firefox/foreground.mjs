@@ -9,12 +9,19 @@
 // Pull in the two things we need from the glue.
 import init, { poeInitMedia, Poe } from './generated/glue.mjs';
 
+// Keep track of the Wasm initialization so we don't try to take action too
+// early.
+let loadedWasm = false;
+
+// Also keep track of duplicate instance warnings so we don't print the same
+// message repeatedly.
+let libraryDetected = false;
+
 /**
- * Initialize and Connect!
+ * Initialize Wasm.
  *
- * This initializes the wasm binary, then creates a connection to the
- * background script. (That script will in turn let us know the current
- * settings, and ping us if there are any updates down the road.)
+ * Initialize the wasm, then let the background script know we're ready to do
+ * stuff.
  *
  * @return {void} Nothing.
  */
@@ -22,59 +29,71 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
 	// Initialize media.
 	poeInitMedia(w);
 
-	// Take a brief moment before issuing the connection to help mitigate any
-	// signal criss-crosses from rapid changes.
+	// Let the background script know after a slightly delay.
 	setTimeout(function() {
-		// Abort if this page seems to have the library version of JS Mate Poe
-		// enqueued. (It would be confusing have two Poes running around.)
+		loadedWasm = true;
+		browser.runtime.sendMessage({ action: 'poeTabInit' });
+	}, 500);
+});
+
+/**
+ * Synchronize State.
+ *
+ * This listens for background-triggered state synchronization requests, and
+ * updates the local Poe instance accordingly.
+ *
+ * In other words, it toggles activeness and/or audio.
+ *
+ * This will return a Promise boolean if the message was applicable — the sync
+ * request we're expecting — or false if not. The promise will be true except
+ * in cases where the library version of Poe has been detected, in which case
+ * the extension goes dormant to avoid the confusion of having multiple sheep
+ * running around at once.
+ *
+ * @param {!Object} m Message (settings).
+ * @return {mixed} Promise or false.
+ */
+browser.runtime.onMessage.addListener(function(m) {
+	if (
+		loadedWasm &&
+		(null !== m) &&
+		('object' === typeof m) &&
+		('poeUpdate' === m.action)
+	) {
+		// Suppress the extension if the library version of Poe is detected on
+		// the page. We aren't allowed to check for window.Poe, so the best we
+		// can do is look at the page scripts to see if any have the default
+		// library name.
 		if (Array.from(document.querySelectorAll('script')).some(s => -1 !== s.src.indexOf('js-mate-poe.min.js'))) {
-			console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
-			Poe.active = false;
+			if (! libraryDetected) {
+				libraryDetected = true;
+				console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
+				Poe.active = false;
+			}
+
 			return Promise.resolve(false);
 		}
 
-		// Okay, let's connect to the background script now!
-		let port = browser.runtime.connect({ name: 'Poe-' + Math.random().toString() });
-
-		/**
-		 * Synchronize State.
-		 *
-		 * The background script will let us know the current settings after
-		 * connecting, and let us know if they change down the road. This
-		 * synchronizes our state accordingly.
-		 *
-		 * @param {Object} m Message.
-		 * @return {void} Nothing.
-		 */
-		port.onMessage.addListener((m) => {
-			if ((null !== m) && ('object' === typeof m) && ('poeUpdate' === m.action)) {
-				Poe.audio = !! m.audio;
-				Poe.active = !! m.active;
-			}
-		});
-
-		/**
-		 * Disconnect on Leave.
-		 *
-		 * Make sure Poe is inactive before we leave the page, just in case the
-		 * browser decides to leave back/next history in a weird half-
-		 * remembered state.
-		 *
-		 * @return {void} Nothing.
-		 */
-		window.addEventListener('beforeunload', function() {
-			Poe.active = false;
-		}, { passive: true });
-
-		/**
-		 * Disconnect Handler.
-		 *
-		 * This ensures the state is cleaned up in the unlikely event the
-		 * background script cancels us. (Annoyingly, it won't trigger if we
-		 * cancel ourselves, hence all the duplicate code.)
-		 *
-		 * @return {void} Nothing.
-		 */
-		port.onDisconnect.addListener(() => { Poe.active = false; });
-	}, 250);
+		// Update the state as requested!
+		Poe.audio = !! m.audio;
+		Poe.active = !! m.active;
+		return Promise.resolve(true);
+	}
+	// This either wasn't the message we were expecting, or it was triggered
+	// too soon. Returning a non-promise false lets the background script know
+	// no action was taken.
+	else { return false; }
 });
+
+/**
+ * Disable on Exit.
+ *
+ * This deactivates Poe on exit to clear the elements, etc., from the DOM.
+ * While not strictly necessary, this can help workaround inconsistent state
+ * issues arising from stale history caches, etc.
+ *
+ * @return {void} Nothing.
+ */
+window.addEventListener('beforeunload', function() {
+	if (loadedWasm) { Poe.active = false; }
+}, { passive: true });
