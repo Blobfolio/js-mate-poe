@@ -126,14 +126,6 @@ impl Scene {
 	}
 }
 
-macro_rules! get {
-	($title:literal, $flag:ident, $get:ident) => (
-		#[must_use]
-		#[doc = concat!("# ", $title, "?")]
-		pub(crate) const fn $get(&self) -> bool { Self::$flag == self.flags & Self::$flag }
-	);
-}
-
 impl Scene {
 	pub(super) const EASE_IN: u8 =       0b0000_0001;
 	pub(super) const EASE_OUT: u8 =      0b0000_0010;
@@ -148,12 +140,10 @@ impl Scene {
 }
 
 impl Scene {
-	get!("Ease In", EASE_IN, ease_in);
-	get!("Ease Out", EASE_OUT, ease_out);
-	//get!("Flip (X) After Scene", FLIP_X_NEXT, flip_x_next);
-	//get!("Flip (Y) After Scene", FLIP_Y_NEXT, flip_y_next);
-	//get!("Gravity Applies", GRAVITY, gravity);
-	//get!("Ignore Edges", IGNORE_EDGES, ignore_edges);
+	/// # Ease?
+	const fn ease(&self) -> bool {
+		0 != self.flags & (Self::EASE_IN | Self::EASE_OUT)
+	}
 }
 
 
@@ -213,7 +203,6 @@ pub(crate) struct SceneList {
 	scenes: SceneListKind,
 	scene_idx: usize,
 	step_idx: usize,
-	moved: (i32, i32),
 }
 
 impl SceneList {
@@ -223,7 +212,6 @@ impl SceneList {
 			scenes,
 			scene_idx: 0,
 			step_idx: 0,
-			moved: (0, 0),
 		}
 	}
 }
@@ -231,7 +219,7 @@ impl SceneList {
 impl Iterator for SceneList {
 	type Item = Step;
 
-	#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
+	#[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
 	fn next(&mut self) -> Option<Self::Item> {
 		loop {
 			let scene = self.scenes.get(self.scene_idx)?;
@@ -249,39 +237,27 @@ impl Iterator for SceneList {
 				}
 
 				// Calculate the step movement, if any.
-				let move_to = scene.move_to.and_then(|m| {
-					let pos =
-						// For the last step, just return whatever's left.
-						if self.step_idx == steps {
-							Position::new(m.x - self.moved.0, m.y - self.moved.1)
+				let move_to = scene.move_to.and_then(|m|
+					if scene.ease() {
+						let total_x = m.x * steps as i32;
+						let total_y = m.y * steps as i32;
+
+						let (mut x, mut y) =
+							if self.scene_idx == steps { (total_x, total_y) }
+							else {
+								ease(self.step_idx, steps, total_x, total_y, scene.flags)?
+							};
+
+						if let Some((last_x, last_y)) = ease(self.step_idx - 1, steps, total_x, total_y, scene.flags) {
+							x -= last_x;
+							y -= last_y;
 						}
-						// Otherwise we need to math it a bit.
-						else {
-							// Find the percentage of the total movements reached by
-							// this step. (Note: these values all fit 16-bit
-							// widths, so are safe to cast to f32.)
-							let mut scale = self.step_idx as f32 / steps as f32;
-							if scene.ease_in() { scale *= scale; }
-							else if scene.ease_out() {
-								scale = (scale * (2.0 - scale)).powi(2);
-							}
 
-							// Subtract what we covered previously to arrive at this
-							// step's personal contributions.
-							let pos = Position::new(
-								(m.x as f32 * scale) as i32 - self.moved.0,
-								(m.y as f32 * scale) as i32 - self.moved.1,
-							);
-
-							// Update the total movements accordingly.
-							self.moved.0 += pos.x;
-							self.moved.1 += pos.y;
-
-							pos
-						};
-					if pos.x != 0 || pos.y != 0 { Some(pos) }
-					else { None }
-				});
+						if x == 0 && y == 0 { None }
+						else { Some(Position::new(x, y)) }
+					}
+					else { Some(m) }
+				);
 
 				// The absolute direction, just in case easing or rounding has
 				// zeroed out a particular movement.
@@ -300,7 +276,6 @@ impl Iterator for SceneList {
 			// Scene change.
 			self.step_idx = 0;
 			self.scene_idx += 1;
-			self.moved = (0, 0);
 		}
 	}
 }
@@ -351,6 +326,29 @@ impl Step {
 	pub(crate) const fn mate_flags(&self) -> u16 {
 		(self.scene_flags & Scene::MATE_MASK) as u16
 	}
+}
+
+
+
+#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
+/// # Ease In/Out.
+///
+/// This returns the cumulative eased movement for a given step, if any.
+fn ease(e: usize, d: usize, x: i32, y: i32, ease: u8) -> Option<(i32, i32)> {
+	if d == 0 || (x == 0 && y == 0) { return None; }
+
+	// Figure out the scale.
+	let mut scale = e as f32 / d as f32;
+	if Scene::EASE_IN == ease & Scene::EASE_IN { scale *= scale; }
+	else { scale = (scale * (2.0 - scale)).powi(2); }
+
+	// Apply it!
+	let x = (scale * x as f32) as i32;
+	let y = (scale * y as f32) as i32;
+
+	// Return the coordinates if either are non-zero.
+	if x == 0 && y == 0 { None }
+	else { Some((x, y)) }
 }
 
 
@@ -440,42 +438,5 @@ mod tests {
 				"Step mismatch {}.", a.as_str()
 			);
 		}
-	}
-
-	#[test]
-	fn t_divisibility() {
-		let mut iffy = Vec::new();
-		for a in Animation::all() {
-			// Let's stick with childless primary animations; combinations
-			// sometimes require concessions.
-			if a.primary() && a.child().is_none() {
-				let scenes = a.scenes(1024);
-				for (k, v) in scenes.scenes.as_slice().iter().enumerate() {
-					// If we aren't easing and have X/Y movement, make sure
-					// they also divide evenly into the number of steps.
-					if 0 == v.flags & (Scene::EASE_IN | Scene::EASE_OUT) {
-						if let Some(Position { x, y }) = v.move_to {
-							let steps = v.steps();
-							let x = x.abs() as usize;
-							let y = y.abs() as usize;
-
-							let x_per_extra = x % steps;
-							let y_per_extra = y % steps;
-							if x_per_extra != 0 || y_per_extra != 0 {
-								iffy.push(format!(
-									"  \x1b[1m{} #{k}\x1b[0m Fractional movement: ({x},{y}) / {steps} = ({},{}) + ({x_per_extra},{y_per_extra})",
-									a.as_str(),
-									x / steps,
-									y / steps,
-								));
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// Assert once so we can get all the failure details.
-		assert!(iffy.is_empty(), "\n{}\n", iffy.join("\n"));
 	}
 }
