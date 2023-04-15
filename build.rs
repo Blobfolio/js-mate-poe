@@ -238,7 +238,7 @@ fn build_default_animations() -> String {
 	pub(crate) fn default_choice() -> Self {{
 		match Universe::rand_mod(3) {{
 			0 => Self::Walk,
-			1 => Self::BeginRun,
+			1 => Self::Run,
 			_ => {{
 				let mut last = LAST_SPECIAL.load(SeqCst).to_le_bytes();
 				loop {{

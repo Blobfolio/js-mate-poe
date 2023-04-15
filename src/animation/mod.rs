@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 82; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 81; // The highest Animation ID.
 
 
 
@@ -53,7 +53,6 @@ pub(crate) enum Animation {
 	Abduction = 1_u8,
 	BathDive,
 	Beg,
-	BeginRun,
 	BigFish,
 	BlackSheepChase,
 	BlackSheepRomance,
@@ -167,7 +166,6 @@ impl Animation {
 			self,
 			Self::Abduction |
 			Self::BathDive |
-			Self::BeginRun |
 			Self::Beg |
 			Self::BigFish |
 			Self::BlackSheepChase |
@@ -260,7 +258,6 @@ impl Animation {
 			Self::BathDive => "Bath Dive",
 			Self::BathDiveChild => "Bathtub (Child)",
 			Self::Beg => "Beg",
-			Self::BeginRun => "Begin Run",
 			Self::BigFish => "Big Fish",
 			Self::BigFishChild => "Big Fish (Child)",
 			Self::BlackSheepChase => "Black Sheep Chase",
@@ -405,7 +402,6 @@ impl Animation {
 			Self::BathCoolDown |
 			Self::BathDive |
 			Self::Beg |
-			Self::BeginRun |
 			Self::BigFish |
 			Self::BlackSheepChase |
 			Self::BlackSheepRomance |
@@ -510,8 +506,8 @@ impl Animation {
 		match self {
 			Self::Abduction => Some(Self::ChaseAMartian),
 			Self::BathDive => Some(Self::BathCoolDown),
-			Self::BeginRun |
-				Self::BlackSheepChase |
+			Self::BlackSheepChase |
+				Self::LegLifts |
 				Self::Scream => Some(Self::Run),
 			Self::BigFish => Some(
 				if 0 == Universe::rand_mod(3) { Self::Sneeze }
@@ -543,7 +539,7 @@ impl Animation {
 			Self::Boing => Some(match Universe::rand_mod(13) {
 				0..=7 => Self::Rotate,
 				8..=11 => Self::Walk,
-				_ => Self::BeginRun,
+				_ => Self::Run,
 			}),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
@@ -576,7 +572,6 @@ impl Animation {
 				2..=3 => Self::Slide,
 				_ => Self::Jump,
 			}),
-			Self::LegLifts => Some(Self::BeginRun),
 			Self::MagicFlower1 => Some(Self::MagicFlower2),
 			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
 				0 => Self::ClimbDown,
@@ -622,8 +617,7 @@ impl Animation {
 	pub(crate) fn next_edge(self) -> Option<Self> {
 		match self {
 			Self::BathDive => Some(Self::BathCoolDown),
-			Self::BeginRun |
-				Self::EndRun |
+			Self::EndRun |
 				Self::Run => Some(Self::Boing),
 			Self::ClimbDown |
 				Self::RunDown |
@@ -670,7 +664,6 @@ impl Animation {
 			Self::BathDive => fixed!(BATH_DIVE),
 			Self::BathDiveChild => fixed!(BATH_DIVE_CHILD),
 			Self::Beg => fixed!(BEG),
-			Self::BeginRun | Self::EndRun => fixed!(BEGIN_END_RUN),
 			Self::BigFish => fixed!(BIG_FISH),
 			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
 			Self::BlackSheepChase => scenes::black_sheep_chase(width),
@@ -696,6 +689,7 @@ impl Animation {
 			Self::Eat => fixed!(EAT),
 			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
 			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
+			Self::EndRun => fixed!(END_RUN),
 			Self::Fall => fixed!(FALL),
 			Self::Flower => fixed!(FLOWER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),

@@ -141,16 +141,6 @@ pub(super) const BEG: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
-/// # For `Animation::BeginRun`.
-pub(super) const BEGIN_END_RUN: &[Scene] = &[
-	Scene::new(100, &[
-		Frame::F002, Frame::F003, Frame::F002,
-		Frame::F003, Frame::F002, Frame::F003,
-	])
-		.with_move_to(Position::new(-24, 0))
-		.with_flags(Scene::GRAVITY),
-];
-
 /// # For `Animation::BigFish`.
 pub(super) const BIG_FISH: &[Scene] = &[
 	Scene::new(30, &[
@@ -386,6 +376,17 @@ pub(super) const EATING_MAGIC_FLOWER: &[Scene] = &[
 		Frame::F003, Frame::F003, Frame::F003, Frame::F006, Frame::F007,
 		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
 	])
+		.with_flags(Scene::GRAVITY),
+];
+
+/// # For `Animation::EndRun`.
+pub(super) const END_RUN: &[Scene] = &[
+	Scene::new(75, &[
+		Frame::F005, Frame::F002, Frame::F003,
+		Frame::F005, Frame::F002, Frame::F003,
+		Frame::F002, Frame::F003,
+	])
+		.with_move_to(Position::new(-32, 0))
 		.with_flags(Scene::GRAVITY),
 ];
 
