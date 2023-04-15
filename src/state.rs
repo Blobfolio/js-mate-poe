@@ -11,6 +11,7 @@ use std::{
 	cell::RefCell,
 	rc::Rc,
 };
+#[cfg(feature = "firefox")] use std::cell::Cell;
 use wasm_bindgen::{
 	JsCast,
 	prelude::*,
@@ -37,6 +38,7 @@ use web_sys::{
 /// last reference to the [`State`].
 pub(crate) struct State {
 	mates: RefCell<[Mate; 2]>,
+	#[cfg(feature = "firefox")] next_dom_check: Cell<u32>,
 	raf: RefCell<Option<Closure<dyn FnMut(f64)>>>,
 	events: StateEvents,
 }
@@ -65,6 +67,7 @@ impl Default for State {
 
 		Self {
 			mates: RefCell::new([m1, m2]),
+			#[cfg(feature = "firefox")] next_dom_check: Cell::new(0),
 			raf: RefCell::new(None),
 			events,
 		}
@@ -121,6 +124,15 @@ impl State {
 	/// Tick and paint each of the mates if their time has come.
 	fn paint(&self, now: u32) {
 		let [m1, m2] = &mut *self.mates.borrow_mut();
+
+		#[cfg(feature = "firefox")]
+		// Make sure the elements are actually still bound to the page.
+		if self.next_dom_check.get() < now {
+			recheck_element_parent(m1.el());
+			recheck_element_parent(m2.el());
+			self.next_dom_check.set(now + 2500);
+		}
+
 		m1.paint(now);
 
 		if Universe::no_child() { m2.stop(); }
@@ -222,6 +234,26 @@ impl StateEvents {
 	}
 }
 
+
+
+#[cfg(feature = "firefox")]
+/// # Verify Element Attachment.
+///
+/// Check to make sure outside forces haven't detached our mate elements from
+/// the DOM, and add them back if necessary.
+///
+/// This specifically works around AJAX-heavy web apps like `phpMyAdmin` that
+/// dynamically replace the contents of the entire document body to mimic page
+/// navigation, rather than restricting changes to specialized wrapper
+/// element(s).
+///
+/// This isn't an issue for the general library version, but the Firefox
+/// extension will encounter all manner of weird and wild things…
+fn recheck_element_parent(el: &Element) {
+	if el.parent_node().is_none() {
+		if let Some(b) = dom::body() { let _res = b.append_child(el); }
+	}
+}
 
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
