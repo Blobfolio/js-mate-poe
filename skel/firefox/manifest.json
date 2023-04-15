@@ -51,7 +51,7 @@
             "matches":
             [
                 "http://*/*",
-            	"https://*/*"
+                "https://*/*"
             ],
             "js":
             [

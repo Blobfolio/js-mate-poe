@@ -29,10 +29,11 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
 	// Initialize media.
 	poeInitMedia(w);
 
-	// Let the background script know after a slightly delay.
+	// Let the background script know we're here, but only after a slight
+	// delay to give the page time to settle.
 	setTimeout(function() {
 		loadedWasm = true;
-		browser.runtime.sendMessage({ action: 'poeTabInit' });
+		browser.runtime.sendMessage({action: 'poeBgNewConnection'});
 	}, 500);
 });
 
@@ -42,13 +43,9 @@ init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
  * This listens for background-triggered state synchronization requests, and
  * updates the local Poe instance accordingly.
  *
- * In other words, it toggles activeness and/or audio.
- *
- * This will return a Promise boolean if the message was applicable — the sync
- * request we're expecting — or false if not. The promise will be true except
- * in cases where the library version of Poe has been detected, in which case
- * the extension goes dormant to avoid the confusion of having multiple sheep
- * running around at once.
+ * It will return a boolean Promise letting the background script know whether
+ * or not to show its pageIcon, or (regular) false if the script wasn't ready
+ * to listen or received some other random message.
  *
  * @param {!Object} m Message (settings).
  * @return {mixed} Promise or false.
@@ -58,12 +55,11 @@ browser.runtime.onMessage.addListener(function(m) {
 		loadedWasm &&
 		(null !== m) &&
 		('object' === typeof m) &&
-		('poeUpdate' === m.action)
+		('poeFgSync' === m.action)
 	) {
 		// Suppress the extension if the library version of Poe is detected on
-		// the page. We aren't allowed to check for window.Poe, so the best we
-		// can do is look at the page scripts to see if any have the default
-		// library name.
+		// the page (as best we can since window.Poe is unavailable to us) to
+		// avoid the confusion of having multiple sheep running around.
 		if (Array.from(document.querySelectorAll('script')).some(s => -1 !== s.src.indexOf('js-mate-poe.min.js'))) {
 			if (! libraryDetected) {
 				libraryDetected = true;
@@ -88,9 +84,9 @@ browser.runtime.onMessage.addListener(function(m) {
 /**
  * Disable on Exit.
  *
- * This deactivates Poe on exit to clear the elements, etc., from the DOM.
- * While not strictly necessary, this can help workaround inconsistent state
- * issues arising from stale history caches, etc.
+ * This tries to remove any Poe-generated elements and event listeners from the
+ * page before it is unloaded to mitigate any inconsistent/stale history
+ * caches on subsequent back/next navigation.
  *
  * @return {void} Nothing.
  */

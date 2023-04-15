@@ -9,21 +9,19 @@
 import { getSettings, saveSettings } from './settings.mjs';
 
 /**
- * Update Tab State.
+ * Sync One Tab.
  *
- * This sends the current audio/active properties to a given tab so its content
- * script can synchronize its state accordingly.
- *
- * It also toggles the pageIcon visibility, title, and icon for the tab, since
- * content scripts can't handle this themselves.
+ * This sends the current audio/active settings to the given tab so its content
+ * script can synchronize its state accordingly, and afterwards, makes sure the
+ * tab's pageIcon has the appropriate visibility, icon, and title.
  *
  * @param {number} tab Tab ID.
- * @return {Promise} Resolutions.
+ * @return {Promise} Resolutions or false.
  */
-const updateTab = async function(tab) {
+const syncOne = async function(tab) {
 	// Pull the current settings, and add an "action" to it.
 	let settings = await getSettings();
-	settings.action = 'poeUpdate';
+	settings.action = 'poeFgSync';
 
 	try {
 		// Send a synchronization request to the tab.
@@ -65,18 +63,18 @@ const updateTab = async function(tab) {
 };
 
 /**
- * Update All Tabs.
+ * Sync All Tabs.
  *
- * This sends an updateTab request for every open tab anytime the global
- * settings are changed (including a pageIcon click, which toggles activeness).
+ * This calls `syncOne` for every open http/s tab. It's a bit much, but is only
+ * triggered when the global settings change, which shouldn't be very often.
  *
  * @return {Promise} Resolutions.
  */
-const updateTabs = async function() {
-	const tabs = await browser.tabs.query({});
+const syncAll = async function() {
+	const tabs = await browser.tabs.query({url: ['http://*/*', 'https://*/*']});
 	const waiting = [];
 	for (const tab of tabs) {
-		if ('number' === typeof tab.id) { waiting.push(updateTab(tab.id)); }
+		if ('number' === typeof tab.id) { waiting.push(syncOne(tab.id)); }
 	}
 	return Promise.allSettled(waiting);
 };
@@ -84,40 +82,43 @@ const updateTabs = async function() {
 /**
  * Toggle Activeness on Icon Click.
  *
- * Turn Poe on/off for all tabs whenever the extension icon is clicked, and
- * save the setting for next time.
+ * Turn Poe on/off for all tabs whenever a pageIcon is clicked.
  *
  * @param {number|Object} tab Tab.
  * @return {void} Nothing.
  */
 browser.pageAction.onClicked.addListener(function() {
+	// Get the original settings.
 	getSettings()
+		// Invert the "active" property and resave.
 		.then((settings) => {
-			// Invert the active property and save the changes.
 			settings.active = ! settings.active;
 			return saveSettings(settings);
 		})
-		.then(() => { return updateTabs(); })
+		// Resync all open tabs accordingly.
+		.then(() => { return syncAll(); })
 		.catch((e) => {});
 });
 
 /**
- * Synchronize Tab State on Self-Reported Initialization
+ * Message Listener.
  *
- * This sends the current settings to a newly-initialized tab so it can
- * synchronize its state.
+ * This listens for broadcasts from newly-initialized content scripts, and
+ * sync-all requests from the options handler. In either case, it will
+ * coordinate a (re)synchronization for the relevant tab(s).
  *
  * @param {!Object} m Message.
  * @param {!Object} sender Sender.
  * @return {boolean} False.
  */
 browser.runtime.onMessage.addListener(function(m, sender) {
-	if (
-		(null !== m) &&
-		('object' === typeof m) &&
-		('poeTabInit' === m.action)
-	) {
-		updateTab(sender.tab.id).catch((e) => {});
+	if ((null !== m) && ('object' === typeof m)) {
+		if ('poeBgNewConnection' === m.action) {
+			syncOne(sender.tab.id).catch((e) => {});
+		}
+		else if ('poeBgSyncAll' === m.action) {
+			syncAll().catch((e) => {});
+		}
 	}
 
 	// We don't need to wait for a response.
