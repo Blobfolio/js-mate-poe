@@ -449,12 +449,12 @@ pub(super) const HOP: &[Scene] = &[
 
 /// # For `Animation::Jump`.
 pub(super) const JUMP: &[Scene] = &[
-	Scene::new(35, &[
+	Scene::new(30, &[
 		Frame::F072, Frame::F072, Frame::F027, Frame::F027, Frame::F027,
 		Frame::F027, Frame::F027, Frame::F027, Frame::F021,
 	])
 		.with_move_to(Position::new(-54, -18)),
-	Scene::new(35, &[
+	Scene::new(30, &[
 		Frame::F021, Frame::F021, Frame::F021, Frame::F022, Frame::F022,
 		Frame::F022, Frame::F022, Frame::F073, Frame::F073,
 	])
