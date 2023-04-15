@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 81; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 82; // The highest Animation ID.
 
 
 
@@ -110,6 +110,7 @@ pub(crate) enum Animation {
 	EndRun,
 	Fall,
 	GraspingFall,
+	Hydroplane,
 	ReachCeiling,
 	ReachFloor,
 	ReachSide1,
@@ -288,6 +289,7 @@ impl Animation {
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Hop => "Hop",
+			Self::Hydroplane => "Hydroplane",
 			Self::Jump => "Jump",
 			Self::LayDown => "Lay Down",
 			Self::LegLifts => "Leg Lifts",
@@ -385,8 +387,8 @@ impl Animation {
 	pub(crate) const fn may_exit(self) -> bool {
 		matches!(
 			self,
-			Self::BlackSheepChase | Self::ChaseAMartian | Self::Run |
-			Self::SneezeShadow | Self::Tornado | Self::Walk
+			Self::BlackSheepChase | Self::ChaseAMartian | Self::Hydroplane |
+			Self::Run | Self::SneezeShadow | Self::Tornado | Self::Walk
 		)
 	}
 
@@ -428,6 +430,7 @@ impl Animation {
 			Self::GraspingFall |
 			Self::Handstand |
 			Self::Hop |
+			Self::Hydroplane |
 			Self::Jump |
 			Self::LayDown |
 			Self::LegLifts |
@@ -520,6 +523,7 @@ impl Animation {
 				Self::Bounce |
 				Self::DigestMagicFlower2 |
 				Self::EndRun |
+				Self::Hydroplane |
 				Self::LayDown |
 				Self::LookDown |
 				Self::LookUp |
@@ -578,10 +582,11 @@ impl Animation {
 				1 => Self::SlideDown,
 				_ => Self::RunDown,
 			}),
-			Self::Run => Some(match Universe::rand_mod(3) {
-				0 => Self::EndRun,
-				1 => Self::Jump,
-				_ => Self::Run,
+			Self::Run => Some(match Universe::rand_mod(10) {
+				0..=2 => Self::EndRun,
+				3..=5 => Self::Jump,
+				6..=8 => Self::Run,
+				_ => Self::Hydroplane,
 			}),
 			Self::RunDown => Some(
 				if 0 == Universe::rand_mod(3) { Self::SlideDown }
@@ -618,6 +623,7 @@ impl Animation {
 		match self {
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::EndRun |
+				Self::Hydroplane |
 				Self::Run => Some(Self::Boing),
 			Self::ClimbDown |
 				Self::RunDown |
@@ -695,6 +701,7 @@ impl Animation {
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Hop => fixed!(HOP),
+			Self::Hydroplane => fixed!(HYDROPLANE),
 			Self::Jump => fixed!(JUMP),
 			Self::LayDown => fixed!(LAY_DOWN),
 			Self::LegLifts => fixed!(LEG_LIFTS),

@@ -448,6 +448,40 @@ pub(super) const HOP: &[Scene] = &[
 		.with_move_to(Position::new(-4, 2)),
 ];
 
+/// # For `Animation::Hydroplane`.
+pub(super) const HYDROPLANE: &[Scene] = &[
+	Scene::new(30, &[
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F046, Frame::F046, Frame::F046, Frame::F046, Frame::F046,
+		Frame::F047, Frame::F047, Frame::F047, Frame::F047, Frame::F047,
+		Frame::F046, Frame::F046, Frame::F046, Frame::F046, Frame::F046,
+		Frame::F047, Frame::F047, Frame::F047, Frame::F047, Frame::F047,
+		Frame::F046, Frame::F046, Frame::F046, Frame::F046, Frame::F046,
+		Frame::F047, Frame::F047, Frame::F047, Frame::F047, Frame::F047,
+		Frame::F046, Frame::F046, Frame::F046, Frame::F046, Frame::F046,
+		Frame::F047, Frame::F047, Frame::F047, Frame::F047, Frame::F047,
+		Frame::F052, Frame::F052, Frame::F052, Frame::F052, Frame::F052,
+		Frame::F052, Frame::F052, Frame::F053, Frame::F053, Frame::F053,
+		Frame::F052, Frame::F052, Frame::F052, Frame::F052, Frame::F052,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(30, &[
+		Frame::F052, Frame::F052, Frame::F052, Frame::F052, Frame::F052,
+		Frame::F052, Frame::F052, Frame::F052, Frame::F052, Frame::F052,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::EASE_OUT | Scene::GRAVITY),
+	Scene::new(150, &[
+		Frame::F073, Frame::F073, Frame::F052, Frame::F052, Frame::F052,
+		Frame::F052,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Jump`.
 pub(super) const JUMP: &[Scene] = &[
 	Scene::new(30, &[
