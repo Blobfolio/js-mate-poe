@@ -419,6 +419,20 @@ pub(super) const FLOWER: &[Scene] = &[
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 ];
 
+/// # For `Animation::Gopher`.
+pub(super) const GOPHER: &[Scene] = &[
+	Scene::new(30, &[Frame::F009])
+		.with_move_to(Position::new(0, -1))
+		.with_repeat(24, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(1500, &[Frame::F009])
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(30, &[Frame::F009])
+		.with_move_to(Position::new(0, 1))
+		.with_repeat(24, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::GraspingFall`.
 pub(super) const GRASPING_FALL: &[Scene] = &[
 	Scene::new(15, &[

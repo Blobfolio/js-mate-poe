@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 82; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 83; // The highest Animation ID.
 
 
 
@@ -63,6 +63,7 @@ pub(crate) enum Animation {
 	Dance,
 	Eat,
 	EatMagicFlower,
+	Gopher,
 	Handstand,
 	Hop,
 	Jump,
@@ -178,6 +179,7 @@ impl Animation {
 			Self::Dance |
 			Self::Eat |
 			Self::EatMagicFlower |
+			Self::Gopher |
 			Self::Handstand |
 			Self::Hop |
 			Self::Jump |
@@ -223,13 +225,14 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 12 } else { 6 }) {
+			let next = match Universe::rand_mod(if first { 14 } else { 7 }) {
 				0 => Self::BathDive,
 				1 => Self::BigFish,
 				2 => Self::BlackSheepChase,
 				3 => Self::BlackSheepRomance,
-				4 => Self::Stargaze,
-				5 => Self::Yoyo,
+				4 => Self::Gopher,
+				5 => Self::Stargaze,
+				6 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -286,6 +289,7 @@ impl Animation {
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
 			Self::Flower => "Flower (Child)",
+			Self::Gopher => "Gopher",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
 			Self::Hop => "Hop",
@@ -427,6 +431,7 @@ impl Animation {
 			Self::EatingMagicFlower |
 			Self::EndRun |
 			Self::Fall |
+			Self::Gopher |
 			Self::GraspingFall |
 			Self::Handstand |
 			Self::Hop |
@@ -698,6 +703,7 @@ impl Animation {
 			Self::EndRun => fixed!(END_RUN),
 			Self::Fall => fixed!(FALL),
 			Self::Flower => fixed!(FLOWER),
+			Self::Gopher => fixed!(GOPHER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
 			Self::Hop => fixed!(HOP),
