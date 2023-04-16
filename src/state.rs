@@ -127,7 +127,7 @@ impl State {
 
 		#[cfg(feature = "firefox")]
 		// Make sure the elements are actually still bound to the page.
-		if self.next_dom_check.get() < now {
+		if self.next_dom_check.get() <= now {
 			recheck_element_parent(m1.el());
 			recheck_element_parent(m2.el());
 			self.next_dom_check.set(now + 2500);
