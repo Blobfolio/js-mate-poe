@@ -11,7 +11,6 @@ use std::{
 	cell::RefCell,
 	rc::Rc,
 };
-#[cfg(feature = "firefox")] use std::cell::Cell;
 use wasm_bindgen::{
 	JsCast,
 	prelude::*,
@@ -21,6 +20,11 @@ use web_sys::{
 	Element,
 	Event,
 	MouseEvent,
+};
+#[cfg(feature = "firefox")]
+use web_sys::{
+	MutationObserver,
+	MutationObserverInit,
 };
 
 
@@ -38,8 +42,8 @@ use web_sys::{
 /// last reference to the [`State`].
 pub(crate) struct State {
 	mates: RefCell<[Mate; 2]>,
-	#[cfg(feature = "firefox")] next_dom_check: Cell<u32>,
 	raf: RefCell<Option<Closure<dyn FnMut(f64)>>>,
+	#[cfg(feature = "firefox")] observer: Option<Observer>,
 	events: StateEvents,
 }
 
@@ -65,10 +69,14 @@ impl Default for State {
 		let events = StateEvents::default();
 		events.bind(m1.el());
 
+		// Set up a Mutation Observer.
+		#[cfg(feature = "firefox")]
+		let observer = Observer::new(m1.el().clone(), m2.el().clone());
+
 		Self {
 			mates: RefCell::new([m1, m2]),
-			#[cfg(feature = "firefox")] next_dom_check: Cell::new(0),
 			raf: RefCell::new(None),
+			#[cfg(feature = "firefox")] observer,
 			events,
 		}
 	}
@@ -76,17 +84,20 @@ impl Default for State {
 
 impl Drop for State {
 	fn drop(&mut self) {
+		// Remove the observer first, if applicable.
+		#[cfg(feature = "firefox")] self.observer.take();
+
 		// Unbind events.
 		let m = self.mates.borrow();
 		self.events.unbind(m[0].el());
 
-		// Remove the mate elements.
+		// Detach the mate elements.
 		if let Some(body) = dom::body() {
 			let _res = body.remove_child(m[0].el()).ok();
 			let _res = body.remove_child(m[1].el()).ok();
 		}
 
-		// Let the Universe know.
+		// Let the Universe know we're dead.
 		Universe::set_state(false);
 		#[cfg(feature = "director")] dom::warn!("Poe deactivated.");
 	}
@@ -124,14 +135,6 @@ impl State {
 	/// Tick and paint each of the mates if their time has come.
 	fn paint(&self, now: u32) {
 		let [m1, m2] = &mut *self.mates.borrow_mut();
-
-		#[cfg(feature = "firefox")]
-		// Make sure the elements are actually still bound to the page.
-		if self.next_dom_check.get() <= now {
-			recheck_element_parent(m1.el());
-			recheck_element_parent(m2.el());
-			self.next_dom_check.set(now + 2500);
-		}
 
 		m1.paint(now);
 
@@ -237,23 +240,71 @@ impl StateEvents {
 
 
 #[cfg(feature = "firefox")]
-/// # Verify Element Attachment.
+/// # DOM Conncetion Watcher.
 ///
-/// Check to make sure outside forces haven't detached our mate elements from
-/// the DOM, and add them back if necessary.
+/// This `MutationObserver` helps ensure our mate elements remain connected to
+/// the DOM in the event a web app dynamically rewrites the contents of its
+/// document body.
 ///
-/// This specifically works around AJAX-heavy web apps like `phpMyAdmin` that
-/// dynamically replace the contents of the entire document body to mimic page
-/// navigation, rather than restricting changes to specialized wrapper
-/// element(s).
+/// The observer triggers anytime direct descendents are added or removed from
+/// the body, at which point we can recheck each element's `isConnected`
+/// property, and add them back if necessary.
 ///
-/// This isn't an issue for the general library version, but the Firefox
-/// extension will encounter all manner of weird and wild things…
-fn recheck_element_parent(el: &Element) {
-	if el.parent_node().is_none() {
-		if let Some(b) = dom::body() { let _res = b.append_child(el); }
+/// We can avoid this overhead for general library builds because anybody
+/// integrating it into their page can make sure their page doesn't break it.
+/// The Firefox extension, on the other hand, has to survive all manner of
+/// weird and wild pages built without any consideration for us…
+struct Observer {
+	observer: Option<MutationObserver>,
+	cb: Closure<dyn FnMut()>,
+}
+
+#[cfg(feature = "firefox")]
+impl Drop for Observer {
+	fn drop(&mut self) {
+		// Disconnect and drop the observer to free up the callback reference.
+		if let Some(o) = self.observer.take() { o.disconnect(); }
 	}
 }
+
+#[cfg(feature = "firefox")]
+impl Observer {
+	/// # New.
+	///
+	/// Set up, bind, and return a `MutationObserver`, or `None` if any of the
+	/// operations fail unexpectedly.
+	fn new(m1: Element, m2: Element) -> Option<Self> {
+		let mut out = Self {
+			observer: None,
+			cb: Closure::wrap(Box::new(move || {
+				if ! m1.is_connected() {
+					if let Some(b) = dom::body() { let _res = b.append_child(&m1); }
+				}
+				if ! m2.is_connected() {
+					if let Some(b) = dom::body() { let _res = b.append_child(&m2); }
+				}
+			})),
+		};
+
+		// Set up and bind the observer.
+		MutationObserver::new(out.cb.as_ref().unchecked_ref())
+			.ok()
+			.and_then(|observer| {
+				let b = dom::body()?;
+				observer.observe_with_options(
+					&b,
+					MutationObserverInit::new()
+						.attributes(false)
+						.character_data(false)
+						.subtree(false)
+						.child_list(true)
+				).ok()?;
+				out.observer.replace(observer);
+				Some(out)
+			})
+	}
+}
+
 
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
