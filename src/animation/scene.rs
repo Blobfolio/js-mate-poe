@@ -228,13 +228,14 @@ impl Iterator for SceneList {
 				self.step_idx += 1;
 
 				// Adjust flags.
-				let mut scene_flags = scene.flags;
-				if self.step_idx < steps {
-					scene_flags &= ! (Scene::FLIP_X_NEXT | Scene::FLIP_Y_NEXT);
-				}
-				else if self.scene_idx + 1 == self.scenes.len() {
-					scene_flags |= Scene::END_SCENELIST;
-				}
+				let scene_flags =
+					if self.step_idx < steps {
+						scene.flags & ! (Scene::FLIP_X_NEXT | Scene::FLIP_Y_NEXT)
+					}
+					else if self.scene_idx + 1 == self.scenes.len() {
+						scene.flags | Scene::END_SCENELIST
+					}
+					else { scene.flags };
 
 				// Calculate the step movement, if any.
 				let move_to = scene.move_to.and_then(|m|
