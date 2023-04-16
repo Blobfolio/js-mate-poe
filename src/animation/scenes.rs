@@ -848,6 +848,22 @@ pub(super) const SCREAM: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::Skip`.
+pub(super) const SKIP: &[Scene] = &[
+	Scene::new(60, &[Frame::F005, Frame::F005, Frame::F005])
+		.with_move_to(Position::new(-4, -1)),
+	Scene::new(60, &[Frame::F002, Frame::F002, Frame::F002])
+		.with_move_to(Position::new(-4, 1)),
+	Scene::new(60, &[Frame::F005, Frame::F005, Frame::F005])
+		.with_move_to(Position::new(-4, -1)),
+	Scene::new(60, &[Frame::F002, Frame::F002, Frame::F002])
+		.with_move_to(Position::new(-4, 1)),
+	Scene::new(60, &[Frame::F005, Frame::F005, Frame::F005])
+		.with_move_to(Position::new(-4, -1)),
+	Scene::new(60, &[Frame::F002, Frame::F002, Frame::F002])
+		.with_move_to(Position::new(-4, 1)),
+];
+
 /// # For `Animation::Sleep`.
 pub(super) const SLEEP: &[Scene] = &[
 	Scene::new(300, &[Frame::F028, Frame::F029, Frame::F030])

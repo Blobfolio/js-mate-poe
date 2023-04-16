@@ -155,6 +155,7 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 	(36, "Hop"),
 	(36, "LookDown"),
 	(36, "LookUp"),
+	(36, "Skip"),
 
 	(24, "Beg"),
 	(24, "Dance"),

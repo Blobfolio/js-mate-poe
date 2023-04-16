@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 83; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 84; // The highest Animation ID.
 
 
 
@@ -82,6 +82,7 @@ pub(crate) enum Animation {
 	Scoot,
 	Scratch,
 	Scream,
+	Skip,
 	Sleep,
 	SleepSitting,
 	SleepStanding,
@@ -198,6 +199,7 @@ impl Animation {
 			Self::Scoot |
 			Self::Scratch |
 			Self::Scream |
+			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
 			Self::SleepStanding |
@@ -317,6 +319,7 @@ impl Animation {
 			Self::Scoot => "Scoot",
 			Self::Scratch => "Scratch",
 			Self::Scream => "Scream",
+			Self::Skip => "Skip",
 			Self::Sleep => "Sleep",
 			Self::SleepSitting => "Sleep (Sitting)",
 			Self::SleepStanding => "Sleep (Standing)",
@@ -427,8 +430,8 @@ impl Animation {
 			Self::DigestMagicFlower2 |
 			Self::Drag |
 			Self::Eat |
-			Self::EatMagicFlower |
 			Self::EatingMagicFlower |
+			Self::EatMagicFlower |
 			Self::EndRun |
 			Self::Fall |
 			Self::Gopher |
@@ -458,6 +461,7 @@ impl Animation {
 			Self::Scoot |
 			Self::Scratch |
 			Self::Scream |
+			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
 			Self::SleepStanding |
@@ -540,6 +544,7 @@ impl Animation {
 				Self::Rest |
 				Self::Roll |
 				Self::Rotate |
+				Self::Skip |
 				Self::Sleep |
 				Self::SleepSitting |
 				Self::Slide |
@@ -732,6 +737,7 @@ impl Animation {
 			Self::Scoot => fixed!(SCOOT),
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
+			Self::Skip => fixed!(SKIP),
 			Self::Sleep => fixed!(SLEEP),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
 			Self::SleepStanding => fixed!(SLEEP_STANDING),
@@ -794,7 +800,7 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		const TOTAL: usize = 33;
+		const TOTAL: usize = 34;
 
 		let set = (0..10_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)
