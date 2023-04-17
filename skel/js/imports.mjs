@@ -115,29 +115,46 @@ const poePlaySound = function(idx) {
  * @return {void} Nothing.
  */
 const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
-	let list = el.classList;
+	// Pull the list so we have it.
+	const list = el.classList;
 
+	// Sanitize frame, scene class IDs.
+	frame = parseInt(frame, 10);
+	scene = parseInt(scene, 10);
+
+	// Orientation classes.
 	list.toggle('rx', !! rx);
 	list.toggle('ry', !! ry);
 
-	frame = parseInt(frame, 10);
-	list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
-	list.toggle('m021', 21 === frame);
-	list.toggle('m100', 100 === frame);
-	list.toggle('m133', 133 === frame);
-
-	scene = parseInt(scene, 10);
+	// Disabled?
 	list.toggle('off', 0 === scene);
-	list.toggle('a1',  1 === scene);
-	list.toggle('a2',  2 === scene);
-	list.toggle('a3',  3 === scene);
-	list.toggle('a4',  4 === scene);
-	list.toggle('a5',  5 === scene);
-	list.toggle('a6',  6 === scene);
-	list.toggle('a7',  7 === scene);
-	list.toggle('a8',  8 === scene);
-	list.toggle('a9',  9 === scene);
-	list.toggle('aa', 10 === scene);
+
+	// Child-only classes.
+	if (list.contains('child')) {
+		// Special frame.
+		list.toggle('m133', 133 === frame);
+
+		// Animations.
+		list.toggle('a2',  2 === scene); // SneezeShadow.
+		list.toggle('a4',  4 === scene); // BigFishChild.
+		list.toggle('a5',  5 === scene); // SplatGhost.
+		list.toggle('a7',  7 === scene); // MagicFlower1 & 2.
+		list.toggle('a9',  9 === scene); // ShadowShodown1.
+		list.toggle('aa', 10 === scene); // ShadowShodown2.
+	}
+	// Primary-only classes.
+	else {
+		// Special frames.
+		list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
+		list.toggle('m021', 21 === frame);
+		list.toggle('m100', 100 === frame);
+
+		// Animations.
+		list.toggle('a1',  1 === scene); // Drag.
+		list.toggle('a3',  3 === scene); // Abduction.
+		list.toggle('a6',  6 === scene); // EatingMagicFlower.
+		list.toggle('a8',  8 === scene); // DigestMagicFlower1.
+	}
 };
 
 /**
