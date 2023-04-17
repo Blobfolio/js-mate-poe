@@ -352,14 +352,14 @@ pub(super) const EAT_MAGIC_FLOWER: &[Scene] = &[
 	Scene::new(100, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(2, 0))
 		.with_repeat(4, 0)
-		.with_flags(Scene::GRAVITY),
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 	Scene::new(150, &[Frame::F052, Frame::F053])
 		.with_repeat(3, 0)
-		.with_flags(Scene::GRAVITY),
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 	Scene::new(100, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(-2, 0))
 		.with_repeat(4, 0)
-		.with_flags(Scene::GRAVITY),
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 	Scene::new(200, &[Frame::F003, Frame::F054])
 		.with_flags(Scene::GRAVITY),
 ];
@@ -793,7 +793,6 @@ pub(super) const RUN: &[Scene] = &[
 	Scene::new(30, &[
 		Frame::F005, Frame::F005, Frame::F005, Frame::F004,
 		Frame::F004, Frame::F004, Frame::F004, Frame::F004,
-
 	])
 		.with_move_to(Position::new(-4, 0))
 		.with_repeat(5, 0)
