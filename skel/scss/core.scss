@@ -49,8 +49,8 @@
 	height: $tile_size / 2;
 }
 
-// Disabled sprite.
-#p.off, #p.a5 { opacity: 0; }
+// Disabled/invisible sprites.
+#p.off, #p.a5, #p.aa { opacity: 0; }
 
 // Reverse the image across one or both planes.
 .rx { --rx: 180deg; }
@@ -64,8 +64,10 @@
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
 
-// Animation: SneezeShadow.
-#p.a2 { z-index: 99999; }
+// Animation: SneezeShadow, and ShadowShowdownChild(ren).
+#p.a2,
+#p.a9,
+#p.aa { z-index: 99999; }
 
 // Animation: Abduction.
 #p.a3 { animation: a3 0.25s 4s infinite; }
@@ -91,13 +93,32 @@
 // Animation: DigestMagicFlower1.
 #p.a8 { transition: filter 1.5s ease-out; }
 
+// Animation: ShadowShowdownChild(ren).
+#p.a9,
+#p.aa {
+	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate skew(var(--skew));
+	filter: brightness(0) blur(1px);
+}
+
+#p.a9 {
+	--skew: -40deg;
+	opacity: 0.5;
+}
+
+#p.aa {
+	--skew: 40deg;
+	transition: none;
+	animation: a5 3s;
+}
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
 	to { filter: saturate(5) hue-rotate(359deg); }
 }
 
-// Fade out the ghost a bit early.
+// This fades out the ghost and shadow sprites _before_ their special classes
+// are removed to prevent the loss of their filters/etc. while still visible.
 @keyframes a5 {
 	0% { opacity: 0.5; }
 	50% { opacity: 0.5; }

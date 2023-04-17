@@ -30,16 +30,17 @@
 #30  Scoot
 #31  Scratch
 #32  Scream
-#33  Skip
-#34  Sleep
-#35  Sleep (Sitting)
-#36  Sleep (Standing)
-#37  Slide
-#38  Sneeze
-#39  Spin
-#40  Stargaze
-#41  Tornado
-#42  Urinate
-#43  Walk
-#44  Yawn
-#45  Yo-Yo
+#33  Shadow Showdown
+#34  Skip
+#35  Sleep
+#36  Sleep (Sitting)
+#37  Sleep (Standing)
+#38  Slide
+#39  Sneeze
+#40  Spin
+#41  Stargaze
+#42  Tornado
+#43  Urinate
+#44  Walk
+#45  Yawn
+#46  Yo-Yo

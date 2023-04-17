@@ -166,11 +166,15 @@ impl Mate {
 					else { self.pos.x - 38 };
 				Some(Position::new(x, self.pos.y))
 			},
-			Animation::AbductionChild => {
-				Some(Position::new(
-					self.pos.x,
-					self.pos.y - Frame::SIZE_I * 2 - 480,
-				))
+			Animation::AbductionChild => Some(Position::new(
+				self.pos.x,
+				self.pos.y - Frame::SIZE_I * 2 - 480,
+			)),
+			Animation::ShadowShowdownChild1 => {
+				let x =
+					if self.flags.flipped_x() { self.pos.x - 40 }
+					else { self.pos.x + 40 };
+				Some(Position::new(x, self.pos.y))
 			},
 			Animation::SneezeShadow | Animation::SplatGhost => Some(self.pos),
 			_ => None,
@@ -561,6 +565,8 @@ impl Mate {
 						Some(Animation::EatingMagicFlower) => 6,
 						Some(Animation::MagicFlower1 | Animation::MagicFlower2) => 7,
 						Some(Animation::DigestMagicFlower1) => 8,
+						Some(Animation::ShadowShowdownChild1) => 9,
+						Some(Animation::ShadowShowdownChild2) => 10,
 						_ => -1,
 					}
 				);

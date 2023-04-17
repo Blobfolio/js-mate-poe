@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 84; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 87; // The highest Animation ID.
 
 
 
@@ -82,6 +82,7 @@ pub(crate) enum Animation {
 	Scoot,
 	Scratch,
 	Scream,
+	ShadowShowdown,
 	Skip,
 	Sleep,
 	SleepSitting,
@@ -135,6 +136,8 @@ pub(crate) enum Animation {
 	Flower,
 	MagicFlower1,
 	MagicFlower2,
+	ShadowShowdownChild1,
+	ShadowShowdownChild2,
 	SneezeShadow,
 	SplatGhost,
 	StargazeChild,
@@ -199,6 +202,7 @@ impl Animation {
 			Self::Scoot |
 			Self::Scratch |
 			Self::Scream |
+			Self::ShadowShowdown |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -319,6 +323,8 @@ impl Animation {
 			Self::Scoot => "Scoot",
 			Self::Scratch => "Scratch",
 			Self::Scream => "Scream",
+			Self::ShadowShowdown => "Shadow Showdown",
+			Self::ShadowShowdownChild1 | Self::ShadowShowdownChild2 => "Shadow Showdown (Child)",
 			Self::Skip => "Skip",
 			Self::Sleep => "Sleep",
 			Self::SleepSitting => "Sleep (Sitting)",
@@ -355,7 +361,8 @@ impl Animation {
 			self,
 			Self::Abduction | Self::BigFishChild | Self::DigestMagicFlower1 |
 			Self::Drag | Self::EatingMagicFlower | Self::MagicFlower1 |
-			Self::MagicFlower2 | Self::SneezeShadow | Self::SplatGhost
+			Self::MagicFlower2 | Self::ShadowShowdownChild1 |
+			Self::ShadowShowdownChild2 | Self::SneezeShadow | Self::SplatGhost
 		)
 	}
 
@@ -461,6 +468,7 @@ impl Animation {
 			Self::Scoot |
 			Self::Scratch |
 			Self::Scream |
+			Self::ShadowShowdown |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -497,6 +505,7 @@ impl Animation {
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
 			Self::Eat => Some(Self::Flower),
 			Self::EatMagicFlower => Some(Self::MagicFlower1),
+			Self::ShadowShowdown => Some(Self::ShadowShowdownChild1),
 			Self::Sneeze => Some(Self::SneezeShadow),
 			Self::Splat => Some(Self::SplatGhost),
 			Self::Stargaze => Some(Self::StargazeChild),
@@ -607,6 +616,8 @@ impl Animation {
 				4..=5 => Self::Rotate,
 				_ => Self::Walk,
 			}),
+			Self::ShadowShowdown => Some(Self::Scratch),
+			Self::ShadowShowdownChild1 => Some(Self::ShadowShowdownChild2),
 			Self::SlideDown => Some(Self::SlideDown),
 			Self::Spin => Some(Self::PlayDead),
 			Self::Stargaze => Some(
@@ -737,6 +748,9 @@ impl Animation {
 			Self::Scoot => fixed!(SCOOT),
 			Self::Scratch => fixed!(SCRATCH),
 			Self::Scream => fixed!(SCREAM),
+			Self::ShadowShowdown => fixed!(SHADOW_SHOWDOWN),
+			Self::ShadowShowdownChild1 => fixed!(SHADOW_SHOWDOWN_CHILD1),
+			Self::ShadowShowdownChild2 => fixed!(SHADOW_SHOWDOWN_CHILD2),
 			Self::Skip => fixed!(SKIP),
 			Self::Sleep => fixed!(SLEEP),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
@@ -800,7 +814,7 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		const TOTAL: usize = 34;
+		const TOTAL: usize = 35;
 
 		let set = (0..10_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)

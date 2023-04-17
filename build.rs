@@ -185,6 +185,7 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 
 	(1, "Abduction"),
 	(1, "Bleat"),
+	(1, "ShadowShowdown"),
 	(1, "Sneeze"),
 	(1, "Tornado"),
 	(1, "Urinate"),

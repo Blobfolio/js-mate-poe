@@ -847,6 +847,59 @@ pub(super) const SCREAM: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::ShadowShowdown`.
+pub(super) const SHADOW_SHOWDOWN: &[Scene] = &[
+	Scene::new(100, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(-2, 0))
+		.with_repeat(19, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(100, &[
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F069, Frame::F069, Frame::F069, Frame::F069, Frame::F069,
+		Frame::F070, Frame::F071, Frame::F070, Frame::F069, Frame::F069,
+	])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(200, &[
+		Frame::F003, Frame::F067, Frame::F068, Frame::F067,
+		Frame::F068, Frame::F067, Frame::F003,
+	])
+		.with_sound(Sound::Baa, 1)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
+/// # For `Animation::ShadowShowdownChild1`.
+pub(super) const SHADOW_SHOWDOWN_CHILD1: &[Scene] = &[
+	Scene::new(100, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(-2, 0))
+		.with_repeat(19, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(100, &[
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F069, Frame::F069, Frame::F069, Frame::F069, Frame::F069,
+		Frame::F070, Frame::F071, Frame::F070, Frame::F069, Frame::F069,
+	])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
+/// # For `Animation::ShadowShowdownChild2`.
+pub(super) const SHADOW_SHOWDOWN_CHILD2: &[Scene] = &[
+	Scene::new(400, &[Frame::F003])
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(30, &[
+		Frame::F005, Frame::F005, Frame::F005, Frame::F004,
+		Frame::F004, Frame::F004, Frame::F004, Frame::F004,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_repeat(12, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::Skip`.
 pub(super) const SKIP: &[Scene] = &[
 	Scene::new(60, &[Frame::F005, Frame::F005, Frame::F005])
