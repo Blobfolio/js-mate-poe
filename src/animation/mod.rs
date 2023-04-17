@@ -592,10 +592,10 @@ impl Animation {
 				1 => Self::SlideDown,
 				_ => Self::RunDown,
 			}),
-			Self::Run => Some(match Universe::rand_mod(10) {
-				0..=2 => Self::EndRun,
-				3..=5 => Self::Jump,
-				6..=8 => Self::Run,
+			Self::Run => Some(match Universe::rand_mod(25) {
+				0..=7 => Self::EndRun,
+				8..=15 => Self::Jump,
+				16..=23 => Self::Run,
 				_ => Self::Hydroplane,
 			}),
 			Self::RunDown => Some(
