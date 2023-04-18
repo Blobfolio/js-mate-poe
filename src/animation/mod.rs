@@ -144,7 +144,7 @@ pub(crate) enum Animation {
 }
 
 impl Animation {
-	#[cfg(any(test))]
+	#[cfg(test)]
 	/// # All Animations.
 	pub(crate) const fn all() -> Animations { Animations(0) }
 
@@ -160,63 +160,6 @@ impl Animation {
 			Some(unsafe { std::mem::transmute(src) })
 		}
 		else { None }
-	}
-
-	#[cfg(any(test, feature = "director"))]
-	/// # Directly Playable?
-	///
-	/// Returns `true` if the animation can be cued up via the userland setter
-	/// `Poe.play`.
-	pub(crate) const fn playable(self) -> bool {
-		matches!(
-			self,
-			Self::Abduction |
-			Self::BathDive |
-			Self::Beg |
-			Self::BigFish |
-			Self::BlackSheepChase |
-			Self::BlackSheepRomance |
-			Self::Bleat |
-			Self::Blink |
-			Self::ChaseAMartian |
-			Self::Cry |
-			Self::Dance |
-			Self::Eat |
-			Self::EatMagicFlower |
-			Self::Gopher |
-			Self::Handstand |
-			Self::Hop |
-			Self::Jump |
-			Self::LayDown |
-			Self::LegLifts |
-			Self::LookDown |
-			Self::LookUp |
-			Self::Nah |
-			Self::PlayDead |
-			Self::Popcorn |
-			Self::Really |
-			Self::Rest |
-			Self::Roll |
-			Self::Rotate |
-			Self::Run |
-			Self::Scoot |
-			Self::Scratch |
-			Self::Scream |
-			Self::ShadowShowdown |
-			Self::Skip |
-			Self::Sleep |
-			Self::SleepSitting |
-			Self::SleepStanding |
-			Self::Slide |
-			Self::Sneeze |
-			Self::Spin |
-			Self::Stargaze |
-			Self::Tornado |
-			Self::Urinate |
-			Self::Walk |
-			Self::Yawn |
-			Self::Yoyo
-		)
 	}
 }
 
@@ -348,24 +291,65 @@ impl Animation {
 			Self::Yoyo => "Yo-Yo",
 		}
 	}
+
+	/// # Directly Playable?
+	///
+	/// Returns `true` if the animation can be cued up via the userland setter
+	/// `Poe.play`.
+	pub(crate) const fn playable(self) -> bool {
+		matches!(
+			self,
+			Self::Abduction |
+			Self::BathDive |
+			Self::Beg |
+			Self::BigFish |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::Bleat |
+			Self::Blink |
+			Self::ChaseAMartian |
+			Self::Cry |
+			Self::Dance |
+			Self::Eat |
+			Self::EatMagicFlower |
+			Self::Gopher |
+			Self::Handstand |
+			Self::Hop |
+			Self::Jump |
+			Self::LayDown |
+			Self::LegLifts |
+			Self::LookDown |
+			Self::LookUp |
+			Self::Nah |
+			Self::PlayDead |
+			Self::Popcorn |
+			Self::Really |
+			Self::Rest |
+			Self::Roll |
+			Self::Rotate |
+			Self::Run |
+			Self::Scoot |
+			Self::Scratch |
+			Self::Scream |
+			Self::ShadowShowdown |
+			Self::Skip |
+			Self::Sleep |
+			Self::SleepSitting |
+			Self::SleepStanding |
+			Self::Slide |
+			Self::Sneeze |
+			Self::Spin |
+			Self::Stargaze |
+			Self::Tornado |
+			Self::Urinate |
+			Self::Walk |
+			Self::Yawn |
+			Self::Yoyo
+		)
+	}
 }
 
 impl Animation {
-	/// # Change Class?
-	///
-	/// Returns true if the animation has a dedicated DOM class for the
-	/// sprite's wrapper element or otherwise does weird things requiring extra
-	/// scrutiny during render.
-	pub(crate) const fn change_class(self) -> bool {
-		matches!(
-			self,
-			Self::Abduction | Self::BigFishChild | Self::DigestMagicFlower1 |
-			Self::Drag | Self::EatingMagicFlower | Self::MagicFlower1 |
-			Self::MagicFlower2 | Self::ShadowShowdownChild1 |
-			Self::ShadowShowdownChild2 | Self::SneezeShadow | Self::SplatGhost
-		)
-	}
-
 	/// # Clamp to Wall.
 	///
 	/// Returns the side — left or right — to clamp the animation's X position
@@ -375,6 +359,26 @@ impl Animation {
 			Self::ClimbDown | Self::RunDown | Self::SlideDown => Some(Direction::Right),
 			Self::ClimbUp | Self::WallSlide => Some(Direction::Left),
 			_ => None,
+		}
+	}
+
+	/// # CSS Class.
+	///
+	/// If the animation has a corresponding CSS class, this returns its number
+	/// (the classes are all named like `a1`, `a2`, etc.), otherwise `-1`.
+	pub(crate) const fn css_class(self) -> i8 {
+		match self {
+			Self::Drag => 1,
+			Self::SneezeShadow => 2,
+			Self::Abduction => 3,
+			Self::BigFishChild => 4,
+			Self::SplatGhost => 5,
+			Self::EatingMagicFlower => 6,
+			Self::MagicFlower1 | Self::MagicFlower2 => 7,
+			Self::DigestMagicFlower1 => 8,
+			Self::ShadowShowdownChild1 => 9,
+			Self::ShadowShowdownChild2 => 10,
+			_ => -1,
 		}
 	}
 
@@ -401,8 +405,13 @@ impl Animation {
 	pub(crate) const fn may_exit(self) -> bool {
 		matches!(
 			self,
-			Self::BlackSheepChase | Self::ChaseAMartian | Self::Hydroplane |
-			Self::Run | Self::SneezeShadow | Self::Tornado | Self::Walk
+			Self::BlackSheepChase |
+			Self::ChaseAMartian |
+			Self::Hydroplane |
+			Self::Run |
+			Self::SneezeShadow |
+			Self::Tornado |
+			Self::Walk
 		)
 	}
 

@@ -204,7 +204,7 @@ impl Mate {
 		// Old animation business.
 		if let Some(o) = old {
 			// Change classes if going to or coming from a special animation.
-			if animation.change_class() || o.change_class() {
+			if 0 < animation.css_class() || 0 < o.css_class() {
 				self.flags.mark_class_changed();
 			}
 
@@ -555,20 +555,7 @@ impl Mate {
 					self.flags.flipped_x(),
 					self.flags.flipped_y(),
 					self.frame.dba(),
-					match self.animation {
-						None => 0,
-						Some(Animation::Drag) => 1,
-						Some(Animation::SneezeShadow) => 2,
-						Some(Animation::Abduction) => 3,
-						Some(Animation::BigFishChild) => 4,
-						Some(Animation::SplatGhost) => 5,
-						Some(Animation::EatingMagicFlower) => 6,
-						Some(Animation::MagicFlower1 | Animation::MagicFlower2) => 7,
-						Some(Animation::DigestMagicFlower1) => 8,
-						Some(Animation::ShadowShowdownChild1) => 9,
-						Some(Animation::ShadowShowdownChild2) => 10,
-						_ => -1,
-					}
+					self.animation.map_or(0, Animation::css_class),
 				);
 			}
 
