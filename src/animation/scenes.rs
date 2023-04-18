@@ -244,7 +244,7 @@ pub(super) const BOUNCE: &[Scene] = &[
 
 /// # For `Animation::ClimbDown`.
 pub(super) const CLIMB_DOWN: &[Scene] = &[
-	Scene::new(150, &[Frame::F017, Frame::F018])
+	Scene::new(75, &[Frame::F017, Frame::F018])
 		.with_move_to(Position::new(0, 2))
 		.with_repeat(20, 0),
 ];
