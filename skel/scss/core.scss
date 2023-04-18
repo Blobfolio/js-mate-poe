@@ -30,6 +30,7 @@
 	opacity: 1;
 	transition: opacity .5s ease;
 	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate;
+	will-change: transform;
 }
 
 // The image.
@@ -42,6 +43,7 @@
 // Disable mouse clicks for disabled sprites, child sprites, and the image
 // element.
 #p.child, #p.off, #i { pointer-events: none; }
+#p.off { will-change: auto; }
 
 // Half-size.
 #p.h {
