@@ -309,21 +309,10 @@ pub(super) const DEEP_THOUGHTS: &[Scene] = &[
 ];
 
 /// # For `Animation::DigestMagicFlower1`.
-pub(super) const DIGEST_MAGIC_FLOWER1: &[Scene] = &[
-	Scene::new(100, &[
-		Frame::F003, Frame::F092, Frame::F092, Frame::F092, Frame::F092,
-		Frame::F092, Frame::F092, Frame::F092, Frame::F092, Frame::F092,
-		Frame::F092, Frame::F091,
-	])
-		.with_repeat(4, 11)
-		.with_flags(Scene::GRAVITY),
-];
+pub(super) const DIGEST_MAGIC_FLOWER1: &[Scene] = &[PLAY_DEAD[0]];
 
 /// # For `Animation::DigestMagicFlower2`.
-pub(super) const DIGEST_MAGIC_FLOWER2: &[Scene] = &[
-	Scene::new(150, &[Frame::F087, Frame::F040, Frame::F009, Frame::F008])
-		.with_flags(Scene::GRAVITY),
-];
+pub(super) const DIGEST_MAGIC_FLOWER2: &[Scene] = &[PLAY_DEAD[1]];
 
 /// # For `Animation::Drag`.
 pub(super) const DRAG: &[Scene] = &[
@@ -353,9 +342,7 @@ pub(super) const EAT_MAGIC_FLOWER: &[Scene] = &[
 		.with_move_to(Position::new(2, 0))
 		.with_repeat(4, 0)
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
-	Scene::new(150, &[Frame::F052, Frame::F053])
-		.with_repeat(3, 0)
-		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	SCRATCH[0],
 	Scene::new(100, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(-2, 0))
 		.with_repeat(4, 0)
@@ -734,15 +721,13 @@ pub(super) const REALLY: &[Scene] = &[
 		.with_repeat(15, 3)
 		.with_flags(Scene::GRAVITY),
 	Scene::new(250, &[
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F033, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F033, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
-		Frame::F032, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F033, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F033, Frame::F032, Frame::F032, Frame::F032,
+		Frame::F032, Frame::F032, Frame::F032, Frame::F032, Frame::F032,
 	])
 		.with_flags(Scene::GRAVITY),
 	Scene::new(150, &[
@@ -837,14 +822,12 @@ pub(super) const SCOOT: &[Scene] = &[
 pub(super) const SCRATCH: &[Scene] = &[
 	Scene::new(150, &[Frame::F052, Frame::F053])
 		.with_repeat(3, 0)
-		.with_flags(Scene::GRAVITY),
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 ];
 
 /// # For `Animation::Scream`.
 pub(super) const SCREAM: &[Scene] = &[
-	Scene::new(50, &[Frame::F046, Frame::F047])
-		.with_repeat(12, 0)
-		.with_flags(Scene::GRAVITY),
+	DEEP_THOUGHTS[1].with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ShadowShowdown`.
@@ -862,29 +845,14 @@ pub(super) const SHADOW_SHOWDOWN: &[Scene] = &[
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
 		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
-	Scene::new(200, &[
-		Frame::F003, Frame::F067, Frame::F068, Frame::F067,
-		Frame::F068, Frame::F067, Frame::F003,
-	])
-		.with_sound(Sound::Baa, 1)
-		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	BLEAT[0],
 ];
 
 /// # For `Animation::ShadowShowdownChild1`.
 pub(super) const SHADOW_SHOWDOWN_CHILD1: &[Scene] = &[
-	Scene::new(100, &[Frame::F002, Frame::F003])
-		.with_move_to(Position::new(-2, 0))
-		.with_repeat(19, 0)
-		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
-	Scene::new(100, &[
-		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
-		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
-		Frame::F069, Frame::F069, Frame::F069, Frame::F069, Frame::F069,
-		Frame::F070, Frame::F071, Frame::F070, Frame::F069, Frame::F069,
-	])
-		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
-		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
+	SHADOW_SHOWDOWN[0],
+	SHADOW_SHOWDOWN[1],
+	SHADOW_SHOWDOWN[2],
 ];
 
 /// # For `Animation::ShadowShowdownChild2`.
@@ -1259,14 +1227,8 @@ pub(super) const fn chase_a_martian_child(w: u16) -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic1([
 		Scene::new(25, &[
-			Frame::F152,
-			Frame::F153,
-			Frame::F152,
-			Frame::F154,
-			Frame::F152,
-			Frame::F153,
-			Frame::F152,
-			Frame::F154,
+			Frame::F152, Frame::F153, Frame::F152, Frame::F154,
+			Frame::F152, Frame::F153, Frame::F152, Frame::F154,
 		])
 			.with_move_to(Position::new(-6, 0))
 			.with_repeat(repeat, 0)
