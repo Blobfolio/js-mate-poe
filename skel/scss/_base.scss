@@ -14,9 +14,6 @@ $max_unused_frame: 165;
 // The sprite image width.
 $width: 6200px;
 
-// Rotation transform.
-$rotate: rotateY(var(--rx, 0deg)) rotateX(var(--ry, 0deg));
-
 // Position transform.
 $pos: translate3d(var(--x, 0), var(--y, 0), 0);
 

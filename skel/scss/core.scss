@@ -29,7 +29,7 @@
 
 	opacity: 1;
 	transition: opacity .5s ease;
-	transform: $pos $rotate;
+	transform: $pos;
 	will-change: transform;
 }
 
@@ -55,8 +55,9 @@
 #p.off, #p.a5, #p.aa { opacity: 0; }
 
 // Reverse the image across one or both planes.
-.rx { --rx: 180deg; }
-.ry { --ry: 180deg; }
+#p.rx { transform: $pos scaleX(-1); }
+#p.ry { transform: $pos scaleY(-1); }
+#p.rx.ry { transform: $pos scale(-1); }
 
 // Masks.
 #p.m021 { clip-path: $m021; }
@@ -75,9 +76,7 @@
 #p.a3 { animation: a3 0.25s 4s infinite; }
 
 // Animation: BigFish.
-#p.a4 {
-	transform: $pos $rotate scale(3);
-}
+#p.a4 { transform: $pos scale(3); }
 
 // Animation: SplatGhost.
 #p.a5 {
@@ -97,20 +96,19 @@
 
 // Animation: ShadowShowdownChild(ren).
 #p.a9,
-#p.aa {
-	transform: $pos $rotate skew(var(--skew));
-	filter: brightness(0) blur(1px);
-}
+#p.aa { filter: brightness(0) blur(1px); }
 
 #p.a9 {
-	--skew: -40deg;
 	opacity: 0.5;
+	transform: $pos skew(-40deg);
+	&.rx { transform: $pos scaleX(-1) skew(-40deg); }
 }
 
 #p.aa {
-	--skew: 40deg;
 	transition: none;
 	animation: a5 3s;
+	transform: $pos skew(40deg);
+	&.rx { transform: $pos scaleX(-1) skew(40deg); }
 }
 
 // Color-shift the sprite to make the abduction more dramatic.
