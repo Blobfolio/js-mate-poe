@@ -360,7 +360,7 @@ mod tests {
 	use crate::Animation;
 
 	#[test]
-	fn builder() {
+	fn t_builder() {
 		let expected = Scene {
 			move_to: Some(Position::new(55, 0)),
 			fpms: 100,
@@ -391,7 +391,7 @@ mod tests {
 	}
 
 	#[test]
-	fn scenes() {
+	fn t_scenes() {
 		for a in Animation::all() {
 			let scenes = a.scenes(3840);
 
