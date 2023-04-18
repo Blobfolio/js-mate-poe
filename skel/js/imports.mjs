@@ -109,12 +109,11 @@ const poePlaySound = function(idx) {
  *
  * @param {!Element} el Element.
  * @param {boolean} rx FlipX.
- * @param {boolean} ry FlipY.
  * @param {number} frame Frame Class.
  * @param {number} scene Animation Class.
  * @return {void} Nothing.
  */
-const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
+const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Pull the list so we have it.
 	const list = el.classList;
 
@@ -122,9 +121,8 @@ const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
 	frame = parseInt(frame, 10);
 	scene = parseInt(scene, 10);
 
-	// Orientation classes.
+	// Orientation class.
 	list.toggle('rx', !! rx);
-	list.toggle('ry', !! ry);
 
 	// Disabled?
 	list.toggle('off', 0 === scene);
@@ -154,6 +152,7 @@ const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
 		list.toggle('a3',  3 === scene); // Abduction.
 		list.toggle('a6',  6 === scene); // EatingMagicFlower.
 		list.toggle('a8',  8 === scene); // DigestMagicFlower1.
+		list.toggle('ab', 11 === scene); // DangleRecover.
 	}
 };
 

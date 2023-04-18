@@ -34,7 +34,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, rx: bool, ry: bool, frame: i16, scene: i8);
+	fn toggle_wrapper_classes(el: &Element, rx: bool, frame: i16, scene: i8);
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poePlaySound")]
@@ -149,9 +149,7 @@ impl Mate {
 		child.pretick_resize();
 
 		// Flip to match.
-		child.flags.clear_flips();
 		child.flags.flip_x(Some(self.flags.flipped_x()));
-		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
 		child.animation.take();
@@ -210,16 +208,10 @@ impl Mate {
 
 			// Unapply the previous animation-wide flips.
 			if o.flip_x() { self.flags.flip_x(None); }
-			if o.flip_y() { self.flags.flip_y(None); }
 		}
 		else {
 			self.set_frame(Frame::None);
 			self.flags.mark_changed();
-		}
-
-		// Remove flippage for these two.
-		if matches!(animation, Animation::Drag | Animation::Fall | Animation::GraspingFall) {
-			self.flags.clear_flips();
 		}
 
 		// Miscellaneous animation-specific adjustments (if we changed).
@@ -235,7 +227,6 @@ impl Mate {
 
 		// Apply animation-wide flips.
 		if animation.flip_x() { self.flags.flip_x(None); }
-		if animation.flip_y() { self.flags.flip_y(None); }
 
 		// Store the new animation!
 		self.animation.replace(animation);
@@ -306,7 +297,6 @@ impl Mate {
 			_ => None,
 		} {
 			self.flags.flip_x(Some(false));
-			self.flags.flip_y(Some(false));
 			self.set_position(pos, true);
 		}
 	}
@@ -461,7 +451,6 @@ impl Mate {
 		// Move it?
 		if let Some(mut pos) = step.move_to() {
 			if self.flags.flipped_x() { pos = pos.invert_x(); }
-			if self.flags.flipped_y() { pos = pos.invert_y(); }
 			self.set_position(pos, false);
 		}
 
@@ -483,7 +472,6 @@ impl Mate {
 			// Note the direction we're moving.
 			let mut dir = step.direction();
 			if self.flags.flipped_x() { dir = dir.invert_x(); }
-			if self.flags.flipped_y() { dir = dir.invert_y(); }
 
 			// Make sure we didn't crash into an edge, and if we did and the
 			// animation changed, recurse.
@@ -553,7 +541,6 @@ impl Mate {
 				toggle_wrapper_classes(
 					&wrapper,
 					self.flags.flipped_x(),
-					self.flags.flipped_y(),
 					self.frame.dba(),
 					self.animation.map_or(0, Animation::css_class),
 				);

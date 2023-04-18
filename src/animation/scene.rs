@@ -127,16 +127,15 @@ impl Scene {
 }
 
 impl Scene {
-	pub(super) const EASE_IN: u8 =       0b0000_0001;
-	pub(super) const EASE_OUT: u8 =      0b0000_0010;
-	pub(crate) const FLIP_X_NEXT: u8 =   0b0000_0100;
-	pub(crate) const FLIP_Y_NEXT: u8 =   0b0000_1000;
-	pub(crate) const GRAVITY: u8 =       0b0001_0000;
-	pub(crate) const IGNORE_EDGES: u8 =  0b0010_0000;
-	pub(super) const END_SCENELIST: u8 = 0b0100_0000;
+	pub(super) const END_SCENELIST: u8 = 0b0000_0001;
+	pub(crate) const FLIP_X_NEXT: u8 =   0b0000_0010;
+	pub(crate) const GRAVITY: u8 =       0b0000_0100;
+	pub(crate) const IGNORE_EDGES: u8 =  0b0000_1000;
+	pub(super) const EASE_IN: u8 =       0b0001_0000;
+	pub(super) const EASE_OUT: u8 =      0b0010_0000;
 
 	pub(crate) const MATE_MASK: u8 =
-		Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
+		Self::FLIP_X_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
 
 impl Scene {
@@ -230,7 +229,7 @@ impl Iterator for SceneList {
 				// Adjust flags.
 				let scene_flags =
 					if self.step_idx < steps {
-						scene.flags & ! (Scene::FLIP_X_NEXT | Scene::FLIP_Y_NEXT)
+						scene.flags & ! Scene::FLIP_X_NEXT
 					}
 					else if self.scene_idx + 1 == self.scenes.len() {
 						scene.flags | Scene::END_SCENELIST

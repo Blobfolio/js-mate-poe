@@ -42,7 +42,9 @@
 
 // Disable mouse clicks for disabled sprites, child sprites, and the image
 // element.
-#p.child, #p.off, #i { pointer-events: none; }
+#p.child,
+#p.off,
+#i { pointer-events: none; }
 #p.off { will-change: auto; }
 
 // Half-size.
@@ -52,12 +54,12 @@
 }
 
 // Disabled/invisible sprites.
-#p.off, #p.a5, #p.aa { opacity: 0; }
+#p.off,
+#p.a5,
+#p.aa { opacity: 0; }
 
 // Reverse the image across one or both planes.
 #p.rx { transform: $pos scaleX(-1); }
-#p.ry { transform: $pos scaleY(-1); }
-#p.rx.ry { transform: $pos scale(-1); }
 
 // Masks.
 #p.m021 { clip-path: $m021; }
@@ -109,6 +111,12 @@
 	animation: a5 3s;
 	transform: $pos skew(40deg);
 	&.rx { transform: $pos scaleX(-1) skew(40deg); }
+}
+
+// Animation: DangleRecover.
+#p.ab {
+	transform: $pos scaleY(-1);
+	&.rx { transform: $pos scale(-1); }
 }
 
 // Color-shift the sprite to make the abduction more dramatic.

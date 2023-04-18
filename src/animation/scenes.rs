@@ -291,21 +291,8 @@ pub(super) const DANGLE_RECOVER: &[Scene] = &[
 		.with_repeat(1, 0),
 	Scene::new(100, &[
 		Frame::F040, Frame::F040, Frame::F040, Frame::F041,
-		Frame::F009, Frame::F008, Frame::F003,
+		Frame::F009, Frame::F008,
 	]),
-];
-
-/// # For `Animation::DeepThoughts`.
-pub(super) const DEEP_THOUGHTS: &[Scene] = &[
-	Scene::new(50, &[
-		Frame::F003, Frame::F003, Frame::F003,
-		Frame::F003, Frame::F003, Frame::F069,
-	])
-		.with_repeat(15, 5),
-	Scene::new(50, &[Frame::F046, Frame::F047])
-		.with_repeat(12, 0),
-	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F010])
-		.with_flags(Scene::FLIP_X_NEXT),
 ];
 
 /// # For `Animation::DigestMagicFlower1`.
@@ -827,7 +814,9 @@ pub(super) const SCRATCH: &[Scene] = &[
 
 /// # For `Animation::Scream`.
 pub(super) const SCREAM: &[Scene] = &[
-	DEEP_THOUGHTS[1].with_flags(Scene::GRAVITY),
+	Scene::new(50, &[Frame::F046, Frame::F047])
+		.with_repeat(12, 0)
+		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ShadowShowdown`.

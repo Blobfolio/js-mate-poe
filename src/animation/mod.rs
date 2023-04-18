@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 87; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 86; // The highest Animation ID.
 
 
 
@@ -105,7 +105,6 @@ pub(crate) enum Animation {
 	ClimbUp,
 	DangleFall,
 	DangleRecover,
-	DeepThoughts,
 	DigestMagicFlower1,
 	DigestMagicFlower2,
 	Drag,
@@ -229,7 +228,6 @@ impl Animation {
 			Self::Dance => "Dance",
 			Self::DangleFall => "Dangle (Maybe) Fall",
 			Self::DangleRecover => "Dangle Fall Recovery",
-			Self::DeepThoughts => "Deep Thoughts",
 			Self::DigestMagicFlower1 | Self::DigestMagicFlower2 => "Digesting (Magic Flower)",
 			Self::Drag => "Drag",
 			Self::Eat => "Eat",
@@ -378,6 +376,7 @@ impl Animation {
 			Self::DigestMagicFlower1 => 8,
 			Self::ShadowShowdownChild1 => 9,
 			Self::ShadowShowdownChild2 => 10,
+			Self::DangleRecover => 11,
 			_ => -1,
 		}
 	}
@@ -388,14 +387,6 @@ impl Animation {
 	/// horizontally.
 	pub(crate) const fn flip_x(self) -> bool {
 		matches!(self, Self::BlackSheepChaseChild | Self::ReachSide2)
-	}
-
-	/// # Flip (Y).
-	///
-	/// Returns `true` if the animation needs to flip the sprite image
-	/// vertically.
-	pub(crate) const fn flip_y(self) -> bool {
-		matches!(self, Self::DangleRecover | Self::DeepThoughts)
 	}
 
 	/// # Animation May Exit Screen?
@@ -441,7 +432,6 @@ impl Animation {
 			Self::Dance |
 			Self::DangleFall |
 			Self::DangleRecover |
-			Self::DeepThoughts |
 			Self::DigestMagicFlower1 |
 			Self::DigestMagicFlower2 |
 			Self::Drag |
@@ -581,13 +571,10 @@ impl Animation {
 				if 0 == Universe::rand_mod(4) { Self::GraspingFall }
 				else { Self::DangleRecover }
 			),
-			Self::DangleRecover |
-				Self::ReachCeiling => Some(
-					if 0 == Universe::rand_mod(5) { Self::DeepThoughts }
-					else { Self::WalkUpsideDown }
-				),
-			Self::DeepThoughts |
-				Self::RunUpsideDown => Some(Self::RunUpsideDown),
+			Self::DangleRecover => Some(
+				if 0 == Universe::rand_mod(5) { Self::RunUpsideDown }
+				else { Self::WalkUpsideDown }
+			),
 			Self::DigestMagicFlower1 => Some(Self::DigestMagicFlower2),
 			Self::Drag => Some(Self::Drag),
 			Self::Eat |
@@ -605,6 +592,7 @@ impl Animation {
 				_ => Self::Jump,
 			}),
 			Self::MagicFlower1 => Some(Self::MagicFlower2),
+			Self::ReachCeiling => Some(Self::WalkUpsideDown),
 			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
 				0 => Self::ClimbDown,
 				1 => Self::SlideDown,
@@ -620,6 +608,7 @@ impl Animation {
 				if 0 == Universe::rand_mod(3) { Self::SlideDown }
 				else { Self::RunDown }
 			),
+			Self::RunUpsideDown => Some(Self::RunUpsideDown),
 			Self::Scoot => Some(match Universe::rand_mod(7) {
 				0..=3 => Self::Scoot,
 				4..=5 => Self::Rotate,
@@ -636,7 +625,6 @@ impl Animation {
 			Self::Tornado => Some(Self::TornadoExit),
 			Self::WalkUpsideDown => Some(match Universe::rand_mod(15) {
 				0 => Self::DangleFall,
-				1 => Self::DeepThoughts,
 				_ => Self::WalkUpsideDown,
 			}),
 			Self::WallSlide => Some(Self::WallSlide),
@@ -660,7 +648,6 @@ impl Animation {
 				Self::SlideDown => Some(Self::ReachFloor),
 			Self::ClimbUp => Some(Self::ReachCeiling),
 			Self::DangleRecover |
-				Self::DeepThoughts |
 				Self::RunUpsideDown |
 				Self::WalkUpsideDown => Some(Self::ReachSide2),
 			Self::Fall => Some(Self::Bounce),
@@ -718,7 +705,6 @@ impl Animation {
 			Self::Dance => fixed!(DANCE),
 			Self::DangleFall => fixed!(DANGLE_FALL),
 			Self::DangleRecover => fixed!(DANGLE_RECOVER),
-			Self::DeepThoughts => fixed!(DEEP_THOUGHTS),
 			Self::DigestMagicFlower1 => fixed!(DIGEST_MAGIC_FLOWER1),
 			Self::DigestMagicFlower2 => fixed!(DIGEST_MAGIC_FLOWER2),
 			Self::Drag => fixed!(DRAG),

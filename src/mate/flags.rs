@@ -12,20 +12,18 @@ pub(crate) struct MateFlags(u16);
 
 impl MateFlags {
 	const FLIPPED_X: u16 =         0b0000_0000_0000_0001; // Flip horizontally.
-	const FLIPPED_Y: u16 =         0b0000_0000_0000_0010; // Flip vertically.
-	const FLIP_X_NEXT: u16 =       0b0000_0000_0000_0100; // Flip X on _next_ tick.
-	const FLIP_Y_NEXT: u16 =       0b0000_0000_0000_1000; // Flip Y on _next_ tick.
-	const GRAVITY: u16 =           0b0000_0000_0001_0000; // Gravity applies.
-	const IGNORE_EDGES: u16 =      0b0000_0000_0010_0000; // No edge checking needed.
-	const MAY_EXIT: u16 =          0b0000_0000_0100_0000; // Allowed to exit.
-	const PRIMARY: u16 =           0b0000_0000_1000_0000; // Primary sprite.
+	const FLIP_X_NEXT: u16 =       0b0000_0000_0000_0010; // Flip X on _next_ tick.
+	const GRAVITY: u16 =           0b0000_0000_0000_0100; // Gravity applies.
+	const IGNORE_EDGES: u16 =      0b0000_0000_0000_1000; // No edge checking needed.
+	const MAY_EXIT: u16 =          0b0000_0000_0001_0000; // Allowed to exit.
+	const PRIMARY: u16 =           0b0000_0000_0010_0000; // Primary sprite.
 
-	const CHANGED_CLASS: u16 =     0b0000_0001_0000_0000; // Class-affecting property changed.
-	const CHANGED_FRAME: u16 =     0b0000_0010_0000_0000; // Image frame changed.
-	const CHANGED_SIZE: u16 =      0b0000_0100_0000_0000; // Screen resized.
-	const CHANGED_SOUND: u16 =     0b0000_1000_0000_0000; // Need to play a sound.
-	const CHANGED_TRANS_X: u16 =   0b0001_0000_0000_0000; // X position changed.
-	const CHANGED_TRANS_Y: u16 =   0b0010_0000_0000_0000; // Y position changed.
+	const CHANGED_CLASS: u16 =     0b0000_0000_0100_0000; // Class-affecting property changed.
+	const CHANGED_FRAME: u16 =     0b0000_0000_1000_0000; // Image frame changed.
+	const CHANGED_SIZE: u16 =      0b0000_0001_0000_0000; // Screen resized.
+	const CHANGED_SOUND: u16 =     0b0000_0010_0000_0000; // Need to play a sound.
+	const CHANGED_TRANS_X: u16 =   0b0000_0100_0000_0000; // X position changed.
+	const CHANGED_TRANS_Y: u16 =   0b0000_1000_0000_0000; // Y position changed.
 
 	// Transform-related changes.
 	const CHANGED_TRANSFORM: u16 =
@@ -39,12 +37,9 @@ impl MateFlags {
 		Self::CHANGED_CLASS | Self::CHANGED_FRAME |
 		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM;
 
-	// All flip-related settings.
-	const FLIPPED: u16 = Self::FLIPPED_X | Self::FLIPPED_Y;
-
 	// Scene Mask.
 	const SCENE_MASK: u16 =
-		Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
+		Self::FLIP_X_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
 
 impl MateFlags {
@@ -66,7 +61,6 @@ macro_rules! get {
 
 impl MateFlags {
 	get!("Flipped (X)", FLIPPED_X, flipped_x);
-	get!("Flipped (Y)", FLIPPED_Y, flipped_y);
 	get!("Gravity Applies", GRAVITY, gravity);
 	get!("Ignore Edges", IGNORE_EDGES, ignore_edges);
 	get!("Allowed to Exit Screen", MAY_EXIT, may_exit);
@@ -137,21 +131,8 @@ impl MateFlags {
 	///
 	/// Remove the next X/Y properties and flip (the current state) accordingly.
 	pub(crate) fn apply_next(&mut self) {
-		if 0 != self.0 & (Self::FLIP_X_NEXT | Self::FLIP_Y_NEXT) {
-			if Self::FLIP_X_NEXT == self.0 & Self::FLIP_X_NEXT {
-				self.0 ^= Self::FLIPPED_X | Self::FLIP_X_NEXT;
-			}
-			if Self::FLIP_Y_NEXT == self.0 & Self::FLIP_Y_NEXT {
-				self.0 ^= Self::FLIPPED_Y | Self::FLIP_Y_NEXT;
-			}
-			self.mark_class_changed();
-		}
-	}
-
-	/// # Clear All Flip-Related Flags.
-	pub(crate) fn clear_flips(&mut self) {
-		if 0 != self.0 & Self::FLIPPED {
-			self.0 &= ! Self::FLIPPED;
+		if Self::FLIP_X_NEXT == self.0 & Self::FLIP_X_NEXT {
+			self.0 ^= Self::FLIPPED_X | Self::FLIP_X_NEXT;
 			self.mark_class_changed();
 		}
 	}
@@ -162,16 +143,6 @@ impl MateFlags {
 	pub(crate) fn flip_x(&mut self, v: Option<bool>) {
 		if v.map_or(true, |v| v != self.flipped_x()) {
 			self.0 ^= Self::FLIPPED_X;
-			self.mark_class_changed();
-		}
-	}
-
-	/// # Flip (Y).
-	///
-	/// Flip/unflip vertically, or toggle if `None`.
-	pub(crate) fn flip_y(&mut self, v: Option<bool>) {
-		if v.map_or(true, |v| v != self.flipped_y()) {
-			self.0 ^= Self::FLIPPED_Y;
 			self.mark_class_changed();
 		}
 	}
@@ -209,7 +180,6 @@ mod tests {
 		}
 
 		flag!(FLIP_X_NEXT);
-		flag!(FLIP_Y_NEXT);
 		flag!(GRAVITY);
 		flag!(IGNORE_EDGES);
 
