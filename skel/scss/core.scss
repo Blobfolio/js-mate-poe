@@ -29,7 +29,7 @@
 
 	opacity: 1;
 	transition: opacity .5s ease;
-	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate;
+	transform: $pos $rotate;
 	will-change: transform;
 }
 
@@ -76,7 +76,7 @@
 
 // Animation: BigFish.
 #p.a4 {
-	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate scale(3);
+	transform: $pos $rotate scale(3);
 }
 
 // Animation: SplatGhost.
@@ -98,7 +98,7 @@
 // Animation: ShadowShowdownChild(ren).
 #p.a9,
 #p.aa {
-	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate skew(var(--skew));
+	transform: $pos $rotate skew(var(--skew));
 	filter: brightness(0) blur(1px);
 }
 
