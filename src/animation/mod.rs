@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 88; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 89; // The highest Animation ID.
 
 
 
@@ -64,6 +64,7 @@ pub(crate) enum Animation {
 	Dance,
 	Eat,
 	EatMagicFlower,
+	FloatIn,
 	Gopher,
 	Handstand,
 	Hop,
@@ -175,16 +176,17 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 18 } else { 9 }) {
+			let next = match Universe::rand_mod(if first { 15 } else { 10 }) {
 				0 => Self::BathDive,
 				1 => Self::BigFish,
 				2 => Self::BlackSheepChase,
 				3 => Self::BlackSheepRomance,
 				4 => Self::ClimbIn,
-				5 => Self::Gopher,
-				6 => Self::SlideIn,
-				7 => Self::Stargaze,
-				8 => Self::Yoyo,
+				5 => Self::FloatIn,
+				6 => Self::Gopher,
+				7 => Self::SlideIn,
+				8 => Self::Stargaze,
+				9 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -240,6 +242,7 @@ impl Animation {
 			Self::EatingMagicFlower => "Eating (Magic Flower)",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
+			Self::FloatIn => "Float In",
 			Self::Flower => "Flower (Child)",
 			Self::Gopher => "Gopher",
 			Self::GraspingFall => "Grasping Fall",
@@ -317,6 +320,7 @@ impl Animation {
 			Self::Dance |
 			Self::Eat |
 			Self::EatMagicFlower |
+			Self::FloatIn |
 			Self::Gopher |
 			Self::Handstand |
 			Self::Hop |
@@ -450,6 +454,7 @@ impl Animation {
 			Self::EatMagicFlower |
 			Self::EndRun |
 			Self::Fall |
+			Self::FloatIn |
 			Self::Gopher |
 			Self::GraspingFall |
 			Self::Handstand |
@@ -551,6 +556,7 @@ impl Animation {
 				Self::Bounce |
 				Self::DigestMagicFlower2 |
 				Self::EndRun |
+				Self::FloatIn |
 				Self::Hydroplane |
 				Self::LayDown |
 				Self::LookDown |
@@ -727,6 +733,7 @@ impl Animation {
 			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
 			Self::EndRun => fixed!(END_RUN),
 			Self::Fall => fixed!(FALL),
+			Self::FloatIn => fixed!(FLOAT_IN),
 			Self::Flower => fixed!(FLOWER),
 			Self::Gopher => fixed!(GOPHER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),

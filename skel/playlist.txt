@@ -12,37 +12,38 @@
 #12  Dance
 #13  Eat
 #14  Eat (Magic Flower)
-#15  Gopher
-#16  Handstand
-#17  Hop
-#18  Jump
-#19  Lay Down
-#20  Leg Lifts
-#21  Look Down
-#22  Look Up
-#23  Nah…
-#24  Play Dead
-#25  Popcorn
-#26  Really?!
-#27  Rest
-#28  Roll
-#29  Rotate
-#30  Run
-#31  Scoot
-#32  Scratch
-#33  Scream
-#34  Shadow Showdown
-#35  Skip
-#36  Sleep
-#37  Sleep (Sitting)
-#38  Sleep (Standing)
-#39  Slide
-#40  Slide In
-#41  Sneeze
-#42  Spin
-#43  Stargaze
-#44  Tornado
-#45  Urinate
-#46  Walk
-#47  Yawn
-#48  Yo-Yo
+#15  Float In
+#16  Gopher
+#17  Handstand
+#18  Hop
+#19  Jump
+#20  Lay Down
+#21  Leg Lifts
+#22  Look Down
+#23  Look Up
+#24  Nah…
+#25  Play Dead
+#26  Popcorn
+#27  Really?!
+#28  Rest
+#29  Roll
+#30  Rotate
+#31  Run
+#32  Scoot
+#33  Scratch
+#34  Scream
+#35  Shadow Showdown
+#36  Skip
+#37  Sleep
+#38  Sleep (Sitting)
+#39  Sleep (Standing)
+#40  Slide
+#41  Slide In
+#42  Sneeze
+#43  Spin
+#44  Stargaze
+#45  Tornado
+#46  Urinate
+#47  Walk
+#48  Yawn
+#49  Yo-Yo

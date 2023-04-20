@@ -27,7 +27,7 @@ const AUDIO_URLS: &str = r"
 				[new Uint8ClampedArray(wasm.memory.buffer, wasm.yawn_ptr(), yawnLen)],
 				{ type: 'audio/flac' },
 			)),
-		";
+";
 
 #[cfg(feature = "firefox")]
 /// # Audio URLs.
@@ -37,7 +37,7 @@ const AUDIO_URLS: &str = r"
 			browser.runtime.getURL('sound/baa.flac'),
 			browser.runtime.getURL('sound/sneeze.flac'),
 			browser.runtime.getURL('sound/yawn.flac'),
-		";
+";
 
 
 

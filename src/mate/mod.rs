@@ -286,6 +286,10 @@ impl Mate {
 				Frame::SIZE_I * 2,
 			)),
 			// Randomize positioning.
+			Animation::FloatIn => Some(Position::new(
+				self.random_x().max(10),
+				h,
+			)),
 			Animation::Gopher => Some(Position::new(self.random_x(), h)),
 			Animation::Yoyo => Some(Position::new(self.random_x(), -Frame::SIZE_I)),
 			Animation::Fall | Animation::GraspingFall | Animation::WallSlide if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>

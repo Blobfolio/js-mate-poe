@@ -153,19 +153,9 @@ pub(super) const BIG_FISH: &[Scene] = &[
 	Scene::new(2000, &[Frame::None])
 		.with_move_to(Position::new(-100, Frame::SIZE_I))
 		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F032])
-		.with_move_to(Position::new(-1, -6))
-		.with_repeat(4, 0)
-		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(50, &[Frame::F026])
-		.with_move_to(Position::new(0, -5))
-		.with_repeat(1, 0)
-		.with_flags(Scene::IGNORE_EDGES),
-	Scene::new(100, &[
-		Frame::F026, Frame::F026, Frame::F026,
-		Frame::F078, Frame::F079, Frame::F003,
-	])
-		.with_flags(Scene::GRAVITY),
+	FLOAT_IN[0],
+	FLOAT_IN[1],
+	FLOAT_IN[2],
 ];
 
 /// # For `Animation::BigFishChild`.
@@ -380,6 +370,23 @@ pub(super) const FALL: &[Scene] = &[
 		.with_move_to(Position::new(0, 5))
 		.with_repeat(49, 0)
 		.with_flags(Scene::EASE_IN),
+];
+
+/// # For `Animation::FloatIn`.
+pub(super) const FLOAT_IN: &[Scene] = &[
+	Scene::new(50, &[Frame::F032])
+		.with_move_to(Position::new(-1, -6))
+		.with_repeat(4, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(50, &[Frame::F026])
+		.with_move_to(Position::new(0, -5))
+		.with_repeat(1, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(100, &[
+		Frame::F026, Frame::F026, Frame::F026,
+		Frame::F078, Frame::F079, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::Flower`.
