@@ -1,5 +1,5 @@
 # Stage One.
-FROM rust:1.68-bullseye AS stage1
+FROM rust:1.69-bullseye AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
 	cargo install --root /tmp/cargo --locked --version 0.2.84 wasm-bindgen-cli && \
