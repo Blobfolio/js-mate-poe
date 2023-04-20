@@ -279,15 +279,16 @@ impl Mate {
 				-Frame::SIZE_I * 2,
 				h - Frame::SIZE_I,
 			)),
-			Animation::Gopher => Some(Position::new(
-				self.random_x(),
-				h,
-			)),
+			Animation::ClimbIn => Some(Position::new(0, h)),
 			Animation::StargazeChild => Some(Position::new(
 				-Frame::SIZE_I,
 				Frame::SIZE_I * 2,
 			)),
 			// Randomize positioning.
+			Animation::Gopher => Some(Position::new(
+				self.random_x(),
+				h,
+			)),
 			Animation::Yoyo => Some(Position::new(
 				self.random_x(),
 				-Frame::SIZE_I,

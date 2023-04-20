@@ -249,6 +249,16 @@ pub(super) const CLIMB_DOWN: &[Scene] = &[
 		.with_repeat(20, 0),
 ];
 
+/// # For `Animation::ClimbIn`.
+pub(super) const CLIMB_IN: &[Scene] = &[
+	Scene::new(150, &[Frame::F019, Frame::F020])
+		.with_move_to(Position::new(0, -2))
+		.with_repeat(9, 0)
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(150, &[Frame::F032, Frame::F033])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::ClimbUp`.
 pub(super) const CLIMB_UP: &[Scene] = &[
 	Scene::new(150, &[Frame::F019, Frame::F020])

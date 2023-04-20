@@ -7,40 +7,41 @@
 #7   Bleat
 #8   Blink
 #9   Chase a Martian
-#10  Cry
-#11  Dance
-#12  Eat
-#13  Eat (Magic Flower)
-#14  Gopher
-#15  Handstand
-#16  Hop
-#17  Jump
-#18  Lay Down
-#19  Leg Lifts
-#20  Look Down
-#21  Look Up
-#22  Nah…
-#23  Play Dead
-#24  Popcorn
-#25  Really?!
-#26  Rest
-#27  Roll
-#28  Rotate
-#29  Run
-#30  Scoot
-#31  Scratch
-#32  Scream
-#33  Shadow Showdown
-#34  Skip
-#35  Sleep
-#36  Sleep (Sitting)
-#37  Sleep (Standing)
-#38  Slide
-#39  Sneeze
-#40  Spin
-#41  Stargaze
-#42  Tornado
-#43  Urinate
-#44  Walk
-#45  Yawn
-#46  Yo-Yo
+#10  Climb In
+#11  Cry
+#12  Dance
+#13  Eat
+#14  Eat (Magic Flower)
+#15  Gopher
+#16  Handstand
+#17  Hop
+#18  Jump
+#19  Lay Down
+#20  Leg Lifts
+#21  Look Down
+#22  Look Up
+#23  Nah…
+#24  Play Dead
+#25  Popcorn
+#26  Really?!
+#27  Rest
+#28  Roll
+#29  Rotate
+#30  Run
+#31  Scoot
+#32  Scratch
+#33  Scream
+#34  Shadow Showdown
+#35  Skip
+#36  Sleep
+#37  Sleep (Sitting)
+#38  Sleep (Standing)
+#39  Slide
+#40  Sneeze
+#41  Spin
+#42  Stargaze
+#43  Tornado
+#44  Urinate
+#45  Walk
+#46  Yawn
+#47  Yo-Yo

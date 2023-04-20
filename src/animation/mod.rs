@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 86; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 87; // The highest Animation ID.
 
 
 
@@ -59,6 +59,7 @@ pub(crate) enum Animation {
 	Bleat,
 	Blink,
 	ChaseAMartian,
+	ClimbIn,
 	Cry,
 	Dance,
 	Eat,
@@ -173,14 +174,15 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 14 } else { 7 }) {
+			let next = match Universe::rand_mod(if first { 16 } else { 8 }) {
 				0 => Self::BathDive,
 				1 => Self::BigFish,
 				2 => Self::BlackSheepChase,
 				3 => Self::BlackSheepRomance,
-				4 => Self::Gopher,
-				5 => Self::Stargaze,
-				6 => Self::Yoyo,
+				4 => Self::ClimbIn,
+				5 => Self::Gopher,
+				6 => Self::Stargaze,
+				7 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -223,6 +225,7 @@ impl Animation {
 			Self::ChaseAMartian => "Chase a Martian",
 			Self::ChaseAMartianChild => "Chase a Martian (Child)",
 			Self::ClimbDown => "Climb Down",
+			Self::ClimbIn => "Climb In",
 			Self::ClimbUp => "Climb Up",
 			Self::Cry => "Cry",
 			Self::Dance => "Dance",
@@ -306,6 +309,7 @@ impl Animation {
 			Self::Bleat |
 			Self::Blink |
 			Self::ChaseAMartian |
+			Self::ClimbIn |
 			Self::Cry |
 			Self::Dance |
 			Self::Eat |
@@ -355,7 +359,7 @@ impl Animation {
 	pub(crate) const fn clamp_x(self) -> Option<Direction> {
 		match self {
 			Self::ClimbDown | Self::RunDown | Self::SlideDown => Some(Direction::Right),
-			Self::ClimbUp | Self::WallSlide => Some(Direction::Left),
+			Self::ClimbIn | Self::ClimbUp | Self::WallSlide => Some(Direction::Left),
 			_ => None,
 		}
 	}
@@ -428,6 +432,7 @@ impl Animation {
 			Self::Bounce |
 			Self::ChaseAMartian |
 			Self::ClimbDown |
+			Self::ClimbIn |
 			Self::ClimbUp |
 			Self::Cry |
 			Self::Dance |
@@ -566,6 +571,7 @@ impl Animation {
 			}),
 			Self::ChaseAMartian => Some(Self::Bleat),
 			Self::ClimbDown => Some(Self::ClimbDown),
+			Self::ClimbIn => Some(Self::Rotate),
 			Self::ClimbUp |
 				Self::ReachSide1 => Some(Self::ClimbUp),
 			Self::DangleFall => Some(
@@ -701,6 +707,7 @@ impl Animation {
 			Self::ChaseAMartian => scenes::chase_a_martian(width),
 			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
 			Self::ClimbDown => fixed!(CLIMB_DOWN),
+			Self::ClimbIn => fixed!(CLIMB_IN),
 			Self::ClimbUp => fixed!(CLIMB_UP),
 			Self::Cry => fixed!(CRY),
 			Self::Dance => fixed!(DANCE),
