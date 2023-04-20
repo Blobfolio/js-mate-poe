@@ -130,7 +130,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Child-only classes.
 	if (list.contains('child')) {
 		// Special frame.
-		list.toggle('m133', 133 === frame);
+		list.toggle('m126', 126 === frame);
 
 		// Animations.
 		list.toggle('a2',  2 === scene); // SneezeShadow.
@@ -143,9 +143,9 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Primary-only classes.
 	else {
 		// Special frames.
-		list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
-		list.toggle('m021', 21 === frame);
-		list.toggle('m100', 100 === frame);
+		list.toggle('h', (36 === frame) || (37 === frame) || (38 === frame));
+		list.toggle('m016', 16 === frame);
+		list.toggle('m026', 26 === frame);
 
 		// Animations.
 		list.toggle('a1',  1 === scene); // Drag.
@@ -153,6 +153,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 		list.toggle('a6',  6 === scene); // EatingMagicFlower.
 		list.toggle('a8',  8 === scene); // DigestMagicFlower1.
 		list.toggle('ab', 11 === scene); // DangleRecover.
+		list.toggle('ac', 12 === scene); // Yoyo.
 	}
 };
 

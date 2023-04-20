@@ -62,9 +62,9 @@
 #p.rx { transform: $pos scaleX(-1); }
 
 // Masks.
-#p.m021 { clip-path: $m021; }
-#p.m100 { clip-path: $m100; }
-#p.m133 { clip-path: $m133; }
+#p.m016 { clip-path: $m016; }
+#p.m026 { clip-path: $m026; }
+#p.m126 { clip-path: $m126; }
 
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
@@ -119,6 +119,9 @@
 	&.rx { transform: $pos scale(-1); }
 }
 
+// Animation: Yoyo.
+#p.ac { animation: ac .2s infinite linear; }
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
@@ -131,4 +134,10 @@
 	0% { opacity: 0.5; }
 	50% { opacity: 0.5; }
 	100% { opacity: 0; }
+}
+
+// Spin and spin!
+@keyframes ac {
+	from { transform: $pos rotate(0deg); }
+	to { transform: $pos rotate(359deg); }
 }

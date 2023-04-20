@@ -55,24 +55,24 @@ body {
 }
 
 // Half Frames.
-.fh31 { @extend .f31; }
-.fh32 { @extend .f32; }
-.fh33 { @extend .f33; }
-.fh31, .fh32, .fh33 {
+.fh36 { @extend .f36; }
+.fh37 { @extend .f37; }
+.fh38 { @extend .f38; }
+.fh36, .fh37, .fh38 {
 	--y: -2px;
 	&:before { clip-path: inset(0 0 50% 0); }
 }
 
 // Maked Frames.
-.fm21 {
-	@extend .f21;
-	&:before { clip-path: $m021; }
+.fm16 {
+	@extend .f16;
+	&:before { clip-path: $m016; }
 }
-.fm100 {
-	@extend .f100;
-	&:before { clip-path: $m100; }
+.fm26 {
+	@extend .f26;
+	&:before { clip-path: $m026; }
 }
-.fm133 {
-	@extend .f133;
-	&:before { clip-path: $m133; }
+.fm126 {
+	@extend .f126;
+	&:before { clip-path: $m126; }
 }

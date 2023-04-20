@@ -377,6 +377,7 @@ impl Animation {
 			Self::ShadowShowdownChild1 => 9,
 			Self::ShadowShowdownChild2 => 10,
 			Self::DangleRecover => 11,
+			Self::Yoyo => 12,
 			_ => -1,
 		}
 	}
