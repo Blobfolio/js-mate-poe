@@ -30,7 +30,6 @@
 	opacity: 1;
 	transition: opacity .5s ease;
 	transform: $pos;
-	will-change: transform;
 }
 
 // The image.
@@ -45,7 +44,6 @@
 #p.child,
 #p.off,
 #i { pointer-events: none; }
-#p.off { will-change: auto; }
 
 // Half-size.
 #p.h {
