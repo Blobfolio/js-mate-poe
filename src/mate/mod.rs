@@ -272,15 +272,15 @@ impl Mate {
 				w + Frame::SIZE_I,
 				h - Frame::SIZE_I,
 			)),
+			Animation::BlackSheepSkip | Animation::BlackSheepSkipChild | Animation::SlideIn => Some(Position::new(
+				-Frame::SIZE_I,
+				h - Frame::SIZE_I,
+			)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(
 				-Frame::SIZE_I * 2,
 				h - Frame::SIZE_I,
 			)),
 			Animation::ClimbIn => Some(Position::new(0, h)),
-			Animation::SlideIn => Some(Position::new(
-				-Frame::SIZE_I,
-				h - Frame::SIZE_I,
-			)),
 			Animation::StargazeChild => Some(Position::new(
 				-Frame::SIZE_I,
 				Frame::SIZE_I * 2,

@@ -176,6 +176,55 @@ pub(super) const BIG_FISH_CHILD: &[Scene] = &[
 		.with_flags(Scene::IGNORE_EDGES),
 ];
 
+/// # For `Animation::BlackSheepSkip`.
+pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
+	Scene::new(60, &[Frame::None])
+		.with_repeat(20, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	JUMP[0],
+	JUMP[1],
+	SLIDE[0],
+	Scene::new(100, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(-2, 0))
+		.with_repeat(5, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(200, &[
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F034, Frame::F035, Frame::F034,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+		Frame::F033, Frame::F033, Frame::F033, Frame::F033, Frame::F033,
+	])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+];
+
+/// # For `Animation::BlackSheepSkipChild`.
+pub(super) const BLACK_SHEEP_SKIP_CHILD: &[Scene] = &[
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+];
+
 /// # For `Animation::Bleat`.
 pub(super) const BLEAT: &[Scene] = &[
 	Scene::new(200, &[
@@ -1154,6 +1203,21 @@ pub(super) const fn black_sheep_chase(w: u16) -> SceneList {
 /// # For `Animation::BlackSheepChaseChild`.
 pub(super) const fn black_sheep_chase_child(w: u16) -> SceneList {
 	let repeat = (w + Frame::SIZE * 2).wrapping_div(32) + 1;
+
+	SceneList::new(SceneListKind::Dynamic1([
+		Scene::new(30, &[
+			Frame::F134, Frame::F134, Frame::F134, Frame::F133,
+			Frame::F133, Frame::F133, Frame::F133, Frame::F133,
+		])
+			.with_move_to(Position::new(4, 0))
+			.with_repeat(repeat, 0)
+			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	]))
+}
+
+/// # For `Animation::BlackSheepSkipExitChild`.
+pub(super) const fn black_sheep_skip_exit_child(w: u16) -> SceneList {
+	let repeat = (w + Frame::SIZE).wrapping_div(32);
 
 	SceneList::new(SceneListKind::Dynamic1([
 		Scene::new(30, &[
