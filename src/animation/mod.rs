@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 87; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 88; // The highest Animation ID.
 
 
 
@@ -89,6 +89,7 @@ pub(crate) enum Animation {
 	SleepSitting,
 	SleepStanding,
 	Slide,
+	SlideIn,
 	Sneeze,
 	Spin,
 	Stargaze,
@@ -174,15 +175,16 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 16 } else { 8 }) {
+			let next = match Universe::rand_mod(if first { 18 } else { 9 }) {
 				0 => Self::BathDive,
 				1 => Self::BigFish,
 				2 => Self::BlackSheepChase,
 				3 => Self::BlackSheepRomance,
 				4 => Self::ClimbIn,
 				5 => Self::Gopher,
-				6 => Self::Stargaze,
-				7 => Self::Yoyo,
+				6 => Self::SlideIn,
+				7 => Self::Stargaze,
+				8 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -275,6 +277,7 @@ impl Animation {
 			Self::SleepStanding => "Sleep (Standing)",
 			Self::Slide => "Slide",
 			Self::SlideDown => "Slide Down",
+			Self::SlideIn => "Slide In",
 			Self::Sneeze => "Sneeze",
 			Self::SneezeShadow => "Sneeze Shadow (Child)",
 			Self::Spin => "Spin",
@@ -339,6 +342,7 @@ impl Animation {
 			Self::SleepSitting |
 			Self::SleepStanding |
 			Self::Slide |
+			Self::SlideIn |
 			Self::Sneeze |
 			Self::Spin |
 			Self::Stargaze |
@@ -480,6 +484,7 @@ impl Animation {
 			Self::SleepStanding |
 			Self::Slide |
 			Self::SlideDown |
+			Self::SlideIn |
 			Self::Sneeze |
 			Self::Spin |
 			Self::Splat |
@@ -562,6 +567,7 @@ impl Animation {
 				Self::Sleep |
 				Self::SleepSitting |
 				Self::Slide |
+				Self::SlideIn |
 				Self::Splat |
 				Self::Urinate => Some(Self::Walk),
 			Self::Boing => Some(match Universe::rand_mod(13) {
@@ -760,6 +766,7 @@ impl Animation {
 			Self::SleepStanding => fixed!(SLEEP_STANDING),
 			Self::Slide => fixed!(SLIDE),
 			Self::SlideDown => fixed!(SLIDE_DOWN),
+			Self::SlideIn => fixed!(SLIDE_IN),
 			Self::Sneeze => fixed!(SNEEZE),
 			Self::SneezeShadow => fixed!(SNEEZE_SHADOW),
 			Self::Spin => fixed!(SPIN),

@@ -942,6 +942,16 @@ pub(super) const SLIDE_DOWN: &[Scene] = &[
 		.with_repeat(25, 0),
 ];
 
+/// # For `Animation::SlideIn`.
+pub(super) const SLIDE_IN: &[Scene] = &[
+	Scene::new(30, &[Frame::M016])
+		.with_move_to(Position::new(4, 0))
+		.with_repeat(19, 0)
+		.with_flags(Scene::EASE_OUT | Scene::GRAVITY | Scene::IGNORE_EDGES),
+	Scene::new(150, &[Frame::F015, Frame::F014, Frame::F018])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+];
+
 /// # For `Animation::Sneeze`.
 pub(super) const SNEEZE: &[Scene] = &[
 	Scene::new(200, &[

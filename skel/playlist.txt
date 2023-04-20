@@ -37,11 +37,12 @@
 #37  Sleep (Sitting)
 #38  Sleep (Standing)
 #39  Slide
-#40  Sneeze
-#41  Spin
-#42  Stargaze
-#43  Tornado
-#44  Urinate
-#45  Walk
-#46  Yawn
-#47  Yo-Yo
+#40  Slide In
+#41  Sneeze
+#42  Spin
+#43  Stargaze
+#44  Tornado
+#45  Urinate
+#46  Walk
+#47  Yawn
+#48  Yo-Yo
