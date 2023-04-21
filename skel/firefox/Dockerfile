@@ -6,7 +6,7 @@ RUN set -eux; \
 	cargo install --root /tmp/cargo --locked --version 0.112.0 wasm-opt
 
 # Stage Two.
-FROM rust:1.68-bullseye
+FROM rust:1.69-bullseye
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
