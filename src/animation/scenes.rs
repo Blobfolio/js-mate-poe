@@ -12,6 +12,14 @@ use crate::{
 use super::SceneListKind;
 
 
+/// # Entrance Delay.
+///
+/// It can look weird if a sprite wanders offscreen on, say, the left, and
+/// _imediately_ pops back up from the right. This slight delay softens the
+/// transition a bit.
+const ENTRANCE_DELAY: Scene = Scene::new(1000, &[Frame::None])
+	.with_flags(Scene::IGNORE_EDGES);
+
 
 /// # For `Animation::Abduction`.
 pub(super) const ABDUCTION: &[Scene] = &[
@@ -97,6 +105,7 @@ pub(super) const BATH_COOL_DOWN: &[Scene] = &[
 
 /// # For `Animation::BathDive`.
 pub(super) const BATH_DIVE: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[Frame::F114])
 		.with_repeat(146, 0)
 		.with_move_to(Position::new(-4, 3)),
@@ -117,6 +126,7 @@ pub(super) const BATH_DIVE: &[Scene] = &[
 
 /// # For `Animation::BathDiveChild`.
 pub(super) const BATH_DIVE_CHILD: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[Frame::M126])
 		.with_repeat(171, 0)
 		.with_flags(Scene::GRAVITY),
@@ -143,6 +153,7 @@ pub(super) const BEG: &[Scene] = &[
 
 /// # For `Animation::BigFish`.
 pub(super) const BIG_FISH: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[
 		Frame::F007, Frame::F007, Frame::F007, Frame::F007, Frame::F006,
 		Frame::F006, Frame::F006, Frame::F006, Frame::F006, Frame::F006,
@@ -160,6 +171,7 @@ pub(super) const BIG_FISH: &[Scene] = &[
 
 /// # For `Animation::BigFishChild`.
 pub(super) const BIG_FISH_CHILD: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[Frame::F059])
 		.with_repeat(34, 0)
 		.with_flags(Scene::IGNORE_EDGES),
@@ -178,6 +190,7 @@ pub(super) const BIG_FISH_CHILD: &[Scene] = &[
 
 /// # For `Animation::BlackSheepSkip`.
 pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(60, &[Frame::None])
 		.with_repeat(20, 0)
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
@@ -199,6 +212,7 @@ pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
 
 /// # For `Animation::BlackSheepSkipChild`.
 pub(super) const BLACK_SHEEP_SKIP_CHILD: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
 		.with_move_to(Position::new(4, -1))
 		.with_flags(Scene::IGNORE_EDGES),
@@ -290,6 +304,7 @@ pub(super) const CLIMB_DOWN: &[Scene] = &[
 
 /// # For `Animation::ClimbIn`.
 pub(super) const CLIMB_IN: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(150, &[Frame::F019, Frame::F020])
 		.with_move_to(Position::new(0, -2))
 		.with_repeat(9, 0)
@@ -423,6 +438,7 @@ pub(super) const FALL: &[Scene] = &[
 
 /// # For `Animation::FloatIn`.
 pub(super) const FLOAT_IN: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(50, &[Frame::F032])
 		.with_move_to(Position::new(-1, -6))
 		.with_repeat(4, 0)
@@ -461,6 +477,7 @@ pub(super) const FLOWER: &[Scene] = &[
 
 /// # For `Animation::Gopher`.
 pub(super) const GOPHER: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[Frame::F009])
 		.with_move_to(Position::new(0, -1))
 		.with_repeat(24, 0)
@@ -1000,6 +1017,7 @@ pub(super) const SLIDE_DOWN: &[Scene] = &[
 
 /// # For `Animation::SlideIn`.
 pub(super) const SLIDE_IN: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(30, &[Frame::M016])
 		.with_move_to(Position::new(4, 0))
 		.with_repeat(19, 0)
@@ -1056,6 +1074,7 @@ pub(super) const SPLAT_GHOST: &[Scene] = &[
 
 /// # For `Animation::Stargaze`.
 pub(super) const STARGAZE: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(50, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(-2, 0))
 		.with_repeat(10, 0)
@@ -1072,6 +1091,7 @@ pub(super) const STARGAZE: &[Scene] = &[
 
 /// # For `Animation::StargazeChild`.
 pub(super) const STARGAZE_CHILD: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(52, &[Frame::F137])
 		.with_repeat(20, 0)
 		.with_flags(Scene::IGNORE_EDGES),
@@ -1153,6 +1173,7 @@ pub(super) const YAWN: &[Scene] = &[
 
 /// # For `Animation::Yoyo`.
 pub(super) const YOYO: &[Scene] = &[
+	ENTRANCE_DELAY,
 	Scene::new(15, &[Frame::F109])
 		.with_move_to(Position::new(0, 11))
 		.with_repeat(39, 0)
@@ -1182,7 +1203,8 @@ pub(super) const YOYO: &[Scene] = &[
 pub(super) const fn black_sheep_chase(w: u16) -> SceneList {
 	let repeat = (w + Frame::SIZE * 4).wrapping_div(32) + 1;
 
-	SceneList::new(SceneListKind::Dynamic2([
+	SceneList::new(SceneListKind::Dynamic3([
+		ENTRANCE_DELAY,
 		Scene::new(30, &[
 			Frame::F007, Frame::F007, Frame::F007, Frame::F006,
 			Frame::F006, Frame::F006, Frame::F006, Frame::F006,
@@ -1204,7 +1226,8 @@ pub(super) const fn black_sheep_chase(w: u16) -> SceneList {
 pub(super) const fn black_sheep_chase_child(w: u16) -> SceneList {
 	let repeat = (w + Frame::SIZE * 2).wrapping_div(32) + 1;
 
-	SceneList::new(SceneListKind::Dynamic1([
+	SceneList::new(SceneListKind::Dynamic2([
+		ENTRANCE_DELAY,
 		Scene::new(30, &[
 			Frame::F134, Frame::F134, Frame::F134, Frame::F133,
 			Frame::F133, Frame::F133, Frame::F133, Frame::F133,
