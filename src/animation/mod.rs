@@ -14,7 +14,7 @@ use crate::{
 };
 use scene::SceneListKind;
 use std::sync::atomic::{
-	AtomicU16,
+	AtomicU32,
 	Ordering::SeqCst,
 };
 
@@ -27,15 +27,14 @@ use std::sync::atomic::{
 
 /// # Special Default.
 ///
-/// Keep track of the "special" default animation selections so we don't end up
-/// playing the same thing back-to-back.
-static LAST_SPECIAL: AtomicU16 = AtomicU16::new(0);
+/// Keep track of the non-Walk default animation selections so we don't repeat
+/// ourselves too frequently.
+static LAST_SPECIAL: AtomicU32 = AtomicU32::new(0);
 
 /// # Last Entrance Choice.
 ///
-/// Same as for the "special" defaults, we want to ensure that entrances are
-/// unique for at least two slots.
-static LAST_ENTRANCE: AtomicU16 = AtomicU16::new(0);
+/// Same as `LAST_SPECIAL`, but for entrance animation selections.
+static LAST_ENTRANCE: AtomicU32 = AtomicU32::new(0);
 
 
 
@@ -194,12 +193,16 @@ impl Animation {
 				_ => Self::Fall,
 			};
 
-			// Accept and return the choice so long as it is different
-			// than the previous two responses.
-			if next as u8 != last[0] && next as u8 != last[1] {
+			// Accept and return the choice so long as it is fresh, and if
+			// we've selected Gopher or Yoyo — which re-exit — make sure
+			// neither have been seen recently.
+			if match next {
+				Self::Gopher | Self::Yoyo => is_fresh(Self::Gopher, last) && is_fresh(Self::Yoyo, last),
+				_ => is_fresh(next, last),
+			} {
 				last.rotate_right(1);
 				last[0] = next as u8;
-				LAST_ENTRANCE.store(u16::from_le_bytes(last), SeqCst);
+				LAST_ENTRANCE.store(u32::from_le_bytes(last), SeqCst);
 				return next;
 			}
 		}
@@ -841,6 +844,19 @@ impl ExactSizeIterator for Animations {
 
 
 
+/// # Animation Choice is Fresh.
+///
+/// Returns true if not present among four choices.
+const fn is_fresh(animation: Animation, set: [u8; 4]) -> bool {
+	let animation = animation as u8;
+	set[0] != animation &&
+	set[1] != animation &&
+	set[2] != animation &&
+	set[3] != animation
+}
+
+
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -850,14 +866,14 @@ mod tests {
 	fn t_default() {
 		const TOTAL: usize = 35;
 
-		let set = (0..10_000_u16).into_iter()
+		let set = (0..5_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)
 			.collect::<HashSet::<u8>>();
 
 		assert_eq!(
 			set.len(),
 			TOTAL,
-			"Failed to choose all {TOTAL} default possibilities in 10K tries."
+			"Failed to choose all {TOTAL} default possibilities in 5K tries."
 		);
 	}
 
