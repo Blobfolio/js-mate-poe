@@ -713,7 +713,9 @@ impl Animation {
 				1 => Self::PlayDead,
 				_ => Self::Splat,
 			}),
-			Self::Jump | Self::Hop => Some(Self::WallSlide),
+			Self::Hop |
+				Self::Jump |
+				Self::Skip => Some(Self::WallSlide),
 			Self::Tornado | Self::WallSlide => Some(Self::Rotate),
 			Self::Walk => Some(match Universe::rand_mod(8) {
 				0..=4 => Self::Rotate,
