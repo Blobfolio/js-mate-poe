@@ -496,6 +496,23 @@ pub(super) const FLOWER: &[Scene] = &[
 		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
 ];
 
+/// # For `Animation::Glitch`.
+pub(super) const GLITCH: &[Scene] = &[
+	Scene::new(60, &[
+		Frame::F100, Frame::F064, Frame::F003,
+		Frame::F123, Frame::F019, Frame::F109,
+	])
+		.with_repeat(2, 0)
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[
+		Frame::F070, Frame::F070, Frame::F070, Frame::F070, Frame::F070,
+		Frame::F078, Frame::F078, Frame::F078, Frame::F078, Frame::F079,
+		Frame::F003, Frame::F003, Frame::F004, Frame::F005, Frame::F004,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Gopher`.
 pub(super) const GOPHER: &[Scene] = &[
 	ENTRANCE_DELAY,

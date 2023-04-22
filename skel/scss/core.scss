@@ -56,9 +56,7 @@
 }
 
 // Disabled/invisible sprites.
-#p.off,
-#p.a5,
-#p.aa { opacity: 0; }
+#p.off { opacity: 0; }
 
 // Reverse the image across one or both planes.
 #p.rx { transform: $pos scaleX(-1); }
@@ -86,7 +84,7 @@
 #p.a5 {
 	filter: sepia(1);
 	transition: none;
-	animation: a5 0.8s;
+	animation: a5 0.8s forwards;
 }
 
 // Animation: Eating/MagicFlower.
@@ -110,7 +108,7 @@
 
 #p.aa {
 	transition: none;
-	animation: a5 3s;
+	animation: a5 3s forwards;
 	transform: $pos skew(40deg);
 	&.rx { transform: $pos scaleX(-1) skew(40deg); }
 }
@@ -131,6 +129,22 @@
 	& > #i { animation: iad 2.5s 1s linear; }
 }
 
+// Animation: Glitch.
+#p.ae:after {
+	content: '';
+	opacity: 0;
+
+	position: absolute;
+	bottom: 0;
+	right: 0;
+
+	width: 20px;
+	height: 20px;
+
+	background-color: lightgreen;
+	animation: ae 1s step-end;
+}
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
@@ -140,9 +154,8 @@
 // This fades out the ghost and shadow sprites _before_ their special classes
 // are removed to prevent the loss of their filters/etc. while still visible.
 @keyframes a5 {
-	0% { opacity: 0.5; }
-	50% { opacity: 0.5; }
-	100% { opacity: 0; }
+	from { opacity: 0.5; }
+	to { opacity: 0; }
 }
 
 // Spin and spin!
@@ -161,4 +174,35 @@
 @keyframes ad {
 	from { filter: none; }
 	to { filter: drop-shadow(0 0 10px #ff1493); }
+}
+
+// Glitch box.
+@keyframes ae {
+	5% { opacity: 1; }
+	10% { opacity: 0; }
+	15% { opacity: 1; }
+	20% { opacity: 0; }
+	25% {
+		opacity: 1;
+		width: 10px;
+		height: 10px;
+	}
+	45% { opacity: 0; }
+	55% {
+		opacity: 1;
+		top: 0;
+		left: 0;
+		bottom: auto;
+		right: auto;
+		background-color: red;
+	}
+	85% { opacity: 0; }
+	90% {
+		opacity: 1;
+		top: auto;
+		bottom: 0;
+		width: 15px;
+		height: 15px;
+		background-color: yellow;
+	}
 }

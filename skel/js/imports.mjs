@@ -155,6 +155,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 		list.toggle('ab', 11 === scene); // DangleRecover.
 		list.toggle('ac', 12 === scene); // Yoyo.
 		list.toggle('ad', 13 === scene); // BeamIn.
+		list.toggle('ae', 14 === scene); // Glitch.
 	}
 };
 

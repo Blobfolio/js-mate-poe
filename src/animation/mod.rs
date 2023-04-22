@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 94; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 95; // The highest Animation ID.
 
 
 
@@ -66,6 +66,7 @@ pub(crate) enum Animation {
 	Eat,
 	EatMagicFlower,
 	FloatIn,
+	Glitch,
 	Gopher,
 	Handstand,
 	Hop,
@@ -257,6 +258,7 @@ impl Animation {
 			Self::Fall => "Fall",
 			Self::FloatIn => "Float In",
 			Self::Flower => "Flower (Child)",
+			Self::Glitch => "Glitch",
 			Self::Gopher => "Gopher",
 			Self::GraspingFall => "Grasping Fall",
 			Self::Handstand => "Handstand",
@@ -337,6 +339,7 @@ impl Animation {
 			Self::Eat |
 			Self::EatMagicFlower |
 			Self::FloatIn |
+			Self::Glitch |
 			Self::Gopher |
 			Self::Handstand |
 			Self::Hop |
@@ -408,6 +411,7 @@ impl Animation {
 			Self::DangleRecover => 11,
 			Self::Yoyo => 12,
 			Self::BeamIn => 13,
+			Self::Glitch => 14,
 			_ => -1,
 		}
 	}
@@ -478,6 +482,7 @@ impl Animation {
 			Self::EndRun |
 			Self::Fall |
 			Self::FloatIn |
+			Self::Glitch |
 			Self::Gopher |
 			Self::GraspingFall |
 			Self::Handstand |
@@ -598,7 +603,8 @@ impl Animation {
 				Self::Splat |
 				Self::Urinate => Some(Self::Walk),
 			Self::BathDive => Some(Self::BathCoolDown),
-			Self::BeamIn => Some(Self::Shake),
+			Self::BeamIn |
+				Self::Glitch => Some(Self::Shake),
 			Self::BigFish => Some(
 				if 0 == Universe::rand_mod(3) { Self::Sneeze }
 				else { Self::Walk }
@@ -771,6 +777,7 @@ impl Animation {
 			Self::Fall => fixed!(FALL),
 			Self::FloatIn => fixed!(FLOAT_IN),
 			Self::Flower => fixed!(FLOWER),
+			Self::Glitch => fixed!(GLITCH),
 			Self::Gopher => fixed!(GOPHER),
 			Self::GraspingFall => fixed!(GRASPING_FALL),
 			Self::Handstand => fixed!(HANDSTAND),
@@ -881,7 +888,7 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		const TOTAL: usize = 36;
+		const TOTAL: usize = 35;
 
 		let set = (0..5_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)
