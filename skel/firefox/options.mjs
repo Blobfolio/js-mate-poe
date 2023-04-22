@@ -22,15 +22,16 @@ const saveOptions = function(e) {
 	getSettings().then((s) => {
 		if (s.audio !== val) {
 			s.audio = val;
-			saveSettings(s).then(() => {
-				try { browser.extension.getBackgroundPage().updateTabs(); }
-				catch (e) {}
+			saveSettings(s).then(async () => {
+				await browser.runtime.sendMessage({action: 'poeBgSyncAll'});
 
 				// Give a visual indication that something happened.
 				btn.classList.add('saved');
 				setTimeout(function() {
 					btn.classList.remove('saved');
 				}, 1500);
+
+				return Promise.resolve(true);
 			});
 		}
 		else {

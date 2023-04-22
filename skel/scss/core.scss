@@ -29,7 +29,7 @@
 
 	opacity: 1;
 	transition: opacity .5s ease;
-	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate;
+	transform: $pos;
 }
 
 // The image.
@@ -41,7 +41,13 @@
 
 // Disable mouse clicks for disabled sprites, child sprites, and the image
 // element.
-#p.child, #p.off, #i { pointer-events: none; }
+#p.child,
+#p.off,
+#i { pointer-events: none; }
+
+// This property is iffy, but we're doing to be pushing shit all over the
+// screen, so it's probably worth it.
+#p:not(.off) { will-change: transform; }
 
 // Half-size.
 #p.h {
@@ -49,37 +55,36 @@
 	height: $tile_size / 2;
 }
 
-// Disabled sprite.
-#p.off, #p.a5 { opacity: 0; }
+// Disabled/invisible sprites.
+#p.off { opacity: 0; }
 
 // Reverse the image across one or both planes.
-.rx { --rx: 180deg; }
-.ry { --ry: 180deg; }
+#p.rx { transform: $pos scaleX(-1); }
 
 // Masks.
-#p.m021 { clip-path: $m021; }
-#p.m100 { clip-path: $m100; }
-#p.m133 { clip-path: $m133; }
+#p.m016 { clip-path: $m016; }
+#p.m026 { clip-path: $m026; }
+#p.m126 { clip-path: $m126; }
 
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
 
-// Animation: SneezeShadow.
-#p.a2 { z-index: 99999; }
+// Animation: SneezeShadow, and ShadowShowdownChild(ren).
+#p.a2,
+#p.a9,
+#p.aa { z-index: 99999; }
 
 // Animation: Abduction.
-#p.a3 { animation: a3 0.25s 4s infinite; }
+#p.a3 { animation: a3 0.25s 4s 28; }
 
 // Animation: BigFish.
-#p.a4 {
-	transform: translate3d(var(--x, 0), var(--y, 0), 0) $rotate scale(3);
-}
+#p.a4 { transform: $pos scale(3); }
 
 // Animation: SplatGhost.
 #p.a5 {
 	filter: sepia(1);
 	transition: none;
-	animation: a5 0.8s;
+	animation: a5 0.8s forwards;
 }
 
 // Animation: Eating/MagicFlower.
@@ -91,15 +96,116 @@
 // Animation: DigestMagicFlower1.
 #p.a8 { transition: filter 1.5s ease-out; }
 
+// Animation: ShadowShowdownChild(ren).
+#p.a9,
+#p.aa { filter: brightness(0) blur(1px); }
+
+#p.a9 {
+	opacity: 0.5;
+	transform: $pos skew(-40deg);
+	&.rx { transform: $pos scaleX(-1) skew(-40deg); }
+}
+
+#p.aa {
+	transition: none;
+	animation: a5 3s forwards;
+	transform: $pos skew(40deg);
+	&.rx { transform: $pos scaleX(-1) skew(40deg); }
+}
+
+// Animation: DangleRecover.
+#p.ab {
+	transform: $pos scaleY(-1);
+	&.rx { transform: $pos scale(-1); }
+}
+
+// Animation: Yoyo.
+#p.ac { animation: ac .2s infinite linear; }
+
+// Animation: BeamIn.
+#p.ad {
+	filter: none;
+	animation: ad 0.5s 3.5s forwards;
+	& > #i { animation: iad 2.5s 1s linear; }
+}
+
+// Animation: Glitch.
+#p.ae:after {
+	content: '';
+	opacity: 0;
+
+	position: absolute;
+	top: 20px;
+	left: 20px;
+
+	width: 20px;
+	height: 20px;
+
+	background-color: lawngreen;
+	animation: ae 1s step-end;
+}
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
 	to { filter: saturate(5) hue-rotate(359deg); }
 }
 
-// Fade out the ghost a bit early.
+// This fades out the ghost and shadow sprites _before_ their special classes
+// are removed to prevent the loss of their filters/etc. while still visible.
 @keyframes a5 {
-	0% { opacity: 0.5; }
-	50% { opacity: 0.5; }
-	100% { opacity: 0; }
+	from { opacity: 0.5; }
+	to { opacity: 0; }
+}
+
+// Spin and spin!
+@keyframes ac {
+	from { transform: $pos rotate(0deg); }
+	to { transform: $pos rotate(359deg); }
+}
+
+// Reveal top/down.
+@keyframes iad {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+// Grow a pink drop-shadow.
+@keyframes ad {
+	from { filter: none; }
+	to { filter: drop-shadow(0 0 10px #ff1493); }
+}
+
+// Glitch boxes.
+@keyframes ae {
+	5% { opacity: 1; }
+	10% { opacity: 0; }
+	15% {
+		opacity: 1;
+	}
+	20% { opacity: 0; }
+	25% {
+		top: 0;
+		left: 0;
+		width: 10px;
+		height: 10px;
+		opacity: 1;
+		background-color: red;
+	}
+	45% { opacity: 0; }
+	55% {
+		top: 5px;
+		left: 15px;
+		opacity: 1;
+		background-color: blue;
+	}
+	85% { opacity: 0; }
+	90% {
+		top: 10px;
+		left: 0;
+		width: 30px;
+		height: 30px;
+		opacity: 1;
+		background-color: fuchsia;
+	}
 }

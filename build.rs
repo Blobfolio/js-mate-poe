@@ -27,7 +27,7 @@ const AUDIO_URLS: &str = r"
 				[new Uint8ClampedArray(wasm.memory.buffer, wasm.yawn_ptr(), yawnLen)],
 				{ type: 'audio/flac' },
 			)),
-		";
+";
 
 #[cfg(feature = "firefox")]
 /// # Audio URLs.
@@ -37,7 +37,7 @@ const AUDIO_URLS: &str = r"
 			browser.runtime.getURL('sound/baa.flac'),
 			browser.runtime.getURL('sound/sneeze.flac'),
 			browser.runtime.getURL('sound/yawn.flac'),
-		";
+";
 
 
 
@@ -105,7 +105,7 @@ fn build_media() -> String {
 
 	// Add the image dimensions to the JS lengths.
 	let (w, h) = img_size();
-	assert_eq!(w, 6200, "Image width has changed!");
+	assert_eq!(w, 5920, "Image width has changed!");
 	assert_eq!(h, 40, "Image height has changed!");
 	js_lengths.push(format!("const imgWidth = {w};"));
 	js_lengths.push(format!("const imgHeight = {h};"));
@@ -152,38 +152,39 @@ pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
 
 /// # Default Animations w/ Weightings.
 const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
-	(36, "Hop"),
-	(36, "LookDown"),
-	(36, "LookUp"),
+	(16, "Hop"),
+	(16, "LookDown"),
+	(16, "LookUp"),
+	(16, "Skip"),
 
-	(24, "Beg"),
-	(24, "Dance"),
-	(24, "Eat"),
-	(24, "Handstand"),
-	(24, "LayDown"),
-	(24, "LegLifts"),
-	(24, "Roll"),
-	(24, "Scratch"),
-	(24, "Spin"),
+	(8, "Beg"),
+	(8, "Dance"),
+	(8, "Eat"),
+	(8, "Handstand"),
+	(8, "LayDown"),
+	(8, "LegLifts"),
+	(8, "Roll"),
+	(8, "Scratch"),
+	(8, "Spin"),
 
-	(12, "SleepSitting"),
-	(12, "SleepStanding"),
-
-	(8, "Blink"),
-	(8, "Cry"),
-	(8, "Nah"),
-	(8, "Popcorn"),
-	(8, "Really"),
-	(8, "Rest"),
-
-	(4, "EatMagicFlower"),
-	(4, "PlayDead"),
+	(4, "Blink"),
+	(4, "Cry"),
+	(4, "Popcorn"),
+	(4, "Really"),
+	(4, "Rest"),
 	(4, "Rotate"),
-	(4, "Scoot"),
-	(4, "Scream"),
+	(4, "SleepSitting"),
+	(4, "SleepStanding"),
+
+	(2, "EatMagicFlower"),
+	(2, "PlayDead"),
+	(2, "Scoot"),
+	(2, "Scream"),
 
 	(1, "Abduction"),
 	(1, "Bleat"),
+	(1, "Glitch"),
+	(1, "ShadowShowdown"),
 	(1, "Sneeze"),
 	(1, "Tornado"),
 	(1, "Urinate"),
@@ -193,14 +194,19 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 /// # Build Default Animation List.
 ///
 /// This exports an Animation::default_choice method for choosing a default
-/// animation. It will return one of Walk/Run/Special.
+/// animation, which one third of the time will just be a Walk.
 ///
-/// The special animations are relatively weighted to prioritize certain
-/// sequences over others, and are additionally constrained to ensure a given
-/// selection is different than the previous two (special) selections.
+/// The non-walk animations are weighted to prioritize certain sequences over
+/// others. (Disruptive-ish animations, including those that make sound, are
+/// given the lowest weight.)
+///
+/// To keep things fresh, any given non-walk selection is guaranteed to be
+/// different than the previous two non-walk selections.
 fn build_default_animations() -> String {
-	// Secret has no weighting, rare is 8x, common is 24x.
-	let total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
+	// Calculate the total.
+	let mut total: usize = DEFAULT_ANIMATIONS.iter().map(|(n, _)| *n).sum();
+	let run = total / 2;
+	total += run;
 
 	// We use u16 for capped randomization; make sure this fits before we do
 	// anything else.
@@ -213,14 +219,14 @@ fn build_default_animations() -> String {
 	let mut from = 0;
 	let mut arms = Vec::new();
 
-	for (n, a) in DEFAULT_ANIMATIONS {
+	for (n, a) in [(run, "Run")].iter().chain(DEFAULT_ANIMATIONS.iter()) {
 		let to = from + n;
-		if from + 1 == total { arms.push(format!("\t\t\t\t\t\t_ => Self::{a},")); }
+		if from + 1 == total { arms.push(format!("\t\t\t\t\t_ => Self::{a},")); }
 		else if *n == 1 {
-			arms.push(format!("\t\t\t\t\t\t{from} => Self::{a},"));
+			arms.push(format!("\t\t\t\t\t{from} => Self::{a},"));
 		}
 		else {
-			arms.push(format!("\t\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
+			arms.push(format!("\t\t\t\t\t{from}..={} => Self::{a},", to - 1));
 		}
 		from = to;
 	}
@@ -236,26 +242,52 @@ fn build_default_animations() -> String {
 	/// Return a generic default animation for use in contexts where no
 	/// explicit choice is supplied.
 	pub(crate) fn default_choice() -> Self {{
-		match Universe::rand_mod(3) {{
-			0 => Self::Walk,
-			1 => Self::BeginRun,
-			_ => {{
-				let mut last = LAST_SPECIAL.load(SeqCst).to_le_bytes();
-				loop {{
-					let next = match Universe::rand_mod({total}) {{
+		if 0 == Universe::rand_mod(3) {{ Self::Walk }}
+		else {{
+			let mut last = LAST_SPECIAL.load(SeqCst).to_le_bytes();
+			loop {{
+				let next = match Universe::rand_mod({total}) {{
 {}
-					}};
+				}};
 
-					// Accept and return the choice so long as it is different
-					// than the previous two (special) responses.
-					if next as u8 != last[0] && next as u8 != last[1] {{
-						last.rotate_right(1);
-						last[0] = next as u8;
-						LAST_SPECIAL.store(u16::from_le_bytes(last), SeqCst);
-						return next;
-					}}
+				// Accept and return the choice so long as it is fresh.
+				if match next {{
+					// Let Run happen every third choice.
+					Self::Run => last[0] != Self::Run as u8 && last[1] != Self::Run as u8,
+					// Only keep a low-priority selection if none of them were
+					// recently chosen.
+					Self::Abduction |
+						Self::Bleat |
+						Self::EatMagicFlower |
+						Self::Glitch |
+						Self::PlayDead |
+						Self::Scoot |
+						Self::Scream |
+						Self::ShadowShowdown |
+						Self::Sneeze |
+						Self::Tornado |
+						Self::Urinate |
+						Self::Yawn =>
+							is_fresh(Self::Abduction, last) &&
+							is_fresh(Self::Bleat, last) &&
+							is_fresh(Self::EatMagicFlower, last) &&
+							is_fresh(Self::Glitch, last) &&
+							is_fresh(Self::PlayDead, last) &&
+							is_fresh(Self::Scoot, last) &&
+							is_fresh(Self::Scream, last) &&
+							is_fresh(Self::ShadowShowdown, last) &&
+							is_fresh(Self::Sneeze, last) &&
+							is_fresh(Self::Tornado, last) &&
+							is_fresh(Self::Urinate, last) &&
+							is_fresh(Self::Yawn, last),
+					// For everything else, 1/5 for itself is fine.
+					_ => is_fresh(next, last),
+				}} {{
+					last.rotate_right(1);
+					last[0] = next as u8;
+					LAST_SPECIAL.store(u32::from_le_bytes(last), SeqCst);
+					return next;
 				}}
-
 			}}
 		}}
 	}}

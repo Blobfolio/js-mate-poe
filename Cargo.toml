@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.4.7"
+version = "1.4.8"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.62"
@@ -54,7 +54,11 @@ default = []
 
 # The Firefox browser extension handles audio differently, and has no dblclick
 # event listener. Note: do not enable this in conjunction with other features!
-firefox = []
+firefox = [
+	"web-sys/MutationObserver",
+	"web-sys/MutationObserverInit",
+	"web-sys/Node",
+]
 
 # The director mode exposes additional browserland methods to make it easier to
 # preview and debug animations, like Poe.list, Poe.play, and Poe.speed.

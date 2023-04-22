@@ -34,7 +34,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, rx: bool, ry: bool, frame: i16, scene: i8);
+	fn toggle_wrapper_classes(el: &Element, rx: bool, frame: i16, scene: i8);
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poePlaySound")]
@@ -149,9 +149,7 @@ impl Mate {
 		child.pretick_resize();
 
 		// Flip to match.
-		child.flags.clear_flips();
 		child.flags.flip_x(Some(self.flags.flipped_x()));
-		child.flags.flip_y(Some(self.flags.flipped_y()));
 
 		// Set the animation.
 		child.animation.take();
@@ -166,11 +164,15 @@ impl Mate {
 					else { self.pos.x - 38 };
 				Some(Position::new(x, self.pos.y))
 			},
-			Animation::AbductionChild => {
-				Some(Position::new(
-					self.pos.x,
-					self.pos.y - Frame::SIZE_I * 2 - 480,
-				))
+			Animation::AbductionChild => Some(Position::new(
+				self.pos.x,
+				self.pos.y - Frame::SIZE_I * 2 - 480,
+			)),
+			Animation::ShadowShowdownChild1 => {
+				let x =
+					if self.flags.flipped_x() { self.pos.x - 40 }
+					else { self.pos.x + 40 };
+				Some(Position::new(x, self.pos.y))
 			},
 			Animation::SneezeShadow | Animation::SplatGhost => Some(self.pos),
 			_ => None,
@@ -200,22 +202,16 @@ impl Mate {
 		// Old animation business.
 		if let Some(o) = old {
 			// Change classes if going to or coming from a special animation.
-			if animation.change_class() || o.change_class() {
+			if 0 < animation.css_class() || 0 < o.css_class() {
 				self.flags.mark_class_changed();
 			}
 
 			// Unapply the previous animation-wide flips.
 			if o.flip_x() { self.flags.flip_x(None); }
-			if o.flip_y() { self.flags.flip_y(None); }
 		}
 		else {
 			self.set_frame(Frame::None);
 			self.flags.mark_changed();
-		}
-
-		// Remove flippage for these two.
-		if matches!(animation, Animation::Drag | Animation::Fall | Animation::GraspingFall) {
-			self.flags.clear_flips();
 		}
 
 		// Miscellaneous animation-specific adjustments (if we changed).
@@ -231,7 +227,6 @@ impl Mate {
 
 		// Apply animation-wide flips.
 		if animation.flip_x() { self.flags.flip_x(None); }
-		if animation.flip_y() { self.flags.flip_y(None); }
 
 		// Store the new animation!
 		self.animation.replace(animation);
@@ -262,43 +257,57 @@ impl Mate {
 				w + Frame::SIZE_I - 790,
 				h - Frame::SIZE_I,
 			)),
-			Animation::BigFish | Animation::Stargaze => Some(Position::new(
-				w,
-				h - Frame::SIZE_I,
-			)),
-			Animation::BigFishChild => Some(Position::new(
-				w + 50,
-				h + 35,
-			)),
-			Animation::BlackSheepChase | Animation::ChaseAMartian => Some(Position::new(
-				w + Frame::SIZE_I * 3,
-				h - Frame::SIZE_I,
-			)),
+			Animation::BigFish |
+				Animation::Stargaze => Some(Position::new(
+					w,
+					h - Frame::SIZE_I,
+				)),
+			Animation::BigFishChild => Some(Position::new(w + 50, h + 35)),
+			Animation::BlackSheepChase |
+				Animation::ChaseAMartian => Some(Position::new(
+					w + Frame::SIZE_I * 3,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepChaseChild |
-			Animation::BlackSheepRomance |
-			Animation::ChaseAMartianChild => Some(Position::new(
-				w + Frame::SIZE_I,
-				h - Frame::SIZE_I,
-			)),
+				Animation::BlackSheepRomance |
+				Animation::ChaseAMartianChild => Some(Position::new(
+					w + Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
+			Animation::BlackSheepSkip |
+				Animation::BlackSheepSkipChild |
+				Animation::SlideIn => Some(Position::new(
+					-Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(
 				-Frame::SIZE_I * 2,
 				h - Frame::SIZE_I,
 			)),
+			Animation::ClimbIn => Some(Position::new(0, h)),
 			Animation::StargazeChild => Some(Position::new(
 				-Frame::SIZE_I,
 				Frame::SIZE_I * 2,
 			)),
 			// Randomize positioning.
-			Animation::Yoyo => Some(Position::new(
+			Animation::BeamIn => Some(Position::new(
 				self.random_x(),
-				-Frame::SIZE_I,
+				h - Frame::SIZE_I,
 			)),
-			Animation::Fall | Animation::GraspingFall | Animation::WallSlide if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>
-				Some(Position::new(self.random_x(), -Frame::SIZE_I)),
+			Animation::FloatIn => Some(Position::new(
+				self.random_x().max(10),
+				h,
+			)),
+			Animation::Gopher => Some(Position::new(self.random_x(), h)),
+			Animation::Yoyo => Some(Position::new(self.random_x(), -Frame::SIZE_I)),
+			Animation::Fall |
+				Animation::GraspingFall |
+				Animation::WallSlide
+				if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>
+					Some(Position::new(self.random_x(), -Frame::SIZE_I)),
 			_ => None,
 		} {
 			self.flags.flip_x(Some(false));
-			self.flags.flip_y(Some(false));
 			self.set_position(pos, true);
 		}
 	}
@@ -453,7 +462,6 @@ impl Mate {
 		// Move it?
 		if let Some(mut pos) = step.move_to() {
 			if self.flags.flipped_x() { pos = pos.invert_x(); }
-			if self.flags.flipped_y() { pos = pos.invert_y(); }
 			self.set_position(pos, false);
 		}
 
@@ -475,7 +483,6 @@ impl Mate {
 			// Note the direction we're moving.
 			let mut dir = step.direction();
 			if self.flags.flipped_x() { dir = dir.invert_x(); }
-			if self.flags.flipped_y() { dir = dir.invert_y(); }
 
 			// Make sure we didn't crash into an edge, and if we did and the
 			// animation changed, recurse.
@@ -545,20 +552,8 @@ impl Mate {
 				toggle_wrapper_classes(
 					&wrapper,
 					self.flags.flipped_x(),
-					self.flags.flipped_y(),
 					self.frame.dba(),
-					match self.animation {
-						None => 0,
-						Some(Animation::Drag) => 1,
-						Some(Animation::SneezeShadow) => 2,
-						Some(Animation::Abduction) => 3,
-						Some(Animation::BigFishChild) => 4,
-						Some(Animation::SplatGhost) => 5,
-						Some(Animation::EatingMagicFlower) => 6,
-						Some(Animation::MagicFlower1 | Animation::MagicFlower2) => 7,
-						Some(Animation::DigestMagicFlower1) => 8,
-						_ => -1,
-					}
+					self.animation.map_or(0, Animation::css_class),
 				);
 			}
 
@@ -709,7 +704,7 @@ impl Mate {
 	/// Return a random horizontal position within the boundaries of the
 	/// screen, used by some start-up/entrance animations.
 	fn random_x(&self) -> i32 {
-		i32::from(Universe::rand_mod(self.max_x() as u16 + 1))
+		i32::from(Universe::rand_mod(self.max_x() as u16))
 	}
 
 	/// # Mate Visibility.

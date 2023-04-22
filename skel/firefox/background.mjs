@@ -8,109 +8,119 @@
 
 import { getSettings, saveSettings } from './settings.mjs';
 
-// This is used to keep track of all of the connected content scripts.
-const ports = new Map();
-
 /**
- * New Connection (with Foreground).
+ * Sync One Tab.
  *
- * The content scripts will reach out to form a connection as soon as they have
- * initialized the wasm. The background, in turn, uses those connections to
- * synchronize the states.
+ * This sends the current audio/active settings to the given tab so its content
+ * script can synchronize its state accordingly, and afterwards, makes sure the
+ * tab's pageIcon has the appropriate visibility, icon, and title.
  *
- * @param {Object} port Port.
- * @return {void} Nothing.
+ * @param {number} tab Tab ID.
+ * @return {Promise} Resolutions or false.
  */
-browser.runtime.onConnect.addListener(async function(port) {
-	// Store the new port, using its random name as the identifier.
-	ports.set(port.name, port);
-
-	/**
-	 * Handle Disconnection.
-	 *
-	 * This removes the port from the list on disconnection so we don't keep
-	 * sending messages to it.
-	 *
-	 * @param {Object} port Port.
-	 * @return {void} Nothing.
-	 */
-	port.onDisconnect.addListener((port) => { ports.delete(port.name); });
-
-	// Enable the pageAction icon.
-	await browser.pageAction.show(port.sender.tab.id).catch((e) => {});
-
-	// Synchronize the state.
-	await updateTab(port);
-});
-
-/**
- * Update Tab State.
- *
- * This synchronizes the audio/active properties of a single tab with the
- * current settings, and also adjusts its pageAction icon to match.
- *
- * @param {Object} port Port.
- * @return {Promise} Resolutions.
- */
-const updateTab = async function(port) {
+const syncOne = async function(tab) {
 	// Pull the current settings, and add an "action" to it.
 	let settings = await getSettings();
-	settings.action = 'poeUpdate';
+	settings.action = 'poeFgSync';
 
-	// Send the settings to the content script.
-	try { port.postMessage(settings); }
+	try {
+		// Send a synchronization request to the tab.
+		let r = await browser.tabs.sendMessage(tab, settings).catch((e) => {});
+
+		// A Promise-false response means we should "disable" the extension for
+		// this tab. Insofar as the background script is concerned, that just
+		// means hiding its pageIcon.
+		if (false === r) {
+			if (await browser.pageAction.isShown({ tabId: tab })) {
+				return browser.pageAction.hide(tab);
+			}
+			return Promise.resolve(false);
+		}
+		// A Promise-true is the normal response; here we just need to make
+		// sure its pageIcon is visible.
+		else if (true === r) {
+			if (! await browser.pageAction.isShown({ tabId: tab })) {
+				await browser.pageAction.show(tab);
+			}
+		}
+		// We can ignore all other responses.
+		else { return Promise.resolve(false); }
+	}
 	catch (e) {}
 
-	// Synchronize the pageAction icon properties, regardless of whether or not
-	// the settings worked.
+	// If we're here, the pageIcon should be visible, so we should make sure
+	// its icon and title reflect the current state.
 	return Promise.allSettled([
 		browser.pageAction.setIcon({
 			path: settings.active ? 'image/sit.svg' : 'image/sleep.svg',
-			tabId: port.sender.tab.id,
+			tabId: tab,
 		}),
 		browser.pageAction.setTitle({
 			title: settings.active ? 'JS Mate Poe: Enabled' : 'JS Mate Poe: Disabled',
-			tabId: port.sender.tab.id,
-		})
+			tabId: tab,
+		}),
 	]);
 };
 
 /**
- * Update All (Connected) Tabs.
+ * Sync All Tabs.
  *
- * Make sure every connected tab is honoring the current settings, and has an
- * appropriate pageAction icon.
- *
- * This is triggered any time a pageAction icon is clicked or the settings are
- * updated. (Otherwise we only communicate with individual tabs as-needed.)
+ * This calls `syncOne` for every open http/s tab. It's a bit much, but is only
+ * triggered when the global settings change, which shouldn't be very often.
  *
  * @return {Promise} Resolutions.
  */
-const updateTabs = async function() {
+const syncAll = async function() {
+	const tabs = await browser.tabs.query({url: ['http://*/*', 'https://*/*']});
 	const waiting = [];
-	for (const port of ports.values()) {
-		waiting.push(updateTab(port));
+	for (const tab of tabs) {
+		if ('number' === typeof tab.id) { waiting.push(syncOne(tab.id)); }
 	}
 	return Promise.allSettled(waiting);
 };
 
 /**
- * Toggle State on Icon Click.
+ * Toggle Activeness on Icon Click.
  *
- * Turn Poe on/off for all tabs whenever the extension icon is clicked, and
- * save the setting for next time.
+ * Turn Poe on/off for all tabs whenever a pageIcon is clicked.
  *
  * @param {number|Object} tab Tab.
  * @return {void} Nothing.
  */
-browser.pageAction.onClicked.addListener(async function() {
-	// Pull the current settings and invert the "active" property.
-	let settings = await getSettings();
-	settings.active = ! settings.active;
+browser.pageAction.onClicked.addListener(function() {
+	// Get the original settings.
+	getSettings()
+		// Invert the "active" property and resave.
+		.then((settings) => {
+			settings.active = ! settings.active;
+			return saveSettings(settings);
+		})
+		// Resync all open tabs accordingly.
+		.then(() => { return syncAll(); })
+		.catch((e) => {});
+});
 
-	// Save the settings.
-	await saveSettings(settings);
+/**
+ * Message Listener.
+ *
+ * This listens for broadcasts from newly-initialized content scripts, and
+ * sync-all requests from the options handler. In either case, it will
+ * coordinate a (re)synchronization for the relevant tab(s).
+ *
+ * @param {!Object} m Message.
+ * @param {!Object} sender Sender.
+ * @return {boolean} False.
+ */
+browser.runtime.onMessage.addListener(function(m, sender) {
+	if ((null !== m) && ('object' === typeof m)) {
+		if ('poeBgNewConnection' === m.action) {
+			syncOne(sender.tab.id).catch((e) => {});
+		}
+		else if ('poeBgSyncAll' === m.action) {
+			syncAll().catch((e) => {});
+		}
+	}
 
-	// Let the tabs know what changed!
-	await updateTabs();
+	// We don't need to wait for a response.
+	return false;
 });

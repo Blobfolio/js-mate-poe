@@ -185,7 +185,7 @@ impl Universe {
 		let mut seeds = get_seeds();
 		let out = seeds[1].overflowing_mul(5).0.rotate_left(7).overflowing_mul(9).0;
 		update_seeds(&mut seeds);
-		set_seeds(&mut seeds);
+		set_seeds(&seeds);
 		out
 	}
 
@@ -367,7 +367,7 @@ fn reseed() {
 	let mut seed: u64 = js_random().to_bits();
 	let mut seeds = [0_u64; 4];
 	for i in &mut seeds { *i = splitmix(&mut seed); }
-	set_seeds(&mut seeds);
+	set_seeds(&seeds);
 
 	// Print a debug message if we care about that sort of thing.
 	#[cfg(feature = "director")]
@@ -381,7 +381,7 @@ fn reseed() {
 }
 
 /// # Set Seeds.
-fn set_seeds(seeds: &mut [u64; 4]) {
+fn set_seeds(seeds: &[u64; 4]) {
 	// We are unlikely to wind up with all zeroes, but just in case…
 	if seeds[0] == 0 && seeds[1] == 0 && seeds[2] == 0 && seeds[3] == 0 {
 		SEED1.store(0x8596_cc44_bef0_1aa0, SeqCst);

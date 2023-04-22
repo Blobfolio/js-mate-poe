@@ -46,6 +46,7 @@ impl Position {
 		Self::new(self.x.saturating_neg(), self.y)
 	}
 
+	#[cfg(test)]
 	/// # Invert (Y).
 	pub(crate) const fn invert_y(self) -> Self {
 		Self::new(self.x, self.y.saturating_neg())
@@ -126,6 +127,7 @@ impl Direction {
 		else { Self::from_u8(self as u8 ^ Self::BOTH_X) }
 	}
 
+	#[cfg(test)]
 	/// # Invert Y.
 	pub(crate) const fn invert_y(self) -> Self {
 		if 0 == self as u8 & Self::BOTH_Y { self }

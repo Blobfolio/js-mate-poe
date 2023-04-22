@@ -109,33 +109,54 @@ const poePlaySound = function(idx) {
  *
  * @param {!Element} el Element.
  * @param {boolean} rx FlipX.
- * @param {boolean} ry FlipY.
  * @param {number} frame Frame Class.
  * @param {number} scene Animation Class.
  * @return {void} Nothing.
  */
-const poeToggleWrapperClasses = function(el, rx, ry, frame, scene) {
-	let list = el.classList;
+const poeToggleWrapperClasses = function(el, rx, frame, scene) {
+	// Pull the list so we have it.
+	const list = el.classList;
 
-	list.toggle('rx', !! rx);
-	list.toggle('ry', !! ry);
-
+	// Sanitize frame, scene class IDs.
 	frame = parseInt(frame, 10);
-	list.toggle('h', (31 === frame) || (32 === frame) || (33 === frame));
-	list.toggle('m021', 21 === frame);
-	list.toggle('m100', 100 === frame);
-	list.toggle('m133', 133 === frame);
-
 	scene = parseInt(scene, 10);
+
+	// Orientation class.
+	list.toggle('rx', !! rx);
+
+	// Disabled?
 	list.toggle('off', 0 === scene);
-	list.toggle('a1', 1 === scene);
-	list.toggle('a2', 2 === scene);
-	list.toggle('a3', 3 === scene);
-	list.toggle('a4', 4 === scene);
-	list.toggle('a5', 5 === scene);
-	list.toggle('a6', 6 === scene);
-	list.toggle('a7', 7 === scene);
-	list.toggle('a8', 8 === scene);
+
+	// Child-only classes.
+	if (list.contains('child')) {
+		// Special frame.
+		list.toggle('m126', 126 === frame);
+
+		// Animations.
+		list.toggle('a2',  2 === scene); // SneezeShadow.
+		list.toggle('a4',  4 === scene); // BigFishChild.
+		list.toggle('a5',  5 === scene); // SplatGhost.
+		list.toggle('a7',  7 === scene); // MagicFlower1 & 2.
+		list.toggle('a9',  9 === scene); // ShadowShodown1.
+		list.toggle('aa', 10 === scene); // ShadowShodown2.
+	}
+	// Primary-only classes.
+	else {
+		// Special frames.
+		list.toggle('h', (36 === frame) || (37 === frame) || (38 === frame));
+		list.toggle('m016', 16 === frame);
+		list.toggle('m026', 26 === frame);
+
+		// Animations.
+		list.toggle('a1',  1 === scene); // Drag.
+		list.toggle('a3',  3 === scene); // Abduction.
+		list.toggle('a6',  6 === scene); // EatingMagicFlower.
+		list.toggle('a8',  8 === scene); // DigestMagicFlower1.
+		list.toggle('ab', 11 === scene); // DangleRecover.
+		list.toggle('ac', 12 === scene); // Yoyo.
+		list.toggle('ad', 13 === scene); // BeamIn.
+		list.toggle('ae', 14 === scene); // Glitch.
+	}
 };
 
 /**
