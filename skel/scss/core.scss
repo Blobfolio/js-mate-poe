@@ -45,6 +45,10 @@
 #p.off,
 #i { pointer-events: none; }
 
+// This property is iffy, but we're doing to be pushing shit all over the
+// screen, so it's probably worth it.
+#p:not(.off) { will-change: transform; }
+
 // Half-size.
 #p.h {
 	--r: -2px;
