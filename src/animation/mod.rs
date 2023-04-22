@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 92; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 94; // The highest Animation ID.
 
 
 
@@ -51,6 +51,7 @@ pub(crate) enum Animation {
 	// Animations for the primary mate.
 	Abduction = 1_u8,
 	BathDive,
+	BeamIn,
 	Beg,
 	BigFish,
 	BlackSheepChase,
@@ -85,6 +86,7 @@ pub(crate) enum Animation {
 	Scratch,
 	Scream,
 	ShadowShowdown,
+	Shake,
 	Skip,
 	Sleep,
 	SleepSitting,
@@ -178,18 +180,19 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 16 } else { 11 }) {
+			let next = match Universe::rand_mod(if first { 18 } else { 12 }) {
 				0 => Self::BathDive,
-				1 => Self::BigFish,
-				2 => Self::BlackSheepChase,
-				3 => Self::BlackSheepSkip,
-				4 => Self::BlackSheepRomance,
-				5 => Self::ClimbIn,
-				6 => Self::FloatIn,
-				7 => Self::Gopher,
-				8 => Self::SlideIn,
-				9 => Self::Stargaze,
-				10 => Self::Yoyo,
+				1 => Self::BeamIn,
+				2 => Self::BigFish,
+				3 => Self::BlackSheepChase,
+				4 => Self::BlackSheepSkip,
+				5 => Self::BlackSheepRomance,
+				6 => Self::ClimbIn,
+				7 => Self::FloatIn,
+				8 => Self::Gopher,
+				9 => Self::SlideIn,
+				10 => Self::Stargaze,
+				11 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -222,6 +225,7 @@ impl Animation {
 			Self::BathCoolDown => "Bath Cool Down",
 			Self::BathDive => "Bath Dive",
 			Self::BathDiveChild => "Bathtub (Child)",
+			Self::BeamIn => "Beam In",
 			Self::Beg => "Beg",
 			Self::BigFish => "Big Fish",
 			Self::BigFishChild => "Big Fish (Child)",
@@ -283,6 +287,7 @@ impl Animation {
 			Self::Scream => "Scream",
 			Self::ShadowShowdown => "Shadow Showdown",
 			Self::ShadowShowdownChild1 | Self::ShadowShowdownChild2 => "Shadow Showdown (Child)",
+			Self::Shake => "Shake",
 			Self::Skip => "Skip",
 			Self::Sleep => "Sleep",
 			Self::SleepSitting => "Sleep (Sitting)",
@@ -317,6 +322,7 @@ impl Animation {
 			self,
 			Self::Abduction |
 			Self::BathDive |
+			Self::BeamIn |
 			Self::Beg |
 			Self::BigFish |
 			Self::BlackSheepChase |
@@ -351,6 +357,7 @@ impl Animation {
 			Self::Scratch |
 			Self::Scream |
 			Self::ShadowShowdown |
+			Self::Shake |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -400,6 +407,7 @@ impl Animation {
 			Self::ShadowShowdownChild2 => 10,
 			Self::DangleRecover => 11,
 			Self::Yoyo => 12,
+			Self::BeamIn => 13,
 			_ => -1,
 		}
 	}
@@ -443,6 +451,7 @@ impl Animation {
 			Self::Abduction |
 			Self::BathCoolDown |
 			Self::BathDive |
+			Self::BeamIn |
 			Self::Beg |
 			Self::BigFish |
 			Self::BlackSheepChase |
@@ -497,6 +506,7 @@ impl Animation {
 			Self::Scratch |
 			Self::Scream |
 			Self::ShadowShowdown |
+			Self::Shake |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -555,7 +565,10 @@ impl Animation {
 	/// terminate instead.
 	pub(crate) fn next(self) -> Option<Self> {
 		match self {
-			Self::Abduction => Some(Self::ChaseAMartian),
+			Self::Abduction => Some(
+				if 0 == Universe::rand() & 1 { Self::ChaseAMartian }
+				else { Self::BeamIn }
+			),
 			Self::BathCoolDown |
 				Self::Beg |
 				Self::Bleat |
@@ -576,6 +589,7 @@ impl Animation {
 				Self::Rest |
 				Self::Roll |
 				Self::Rotate |
+				Self::Shake |
 				Self::Skip |
 				Self::Sleep |
 				Self::SleepSitting |
@@ -584,6 +598,7 @@ impl Animation {
 				Self::Splat |
 				Self::Urinate => Some(Self::Walk),
 			Self::BathDive => Some(Self::BathCoolDown),
+			Self::BeamIn => Some(Self::Shake),
 			Self::BigFish => Some(
 				if 0 == Universe::rand_mod(3) { Self::Sneeze }
 				else { Self::Walk }
@@ -593,9 +608,9 @@ impl Animation {
 				Self::Scream => Some(Self::Run),
 			Self::BlackSheepSkip => Some(Self::LayDown),
 			Self::BlackSheepSkipChild => Some(Self::BlackSheepSkipExitChild),
-			Self::Boing => Some(match Universe::rand_mod(13) {
+			Self::Boing => Some(match Universe::rand_mod(10) {
 				0..=7 => Self::Rotate,
-				8..=11 => Self::Walk,
+				8 => Self::Shake,
 				_ => Self::Run,
 			}),
 			Self::ChaseAMartian => Some(Self::Bleat),
@@ -722,6 +737,7 @@ impl Animation {
 			Self::BathCoolDown => fixed!(BATH_COOL_DOWN),
 			Self::BathDive => fixed!(BATH_DIVE),
 			Self::BathDiveChild => fixed!(BATH_DIVE_CHILD),
+			Self::BeamIn => fixed!(BEAM_IN),
 			Self::Beg => fixed!(BEG),
 			Self::BigFish => fixed!(BIG_FISH),
 			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
@@ -787,6 +803,7 @@ impl Animation {
 			Self::ShadowShowdown => fixed!(SHADOW_SHOWDOWN),
 			Self::ShadowShowdownChild1 => fixed!(SHADOW_SHOWDOWN_CHILD1),
 			Self::ShadowShowdownChild2 => fixed!(SHADOW_SHOWDOWN_CHILD2),
+			Self::Shake => fixed!(SHAKE),
 			Self::Skip => fixed!(SKIP),
 			Self::Sleep => fixed!(SLEEP),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
@@ -864,7 +881,7 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		const TOTAL: usize = 35;
+		const TOTAL: usize = 36;
 
 		let set = (0..5_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)

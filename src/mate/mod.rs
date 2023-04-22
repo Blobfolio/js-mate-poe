@@ -257,25 +257,29 @@ impl Mate {
 				w + Frame::SIZE_I - 790,
 				h - Frame::SIZE_I,
 			)),
-			Animation::BigFish | Animation::Stargaze => Some(Position::new(
-				w,
-				h - Frame::SIZE_I,
-			)),
+			Animation::BigFish |
+				Animation::Stargaze => Some(Position::new(
+					w,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BigFishChild => Some(Position::new(w + 50, h + 35)),
-			Animation::BlackSheepChase | Animation::ChaseAMartian => Some(Position::new(
-				w + Frame::SIZE_I * 3,
-				h - Frame::SIZE_I,
-			)),
+			Animation::BlackSheepChase |
+				Animation::ChaseAMartian => Some(Position::new(
+					w + Frame::SIZE_I * 3,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepChaseChild |
-			Animation::BlackSheepRomance |
-			Animation::ChaseAMartianChild => Some(Position::new(
-				w + Frame::SIZE_I,
-				h - Frame::SIZE_I,
-			)),
-			Animation::BlackSheepSkip | Animation::BlackSheepSkipChild | Animation::SlideIn => Some(Position::new(
-				-Frame::SIZE_I,
-				h - Frame::SIZE_I,
-			)),
+				Animation::BlackSheepRomance |
+				Animation::ChaseAMartianChild => Some(Position::new(
+					w + Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
+			Animation::BlackSheepSkip |
+				Animation::BlackSheepSkipChild |
+				Animation::SlideIn => Some(Position::new(
+					-Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(
 				-Frame::SIZE_I * 2,
 				h - Frame::SIZE_I,
@@ -286,14 +290,21 @@ impl Mate {
 				Frame::SIZE_I * 2,
 			)),
 			// Randomize positioning.
+			Animation::BeamIn => Some(Position::new(
+				self.random_x(),
+				h - Frame::SIZE_I,
+			)),
 			Animation::FloatIn => Some(Position::new(
 				self.random_x().max(10),
 				h,
 			)),
 			Animation::Gopher => Some(Position::new(self.random_x(), h)),
 			Animation::Yoyo => Some(Position::new(self.random_x(), -Frame::SIZE_I)),
-			Animation::Fall | Animation::GraspingFall | Animation::WallSlide if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>
-				Some(Position::new(self.random_x(), -Frame::SIZE_I)),
+			Animation::Fall |
+				Animation::GraspingFall |
+				Animation::WallSlide
+				if first || self.pos.x < 0 || w - Frame::SIZE_I < self.pos.x =>
+					Some(Position::new(self.random_x(), -Frame::SIZE_I)),
 			_ => None,
 		} {
 			self.flags.flip_x(Some(false));
@@ -693,7 +704,7 @@ impl Mate {
 	/// Return a random horizontal position within the boundaries of the
 	/// screen, used by some start-up/entrance animations.
 	fn random_x(&self) -> i32 {
-		i32::from(Universe::rand_mod(self.max_x() as u16 + 1))
+		i32::from(Universe::rand_mod(self.max_x() as u16))
 	}
 
 	/// # Mate Visibility.

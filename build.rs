@@ -181,6 +181,7 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 	(2, "PlayDead"),
 	(2, "Scoot"),
 	(2, "Scream"),
+	(2, "Shake"),
 
 	(1, "Abduction"),
 	(1, "Bleat"),
@@ -264,6 +265,7 @@ fn build_default_animations() -> String {
 						Self::Scoot |
 						Self::Scream |
 						Self::ShadowShowdown |
+						Self::Shake |
 						Self::Sneeze |
 						Self::Tornado |
 						Self::Urinate |
@@ -276,6 +278,7 @@ fn build_default_animations() -> String {
 							is_fresh(Self::Scoot, last) &&
 							is_fresh(Self::Scream, last) &&
 							is_fresh(Self::ShadowShowdown, last) &&
+							is_fresh(Self::Shake, last) &&
 							is_fresh(Self::Sneeze, last) &&
 							is_fresh(Self::Tornado, last) &&
 							is_fresh(Self::Urinate, last) &&

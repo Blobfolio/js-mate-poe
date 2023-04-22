@@ -140,6 +140,27 @@ pub(super) const BATH_DIVE_CHILD: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::BeamIn`.
+pub(super) const BEAM_IN: &[Scene] = &[
+	ENTRANCE_DELAY,
+	Scene::new(3000, &[Frame::F076])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(75, &[
+		Frame::F076, Frame::F075, Frame::F074, Frame::F075, Frame::F076,
+		Frame::F075, Frame::F074, Frame::F075, Frame::F076, Frame::F075,
+		Frame::F074, Frame::F075, Frame::F076, Frame::F075, Frame::F074,
+		Frame::F074, Frame::F074, Frame::F074, Frame::F074, Frame::F074,
+		Frame::F003, Frame::F003, Frame::F079, Frame::F079, Frame::F079,
+		Frame::F079, Frame::F079, Frame::F079, Frame::F079, Frame::F079,
+		Frame::F003, Frame::F003, Frame::F074, Frame::F074, Frame::F074,
+		Frame::F074, Frame::F074, Frame::F074, Frame::F074, Frame::F074,
+		Frame::F074, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003, Frame::F003, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::Beg`.
 pub(super) const BEG: &[Scene] = &[
 	Scene::new(150, &[
@@ -918,6 +939,17 @@ pub(super) const SHADOW_SHOWDOWN: &[Scene] = &[
 	Scene::new(50, &[Frame::F003, Frame::F008, Frame::F009, Frame::F012])
 		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY | Scene::IGNORE_EDGES),
 	BLEAT[0],
+];
+
+/// # For `Animation::Shake`.
+pub(super) const SHAKE: &[Scene] = &[
+	Scene::new(60, &[
+		Frame::F008, Frame::F003, Frame::F013, Frame::F003,
+		Frame::F008, Frame::F003, Frame::F013, Frame::F003,
+		Frame::F008, Frame::F003, Frame::F013, Frame::F003,
+		Frame::F008, Frame::F003, Frame::F013, Frame::F003,
+	])
+		.with_flags(Scene::GRAVITY),
 ];
 
 /// # For `Animation::ShadowShowdownChild1`.

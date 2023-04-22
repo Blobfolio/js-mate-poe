@@ -73,7 +73,7 @@
 #p.aa { z-index: 99999; }
 
 // Animation: Abduction.
-#p.a3 { animation: a3 0.25s 4s infinite; }
+#p.a3 { animation: a3 0.25s 4s 28; }
 
 // Animation: BigFish.
 #p.a4 { transform: $pos scale(3); }
@@ -120,6 +120,13 @@
 // Animation: Yoyo.
 #p.ac { animation: ac .2s infinite linear; }
 
+// Animation: BeamIn.
+#p.ad {
+	filter: none;
+	animation: ad 0.5s 3.5s forwards;
+	& > #i { animation: iad 2.5s 1s linear; }
+}
+
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
 	from { filter: saturate(5); }
@@ -138,4 +145,16 @@
 @keyframes ac {
 	from { transform: $pos rotate(0deg); }
 	to { transform: $pos rotate(359deg); }
+}
+
+// Reveal top/down.
+@keyframes iad {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+// Grow a pink drop-shadow.
+@keyframes ad {
+	from { filter: none; }
+	to { filter: drop-shadow(0 0 10px #ff1493); }
 }

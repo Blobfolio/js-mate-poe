@@ -154,6 +154,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 		list.toggle('a8',  8 === scene); // DigestMagicFlower1.
 		list.toggle('ab', 11 === scene); // DangleRecover.
 		list.toggle('ac', 12 === scene); // Yoyo.
+		list.toggle('ad', 13 === scene); // BeamIn.
 	}
 };
 
