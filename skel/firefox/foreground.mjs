@@ -71,8 +71,12 @@ browser.runtime.onMessage.addListener(function(m) {
 		}
 
 		// Update the state as requested!
-		Poe.audio = !! m.audio;
-		Poe.active = !! m.active;
+		if (m.active) {
+			Poe.audio = !! m.audio;
+			Poe.active = !! m.active;
+		}
+		else { Poe.active = false; }
+
 		return Promise.resolve(true);
 	}
 	// This either wasn't the message we were expecting, or it was triggered
