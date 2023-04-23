@@ -4,7 +4,7 @@
  * @param {Object} val Settings.
  * @return {Object} Sanitized settings.
  */
-const sanitizeSettings = function(val) {
+export const sanitizeSettings = function(val) {
 	const out = {
 		active: false,
 		audio: false,
