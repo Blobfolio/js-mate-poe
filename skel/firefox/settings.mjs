@@ -43,7 +43,7 @@ export const getSettings = async function() {
  */
 export const saveSettings = async function(val) {
 	val = sanitizeSettings(val);
-	let old = await getSettings();
+	const old = await getSettings();
 	if ((old.active === val.active) && (old.audio === val.audio)) {
 		return Promise.resolve(false);
 	}

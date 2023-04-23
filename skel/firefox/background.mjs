@@ -153,10 +153,12 @@ browser.runtime.onUpdateAvailable.addListener(function() {
 /**
  * Active Tab Sync.
  *
- * Firefox events can miss their target; this makes sure the active tab is,
- * at least, always synced.
+ * The message handlers can occasionally miss a target, so this redundantly
+ * calls the active tab to make sure it is reflecting the correct state.
  *
  * @param {Object} info Info.
  * @return {void} Nothing.
  */
-browser.tabs.onActivated.addListener(function(info) { syncOne(info.tabId); });
+browser.tabs.onActivated.addListener(function(info) {
+	if ('number' === typeof info.tabId) { syncOne(info.tabId); }
+});
