@@ -149,3 +149,14 @@ browser.runtime.onUpdateAvailable.addListener(function() {
 		browser.runtime.reload();
 	});
 });
+
+/**
+ * Active Tab Sync.
+ *
+ * Firefox events can miss their target; this makes sure the active tab is,
+ * at least, always synced.
+ *
+ * @param {Object} info Info.
+ * @return {void} Nothing.
+ */
+browser.tabs.onActivated.addListener(function(info) { syncOne(info.tabId); });
