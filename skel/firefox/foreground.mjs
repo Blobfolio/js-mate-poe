@@ -73,7 +73,7 @@ browser.runtime.onMessage.addListener(function(m) {
 		// Update the state as requested!
 		if (m.active) {
 			Poe.audio = !! m.audio;
-			Poe.active = !! m.active;
+			Poe.active = true;
 		}
 		else { Poe.active = false; }
 
