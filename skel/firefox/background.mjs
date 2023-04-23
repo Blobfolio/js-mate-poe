@@ -135,3 +135,17 @@ browser.runtime.onMessage.addListener(function(m, sender) {
 	// We don't need to wait for a response.
 	return false;
 });
+
+/**
+ * Pre-Update Cleanup.
+ *
+ * This attempts to stop any running instances of Poe so that their elements
+ * can be cleaned up before Firefox nukes their content scripts.
+ *
+ * @return {void} Nothing.
+ */
+browser.runtime.onUpdateAvailable.addListener(function() {
+	syncAll({ active: false }).then(() => {
+		browser.runtime.reload();
+	});
+});
