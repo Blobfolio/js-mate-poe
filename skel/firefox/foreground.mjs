@@ -64,15 +64,19 @@ browser.runtime.onMessage.addListener(function(m) {
 			if (! libraryDetected) {
 				libraryDetected = true;
 				console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
-				Poe.active = false;
 			}
 
+			Poe.active = false;
 			return Promise.resolve(false);
 		}
 
 		// Update the state as requested!
-		Poe.audio = !! m.audio;
-		Poe.active = !! m.active;
+		if (m.active) {
+			Poe.audio = !! m.audio;
+			Poe.active = true;
+		}
+		else { Poe.active = false; }
+
 		return Promise.resolve(true);
 	}
 	// This either wasn't the message we were expecting, or it was triggered
