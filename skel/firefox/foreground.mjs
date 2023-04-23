@@ -64,9 +64,9 @@ browser.runtime.onMessage.addListener(function(m) {
 			if (! libraryDetected) {
 				libraryDetected = true;
 				console.warn('Another instance of JS Mate Poe was detected; the extension has been disabled for this page.');
-				Poe.active = false;
 			}
 
+			Poe.active = false;
 			return Promise.resolve(false);
 		}
 
