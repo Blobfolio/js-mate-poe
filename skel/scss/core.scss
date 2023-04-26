@@ -72,7 +72,7 @@
 // Animation: SneezeShadow, and ShadowShowdownChild(ren).
 #p.a2,
 #p.a9,
-#p.aa { z-index: 99999; }
+#p.aa { z-index: 2147483646; }
 
 // Animation: Abduction.
 #p.a3 { animation: a3 0.25s 4s 28; }
@@ -164,25 +164,23 @@
 	to { transform: $pos rotate(359deg); }
 }
 
-// Reveal top/down.
-@keyframes iad {
-	from { clip-path: inset(0 0 100% 0); }
-	to { clip-path: inset(0 0 0 0); }
-}
-
 // Grow a pink drop-shadow.
 @keyframes ad {
 	from { filter: none; }
 	to { filter: drop-shadow(0 0 10px #ff1493); }
 }
 
-// Glitch boxes.
+// Reveal top/down.
+@keyframes iad {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+// Jiggle the glitch boxes around.
 @keyframes ae {
 	5% { opacity: 1; }
 	10% { opacity: 0; }
-	15% {
-		opacity: 1;
-	}
+	15% { opacity: 1; }
 	20% { opacity: 0; }
 	25% {
 		top: 0;
