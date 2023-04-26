@@ -36,7 +36,7 @@
 #i {
 	width: $width;
 	height: $tile_size;
-	transform: translate3d(var(--c, 0), var(--r, 0), 0);
+	transform: translateX(var(--c, 0));
 }
 
 // Disable mouse clicks for disabled sprites, child sprites, and the image
@@ -51,8 +51,8 @@
 
 // Half-size.
 #p.h {
-	--r: -2px;
 	height: $tile_size / 2;
+	& > #i { margin-top: -2px; }
 }
 
 // Disabled/invisible sprites.
