@@ -28,7 +28,7 @@
 	overflow: hidden;
 
 	opacity: 1;
-	transition: opacity .5s ease;
+	transition: opacity 0.5s ease;
 	transform: $pos;
 }
 
@@ -91,7 +91,7 @@
 #p.a6,
 #p.a7 { filter: hue-rotate(250deg); }
 
-#p.a6 { transition: filter 3s .8s ease-out; }
+#p.a6 { transition: filter 3s 0.8s ease-out; }
 
 // Animation: DigestMagicFlower1.
 #p.a8 { transition: filter 1.5s ease-out; }
@@ -120,7 +120,7 @@
 }
 
 // Animation: Yoyo.
-#p.ac { animation: ac .2s infinite linear; }
+#p.ac { animation: ac 0.2s infinite linear; }
 
 // Animation: BeamIn.
 #p.ad {
