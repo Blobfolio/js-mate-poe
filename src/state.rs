@@ -51,7 +51,9 @@ impl Default for State {
 	fn default() -> Self {
 		// Update the universe.
 		Universe::set_state(true);
-		size();
+		let quirks = dom::document().expect_throw("Missing DocumentElement.").compat_mode() == "BackCompat";
+		if quirks { size_quirks(); }
+		else { size_standards(); }
 
 		// Initialize the mates and add them to the document body.
 		let mut m1 = Mate::new(true);
@@ -66,7 +68,7 @@ impl Default for State {
 		if Universe::assign_child() { m1.set_child_animation(&mut m2); }
 
 		// Set up the event bindings.
-		let events = StateEvents::default();
+		let events = StateEvents::new(quirks);
 		events.bind(m1.el());
 
 		// Set up a Mutation Observer.
@@ -168,8 +170,9 @@ struct StateEvents {
 	resize: Closure<dyn FnMut()>,
 }
 
-impl Default for StateEvents {
-	fn default() -> Self {
+impl StateEvents {
+	/// # New.
+	fn new(quirks: bool) -> Self {
 		Self {
 			contextmenu: Closure::wrap(Box::new(|e: Event| { e.prevent_default(); })),
 			#[cfg(not(feature = "firefox"))]
@@ -186,12 +189,10 @@ impl Default for StateEvents {
 				}
 			)),
 			mouseup: Closure::wrap(Box::new(|| { Universe::set_dragging(false); })),
-			resize: Closure::wrap(Box::new(size)),
+			resize: Closure::wrap(Box::new(if quirks { size_quirks } else { size_standards })),
 		}
 	}
-}
 
-impl StateEvents {
 	/// # Bind Event Listeners.
 	fn bind(&self, el: &Element) {
 		let document_element = dom::document_element().expect_throw("Missing documentElement.");
@@ -308,27 +309,58 @@ impl Observer {
 
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-/// # Get Width/Height.
+/// # Get/Set Width/Height (Standards Mode).
 ///
 /// Pull the closest thing to a window size we can get without injecting our
 /// own 100% fixed element. This may or may not factor the width of the
-/// scrollbar (if any), but most browsers auto-hide them nowadays anyway.
-fn size() {
+/// scrollbar (if any), but most browsers auto-hide them anyway.
+fn size_standards() {
 	const MAX: i32 = u16::MAX as i32;
 
 	if let Some(el) = dom::document_element() {
 		let size = el.client_width();
 		let width =
 			if size <= 0 { 0 }
-			else if size < MAX { size as u16 }
+			else if size <= MAX { size as u16 }
 			else { u16::MAX };
 
 		let size = el.client_height();
 		let height =
 			if size <= 0 { 0 }
-			else if size < MAX { size as u16 }
+			else if size <= MAX { size as u16 }
 			else { u16::MAX };
 
 		Universe::set_size(width, height);
 	}
+}
+
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+/// # Get/Set Width/Height (Quirks Mode).
+///
+/// Pull the closest thing to a window size we can get without injecting our
+/// own 100% fixed element. This may or may not factor the width of the
+/// scrollbar (if any), but most browsers auto-hide them anyway.
+fn size_quirks() {
+	if let Some(window) = dom::window() {
+		let width = jsvalue_to_u16(window.inner_width());
+		let height = jsvalue_to_u16(window.inner_height());
+		Universe::set_size(width, height);
+	}
+}
+
+#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+/// # Parse JS Value to u16.
+///
+/// Javascript's sloppy number-handling is very inconvenient! Thankfully we
+/// only have to use this for quirks-mode documents, which are increasingly
+/// rare.
+fn jsvalue_to_u16(v: Result<JsValue, JsValue>) -> u16 {
+	if let Ok(v) = v {
+		if let Some(v) = v.as_f64() {
+			if v.is_normal() && v.is_sign_positive() {
+				return u16::try_from(v as u64).unwrap_or(u16::MAX);
+			}
+		}
+	}
+	0
 }
