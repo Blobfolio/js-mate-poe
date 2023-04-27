@@ -20,34 +20,35 @@
 #20  Handstand
 #21  Hop
 #22  Jump
-#23  Lay Down
-#24  Leg Lifts
-#25  Look Down
-#26  Look Up
-#27  Nah…
-#28  Play Dead
-#29  Popcorn
-#30  Really?!
-#31  Rest
-#32  Roll
-#33  Rotate
-#34  Run
-#35  Scoot
-#36  Scratch
-#37  Scream
-#38  Shadow Showdown
-#39  Shake
-#40  Skip
-#41  Sleep
-#42  Sleep (Sitting)
-#43  Sleep (Standing)
-#44  Slide
-#45  Slide In
-#46  Sneeze
-#47  Spin
-#48  Stargaze
-#49  Tornado
-#50  Urinate
-#51  Walk
-#52  Yawn
-#53  Yo-Yo
+#23  Jump In
+#24  Lay Down
+#25  Leg Lifts
+#26  Look Down
+#27  Look Up
+#28  Nah…
+#29  Play Dead
+#30  Popcorn
+#31  Really?!
+#32  Rest
+#33  Roll
+#34  Rotate
+#35  Run
+#36  Scoot
+#37  Scratch
+#38  Scream
+#39  Shadow Showdown
+#40  Shake
+#41  Skip
+#42  Sleep
+#43  Sleep (Sitting)
+#44  Sleep (Standing)
+#45  Slide
+#46  Slide In
+#47  Sneeze
+#48  Spin
+#49  Stargaze
+#50  Tornado
+#51  Urinate
+#52  Walk
+#53  Yawn
+#54  Yo-Yo

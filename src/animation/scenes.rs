@@ -605,6 +605,37 @@ pub(super) const JUMP: &[Scene] = &[
 		.with_move_to(Position::new(-5, 2)),
 ];
 
+/// # For `Animation::JumpIn`.
+pub(super) const JUMP_IN: &[Scene] = &[
+	Scene::new(30, &[
+		Frame::F027, Frame::F027, Frame::F027, Frame::F027, Frame::F027,
+		Frame::F027, Frame::F027, Frame::F027, Frame::F027, Frame::F027,
+	])
+		.with_move_to(Position::new(-7, 5)),
+];
+
+/// # For `Animation::JumpInLanding`.
+pub(super) const JUMP_IN_LANDING: &[Scene] = &[
+	Scene::new(30, &[
+		Frame::F078, Frame::F069, Frame::F068,
+		Frame::F067, Frame::F066, Frame::F065, Frame::F077,
+	])
+		.with_move_to(Position::new(-7, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(30, &[
+		Frame::F078, Frame::F069, Frame::F068,
+		Frame::F067, Frame::F066, Frame::F065, Frame::F077,
+	])
+		.with_move_to(Position::new(-6, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(30, &[
+		Frame::F078, Frame::F069, Frame::F068,
+		Frame::F067, Frame::F066, Frame::F065, Frame::F077,
+	])
+		.with_move_to(Position::new(-5, 0))
+		.with_flags(Scene::GRAVITY),
+];
+
 /// # For `Animation::LayDown`.
 pub(super) const LAY_DOWN: &[Scene] = &[
 	Scene::new(200, &[Frame::F033, Frame::M026])

@@ -285,6 +285,10 @@ impl Mate {
 				h - Frame::SIZE_I,
 			)),
 			Animation::ClimbIn => Some(Position::new(0, h)),
+			Animation::JumpIn => Some(Position::new(
+				w,
+				h - 149 - Frame::SIZE_I,
+			)),
 			Animation::StargazeChild => Some(Position::new(
 				-Frame::SIZE_I,
 				Frame::SIZE_I * 2,

@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 95; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 97; // The highest Animation ID.
 
 
 
@@ -71,6 +71,7 @@ pub(crate) enum Animation {
 	Handstand,
 	Hop,
 	Jump,
+	JumpIn,
 	LayDown,
 	LegLifts,
 	LookDown,
@@ -119,6 +120,7 @@ pub(crate) enum Animation {
 	Fall,
 	GraspingFall,
 	Hydroplane,
+	JumpInLanding,
 	ReachCeiling,
 	ReachFloor,
 	ReachSide1,
@@ -181,7 +183,7 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 18 } else { 12 }) {
+			let next = match Universe::rand_mod(if first { 19 } else { 13 }) {
 				0 => Self::BathDive,
 				1 => Self::BeamIn,
 				2 => Self::BigFish,
@@ -191,9 +193,10 @@ impl Animation {
 				6 => Self::ClimbIn,
 				7 => Self::FloatIn,
 				8 => Self::Gopher,
-				9 => Self::SlideIn,
-				10 => Self::Stargaze,
-				11 => Self::Yoyo,
+				9 => Self::JumpIn,
+				10 => Self::SlideIn,
+				11 => Self::Stargaze,
+				12 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -265,6 +268,8 @@ impl Animation {
 			Self::Hop => "Hop",
 			Self::Hydroplane => "Hydroplane",
 			Self::Jump => "Jump",
+			Self::JumpIn => "Jump In",
+			Self::JumpInLanding => "Jump In (Landing)",
 			Self::LayDown => "Lay Down",
 			Self::LegLifts => "Leg Lifts",
 			Self::LookDown => "Look Down",
@@ -344,6 +349,7 @@ impl Animation {
 			Self::Handstand |
 			Self::Hop |
 			Self::Jump |
+			Self::JumpIn |
 			Self::LayDown |
 			Self::LegLifts |
 			Self::LookDown |
@@ -489,6 +495,8 @@ impl Animation {
 			Self::Hop |
 			Self::Hydroplane |
 			Self::Jump |
+			Self::JumpIn |
+			Self::JumpInLanding |
 			Self::LayDown |
 			Self::LegLifts |
 			Self::LookDown |
@@ -610,6 +618,7 @@ impl Animation {
 				else { Self::Walk }
 			),
 			Self::BlackSheepChase |
+				Self::JumpInLanding |
 				Self::LegLifts |
 				Self::Scream => Some(Self::Run),
 			Self::BlackSheepSkip => Some(Self::LayDown),
@@ -648,6 +657,7 @@ impl Animation {
 				2..=3 => Self::Slide,
 				_ => Self::Jump,
 			}),
+			Self::JumpIn => Some(Self::JumpIn),
 			Self::MagicFlower1 => Some(Self::MagicFlower2),
 			Self::ReachCeiling => Some(Self::WalkUpsideDown),
 			Self::ReachSide2 => Some(match Universe::rand_mod(5) {
@@ -699,6 +709,7 @@ impl Animation {
 			Self::BathDive => Some(Self::BathCoolDown),
 			Self::EndRun |
 				Self::Hydroplane |
+				Self::JumpInLanding |
 				Self::Run => Some(Self::Boing),
 			Self::ClimbDown |
 				Self::RunDown |
@@ -716,6 +727,7 @@ impl Animation {
 			Self::Hop |
 				Self::Jump |
 				Self::Skip => Some(Self::WallSlide),
+			Self::JumpIn => Some(Self::JumpInLanding),
 			Self::Tornado | Self::WallSlide => Some(Self::Rotate),
 			Self::Walk => Some(match Universe::rand_mod(8) {
 				0..=4 => Self::Rotate,
@@ -728,6 +740,7 @@ impl Animation {
 }
 
 impl Animation {
+	#[allow(clippy::too_many_lines)]
 	/// # Scenes.
 	///
 	/// Return the animation's `SceneList`.
@@ -786,6 +799,8 @@ impl Animation {
 			Self::Hop => fixed!(HOP),
 			Self::Hydroplane => fixed!(HYDROPLANE),
 			Self::Jump => fixed!(JUMP),
+			Self::JumpIn => fixed!(JUMP_IN),
+			Self::JumpInLanding => fixed!(JUMP_IN_LANDING),
 			Self::LayDown => fixed!(LAY_DOWN),
 			Self::LegLifts => fixed!(LEG_LIFTS),
 			Self::LookDown => fixed!(LOOK_DOWN),
