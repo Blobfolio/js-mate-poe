@@ -84,7 +84,12 @@ const poeMakeImage = function() {
  */
 const poePlaySound = function(idx) {
 	idx = parseInt(idx, 10);
-	if (! isNaN(idx) && (null !== audioUrls) && undefined !== audioUrls[idx]) {
+	if (
+		! isNaN(idx) &&
+		(null !== audioUrls) &&
+		(undefined !== audioUrls[idx]) &&
+		'visible' === document.visibilityState
+	) {
 		const audio = new Audio();
 		audio.addEventListener('canplaythrough', () => {
 			audio.play().catch((e) => {
