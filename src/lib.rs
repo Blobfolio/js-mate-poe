@@ -31,10 +31,6 @@
 	clippy::redundant_pub_crate,
 )]
 
-#[cfg(target_arch = "wasm32")]
-#[global_allocator]
-static ALLOCATOR: lol_alloc::LockedAllocator<lol_alloc::FreeListAllocator> = lol_alloc::LockedAllocator::new(lol_alloc::FreeListAllocator::new());
-
 mod animation;
 pub(crate) mod dom;
 mod mate;
