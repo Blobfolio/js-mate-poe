@@ -188,8 +188,8 @@ impl Animation {
 				1 => Self::BeamIn,
 				2 => Self::BigFish,
 				3 => Self::BlackSheepChase,
-				4 => Self::BlackSheepSkip,
-				5 => Self::BlackSheepRomance,
+				4 => Self::BlackSheepRomance,
+				5 => Self::BlackSheepSkip,
 				6 => Self::ClimbIn,
 				7 => Self::FloatIn,
 				8 => Self::Gopher,
@@ -235,10 +235,10 @@ impl Animation {
 			Self::BigFishChild => "Big Fish (Child)",
 			Self::BlackSheepChase => "Black Sheep Chase",
 			Self::BlackSheepChaseChild => "Black Sheep Chase (Child)",
-			Self::BlackSheepSkip => "Black Sheep Skip",
-			Self::BlackSheepSkipChild | Self::BlackSheepSkipExitChild => "Black Sheep Skip(Child)",
 			Self::BlackSheepRomance => "Black Sheep Romance",
 			Self::BlackSheepRomanceChild => "Black Sheep Romance (Child)",
+			Self::BlackSheepSkip => "Black Sheep Skip",
+			Self::BlackSheepSkipChild | Self::BlackSheepSkipExitChild => "Black Sheep Skip(Child)",
 			Self::Bleat => "Bleat",
 			Self::Blink => "Blink",
 			Self::Boing => "Boing!",
@@ -255,8 +255,8 @@ impl Animation {
 			Self::DigestMagicFlower1 | Self::DigestMagicFlower2 => "Digesting (Magic Flower)",
 			Self::Drag => "Drag",
 			Self::Eat => "Eat",
-			Self::EatMagicFlower => "Eat (Magic Flower)",
 			Self::EatingMagicFlower => "Eating (Magic Flower)",
+			Self::EatMagicFlower => "Eat (Magic Flower)",
 			Self::EndRun => "End Run",
 			Self::Fall => "Fall",
 			Self::FloatIn => "Float In",
@@ -333,8 +333,8 @@ impl Animation {
 			Self::Beg |
 			Self::BigFish |
 			Self::BlackSheepChase |
-			Self::BlackSheepSkip |
 			Self::BlackSheepRomance |
+			Self::BlackSheepSkip |
 			Self::Bleat |
 			Self::Blink |
 			Self::ChaseAMartian |
@@ -465,8 +465,8 @@ impl Animation {
 			Self::Beg |
 			Self::BigFish |
 			Self::BlackSheepChase |
-			Self::BlackSheepSkip |
 			Self::BlackSheepRomance |
+			Self::BlackSheepSkip |
 			Self::Bleat |
 			Self::Blink |
 			Self::Boing |
@@ -553,8 +553,8 @@ impl Animation {
 			Self::BathDive => Some(Self::BathDiveChild),
 			Self::BigFish => Some(Self::BigFishChild),
 			Self::BlackSheepChase => Some(Self::BlackSheepChaseChild),
-			Self::BlackSheepSkip => Some(Self::BlackSheepSkipChild),
 			Self::BlackSheepRomance => Some(Self::BlackSheepRomanceChild),
+			Self::BlackSheepSkip => Some(Self::BlackSheepSkipChild),
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
 			Self::Eat => Some(Self::Flower),
 			Self::EatMagicFlower => Some(Self::MagicFlower1),
@@ -764,11 +764,11 @@ impl Animation {
 			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
 			Self::BlackSheepChase => scenes::black_sheep_chase(width),
 			Self::BlackSheepChaseChild => scenes::black_sheep_chase_child(width),
+			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
+			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
 			Self::BlackSheepSkip => fixed!(BLACK_SHEEP_SKIP),
 			Self::BlackSheepSkipChild => fixed!(BLACK_SHEEP_SKIP_CHILD),
 			Self::BlackSheepSkipExitChild => scenes::black_sheep_skip_exit_child(width),
-			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
-			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
 			Self::Bleat => fixed!(BLEAT),
 			Self::Blink => fixed!(BLINK),
 			Self::Boing => fixed!(BOING),
@@ -786,8 +786,8 @@ impl Animation {
 			Self::DigestMagicFlower2 => fixed!(DIGEST_MAGIC_FLOWER2),
 			Self::Drag => fixed!(DRAG),
 			Self::Eat => fixed!(EAT),
-			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
 			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
+			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
 			Self::EndRun => fixed!(END_RUN),
 			Self::Fall => fixed!(FALL),
 			Self::FloatIn => fixed!(FLOAT_IN),
