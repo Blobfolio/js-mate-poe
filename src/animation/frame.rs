@@ -159,8 +159,8 @@ pub(crate) enum Frame {
 	H037, // Half-frame.
 	H038, // Half-frame.
 
-	M016, // Masked.
-	M026, // Masked.
+	M020, // Masked.
+	M030, // Masked.
 	M126, // Masked.
 
 	None, // Empty tile.
@@ -182,8 +182,8 @@ impl Frame {
 			Self::H036 => 36,
 			Self::H037 => 37,
 			Self::H038 => 38,
-			Self::M016 => 16,
-			Self::M026 => 26,
+			Self::M020 => 20,
+			Self::M030 => 30,
 			Self::M126 => 126,
 			_ => -1
 		}
@@ -198,8 +198,8 @@ impl Frame {
 			Self::H036 => 36 * -Self::SIZE_I,
 			Self::H037 => 37 * -Self::SIZE_I,
 			Self::H038 => 38 * -Self::SIZE_I,
-			Self::M016 => 16 * -Self::SIZE_I,
-			Self::M026 => 26 * -Self::SIZE_I,
+			Self::M020 => 20 * -Self::SIZE_I,
+			Self::M030 => 30 * -Self::SIZE_I,
 			Self::M126 => 126 * -Self::SIZE_I,
 			_ => self as i32 * -Self::SIZE_I,
 		}

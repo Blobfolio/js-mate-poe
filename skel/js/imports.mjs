@@ -149,8 +149,8 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	else {
 		// Special frames.
 		list.toggle('h', (36 === frame) || (37 === frame) || (38 === frame));
-		list.toggle('m016', 16 === frame);
-		list.toggle('m026', 26 === frame);
+		list.toggle('m020', 20 === frame);
+		list.toggle('m030', 30 === frame);
 
 		// Animations.
 		list.toggle('a1',  1 === scene); // Drag.

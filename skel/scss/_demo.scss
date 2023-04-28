@@ -64,13 +64,13 @@ body {
 }
 
 // Maked Frames.
-.fm16 {
-	@extend .f16;
-	&:before { clip-path: $m016; }
+.fm20 {
+	@extend .f20;
+	&:before { clip-path: $m020; }
 }
-.fm26 {
-	@extend .f26;
-	&:before { clip-path: $m026; }
+.fm30 {
+	@extend .f30;
+	&:before { clip-path: $m030; }
 }
 .fm126 {
 	@extend .f126;
