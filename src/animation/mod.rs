@@ -442,7 +442,6 @@ impl Animation {
 			self,
 			Self::BlackSheepChase |
 			Self::ChaseAMartian |
-			Self::Hydroplane |
 			Self::Run |
 			Self::SneezeShadow |
 			Self::Tornado |
