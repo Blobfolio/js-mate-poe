@@ -21,7 +21,7 @@ use std::sync::atomic::{
 
 
 #[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 97; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 100; // The highest Animation ID.
 
 
 
@@ -54,8 +54,9 @@ pub(crate) enum Animation {
 	BeamIn,
 	Beg,
 	BigFish,
+	BlackSheepCatch,
+	BlackSheepCatchFail,
 	BlackSheepChase,
-	BlackSheepSkip,
 	BlackSheepRomance,
 	Bleat,
 	Blink,
@@ -137,9 +138,11 @@ pub(crate) enum Animation {
 	AbductionChild,
 	BathDiveChild,
 	BigFishChild,
+	BlackSheepCatchChild,
+	BlackSheepCatchExitChild,
+	BlackSheepCatchFailChild,
+	BlackSheepCatchFailExitChild,
 	BlackSheepChaseChild,
-	BlackSheepSkipChild,
-	BlackSheepSkipExitChild,
 	BlackSheepRomanceChild,
 	ChaseAMartianChild,
 	Flower,
@@ -183,20 +186,21 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 19 } else { 13 }) {
+			let next = match Universe::rand_mod(if first { 21 } else { 14 }) {
 				0 => Self::BathDive,
 				1 => Self::BeamIn,
 				2 => Self::BigFish,
-				3 => Self::BlackSheepChase,
-				4 => Self::BlackSheepRomance,
-				5 => Self::BlackSheepSkip,
-				6 => Self::ClimbIn,
-				7 => Self::FloatIn,
-				8 => Self::Gopher,
-				9 => Self::JumpIn,
-				10 => Self::SlideIn,
-				11 => Self::Stargaze,
-				12 => Self::Yoyo,
+				3 => Self::BlackSheepCatch,
+				4 => Self::BlackSheepCatchFail,
+				5 => Self::BlackSheepChase,
+				6 => Self::BlackSheepRomance,
+				7 => Self::ClimbIn,
+				8 => Self::FloatIn,
+				9 => Self::Gopher,
+				10 => Self::JumpIn,
+				11 => Self::SlideIn,
+				12 => Self::Stargaze,
+				13 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
@@ -233,12 +237,14 @@ impl Animation {
 			Self::Beg => "Beg",
 			Self::BigFish => "Big Fish",
 			Self::BigFishChild => "Big Fish (Child)",
+			Self::BlackSheepCatch => "Black Sheep Catch",
+			Self::BlackSheepCatchChild | Self::BlackSheepCatchExitChild => "Black Sheep Catch (Child)",
+			Self::BlackSheepCatchFail => "Black Sheep (Almost) Catch",
+			Self::BlackSheepCatchFailChild | Self::BlackSheepCatchFailExitChild => "Black Sheep (Almost) Catch (Child)",
 			Self::BlackSheepChase => "Black Sheep Chase",
 			Self::BlackSheepChaseChild => "Black Sheep Chase (Child)",
 			Self::BlackSheepRomance => "Black Sheep Romance",
 			Self::BlackSheepRomanceChild => "Black Sheep Romance (Child)",
-			Self::BlackSheepSkip => "Black Sheep Skip",
-			Self::BlackSheepSkipChild | Self::BlackSheepSkipExitChild => "Black Sheep Skip(Child)",
 			Self::Bleat => "Bleat",
 			Self::Blink => "Blink",
 			Self::Boing => "Boing!",
@@ -332,9 +338,10 @@ impl Animation {
 			Self::BeamIn |
 			Self::Beg |
 			Self::BigFish |
+			Self::BlackSheepCatch |
+			Self::BlackSheepCatchFail |
 			Self::BlackSheepChase |
 			Self::BlackSheepRomance |
-			Self::BlackSheepSkip |
 			Self::Bleat |
 			Self::Blink |
 			Self::ChaseAMartian |
@@ -405,7 +412,7 @@ impl Animation {
 	pub(crate) const fn css_class(self) -> i8 {
 		match self {
 			Self::Drag => 1,
-			Self::SneezeShadow => 2,
+			Self::BlackSheepCatchChild | Self::SneezeShadow => 2,
 			Self::Abduction => 3,
 			Self::BigFishChild => 4,
 			Self::SplatGhost => 5,
@@ -418,6 +425,7 @@ impl Animation {
 			Self::Yoyo => 12,
 			Self::BeamIn => 13,
 			Self::Glitch => 14,
+			Self::BlackSheepCatchExitChild => 15,
 			_ => -1,
 		}
 	}
@@ -429,7 +437,10 @@ impl Animation {
 	pub(crate) const fn flip_x(self) -> bool {
 		matches!(
 			self,
-			Self::BlackSheepChaseChild | Self::BlackSheepSkip | Self::ReachSide2
+			Self::BlackSheepCatch |
+			Self::BlackSheepCatchFail |
+			Self::BlackSheepChaseChild |
+			Self::ReachSide2
 		)
 	}
 
@@ -463,9 +474,10 @@ impl Animation {
 			Self::BeamIn |
 			Self::Beg |
 			Self::BigFish |
+			Self::BlackSheepCatch |
+			Self::BlackSheepCatchFail |
 			Self::BlackSheepChase |
 			Self::BlackSheepRomance |
-			Self::BlackSheepSkip |
 			Self::Bleat |
 			Self::Blink |
 			Self::Boing |
@@ -551,9 +563,10 @@ impl Animation {
 			Self::Abduction => Some(Self::AbductionChild),
 			Self::BathDive => Some(Self::BathDiveChild),
 			Self::BigFish => Some(Self::BigFishChild),
+			Self::BlackSheepCatch => Some(Self::BlackSheepCatchChild),
+			Self::BlackSheepCatchFail => Some(Self::BlackSheepCatchFailChild),
 			Self::BlackSheepChase => Some(Self::BlackSheepChaseChild),
 			Self::BlackSheepRomance => Some(Self::BlackSheepRomanceChild),
-			Self::BlackSheepSkip => Some(Self::BlackSheepSkipChild),
 			Self::ChaseAMartian => Some(Self::ChaseAMartianChild),
 			Self::Eat => Some(Self::Flower),
 			Self::EatMagicFlower => Some(Self::MagicFlower1),
@@ -616,12 +629,14 @@ impl Animation {
 				if 0 == Universe::rand_mod(3) { Self::Sneeze }
 				else { Self::Walk }
 			),
+			Self::BlackSheepCatch => Some(Self::Skip),
+			Self::BlackSheepCatchChild => Some(Self::BlackSheepCatchExitChild),
+			Self::BlackSheepCatchFail => Some(Self::LayDown),
+			Self::BlackSheepCatchFailChild => Some(Self::BlackSheepCatchFailExitChild),
 			Self::BlackSheepChase |
 				Self::JumpInLanding |
 				Self::LegLifts |
 				Self::Scream => Some(Self::Run),
-			Self::BlackSheepSkip => Some(Self::LayDown),
-			Self::BlackSheepSkipChild => Some(Self::BlackSheepSkipExitChild),
 			Self::Boing => Some(match Universe::rand_mod(10) {
 				0..=7 => Self::Rotate,
 				8 => Self::Shake,
@@ -761,13 +776,16 @@ impl Animation {
 			Self::Beg => fixed!(BEG),
 			Self::BigFish => fixed!(BIG_FISH),
 			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
+			Self::BlackSheepCatch => fixed!(BLACK_SHEEP_CATCH),
+			Self::BlackSheepCatchChild => fixed!(BLACK_SHEEP_CATCH_CHILD),
+			Self::BlackSheepCatchExitChild => fixed!(BLACK_SHEEP_CATCH_EXIT_CHILD),
+			Self::BlackSheepCatchFail => fixed!(BLACK_SHEEP_CATCH_FAIL),
+			Self::BlackSheepCatchFailChild => fixed!(BLACK_SHEEP_CATCH_FAIL_CHILD),
+			Self::BlackSheepCatchFailExitChild => scenes::black_sheep_catch_fail_exit_child(width),
 			Self::BlackSheepChase => scenes::black_sheep_chase(width),
 			Self::BlackSheepChaseChild => scenes::black_sheep_chase_child(width),
 			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
 			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
-			Self::BlackSheepSkip => fixed!(BLACK_SHEEP_SKIP),
-			Self::BlackSheepSkipChild => fixed!(BLACK_SHEEP_SKIP_CHILD),
-			Self::BlackSheepSkipExitChild => scenes::black_sheep_skip_exit_child(width),
 			Self::Bleat => fixed!(BLEAT),
 			Self::Blink => fixed!(BLINK),
 			Self::Boing => fixed!(BOING),

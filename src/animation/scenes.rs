@@ -209,8 +209,71 @@ pub(super) const BIG_FISH_CHILD: &[Scene] = &[
 		.with_flags(Scene::IGNORE_EDGES),
 ];
 
-/// # For `Animation::BlackSheepSkip`.
-pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
+/// # For `Animation::BlackSheepCatch`.
+pub(super) const BLACK_SHEEP_CATCH: &[Scene] = &[
+	ENTRANCE_DELAY,
+	Scene::new(60, &[Frame::None])
+		.with_repeat(17, 0)
+		.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	JUMP[0],
+	JUMP[1],
+	SLIDE[0],
+	Scene::new(100, &[Frame::F030, Frame::F033])
+		.with_flags(Scene::GRAVITY),
+	// Rotate (slightly faster than usual).
+	Scene::new(100, &[Frame::F003, Frame::F012, Frame::F013])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+	Scene::new(100, &[Frame::F012, Frame::F003])
+		.with_flags(Scene::GRAVITY),
+	LOOK_DOWN[0],
+	// Rotate (slightly faster than usual).
+	Scene::new(100, &[Frame::F003, Frame::F012, Frame::F013])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+	Scene::new(100, &[Frame::F012, Frame::F003])
+		.with_flags(Scene::GRAVITY),
+	LOOK_DOWN[0],
+	// Trigger orientation reset since this animation is flipped.
+	Scene::new(250, &[Frame::F003])
+		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
+];
+
+/// # For `Animation::BlackSheepCatchChild`.
+pub(super) const BLACK_SHEEP_CATCH_CHILD: &[Scene] = &[
+	ENTRANCE_DELAY,
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
+		.with_move_to(Position::new(4, -1))
+		.with_flags(Scene::IGNORE_EDGES),
+	Scene::new(60, &[Frame::F135, Frame::F135, Frame::F135])
+		.with_move_to(Position::new(4, 1))
+		.with_flags(Scene::IGNORE_EDGES),
+];
+
+/// # For `Animation::BlackSheepCatchExitChild`.
+pub(super) const BLACK_SHEEP_CATCH_EXIT_CHILD: &[Scene] = &[
+	Scene::new(1000, &[Frame::F136, Frame::F136, Frame::F136, Frame::None])
+		.with_flags(Scene::GRAVITY),
+];
+
+/// # For `Animation::BlackSheepCatchFail`.
+pub(super) const BLACK_SHEEP_CATCH_FAIL: &[Scene] = &[
 	ENTRANCE_DELAY,
 	Scene::new(60, &[Frame::None])
 		.with_repeat(20, 0)
@@ -218,6 +281,8 @@ pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
 	JUMP[0],
 	JUMP[1],
 	SLIDE[0],
+	Scene::new(100, &[Frame::F030, Frame::F033])
+		.with_flags(Scene::GRAVITY),
 	Scene::new(100, &[Frame::F002, Frame::F003])
 		.with_move_to(Position::new(-2, 0))
 		.with_repeat(5, 0)
@@ -231,8 +296,8 @@ pub(super) const BLACK_SHEEP_SKIP: &[Scene] = &[
 		.with_flags(Scene::FLIP_X_NEXT | Scene::GRAVITY),
 ];
 
-/// # For `Animation::BlackSheepSkipChild`.
-pub(super) const BLACK_SHEEP_SKIP_CHILD: &[Scene] = &[
+/// # For `Animation::BlackSheepCatchFailChild`.
+pub(super) const BLACK_SHEEP_CATCH_FAIL_CHILD: &[Scene] = &[
 	ENTRANCE_DELAY,
 	Scene::new(60, &[Frame::F134, Frame::F134, Frame::F134])
 		.with_move_to(Position::new(4, -1))
@@ -1283,6 +1348,21 @@ pub(super) const YOYO: &[Scene] = &[
 		.with_flags(Scene::EASE_OUT | Scene::IGNORE_EDGES),
 ];
 
+/// # For `Animation::BlackSheepCatchFailExitChild`.
+pub(super) const fn black_sheep_catch_fail_exit_child(w: u16) -> SceneList {
+	let repeat = (w + Frame::SIZE).wrapping_div(32);
+
+	SceneList::new(SceneListKind::Dynamic1([
+		Scene::new(30, &[
+			Frame::F134, Frame::F134, Frame::F134, Frame::F133,
+			Frame::F133, Frame::F133, Frame::F133, Frame::F133,
+		])
+			.with_move_to(Position::new(4, 0))
+			.with_repeat(repeat, 0)
+			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
+	]))
+}
+
 /// # For `Animation::BlackSheepChase`.
 pub(super) const fn black_sheep_chase(w: u16) -> SceneList {
 	let repeat = (w + Frame::SIZE * 4).wrapping_div(32) + 1;
@@ -1312,21 +1392,6 @@ pub(super) const fn black_sheep_chase_child(w: u16) -> SceneList {
 
 	SceneList::new(SceneListKind::Dynamic2([
 		ENTRANCE_DELAY,
-		Scene::new(30, &[
-			Frame::F134, Frame::F134, Frame::F134, Frame::F133,
-			Frame::F133, Frame::F133, Frame::F133, Frame::F133,
-		])
-			.with_move_to(Position::new(4, 0))
-			.with_repeat(repeat, 0)
-			.with_flags(Scene::GRAVITY | Scene::IGNORE_EDGES),
-	]))
-}
-
-/// # For `Animation::BlackSheepSkipExitChild`.
-pub(super) const fn black_sheep_skip_exit_child(w: u16) -> SceneList {
-	let repeat = (w + Frame::SIZE).wrapping_div(32);
-
-	SceneList::new(SceneListKind::Dynamic1([
 		Scene::new(30, &[
 			Frame::F134, Frame::F134, Frame::F134, Frame::F133,
 			Frame::F133, Frame::F133, Frame::F133, Frame::F133,

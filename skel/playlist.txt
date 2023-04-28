@@ -3,52 +3,53 @@
 #3   Beam In
 #4   Beg
 #5   Big Fish
-#6   Black Sheep Chase
-#7   Black Sheep Skip
-#8   Black Sheep Romance
-#9   Bleat
-#10  Blink
-#11  Chase a Martian
-#12  Climb In
-#13  Cry
-#14  Dance
-#15  Eat
-#16  Eat (Magic Flower)
-#17  Float In
-#18  Glitch
-#19  Gopher
-#20  Handstand
-#21  Hop
-#22  Jump
-#23  Jump In
-#24  Lay Down
-#25  Leg Lifts
-#26  Look Down
-#27  Look Up
-#28  Nah…
-#29  Play Dead
-#30  Popcorn
-#31  Really?!
-#32  Rest
-#33  Roll
-#34  Rotate
-#35  Run
-#36  Scoot
-#37  Scratch
-#38  Scream
-#39  Shadow Showdown
-#40  Shake
-#41  Skip
-#42  Sleep
-#43  Sleep (Sitting)
-#44  Sleep (Standing)
-#45  Slide
-#46  Slide In
-#47  Sneeze
-#48  Spin
-#49  Stargaze
-#50  Tornado
-#51  Urinate
-#52  Walk
-#53  Yawn
-#54  Yo-Yo
+#6   Black Sheep Catch
+#7   Black Sheep (Almost) Catch
+#8   Black Sheep Chase
+#9   Black Sheep Romance
+#10  Bleat
+#11  Blink
+#12  Chase a Martian
+#13  Climb In
+#14  Cry
+#15  Dance
+#16  Eat
+#17  Eat (Magic Flower)
+#18  Float In
+#19  Glitch
+#20  Gopher
+#21  Handstand
+#22  Hop
+#23  Jump
+#24  Jump In
+#25  Lay Down
+#26  Leg Lifts
+#27  Look Down
+#28  Look Up
+#29  Nah…
+#30  Play Dead
+#31  Popcorn
+#32  Really?!
+#33  Rest
+#34  Roll
+#35  Rotate
+#36  Run
+#37  Scoot
+#38  Scratch
+#39  Scream
+#40  Shadow Showdown
+#41  Shake
+#42  Skip
+#43  Sleep
+#44  Sleep (Sitting)
+#45  Sleep (Standing)
+#46  Slide
+#47  Slide In
+#48  Sneeze
+#49  Spin
+#50  Stargaze
+#51  Tornado
+#52  Urinate
+#53  Walk
+#54  Yawn
+#55  Yo-Yo

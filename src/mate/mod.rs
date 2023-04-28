@@ -263,6 +263,14 @@ impl Mate {
 					h - Frame::SIZE_I,
 				)),
 			Animation::BigFishChild => Some(Position::new(w + 50, h + 35)),
+				Animation::BlackSheepCatch |
+				Animation::BlackSheepCatchChild |
+				Animation::BlackSheepCatchFail |
+				Animation::BlackSheepCatchFailChild |
+				Animation::SlideIn => Some(Position::new(
+					-Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepChase |
 				Animation::ChaseAMartian => Some(Position::new(
 					w + Frame::SIZE_I * 3,
@@ -272,12 +280,6 @@ impl Mate {
 				Animation::BlackSheepRomance |
 				Animation::ChaseAMartianChild => Some(Position::new(
 					w + Frame::SIZE_I,
-					h - Frame::SIZE_I,
-				)),
-			Animation::BlackSheepSkip |
-				Animation::BlackSheepSkipChild |
-				Animation::SlideIn => Some(Position::new(
-					-Frame::SIZE_I,
 					h - Frame::SIZE_I,
 				)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(

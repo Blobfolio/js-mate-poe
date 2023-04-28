@@ -69,10 +69,12 @@
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
 
-// Animation: SneezeShadow, and ShadowShowdownChild(ren).
+// Animation: BlackSheepCatchChild(ren), SneezeShadow, and
+// ShadowShowdownChild(ren).
 #p.a2,
 #p.a9,
-#p.aa { z-index: 2147483646; }
+#p.aa,
+#p.af { z-index: 2147483646; }
 
 // Animation: Abduction.
 #p.a3 { animation: a3 0.25s 4s 28; }
@@ -143,6 +145,14 @@
 
 	background-color: lawngreen;
 	animation: ae 1s step-end;
+}
+
+// Animation: BlackSheepCatchExitChild.
+#p.af {
+	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
+	opacity: 0;
+	transform: $pos scaleY(0.1);
+	transform-origin: bottom;
 }
 
 // Color-shift the sprite to make the abduction more dramatic.
