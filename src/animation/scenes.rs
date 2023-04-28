@@ -1080,11 +1080,15 @@ pub(super) const SLEEP_STANDING: &[Scene] = &[
 /// # For `Animation::Slide`.
 pub(super) const SLIDE: &[Scene] = &[
 	Scene::new(100, &[
-		Frame::F031, Frame::F030, Frame::F030, Frame::F030, Frame::F030,
-		Frame::F030, Frame::F033, Frame::F003, Frame::F003, Frame::F003,
-		Frame::F003,
+		Frame::F031, Frame::F030, Frame::F030, Frame::F030,
+		Frame::F030, Frame::F030,
 	])
 		.with_move_to(Position::new(-2, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(100, &[
+		Frame::F030, Frame::F033, Frame::F003,
+		Frame::F003, Frame::F003, Frame::F003,
+	])
 		.with_flags(Scene::GRAVITY),
 ];
 
