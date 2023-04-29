@@ -164,8 +164,9 @@
 // This fades out the ghost and shadow sprites _before_ their special classes
 // are removed to prevent the loss of their filters/etc. while still visible.
 @keyframes a5 {
-	from { opacity: 0.5; }
-	to { opacity: 0; }
+	0% { opacity: 0.5; }
+	50% { opacity: 0.5; }
+	100% { opacity: 0; }
 }
 
 // Spin and spin!
