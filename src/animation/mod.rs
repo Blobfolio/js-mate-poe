@@ -426,6 +426,7 @@ impl Animation {
 			Self::BeamIn => 13,
 			Self::Glitch => 14,
 			Self::BlackSheepCatchExitChild => 15,
+			Self::BathDiveChild => 16,
 			_ => -1,
 		}
 	}

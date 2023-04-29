@@ -145,11 +145,14 @@
 
 // Animation: BlackSheepCatchExitChild.
 #p.af {
-	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
 	opacity: 0;
+	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
 	transform: $pos scaleY(0.1);
 	transform-origin: bottom;
 }
+
+// Animation: BathDiveChild.
+#p.ag { transition: opacity 0.5s 1.25s ease; }
 
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {

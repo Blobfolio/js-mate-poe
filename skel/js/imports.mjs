@@ -145,6 +145,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 		list.toggle('a9',  9 === scene); // ShadowShodown1.
 		list.toggle('aa', 10 === scene); // ShadowShodown2.
 		list.toggle('af', 15 === scene); // BlackSheepCatchExitChild.
+		list.toggle('ag', 16 === scene); // BathDiveChild.
 	}
 	// Primary-only classes.
 	else {
