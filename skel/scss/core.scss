@@ -126,7 +126,6 @@
 
 // Animation: BeamIn.
 #p.ad {
-	filter: none;
 	animation: ad 0.5s 3.5s forwards;
 	& > #i { animation: iad 2.5s 1s linear; }
 }
@@ -171,14 +170,12 @@
 
 // Spin and spin!
 @keyframes ac {
-	from { transform: $pos rotate(0deg); }
 	to { transform: $pos rotate(359deg); }
 }
 
 // Grow a pink drop-shadow.
 @keyframes ad {
-	from { filter: none; }
-	to { filter: drop-shadow(0 0 10px #ff1493); }
+	to   { filter: drop-shadow(0 0 10px #ff1493); }
 }
 
 // Reveal top/down.
