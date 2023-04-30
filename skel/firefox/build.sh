@@ -63,6 +63,7 @@ cd ..
 google-closure-compiler \
 	--env BROWSER \
 	--language_in STABLE \
+	--js "js/is_real_object.mjs" \
 	--js "js/settings.mjs" \
 	--js "js/background.mjs" \
 	--entry_point "js/background.mjs" \
@@ -82,6 +83,7 @@ sed -i "s/* JS Mate Poe/* JS Mate Poe: Background/g" dist/background.js
 google-closure-compiler \
 	--env BROWSER \
 	--language_in STABLE \
+	--js "js/is_real_object.mjs" \
 	--js "js/settings.mjs" \
 	--js "js/options.mjs" \
 	--entry_point "js/options.mjs" \
@@ -101,6 +103,7 @@ sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options/options.js
 google-closure-compiler \
 	--env BROWSER \
 	--language_in STABLE \
+	--js "js/is_real_object.mjs" \
 	--js "js/generated/glue.mjs" \
 	--js "js/foreground.mjs" \
 	--entry_point "js/foreground.mjs" \

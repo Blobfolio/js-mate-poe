@@ -754,6 +754,10 @@ fn make_element(primary: bool) -> Element {
 	// Create the main element, its shadow DOM, and its shadow elements.
 	let el = document.create_element("div").expect_throw("!");
 	el.set_attribute("aria-hidden", "true").expect_throw("!");
+	el.set_class_name("js-mate-poe-mate");
+
+	#[cfg(feature = "firefox")]
+	el.set_attribute("data-from", "firefox").expect_throw("!");
 
 	// Create its stylesheet.
 	let style = document.create_element("style").expect_throw("!");

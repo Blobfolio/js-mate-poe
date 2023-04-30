@@ -51,11 +51,7 @@ default = []
 
 # The Firefox browser extension handles audio differently, and has no dblclick
 # event listener. Note: do not enable this in conjunction with other features!
-firefox = [
-	"web-sys/MutationObserver",
-	"web-sys/MutationObserverInit",
-	"web-sys/Node",
-]
+firefox = ["web-sys/Node"]
 
 # The director mode exposes additional browserland methods to make it easier to
 # preview and debug animations, like Poe.list, Poe.play, and Poe.speed.

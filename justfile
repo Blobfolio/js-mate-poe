@@ -178,8 +178,8 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/img/poe.png" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 	cp "{{ skel_dir }}/img/poe.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 	cp "{{ skel_dir }}/js/imports.mjs" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
-	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/scss"
-	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust/src"
+	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
+	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust"
 
 	# Fix the permissions and ownership.
 	just _fix-chown "{{ dist_dir }}/js-mate-poe_firefox"

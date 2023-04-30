@@ -1,4 +1,10 @@
 /**
+ * @file Firefox Extension: Settings.
+ */
+
+import { isRealObject } from './is_real_object.mjs';
+
+/**
  * Sanitize Settings.
  *
  * @param {Object} val Settings.
@@ -11,7 +17,7 @@ export const sanitizeSettings = function(val) {
 	};
 
 	// Copy valid properties from the source, if any.
-	if ((null !== val) && 'object' === typeof val) {
+	if (isRealObject(val)) {
 		if ('undefined' !== typeof val.active) { out.active = !! val.active; }
 		if ('undefined' !== typeof val.audio) { out.audio = !! val.audio; }
 	}

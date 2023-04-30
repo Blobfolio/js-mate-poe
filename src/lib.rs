@@ -132,6 +132,14 @@ impl Poe {
 #[wasm_bindgen]
 /// ## Setters.
 impl Poe {
+	#[cfg(feature = "firefox")]
+	#[wasm_bindgen]
+	/// # Set Fix Bindings Flag.
+	///
+	/// This hints to the state that it should try to rebind the mate elements
+	/// to the document body.
+	pub fn fix_bindings() { Universe::set_fix_bindings(); }
+
 	#[wasm_bindgen(setter)]
 	#[inline]
 	/// # Set Active.
