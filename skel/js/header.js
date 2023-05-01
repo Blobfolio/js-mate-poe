@@ -1,6 +1,6 @@
 /**
  * JS Mate Poe
  *
- * @version 1.4.10
+ * @version 1.5.0
  * @see {{https://github.com/Blobfolio/js-mate-poe}}
  */
