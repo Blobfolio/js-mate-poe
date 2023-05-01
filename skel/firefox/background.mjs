@@ -6,6 +6,7 @@
  * synchronizes state changes with all the tabs.
  */
 
+import { isRealObject } from './is_real_object.mjs';
 import { getSettings, sanitizeSettings, saveSettings } from './settings.mjs';
 
 /**
@@ -21,10 +22,8 @@ import { getSettings, sanitizeSettings, saveSettings } from './settings.mjs';
  */
 const syncOne = async function(tab, settings) {
 	// Handle settings.
-	if ((null === settings) || ('object' !== typeof settings)) {
-		settings = await getSettings();
-	}
-	else { settings = sanitizeSettings(settings); }
+	if (isRealObject(settings)) { settings = sanitizeSettings(settings); }
+	else { settings = await getSettings(); }
 	settings.action = 'poeFgSync';
 
 	try {
@@ -77,10 +76,8 @@ const syncOne = async function(tab, settings) {
  */
 const syncAll = async function(settings) {
 	// Handle settings.
-	if ((null === settings) || ('object' !== typeof settings)) {
-		settings = await getSettings();
-	}
-	else { settings = sanitizeSettings(settings); }
+	if (isRealObject(settings)) { settings = sanitizeSettings(settings); }
+	else { settings = await getSettings(); }
 
 	// Call all tabs.
 	const tabs = await browser.tabs.query({url: ['http://*/*', 'https://*/*']});
@@ -123,7 +120,7 @@ browser.pageAction.onClicked.addListener(function() {
  * @return {boolean} False.
  */
 browser.runtime.onMessage.addListener(function(m, sender) {
-	if ((null !== m) && ('object' === typeof m)) {
+	if (isRealObject(m)) {
 		if ('poeBgNewConnection' === m.action) {
 			syncOne(sender.tab.id).catch((e) => {});
 		}
@@ -134,20 +131,6 @@ browser.runtime.onMessage.addListener(function(m, sender) {
 
 	// We don't need to wait for a response.
 	return false;
-});
-
-/**
- * Pre-Update Cleanup.
- *
- * This attempts to stop any running instances of Poe so that their elements
- * can be cleaned up before Firefox nukes their content scripts.
- *
- * @return {void} Nothing.
- */
-browser.runtime.onUpdateAvailable.addListener(function() {
-	syncAll({ active: false }).then(() => {
-		browser.runtime.reload();
-	});
 });
 
 /**

@@ -221,7 +221,7 @@ impl Mate {
 		// it.
 		let animation_exit = animation.may_exit();
 		if animation_changed || ! animation_exit { self.flags.set_may_exit(false); }
-		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand_mod(15) {
+		if animation_exit && ! self.flags.may_exit() && 0 == Universe::rand_mod(25) {
 			self.flags.set_may_exit(true);
 		}
 
@@ -263,6 +263,14 @@ impl Mate {
 					h - Frame::SIZE_I,
 				)),
 			Animation::BigFishChild => Some(Position::new(w + 50, h + 35)),
+				Animation::BlackSheepCatch |
+				Animation::BlackSheepCatchChild |
+				Animation::BlackSheepCatchFail |
+				Animation::BlackSheepCatchFailChild |
+				Animation::SlideIn => Some(Position::new(
+					-Frame::SIZE_I,
+					h - Frame::SIZE_I,
+				)),
 			Animation::BlackSheepChase |
 				Animation::ChaseAMartian => Some(Position::new(
 					w + Frame::SIZE_I * 3,
@@ -274,17 +282,15 @@ impl Mate {
 					w + Frame::SIZE_I,
 					h - Frame::SIZE_I,
 				)),
-			Animation::BlackSheepSkip |
-				Animation::BlackSheepSkipChild |
-				Animation::SlideIn => Some(Position::new(
-					-Frame::SIZE_I,
-					h - Frame::SIZE_I,
-				)),
 			Animation::BlackSheepRomanceChild => Some(Position::new(
 				-Frame::SIZE_I * 2,
 				h - Frame::SIZE_I,
 			)),
 			Animation::ClimbIn => Some(Position::new(0, h)),
+			Animation::JumpIn => Some(Position::new(
+				w,
+				h - 149 - Frame::SIZE_I,
+			)),
 			Animation::StargazeChild => Some(Position::new(
 				-Frame::SIZE_I,
 				Frame::SIZE_I * 2,
@@ -748,6 +754,10 @@ fn make_element(primary: bool) -> Element {
 	// Create the main element, its shadow DOM, and its shadow elements.
 	let el = document.create_element("div").expect_throw("!");
 	el.set_attribute("aria-hidden", "true").expect_throw("!");
+	el.set_class_name("js-mate-poe-mate");
+
+	#[cfg(feature = "firefox")]
+	el.set_attribute("data-from", "firefox").expect_throw("!");
 
 	// Create its stylesheet.
 	let style = document.create_element("style").expect_throw("!");

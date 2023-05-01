@@ -62,17 +62,19 @@
 #p.rx { transform: $pos scaleX(-1); }
 
 // Masks.
-#p.m016 { clip-path: $m016; }
-#p.m026 { clip-path: $m026; }
+#p.m024 { clip-path: $m024; }
+#p.m082 { clip-path: $m082; }
 #p.m126 { clip-path: $m126; }
 
 // Animation: Dragging.
 #p.a1 { cursor: grabbing; }
 
-// Animation: SneezeShadow, and ShadowShowdownChild(ren).
+// Animation: BlackSheepCatchChild(ren), SneezeShadow, and
+// ShadowShowdownChild(ren).
 #p.a2,
 #p.a9,
-#p.aa { z-index: 2147483646; }
+#p.aa,
+#p.af { z-index: 2147483646; }
 
 // Animation: Abduction.
 #p.a3 { animation: a3 0.25s 4s 28; }
@@ -124,7 +126,6 @@
 
 // Animation: BeamIn.
 #p.ad {
-	filter: none;
 	animation: ad 0.5s 3.5s forwards;
 	& > #i { animation: iad 2.5s 1s linear; }
 }
@@ -132,18 +133,26 @@
 // Animation: Glitch.
 #p.ae:after {
 	content: '';
-	opacity: 0;
 
 	position: absolute;
-	top: 20px;
-	left: 20px;
+	inset: 0;
 
-	width: 20px;
-	height: 20px;
+	clip-path: inset(0 0 100% 0);
+	mix-blend-mode: screen;
 
-	background-color: lawngreen;
 	animation: ae 1s step-end;
 }
+
+// Animation: BlackSheepCatchExitChild.
+#p.af {
+	opacity: 0;
+	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
+	transform: $pos scaleY(0.1);
+	transform-origin: bottom;
+}
+
+// Animation: BathDiveChild.
+#p.ag { transition: opacity 0.5s 1.25s ease; }
 
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {
@@ -154,56 +163,45 @@
 // This fades out the ghost and shadow sprites _before_ their special classes
 // are removed to prevent the loss of their filters/etc. while still visible.
 @keyframes a5 {
-	from { opacity: 0.5; }
-	to { opacity: 0; }
+	0%   { opacity: 0.5; }
+	50%  { opacity: 0.5; }
+	100% { opacity: 0; }
 }
 
 // Spin and spin!
 @keyframes ac {
-	from { transform: $pos rotate(0deg); }
 	to { transform: $pos rotate(359deg); }
 }
 
 // Grow a pink drop-shadow.
 @keyframes ad {
-	from { filter: none; }
-	to { filter: drop-shadow(0 0 10px #ff1493); }
+	to   { filter: drop-shadow(0 0 10px #ff1493); }
 }
 
 // Reveal top/down.
 @keyframes iad {
 	from { clip-path: inset(0 0 100% 0); }
-	to { clip-path: inset(0 0 0 0); }
+	to   { clip-path: inset(0 0 0 0); }
 }
 
 // Jiggle the glitch boxes around.
 @keyframes ae {
-	5% { opacity: 1; }
-	10% { opacity: 0; }
-	15% { opacity: 1; }
-	20% { opacity: 0; }
+	5%  {
+		clip-path: inset(100% 0 30% 70%);
+		background-color: fuchsia;
+	}
+	20% { clip-path: inset(0 0 100% 0); }
 	25% {
-		top: 0;
-		left: 0;
-		width: 10px;
-		height: 10px;
-		opacity: 1;
-		background-color: red;
+		clip-path: inset(25% 75% 100% 0);
+		background-color: lawngreen;
 	}
-	45% { opacity: 0; }
-	55% {
-		top: 5px;
-		left: 15px;
-		opacity: 1;
-		background-color: blue;
+	45% {
+		clip-path: inset(0 0 100% 0);
+		background-color: aqua;
 	}
-	85% { opacity: 0; }
-	90% {
-		top: 10px;
-		left: 0;
-		width: 30px;
-		height: 30px;
-		opacity: 1;
+	55% { clip-path: inset(35% 55% 90% 20%); }
+	85% {
+		clip-path: inset(100% 25% 75% 0);
 		background-color: fuchsia;
 	}
 }

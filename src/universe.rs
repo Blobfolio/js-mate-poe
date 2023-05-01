@@ -99,6 +99,8 @@ impl Universe {
 	const ASSIGN_CHILD: u8 =  0b0000_1000; // The primary mate needs a child animation.
 	const NO_CHILD: u8 =      0b0001_0000; // Children must be stopped!
 	const STATE: u8 =         0b0010_0000; // State is active.
+	#[cfg(feature = "firefox")]
+	const FIX_BINDINGS: u8 =  0b0100_0000; // Body element bindings were lost.
 }
 
 macro_rules! get {
@@ -123,6 +125,17 @@ impl Universe {
 	pub(crate) fn assign_child() -> bool {
 		let old = FLAGS.fetch_and(! Self::ASSIGN_CHILD, SeqCst);
 		Self::ASSIGN_CHILD == old & Self::ASSIGN_CHILD
+	}
+
+	#[cfg(feature = "firefox")]
+	/// # Fix Element Bindings?
+	///
+	/// Returns `true` if one or both elements seem to have disappeared from
+	/// the document body since the last time this method was called.
+	pub(crate) fn fix_bindings() -> bool {
+		let old = FLAGS.fetch_and(! Self::FIX_BINDINGS, SeqCst);
+		let expected = Self::FIX_BINDINGS | Self::ACTIVE;
+		expected == old & expected
 	}
 
 	/// # Stop Child Animations?
@@ -259,6 +272,12 @@ impl Universe {
 		if Self::NO_CHILD == FLAGS.fetch_or(Self::ASSIGN_CHILD, SeqCst) & Self::NO_CHILD {
 			FLAGS.fetch_and(! Self::NO_CHILD, SeqCst);
 		}
+	}
+
+	#[cfg(feature = "firefox")]
+	/// # Require Element Re-Binding.
+	pub(crate) fn set_fix_bindings() {
+		if Self::active() { FLAGS.fetch_or(Self::FIX_BINDINGS, SeqCst); }
 	}
 
 	/// # Set No Child Flag.

@@ -59,7 +59,19 @@ To install it, simply click the `js-mate-poe_firefox_#.#.#.xpi` package link fro
 
 Firefox should prompt you to install it then and there, but if you end up downloading the file, you can either double-click it, or go to the "Manage Your Extensions" settings page (`about:addons`), click the gear/settings icon, and select "Install Add-on From File".
 
-Once installed, look for the little sheep icon in the URL bar — visible on regular pages, not settings pages — and click that to turn Poe on or off.
+Once installed, look for the little sheep icon in the URL bar — visible on all _regular_ pages (but not local or settings-type stuff) — and click that to turn Poe on or off.
+
+If you want to allow audio — see also the [known issues](#known-issues) section below — you can enable that from the add-on's preferences tab. (Sound is disabled by default.)
+
+#### Permissions
+
+Browser extension permissions lack _nuance_, and as such, JS Mate Poe technically requires "access [to] your data on all sites" in order to run.
+
+To be clear, it **does not** give two bleats about your personal data or browsing history, but because DOM access is an all-or-nothing proposition, is has to ask for EVERYTHING to be able to do anything. 😕
+
+In actuality, all JS Mate Poe needs from the DOM is an ability to add and manipulate its _own_ page elements — the sheep — and query _relevant_ environmental details like the current window size.
+
+The alarmist phrasing is unfortunate, but is what it is.
 
 
 &nbsp;
@@ -89,6 +101,46 @@ console.log(Poe.active);
 ```
 
 Short and sweet!
+
+
+&nbsp;
+## Known Issues
+
+The Internet is a good habitat for Poe, but not a _perfect_ one. There are a few quirks he has to live with, at least for the time being. Before reporting an issue, please double-check it isn't listed below.
+
+| Issue | Library | Extension |
+| ----- | ------- | --------- |
+| [Frozen/Duplicate Poe](#frozenduplicate-poe) | | X |
+| [No Audio](#no-audio) | X | X |
+| [No Auto-Updates](#no-auto-updates) | | X |
+
+
+### Frozen/Duplicate Poe Instance
+
+Firefox kills any active instances of an add-on before applying an update, but does not reload the page(s) it was running on, effectively orphaning any elements — like sheep! — it may have been managing.
+
+If Poe happens to be running around your screen when such an update occurs, he may freeze in place as the old controlling script is nuked, and be joined by a second Poe shortly thereafter launched by the new controlling script.
+
+A workaround has been added to `1.5.0` to fix the issue for _subsequent_ updates (`1.5.1`, etc.), but until then, it is what it is.
+
+To return to normalcy, simply reload the affected page(s).
+
+(Poe will also freeze if you disable the extension entirely while it is active. A reload will always be necessary to recover from that.)
+
+
+### No Audio
+
+Browsers automatically block autoplaying audio to protect users from disruptive advertisements and SPAM. This is a sound decision 😜, but unfortunately means that even when Poe's audio option is enabled, it might not actually be _allowed_ to make any noise.
+
+The only workaround for this is to click somewhere — anywhere — on the page. (Browsers aren't smart enough to recognize PLAY buttons, so have to assume that any sort of click might indicate the user's desire to play something.)
+
+
+### No Auto-Updates
+
+The Firefox extension has supported automatic updates since version `1.4.3`, but if you are running an older version, you'll need to manually upgrade once to get back up to speed.
+
+(Just click the `#.#.#.xpi` link attached to the [latest release](https://github.com/Blobfolio/js-mate-poe/releases) to upgrade to that version.)
+
 
 
 &nbsp;
