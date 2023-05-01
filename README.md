@@ -110,7 +110,7 @@ The Internet is a good habitat for Poe, but not a _perfect_ one. There are a few
 
 | Issue | Library | Extension |
 | ----- | ------- | --------- |
-| [Frozen/Duplicate Poe](#frozenduplicate-poe) | | X |
+| [Frozen/Duplicate Poe](#frozenduplicate-poe-instance) | | X |
 | [No Audio](#no-audio) | X | X |
 | [No Auto-Updates](#no-auto-updates) | | X |
 
