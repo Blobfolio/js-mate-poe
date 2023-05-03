@@ -3,5 +3,6 @@
 /Cargo.lock
 /demo/
 /dist/
+/skel/img/svg/
 /skel/js/generated/
 /target/
