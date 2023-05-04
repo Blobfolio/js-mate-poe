@@ -261,11 +261,18 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# under wasm yet.
 	[ ! $(command -v fyi) ] || fyi task "Features: none (default)"
 	cargo test \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
+	cargo test \
 		--release \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 
 	[ ! $(command -v fyi) ] || fyi task "Features: director"
+	cargo test \
+		--features director \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
 	cargo test \
 		--release \
 		--features director \
@@ -273,6 +280,10 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--target-dir "{{ cargo_dir }}"
 
 	[ ! $(command -v fyi) ] || fyi task "Features: firefox"
+	cargo test \
+		--features firefox \
+		--target x86_64-unknown-linux-gnu \
+		--target-dir "{{ cargo_dir }}"
 	cargo test \
 		--release \
 		--features firefox \
