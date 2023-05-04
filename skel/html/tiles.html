@@ -35,8 +35,9 @@
 		const fps = document.getElementById('fps');
 
 		// Special frames.
-		const masks = [24, 82, 126];
-		const halves = [37, 38, 39];
+		const masks =  [24, 83, 120];
+		const halves = [38, 39, 40];
+		const flips =  [43, 81, 82, 101, 102, 103];
 
 		// "Movie" playback details.
 		let frameId = 0;
@@ -115,10 +116,15 @@
 		};
 
 		// Add each frame to the sprite table.
-		for (let i = 0; i <= 165; ++i) {
-			// If there's a corresponding mask, add it first.
+		for (let i = 0; i <= 163; ++i) {
+			// Mask version?
 			if (-1 !== masks.indexOf(i)) { sprite.appendChild(makeFrame(`fm${i}`)); }
+
+			// Normal version.
 			sprite.appendChild(makeFrame(`f${i}`));
+
+			// Rotated version?
+			if (-1 !== flips.indexOf(i)) { sprite.appendChild(makeFrame(`fr${i}`)); }
 		}
 
 		// Save the halfsies for last because they look weird.

@@ -127,6 +127,12 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	scene = parseInt(scene, 10);
 
 	// Orientation class.
+	if (
+		(43 === frame) || (81 === frame) || (82 === frame) ||
+		(101 === frame) || (102 === frame) || (103 === frame)
+	) {
+		rx = ! rx;
+	}
 	list.toggle('rx', !! rx);
 
 	// Disabled?
@@ -135,7 +141,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Child-only classes.
 	if (list.contains('child')) {
 		// Special frame.
-		list.toggle('m126', 126 === frame);
+		list.toggle('m120', 120 === frame);
 
 		// Animations.
 		list.toggle('a2',  2 === scene); // SneezeShadow.
@@ -150,9 +156,9 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Primary-only classes.
 	else {
 		// Special frames.
-		list.toggle('h', (37 === frame) || (38 === frame) || (39 === frame));
+		list.toggle('h', (38 === frame) || (39 === frame) || (40 === frame));
 		list.toggle('m024', 24 === frame);
-		list.toggle('m082', 82 === frame);
+		list.toggle('m083', 83 === frame);
 
 		// Animations.
 		list.toggle('a1',  1 === scene); // Drag.

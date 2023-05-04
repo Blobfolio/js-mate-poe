@@ -23,10 +23,7 @@ body {
 	&:before {
 		content: '';
 		position: absolute;
-		top: 0;
-		left: 0;
-		width: $tile_size;
-		height: $tile_size;
+		inset: 0;
 
 		background-image: url('poe.png');
 		background-repeat: no-repeat;
@@ -55,12 +52,23 @@ body {
 }
 
 // Half Frames.
-.fh37 { @extend .f37; }
 .fh38 { @extend .f38; }
 .fh39 { @extend .f39; }
-.fh37, .fh38, .fh39 {
+.fh40 { @extend .f40; }
+.fh38, .fh39, .fh40 {
 	--y: -2px;
 	&:before { clip-path: inset(0 0 50% 0); }
+}
+
+// Reversed frames.
+.fr43 { @extend .f43; }
+.fr81 { @extend .f81; }
+.fr82 { @extend .f82; }
+.fr101 { @extend .f101; }
+.fr102 { @extend .f102; }
+.fr103 { @extend .f103; }
+.fr43, .fr81, .fr82, .fr101, .fr102, .fr103 {
+	&:before { transform: scaleX(-1); }
 }
 
 // Maked Frames.
@@ -68,11 +76,11 @@ body {
 	@extend .f24;
 	&:before { clip-path: $m024; }
 }
-.fm82 {
-	@extend .f82;
-	&:before { clip-path: $m082; }
+.fm83 {
+	@extend .f83;
+	&:before { clip-path: $m083; }
 }
-.fm126 {
-	@extend .f126;
-	&:before { clip-path: $m126; }
+.fm120 {
+	@extend .f120;
+	&:before { clip-path: $m120; }
 }

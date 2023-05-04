@@ -105,7 +105,7 @@ fn build_media() -> String {
 
 	// Add the image dimensions to the JS lengths.
 	let (w, h) = img_size();
-	assert_eq!(w, 5920, "Image width has changed!");
+	assert_eq!(w, 5680, "Image width has changed!");
 	assert_eq!(h, 40, "Image height has changed!");
 	js_lengths.push(format!("const imgWidth = {w};"));
 	js_lengths.push(format!("const imgHeight = {h};"));
