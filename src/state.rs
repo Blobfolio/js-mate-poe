@@ -243,59 +243,38 @@ impl StateEvents {
 
 
 
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Get/Set Width/Height (Standards Mode).
 ///
-/// Pull the closest thing to a window size we can get without injecting our
-/// own 100% fixed element. This may or may not factor the width of the
-/// scrollbar (if any), but most browsers auto-hide them anyway.
+/// This grabs a good-enough approximation of the page's layout dimensions
+/// from the `documentElement` and updates the `Universe`'s cache accordingly.
 fn size_standards() {
-	const MAX: i32 = u16::MAX as i32;
-
 	if let Some(el) = dom::document_element() {
-		let size = el.client_width();
-		let width =
-			if size <= 0 { 0 }
-			else if size <= MAX { size as u16 }
-			else { u16::MAX };
+		let w = normalize_size(el.client_width());
+		let h = normalize_size(el.client_height());
+		Universe::set_size(w, h);
+	}
+}
 
-		let size = el.client_height();
-		let height =
-			if size <= 0 { 0 }
-			else if size <= MAX { size as u16 }
-			else { u16::MAX };
-
-		Universe::set_size(width, height);
+/// # Get/Set Width/Height (Quirks Mode).
+///
+/// This does the same thing as `size_standards`, but with the document body
+/// instead, because the Internet is fucking terrible. Haha.
+fn size_quirks() {
+	if let Some(el) = dom::body() {
+		let w = normalize_size(el.client_width());
+		let h = normalize_size(el.client_height());
+		Universe::set_size(w, h);
 	}
 }
 
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-/// # Get/Set Width/Height (Quirks Mode).
+/// # Normalize Size.
 ///
-/// Pull the closest thing to a window size we can get without injecting our
-/// own 100% fixed element. This may or may not factor the width of the
-/// scrollbar (if any), but most browsers auto-hide them anyway.
-fn size_quirks() {
-	if let Some(window) = dom::window() {
-		let width = jsvalue_to_u16(window.inner_width());
-		let height = jsvalue_to_u16(window.inner_height());
-		Universe::set_size(width, height);
-	}
-}
+/// This caps an `i32` dimension to a `u16`.
+const fn normalize_size(size: i32) -> u16 {
+	const MAX: i32 = u16::MAX as i32;
 
-#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-/// # Parse JS Value to u16.
-///
-/// Javascript's sloppy number-handling is very inconvenient! Thankfully we
-/// only have to use this for quirks-mode documents, which are increasingly
-/// rare.
-fn jsvalue_to_u16(v: Result<JsValue, JsValue>) -> u16 {
-	if let Ok(v) = v {
-		if let Some(v) = v.as_f64() {
-			if v.is_normal() && v.is_sign_positive() {
-				return u16::try_from(v as u64).unwrap_or(u16::MAX);
-			}
-		}
-	}
-	0
+	if size <= 0 { 0 }
+	else if size <= MAX { size as u16 }
+	else { u16::MAX }
 }
