@@ -87,19 +87,22 @@ pub(crate) enum Direction {
 
 impl Direction {
 	const BOTH_X: u8 = Self::Left as u8 | Self::Right as u8;
+
+	#[cfg(test)]
 	const BOTH_Y: u8 = Self::Up as u8 | Self::Down as u8;
 
-	#[allow(unsafe_code)]
 	/// # From U8.
 	const fn from_u8(flag: u8) -> Self {
-		// Treat invalid combinations are none. (This shouldn't ever happen,
-		// but better safe than sorry.)
-		if (Self::BOTH_X == flag & Self::BOTH_X) || (Self::BOTH_Y == flag & Self::BOTH_Y) {
-			Self::None
-		}
-		else {
-			// Safety: all combinations of 0..=1 X and 0..=1 Y are covered.
-			unsafe { std::mem::transmute(flag & (Self::BOTH_X | Self::BOTH_Y)) }
+		match flag & 0b0000_1111 {
+			0b0000_0001 => Self::Left,
+			0b0000_0010 => Self::Right,
+			0b0000_0100 => Self::Up,
+			0b0000_1000 => Self::Down,
+			0b0000_0101 => Self::LeftUp,
+			0b0000_1001 => Self::LeftDown,
+			0b0000_0110 => Self::RightUp,
+			0b0000_1010 => Self::RightDown,
+			_ => Self::None,
 		}
 	}
 }
@@ -189,6 +192,8 @@ mod tests {
 		assert_eq!(Direction::from_u8(0b1111_1111), Direction::None);
 		assert_eq!(Direction::from_u8(Direction::BOTH_X), Direction::None);
 		assert_eq!(Direction::from_u8(Direction::BOTH_Y), Direction::None);
+		assert_eq!(Direction::from_u8(Direction::BOTH_X | Direction::Up as u8), Direction::None);
+		assert_eq!(Direction::from_u8(Direction::BOTH_Y | Direction::Left as u8), Direction::None);
 
 		// Left.
 		let pos = Position::new(-10, 0);
@@ -261,6 +266,20 @@ mod tests {
 		assert!(matches!(dir.invert_y(), Direction::Up));
 		test_x!(dir);
 		test_y!(dir, false, true);
+	}
+
+	#[test]
+	fn t_direction_conv() {
+		for d in [
+			Direction::None, Direction::Left, Direction::Right, Direction::Up,
+			Direction::Down, Direction::LeftUp, Direction::LeftDown,
+			Direction::RightUp, Direction::RightDown
+		] {
+			// Make sure Direction-to-U8-to-Direction gets us back where we
+			// started.
+			let i = d as u8;
+			assert_eq!(d, Direction::from_u8(i));
+		}
 	}
 
 	#[test]
