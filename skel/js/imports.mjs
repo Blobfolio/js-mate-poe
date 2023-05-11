@@ -1,12 +1,32 @@
 /**
  * @file Wasm Imports & Glue
+ *
+ * Some of these methods won't be necessary depending on the crate features
+ * enabled, but they should be recognized as dead code and pruned during
+ * transpilation, so won't add any overhead to the final library.
  */
 
-// Playlist.
-const playlist = `%PLAYLIST%`;
+/**
+ * Import: Console Debug (Director).
+ *
+ * This is just a thin wrapper around console.debug, accepting a single string
+ * as input.
+ *
+ * @param {string} msg Message.
+ * @return {void} Nothing.
+ */
+const poeConsoleDebug = function(msg) { console.debug(msg); };
 
-// Library version.
-const version = '%VERSION%';
+/**
+ * Import: Console Warn (Director).
+ *
+ * This is just a thin wrapper around console.debug, accepting a single string
+ * as input.
+ *
+ * @param {string} msg Message.
+ * @return {void} Nothing.
+ */
+const poeConsoleWarn = function(msg) { console.warn(msg); };
 
 /**
  * Import: Print Library Details (Director).
@@ -14,7 +34,8 @@ const version = '%VERSION%';
  * @return {void} Nothing.
  */
 const poeDetails = function() {
-	console.info(`%cJS Mate Poe: %c${version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
+	const playlist = `%PLAYLIST%`;
+	console.info(`%cJS Mate Poe: %c%VERSION%`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
 	console.info(`%c${playlist}`, 'color:#b2bec3;font-family:monospace;');
 };
 

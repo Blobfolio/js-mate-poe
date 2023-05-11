@@ -134,7 +134,7 @@ impl Drop for State {
 
 		// Let the Universe know we're dead.
 		Universe::set_state(false);
-		#[cfg(feature = "director")] dom::warn!("Poe deactivated.");
+		#[cfg(feature = "director")] dom::console_warn("Poe deactivated.");
 	}
 }
 

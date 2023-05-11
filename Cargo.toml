@@ -27,10 +27,6 @@ imagesize = "=0.12.0"
 js-sys = "=0.3.62"
 wasm-bindgen = "=0.2.85"
 
-[dependencies.gloo-console]
-version = "=0.2.3"
-optional = true
-
 [dependencies.web-sys]
 version = "=0.3.62"
 features = [
@@ -61,8 +57,8 @@ default = []
 firefox = ["web-sys/Node"]
 
 # The director mode exposes additional browserland methods to make it easier to
-# preview and debug animations, like Poe.list, Poe.play, and Poe.speed.
-director = ["gloo-console"]
+# preview and debug animations, like Poe.play and Poe.speed.
+director = []
 
 [profile.release]
 lto = true

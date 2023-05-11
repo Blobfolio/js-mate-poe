@@ -18,7 +18,6 @@ use crate::{
 	Step,
 	Universe,
 };
-#[cfg(feature = "director")] use crate::dom::debug;
 use flags::MateFlags;
 use wasm_bindgen::prelude::*;
 use web_sys::{
@@ -232,7 +231,11 @@ impl Mate {
 		if animation.child().is_some() { Universe::set_assign_child(); }
 
 		#[cfg(feature = "director")]
-		debug!(&format!("Playing: {} (#{})", animation.as_str(), animation as u8));
+		dom::console_debug(&format!(
+			"Playing: {} (#{})",
+			animation.as_str(),
+			animation as u8,
+		));
 	}
 
 	/// # Set Animation Starting Position.

@@ -338,7 +338,7 @@ impl Universe {
 		// Store as an integer.
 		SPEED.store(speed as u16, SeqCst);
 
-		#[cfg(feature = "director")] dom::debug!(format!(
+		#[cfg(feature = "director")] dom::console_debug(&format!(
 			"Playback Speed: {speed:.2}%"
 		));
 	}
@@ -390,7 +390,7 @@ fn reseed() {
 
 	// Print a debug message if we care about that sort of thing.
 	#[cfg(feature = "director")]
-	dom::debug!(format!(
+	dom::console_debug(&format!(
 		"PNRG1: {:016x}\nPNRG2: {:016x}\nPNRG3: {:016x}\nPNRG4: {:016x}",
 		seeds[0],
 		seeds[1],

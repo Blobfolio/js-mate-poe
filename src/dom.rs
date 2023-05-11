@@ -2,6 +2,7 @@
 # RS Mate Poe: DOM
 */
 
+#[cfg(feature = "director")] use wasm_bindgen::prelude::*;
 use web_sys::{
 	Document,
 	Element,
@@ -10,11 +11,19 @@ use web_sys::{
 };
 pub(crate) use web_sys::window;
 
+
+
 #[cfg(feature = "director")]
-pub(crate) use gloo_console::{
-	debug,
-	warn,
-};
+#[wasm_bindgen]
+extern "C" {
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poeConsoleDebug")]
+	pub(crate) fn console_debug(msg: &str);
+
+	#[allow(unsafe_code)]
+	#[wasm_bindgen(js_name = "poeConsoleWarn")]
+	pub(crate) fn console_warn(msg: &str);
+}
 
 
 
