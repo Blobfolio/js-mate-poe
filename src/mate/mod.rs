@@ -9,9 +9,12 @@ use crate::{
 	Direction,
 	dom,
 	Frame,
+	IMAGE_HEIGHT,
+	IMAGE_WIDTH,
 	Position,
 	SceneList,
 	Sound,
+	StateAudio,
 	Step,
 	Universe,
 };
@@ -20,6 +23,7 @@ use flags::MateFlags;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	Element,
+	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
 };
@@ -35,14 +39,6 @@ extern "C" {
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
 	fn toggle_wrapper_classes(el: &Element, rx: bool, frame: i16, scene: i8);
-
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poePlaySound")]
-	fn play_sound(idx: u8);
-
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeMakeImage")]
-	fn make_image() -> Element;
 }
 
 
@@ -66,8 +62,8 @@ impl Mate {
 	/// # New.
 	///
 	/// Create a new instance (and supporting DOM elements).
-	pub(crate) fn new(primary: bool) -> Self {
-		let el = make_element(primary);
+	pub(crate) fn new(primary: bool, image: &str) -> Self {
+		let el = make_element(primary, image);
 		Self {
 			el,
 			size: Universe::size(),
@@ -361,9 +357,9 @@ impl Mate {
 	///
 	/// Crunch the animation step details and repaint the DOM elements if
 	/// needed.
-	pub(crate) fn paint(&mut self, now: u32) {
+	pub(crate) fn paint(&mut self, now: u32, audio: &StateAudio) {
 		if self.pretick(now) { self.tick(now); }
-		self.render();
+		self.render(audio);
 	}
 
 	/// # Pre-Tick.
@@ -544,7 +540,7 @@ impl Mate {
 	/// # Render.
 	///
 	/// Apply any and all necessary changes to the DOM elements.
-	fn render(&mut self) {
+	fn render(&mut self, audio: &StateAudio) {
 		if ! self.flags.changed() { return; }
 
 		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
@@ -580,7 +576,7 @@ impl Mate {
 		}
 
 		// Play a sound?
-		if let Some(sound) = self.sound.take() { play_sound(sound as u8); }
+		if let Some(sound) = self.sound.take() { audio.play(sound); }
 
 		// Reset the change flags.
 		self.flags.clear_changed();
@@ -748,7 +744,7 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and return the "mate" DOM elements.
-fn make_element(primary: bool) -> Element {
+fn make_element(primary: bool, image: &str) -> Element {
 	let document = dom::document().expect_throw("Missing document.");
 
 	// Create the main element, its shadow DOM, and its shadow elements.
@@ -763,12 +759,16 @@ fn make_element(primary: bool) -> Element {
 	let style = document.create_element("style").expect_throw("!");
 	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
-	// And the wrapper div (with the image).
+	// And the wrapper div.
 	let wrapper = document.create_element("div").expect_throw("!");
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
-	wrapper.append_child(&make_image()).expect_throw("!");
+
+	// Create the image and append it to the wrapper.
+	make_element_image(image)
+		.and_then(|i| wrapper.append_child(&i))
+		.expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
@@ -776,4 +776,12 @@ fn make_element(primary: bool) -> Element {
 		.expect_throw("!");
 
 	el
+}
+
+/// # Make Image Element.
+fn make_element_image(src: &str) -> Result<HtmlImageElement, JsValue> {
+	let el = HtmlImageElement::new_with_width_and_height(IMAGE_WIDTH, IMAGE_HEIGHT)?;
+	el.set_id("i");
+	el.set_src(src);
+	Ok(el)
 }

@@ -2,27 +2,11 @@
  * @file Wasm Imports & Glue
  */
 
-// Buffer lengths.
-%LENGTHS%
-
-// ASCII Art.
-const imgAscii = `%ASCII%`;
-
 // Playlist.
 const playlist = `%PLAYLIST%`;
 
 // Library version.
 const version = '%VERSION%';
-
-// A flag to indicate whether or not we've explained how browser autoplay
-// works.
-let audioWarned = false;
-
-// The Blob-derived audio URLs: baa, sneeze, and yawn, respectively.
-let audioUrls = null;
-
-// The Blob-derived image sprite URL.
-let imgUrl = null;
 
 /**
  * Import: Print Library Details (Director).
@@ -30,78 +14,24 @@ let imgUrl = null;
  * @return {void} Nothing.
  */
 const poeDetails = function() {
-	console.info(`%c${imgAscii}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
 	console.info(`%cJS Mate Poe: %c${version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
 	console.info(`%c${playlist}`, 'color:#b2bec3;font-family:monospace;');
 };
 
 /**
- * Initialize Media.
+ * Import: Get URL (Firefox).
  *
- * This creates and/or sets "URLs" that can be used to access the embedded
- * media (the image sprite and audio files).
+ * The audio assets — but _not_ the image for whatever reason — have to be
+ * bundled with the extension rather than the wasm to exempt them from per-site
+ * CSP restrictions.
  *
- * Note: This must be called by the MJS entrypoint AFTER init(), and BEFORE
- * Poe.activate.
+ * This wrapper gives the wasm a way to generate URLs for them so it can do
+ * what it needs to do.
  *
- * @param {Object} wasm Wasm exports.
- * @return {void} Nothing.
+ * @param {string} path Relative Path.
+ * @return {string} URL.
  */
-export const poeInitMedia = function(wasm) {
-	if (null === audioUrls) {
-		audioUrls = [%AUDIO_URLS%];
-	}
-
-	if (null === imgUrl) {
-		imgUrl = URL.createObjectURL(
-			new Blob(
-				[new Uint8ClampedArray(wasm.memory.buffer, wasm.img_ptr(), imgLen)],
-				{ type: 'image/png' },
-			)
-		);
-	}
-};
-
-/**
- * Import: Create Mate Image.
- *
- * This generates and returns a mate image element, complete with source.
- *
- * @return {Element} Element.
- */
-const poeMakeImage = function() {
-	const el = new Image(imgWidth, imgHeight);
-	el.id = 'i';
-	if (null !== imgUrl) { el.src = imgUrl; }
-	return el;
-};
-
-/**
- * Import: Play Sound.
- *
- * @param {number} idx ID.
- * @return {void} Nothing.
- */
-const poePlaySound = function(idx) {
-	idx = parseInt(idx, 10);
-	if (
-		! isNaN(idx) &&
-		(null !== audioUrls) &&
-		(undefined !== audioUrls[idx]) &&
-		'visible' === document.visibilityState
-	) {
-		const audio = new Audio();
-		audio.addEventListener('canplaythrough', () => {
-			audio.play().catch((e) => {
-				if (! audioWarned) {
-					audioWarned = true;
-					console.info('Hint: try clicking (anywhere on) the page.');
-				}
-			});
-		}, { once: true, passive: true });
-		audio.src = audioUrls[idx];
-	}
-};
+const poeGetUrl = function(path) { return browser.runtime.getURL(path); };
 
 /**
  * Import: Update Wrapper Classes.

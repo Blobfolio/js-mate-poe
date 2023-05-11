@@ -20,29 +20,36 @@ credits-dir = "./"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-guff_css = "0.1.*"
-imagesize = "0.12.*"
+guff_css = "=0.1.30"
+imagesize = "=0.12.0"
 
 [dependencies]
+js-sys = "=0.3.62"
 wasm-bindgen = "=0.2.85"
 
 [dependencies.gloo-console]
-version = "0.2.*"
+version = "=0.2.3"
 optional = true
 
 [dependencies.web-sys]
 version = "=0.3.62"
 features = [
 	"AddEventListenerOptions",
+	"Blob",
+	"BlobPropertyBag",
 	"Document",
 	"Element",
 	"Event",
 	"EventTarget",
+	"HtmlAudioElement",
 	"HtmlElement",
+	"HtmlImageElement",
 	"MouseEvent",
 	"ShadowRoot",
 	"ShadowRootInit",
 	"ShadowRootMode",
+	"Url",
+	"VisibilityState",
 	"Window",
 ]
 

@@ -6,6 +6,7 @@ use web_sys::{
 	Document,
 	Element,
 	HtmlElement,
+	VisibilityState,
 };
 pub(crate) use web_sys::window;
 
@@ -35,4 +36,18 @@ pub(crate) fn document_element() -> Option<Element> {
 	web_sys::window()
 		.and_then(|w| w.document())
 		.and_then(|d| d.document_element())
+}
+
+/// # Is Quirks?
+///
+/// Returns `true` if the page is operating in "quirks" mode.
+pub(crate) fn is_quirks() -> bool {
+	document().map_or(true, |d| d.compat_mode() == "BackCompat")
+}
+
+/// # Is Visible?
+///
+/// Returns `true` if the tab has focus.
+pub(crate) fn is_visible() -> bool {
+	document().map_or(false, |d| matches!(d.visibility_state(), VisibilityState::Visible))
 }
