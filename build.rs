@@ -13,10 +13,9 @@ use std::path::{
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
 	println!("cargo:rerun-if-changed=skel/img/poe.png");
-	println!("cargo:rerun-if-changed=skel/img/poe.txt");
 	println!("cargo:rerun-if-changed=skel/js/imports.mjs");
 	println!("cargo:rerun-if-changed=skel/playlist.txt");
-	println!("cargo:rerun-if-changed=skel/scss/core.scss");
+	println!("cargo:rerun-if-changed=skel/scss");
 	println!("cargo:rerun-if-changed=skel/sound/baa.flac");
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
 	println!("cargo:rerun-if-changed=skel/sound/yawn.flac");
