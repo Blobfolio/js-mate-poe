@@ -69,8 +69,9 @@ static YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
 /// weird recursive purgatory courtesy of [`Rc`].
 ///
 /// If the `requestAnimationFrame` handler discovers the [`Universe`] has been
-/// deactivated, it unbinds the other events and drops itself, and as such the
-/// last reference to the [`State`].
+/// deactivated, it won't request another, causing the last [`State`] reference
+/// to be dropped, at which point it will unbind all of its associated events,
+/// elements, and objects.
 pub(crate) struct State {
 	image: String,
 	sound: StateAudio,
@@ -212,11 +213,13 @@ impl State {
 
 /// # State Audio.
 ///
-/// This holds a reference to a (detached) audio element with a playback
-/// listener, as well as the URL sources for each of the three sounds.
+/// This holds a reference to a (detached) audio element and URLs that can be
+/// used to point to each of the three audio sources at runtime, either actual
+/// `URL` objects in the case of the library, or normal strings for the Firefox
+/// extension.
 ///
-/// This way it can be setup and reused throughout the lifetime of the Poe
-/// instance, and deconstructed cleanly if/when it gets dropped.
+/// Its [`StateAudio::play`] method is used by [`Mate`] to initiate playback if
+/// and when sound is required.
 pub(crate) struct StateAudio {
 	el: HtmlAudioElement,
 	sound: [String; 3],
@@ -256,12 +259,14 @@ impl Drop for StateAudio {
 impl StateAudio {
 	/// # Play Sound.
 	///
-	/// This updates the audio source to the requested value and reloads it
-	/// (the audio element), triggering playback as soon as the browser
-	/// catches on.
+	/// This updates the audio source and calls the element's `load` method.
+	/// (That should in turn trigger its `canplaythrough` event, which in turn
+	/// actually _plays_ the source.)
 	///
-	/// The global audio setting is enforced at the `Mate` level — it won't
-	/// call this method if sound is disabled.
+	/// This method has no conditional logic of its own.
+	///
+	/// The [`Mate`] calling it ensures the global audio option is enabled, and
+	/// the `oncanplaythrough` callback makes sure the page is visible/active.
 	pub(crate) fn play(&self, sound: Sound) {
 		// Update the source.
 		self.el.set_src(match sound {
@@ -277,6 +282,11 @@ impl StateAudio {
 
 
 /// # Event Handlers.
+///
+/// This holds all of the event listeners required to make Poe work. They are
+/// bound when the [`State`] is instantiated, and unbound when it is dropped,
+/// allowing for proper cleanup once the `StateEvents` object is itself
+/// dropped.
 struct StateEvents {
 	canplaythrough: Closure<dyn FnMut(Event)>,
 	contextmenu: Closure<dyn FnMut(Event)>,
@@ -289,6 +299,10 @@ struct StateEvents {
 
 impl StateEvents {
 	/// # New.
+	///
+	/// This returns a new, ready-to-bind `StateEvents` instance. The `quirks`
+	/// variable determines which of the two approaches should be used to
+	/// obtain the window dimensions after a resize event.
 	fn new(quirks: bool) -> Self {
 		Self {
 			canplaythrough: Closure::wrap(Box::new(|e: Event|
@@ -343,6 +357,10 @@ impl StateEvents {
 	}
 
 	/// # Unbind Event Listeners.
+	///
+	/// Note: this must be called before the object is dropped, otherwise
+	/// active references to the callbacks may persist, preventing their memory
+	/// from being properly freed.
 	fn unbind(&self, mate: &Element, audio: &Element) {
 		macro_rules! unbind {
 			($el:expr, $event:ident) => (
@@ -371,6 +389,8 @@ impl StateEvents {
 ///
 /// This grabs a good-enough approximation of the page's layout dimensions
 /// from the `documentElement` and updates the `Universe`'s cache accordingly.
+///
+/// Note: this may or may not factor in scrollbar widths.
 fn size_standards() {
 	if let Some(el) = dom::document_element() {
 		let w = normalize_size(el.client_width());
@@ -383,6 +403,8 @@ fn size_standards() {
 ///
 /// This does the same thing as `size_standards`, but with the document body
 /// instead, because the Internet is fucking terrible. Haha.
+///
+/// Note: this may or may not factor in scrollbar widths.
 fn size_quirks() {
 	if let Some(el) = dom::body() {
 		let w = normalize_size(el.client_width());
@@ -394,7 +416,9 @@ fn size_quirks() {
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Normalize Size.
 ///
-/// This caps an `i32` dimension to a `u16`.
+/// The `clientWidth`/`clientHeight` values are returned as `i32`, but know
+/// resolutions can't be negative, so store them as `u16` instead. This merely
+/// performs a saturating cast to keep them in that range.
 const fn normalize_size(size: i32) -> u16 {
 	const MAX: i32 = u16::MAX as i32;
 
@@ -405,9 +429,14 @@ const fn normalize_size(size: i32) -> u16 {
 
 /// # Slice to Blob to URL.
 ///
-/// It is tedious to generate a Javascript URL object from our raw binary data,
-/// but relatively cheap memory-wise since the reference is part of the
-/// initialized wasm itself.
+/// This generates a Javascript `URL` object pointing to a raw binary slice.
+///
+/// It's a bit of journey to get there. The slice must first be converted to a
+/// `Uint8Array`, placed inside an `Array`, and converted to a `Blob` before a
+/// `URL` can be generated.
+///
+/// Thankfully, this is virtually free memory-wise because the underlying data
+/// is part of the Wasm itself.
 fn url(data: &'static [u8], mime: &str) -> String {
 	Blob::new_with_u8_array_sequence_and_options(
 		&Array::of1(&Uint8Array::from(data)),
