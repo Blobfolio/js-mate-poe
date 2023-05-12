@@ -9,46 +9,13 @@ use std::path::{
 };
 
 
-
-#[cfg(not(feature = "firefox"))]
-/// # Audio URLs.
-///
-/// This version teases them out of the shared Wasm memory.
-const AUDIO_URLS: &str = r"
-			URL.createObjectURL(new Blob(
-				[new Uint8ClampedArray(wasm.memory.buffer, wasm.baa_ptr(), baaLen)],
-				{ type: 'audio/flac' },
-			)),
-			URL.createObjectURL(new Blob(
-				[new Uint8ClampedArray(wasm.memory.buffer, wasm.sneeze_ptr(), sneezeLen)],
-				{ type: 'audio/flac' },
-			)),
-			URL.createObjectURL(new Blob(
-				[new Uint8ClampedArray(wasm.memory.buffer, wasm.yawn_ptr(), yawnLen)],
-				{ type: 'audio/flac' },
-			)),
-";
-
-#[cfg(feature = "firefox")]
-/// # Audio URLs.
-///
-/// This version pulls the audio from the extension assets.
-const AUDIO_URLS: &str = r"
-			browser.runtime.getURL('sound/baa.flac'),
-			browser.runtime.getURL('sound/sneeze.flac'),
-			browser.runtime.getURL('sound/yawn.flac'),
-";
-
-
-
 /// # Main.
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
 	println!("cargo:rerun-if-changed=skel/img/poe.png");
-	println!("cargo:rerun-if-changed=skel/img/poe.txt");
 	println!("cargo:rerun-if-changed=skel/js/imports.mjs");
 	println!("cargo:rerun-if-changed=skel/playlist.txt");
-	println!("cargo:rerun-if-changed=skel/scss/core.scss");
+	println!("cargo:rerun-if-changed=skel/scss");
 	println!("cargo:rerun-if-changed=skel/sound/baa.flac");
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
 	println!("cargo:rerun-if-changed=skel/sound/yawn.flac");
@@ -85,60 +52,24 @@ fn build_css() -> String {
 /// snippet and main glue file need to be merged together and saved to
 /// skel/generated/glue.mjs.
 fn build_media() -> String {
-	// Individual media.
-	let media = [
-		std::fs::read("skel/img/poe.png").expect("Missing poe.png"),
-
-		#[cfg(not(feature = "firefox"))]
-		std::fs::read("skel/sound/baa.flac").expect("Missing baa.flac"),
-
-		#[cfg(not(feature = "firefox"))]
-		std::fs::read("skel/sound/sneeze.flac").expect("Missing sneeze.flac"),
-
-		#[cfg(not(feature = "firefox"))]
-		std::fs::read("skel/sound/yawn.flac").expect("Missing yawn.flac"),
-	];
-
 	// Code holders.
 	let mut out = Vec::new();
-	let mut js_lengths = Vec::new();
 
-	// Add the image dimensions to the JS lengths.
+	// Generate constants for the image dimensions so we don't screw them up.
 	let (w, h) = img_size();
-	assert_eq!(w, 5920, "Image width has changed!");
+	assert_eq!(w, 5680, "Image width has changed!");
 	assert_eq!(h, 40, "Image height has changed!");
-	js_lengths.push(format!("const imgWidth = {w};"));
-	js_lengths.push(format!("const imgHeight = {h};"));
+	out.push(format!(
+		r#"/// # Image Width.
+pub(crate) const IMAGE_WIDTH: u32 = {w};
 
-	// Handle the media bits.
-	for (k, v) in ["img", "baa", "sneeze", "yawn"].iter().zip(media.iter()) {
-		// Add the buffer.
-		out.push(format!(
-			r"/// # Buffer ({k}).
-static {}_BUFFER: [u8; {}] = {v:?};",
-			k.to_ascii_uppercase(),
-			v.len(),
-		));
-
-		// Add the pointer method.
-		out.push(format!(
-			r"#[wasm_bindgen]
-#[must_use]
-/// # Pointer ({k}).
-pub fn {k}_ptr() -> *const u8 {{ {}_BUFFER.as_ptr() }}",
-			k.to_ascii_uppercase(),
-		));
-
-		// Add the length to our collection.
-		js_lengths.push(format!("const {k}Len = {};", v.len()));
-	}
+/// # Image Height.
+pub(crate) const IMAGE_HEIGHT: u32 = {h};"#
+	));
 
 	// Load the JS imports, and swap out the two dynamic bits.
 	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
 		.expect("Missing imports.mjs")
-		.replace("%ASCII%", &std::fs::read_to_string("skel/img/poe.txt").unwrap_or_default())
-		.replace("%AUDIO_URLS%", AUDIO_URLS)
-		.replace("%LENGTHS%", &js_lengths.join("\n"))
 		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").unwrap_or_default())
 		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_default());
 	js.push('\n');

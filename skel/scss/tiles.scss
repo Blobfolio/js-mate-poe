@@ -28,10 +28,7 @@
 		content: attr(data-frame);
 
 		position: absolute;
-		top: 0;
-		left: 0;
-		height: $tile_size;
-		width: $tile_size;
+		inset: 0;
 
 		color: white;
 		background-color: black;

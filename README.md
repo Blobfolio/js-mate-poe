@@ -119,7 +119,7 @@ The Internet is a good habitat for Poe, but not a _perfect_ one. There are a few
 
 Firefox kills any active instances of an add-on before applying an update, but does not reload the page(s) it was running on, effectively orphaning any elements — like sheep! — it may have been managing.
 
-If Poe happens to be running around your screen when such an update occurs, he may freeze in place as the old controlling script is nuked, and be joined by a second Poe shortly thereafter launched by the new controlling script.
+If Poe happens to be running around your screen when such an update occurs, he may freeze in place as the old controlling script is nuked, and be joined by a second Poe shortly thereafter once the new controlling script is added to the page.
 
 A workaround has been added to `1.5.0` to fix the issue for _subsequent_ updates (`1.5.1`, etc.), but until then, it is what it is.
 
@@ -165,9 +165,10 @@ This work is free. You can redistribute it and/or modify it under the terms of t
     0. You just DO WHAT THE FUCK YOU WANT TO.
 
 
+
 &nbsp;
 ## Credits
 
-The [original Screen Mate Poe](https://en-academic.com/dic.nsf/enwiki/1080158) (AKA eSheep, Screen Mate Poo, etc.) was based on Tatsutoshi Nomura's animated shorts "Stray Sheep", which aired on the Fuji Television network in Japan. Mr. Nomura has subsequently published a series of cute children's books and games featuring featuring Poe.
+The [original Screen Mate Poe](https://en-academic.com/dic.nsf/enwiki/1080158) (AKA eSheep, Screen Mate Poo, etc.) was based on Tatsutoshi Nomura's animated shorts "Stray Sheep", which aired on the Fuji Television network in Japan. Mr. Nomura has subsequently published a series of cute children's books and games featuring Poe.
 
 If you're looking for an adorable gift for young readers, be sure to check out ["Poe At Play"](https://www.biblio.com/9781591822882)!

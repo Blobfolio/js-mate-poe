@@ -148,20 +148,21 @@ pub(crate) enum Frame {
 	F139,
 	F140,
 	F141,
-	F142,
-	F143,
-	F144,
-	F145,
-	F146,
-	F147,
 
-	H037, // Half-frame.
 	H038, // Half-frame.
 	H039, // Half-frame.
+	H040, // Half-frame.
 
 	M024, // Masked.
-	M082, // Masked.
-	M126, // Masked.
+	M083, // Masked.
+	M120, // Masked.
+
+	R043, // Reverse (X).
+	R081, // Reverse (X).
+	R082, // Reverse (X).
+	R101, // Reverse (X).
+	R102, // Reverse (X).
+	R103,
 
 	None, // Empty tile.
 }
@@ -179,12 +180,18 @@ impl Frame {
 	/// another frame, or -1 if not.
 	pub(crate) const fn dba(self) -> i16 {
 		match self {
-			Self::H037 => 37,
 			Self::H038 => 38,
 			Self::H039 => 39,
+			Self::H040 => 40,
 			Self::M024 => 24,
-			Self::M082 => 82,
-			Self::M126 => 126,
+			Self::M083 => 83,
+			Self::M120 => 120,
+			Self::R043 => 43,
+			Self::R081 => 81,
+			Self::R082 => 82,
+			Self::R101 => 101,
+			Self::R102 => 102,
+			Self::R103 => 103,
 			_ => -1
 		}
 	}
@@ -195,13 +202,19 @@ impl Frame {
 	pub(crate) const fn offset(self) -> i32 {
 		match self {
 			Self::None => Self::SIZE_I,
-			Self::H037 => 37 * -Self::SIZE_I,
-			Self::H038 => 38 * -Self::SIZE_I,
-			Self::H039 => 39 * -Self::SIZE_I,
-			Self::M024 => 24 * -Self::SIZE_I,
-			Self::M082 => 82 * -Self::SIZE_I,
-			Self::M126 => 126 * -Self::SIZE_I,
-			_ => self as i32 * -Self::SIZE_I,
+			Self::H038 =>  38 * -Self::SIZE_I,
+			Self::H039 =>  39 * -Self::SIZE_I,
+			Self::H040 =>  40 * -Self::SIZE_I,
+			Self::M024 =>  24 * -Self::SIZE_I,
+			Self::M083 =>  83 * -Self::SIZE_I,
+			Self::M120 => 120 * -Self::SIZE_I,
+			Self::R043 =>  43 * -Self::SIZE_I,
+			Self::R081 =>  81 * -Self::SIZE_I,
+			Self::R082 =>  82 * -Self::SIZE_I,
+			Self::R101 => 101 * -Self::SIZE_I,
+			Self::R102 => 102 * -Self::SIZE_I,
+			Self::R103 => 103 * -Self::SIZE_I,
+			_ =>  self as i32 * -Self::SIZE_I,
 		}
 	}
 }

@@ -39,7 +39,13 @@ jobs:
         cargo --version
         cargo clippy --version
 
-    - name: Build
+    - name: Build (Debug)
+      run: |
+        cargo build --no-default-features --target wasm32-unknown-unknown
+        cargo build --no-default-features --features director --target wasm32-unknown-unknown
+        cargo build --no-default-features --features firefox --target wasm32-unknown-unknown
+
+    - name: Build (Release)
       run: |
         cargo build --release --no-default-features --target wasm32-unknown-unknown
         cargo build --release --no-default-features --features director --target wasm32-unknown-unknown
@@ -51,7 +57,13 @@ jobs:
         cargo clippy --release --no-default-features --features director --target wasm32-unknown-unknown
         cargo clippy --release --no-default-features --features firefox --target wasm32-unknown-unknown
 
-    - name: Tests
+    - name: Tests (Debug)
+      run: |
+        cargo test --no-default-features --target ${{ matrix.target }}
+        cargo test --no-default-features --features director --target ${{ matrix.target }}
+        cargo test --no-default-features --features firefox --target ${{ matrix.target }}
+
+    - name: Tests (Release)
       run: |
         cargo test --release --no-default-features --target ${{ matrix.target }}
         cargo test --release --no-default-features --features director --target ${{ matrix.target }}

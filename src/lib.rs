@@ -55,7 +55,10 @@ pub(crate) use position::{
 	Direction,
 	Position,
 };
-pub(crate) use state::State;
+pub(crate) use state::{
+	State,
+	StateAudio,
+};
 pub(crate) use universe::Universe;
 
 use wasm_bindgen::prelude::*;

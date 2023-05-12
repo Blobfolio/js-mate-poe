@@ -7,7 +7,7 @@
  */
 
 import { isRealObject } from './is_real_object.mjs';
-import init, { poeInitMedia, Poe } from './generated/glue.mjs';
+import init, { Poe } from './generated/glue.mjs';
 
 // Keep track of the Wasm initialization so we don't try to take action too
 // early.
@@ -145,10 +145,7 @@ const poeOff = function() {
  *
  * @return {void} Nothing.
  */
-init(browser.runtime.getURL('js-mate-poe.wasm')).then((w) => {
-	// Initialize media.
-	poeInitMedia(w);
-
+init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
 	// Clean up old instances, if any.
 	if (cleanOrphanedMates()) {
 		console.warn('Removed orphaned JS Mate Poe element(s) from the page.');

@@ -1,28 +1,32 @@
 /**
  * @file Wasm Imports & Glue
+ *
+ * Some of these methods won't be necessary depending on the crate features
+ * enabled, but they should be recognized as dead code and pruned during
+ * transpilation, so won't add any overhead to the final library.
  */
 
-// Buffer lengths.
-%LENGTHS%
+/**
+ * Import: Console Debug (Director).
+ *
+ * This is just a thin wrapper around console.debug, accepting a single string
+ * as input.
+ *
+ * @param {string} msg Message.
+ * @return {void} Nothing.
+ */
+const poeConsoleDebug = function(msg) { console.debug(msg); };
 
-// ASCII Art.
-const imgAscii = `%ASCII%`;
-
-// Playlist.
-const playlist = `%PLAYLIST%`;
-
-// Library version.
-const version = '%VERSION%';
-
-// A flag to indicate whether or not we've explained how browser autoplay
-// works.
-let audioWarned = false;
-
-// The Blob-derived audio URLs: baa, sneeze, and yawn, respectively.
-let audioUrls = null;
-
-// The Blob-derived image sprite URL.
-let imgUrl = null;
+/**
+ * Import: Console Warn (Director).
+ *
+ * This is just a thin wrapper around console.debug, accepting a single string
+ * as input.
+ *
+ * @param {string} msg Message.
+ * @return {void} Nothing.
+ */
+const poeConsoleWarn = function(msg) { console.warn(msg); };
 
 /**
  * Import: Print Library Details (Director).
@@ -30,78 +34,25 @@ let imgUrl = null;
  * @return {void} Nothing.
  */
 const poeDetails = function() {
-	console.info(`%c${imgAscii}`, 'color:#b2bec3;font-family:monospace;font-weight:bold;');
-	console.info(`%cJS Mate Poe: %c${version}`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
+	const playlist = `%PLAYLIST%`;
+	console.info(`%cJS Mate Poe: %c%VERSION%`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
 	console.info(`%c${playlist}`, 'color:#b2bec3;font-family:monospace;');
 };
 
 /**
- * Initialize Media.
+ * Import: Get URL (Firefox).
  *
- * This creates and/or sets "URLs" that can be used to access the embedded
- * media (the image sprite and audio files).
+ * The audio assets — but _not_ the image for whatever reason — have to be
+ * bundled with the extension rather than the wasm to exempt them from per-site
+ * CSP restrictions.
  *
- * Note: This must be called by the MJS entrypoint AFTER init(), and BEFORE
- * Poe.activate.
+ * This wrapper gives the wasm a way to generate URLs for them so it can do
+ * what it needs to do.
  *
- * @param {Object} wasm Wasm exports.
- * @return {void} Nothing.
+ * @param {string} path Relative Path.
+ * @return {string} URL.
  */
-export const poeInitMedia = function(wasm) {
-	if (null === audioUrls) {
-		audioUrls = [%AUDIO_URLS%];
-	}
-
-	if (null === imgUrl) {
-		imgUrl = URL.createObjectURL(
-			new Blob(
-				[new Uint8ClampedArray(wasm.memory.buffer, wasm.img_ptr(), imgLen)],
-				{ type: 'image/png' },
-			)
-		);
-	}
-};
-
-/**
- * Import: Create Mate Image.
- *
- * This generates and returns a mate image element, complete with source.
- *
- * @return {Element} Element.
- */
-const poeMakeImage = function() {
-	const el = new Image(imgWidth, imgHeight);
-	el.id = 'i';
-	if (null !== imgUrl) { el.src = imgUrl; }
-	return el;
-};
-
-/**
- * Import: Play Sound.
- *
- * @param {number} idx ID.
- * @return {void} Nothing.
- */
-const poePlaySound = function(idx) {
-	idx = parseInt(idx, 10);
-	if (
-		! isNaN(idx) &&
-		(null !== audioUrls) &&
-		(undefined !== audioUrls[idx]) &&
-		'visible' === document.visibilityState
-	) {
-		const audio = new Audio();
-		audio.addEventListener('canplaythrough', () => {
-			audio.play().catch((e) => {
-				if (! audioWarned) {
-					audioWarned = true;
-					console.info('Hint: try clicking (anywhere on) the page.');
-				}
-			});
-		}, { once: true, passive: true });
-		audio.src = audioUrls[idx];
-	}
-};
+const poeGetUrl = function(path) { return browser.runtime.getURL(path); };
 
 /**
  * Import: Update Wrapper Classes.
@@ -127,6 +78,12 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	scene = parseInt(scene, 10);
 
 	// Orientation class.
+	if (
+		(43 === frame) || (81 === frame) || (82 === frame) ||
+		(101 === frame) || (102 === frame) || (103 === frame)
+	) {
+		rx = ! rx;
+	}
 	list.toggle('rx', !! rx);
 
 	// Disabled?
@@ -135,7 +92,7 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Child-only classes.
 	if (list.contains('child')) {
 		// Special frame.
-		list.toggle('m126', 126 === frame);
+		list.toggle('m120', 120 === frame);
 
 		// Animations.
 		list.toggle('a2',  2 === scene); // SneezeShadow.
@@ -150,9 +107,9 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	// Primary-only classes.
 	else {
 		// Special frames.
-		list.toggle('h', (37 === frame) || (38 === frame) || (39 === frame));
+		list.toggle('h', (38 === frame) || (39 === frame) || (40 === frame));
 		list.toggle('m024', 24 === frame);
-		list.toggle('m082', 82 === frame);
+		list.toggle('m083', 83 === frame);
 
 		// Animations.
 		list.toggle('a1',  1 === scene); // Drag.

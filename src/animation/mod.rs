@@ -186,21 +186,20 @@ impl Animation {
 	pub(crate) fn entrance_choice(first: bool) -> Self {
 		let mut last = LAST_ENTRANCE.load(SeqCst).to_le_bytes();
 		loop {
-			let next = match Universe::rand_mod(if first { 21 } else { 14 }) {
+			let next = match Universe::rand_mod(if first { 19 } else { 13 }) {
 				0 => Self::BathDive,
-				1 => Self::BeamIn,
-				2 => Self::BigFish,
-				3 => Self::BlackSheepCatch,
-				4 => Self::BlackSheepCatchFail,
-				5 => Self::BlackSheepChase,
-				6 => Self::BlackSheepRomance,
-				7 => Self::ClimbIn,
-				8 => Self::FloatIn,
-				9 => Self::Gopher,
-				10 => Self::JumpIn,
-				11 => Self::SlideIn,
-				12 => Self::Stargaze,
-				13 => Self::Yoyo,
+				1 => Self::BigFish,
+				2 => Self::BlackSheepCatch,
+				3 => Self::BlackSheepCatchFail,
+				4 => Self::BlackSheepChase,
+				5 => Self::BlackSheepRomance,
+				6 => Self::ClimbIn,
+				7 => Self::FloatIn,
+				8 => Self::Gopher,
+				9 => Self::JumpIn,
+				10 => Self::SlideIn,
+				11 => Self::Stargaze,
+				12 => Self::Yoyo,
 				_ => Self::Fall,
 			};
 
