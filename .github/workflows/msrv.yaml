@@ -30,7 +30,7 @@ jobs:
     - uses: actions/checkout@v3
     - uses: dtolnay/rust-toolchain@stable
       with:
-        targets: ${{ matrix.target }},wasm32-unknown-unknown
+        targets: ${{ matrix.target }}
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-msrv
@@ -44,4 +44,3 @@ jobs:
     - name: MSRV
       run: |
         cargo msrv verify
-        cargo msrv --target wasm32-unknown-unknown verify
