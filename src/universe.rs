@@ -98,9 +98,10 @@ impl Universe {
 	const DRAGGING: u8 =      0b0000_0100; // Poe is currently being dragged.
 	const ASSIGN_CHILD: u8 =  0b0000_1000; // The primary mate needs a child animation.
 	const NO_CHILD: u8 =      0b0001_0000; // Children must be stopped!
-	const STATE: u8 =         0b0010_0000; // State is active.
+	const NO_FOCUS: u8 =      0b0010_0000; // Disable primary mate focus support.
+	const STATE: u8 =         0b0100_0000; // State is active.
 	#[cfg(feature = "firefox")]
-	const FIX_BINDINGS: u8 =  0b0100_0000; // Body element bindings were lost.
+	const FIX_BINDINGS: u8 =  0b1000_0000; // Body element bindings were lost.
 }
 
 macro_rules! get {
@@ -117,6 +118,7 @@ impl Universe {
 	get!("Active", ACTIVE, active);
 	get!("Audio Enabled", AUDIO, audio);
 	get!("Dragging", DRAGGING, dragging);
+	get!("No Focus Allowed", NO_FOCUS, no_focus);
 
 	/// # Assign Child Animation?
 	///
@@ -257,9 +259,9 @@ impl Universe {
 				State::init();
 			}
 			else {
-				// Clear everything but the audio and state properties. (State
-				// will clear itself in a moment, hopefully.)
-				FLAGS.fetch_and(Self::AUDIO | Self::STATE, SeqCst);
+				// Clear everything but the audio, focus, and state properties.
+				// (State will clear itself in a moment, hopefully.)
+				FLAGS.fetch_and(Self::AUDIO | Self::NO_FOCUS | Self::STATE, SeqCst);
 			}
 			true
 		}
@@ -287,6 +289,19 @@ impl Universe {
 		if Self::ASSIGN_CHILD == FLAGS.fetch_or(Self::NO_CHILD, SeqCst) & Self::ASSIGN_CHILD {
 			FLAGS.fetch_and(! Self::ASSIGN_CHILD, SeqCst);
 		}
+	}
+
+	/// # Set No Focus.
+	///
+	/// If true, this will also disable dragging, since there wouldn't be
+	/// any way to undrag.
+	pub(crate) fn set_no_focus(v: bool) {
+		if v {
+			if Self::DRAGGING == FLAGS.fetch_or(Self::NO_FOCUS, SeqCst) & Self::DRAGGING {
+				FLAGS.fetch_and(! Self::DRAGGING, SeqCst);
+			}
+		}
+		else { FLAGS.fetch_and(! Self::NO_FOCUS, SeqCst); }
 	}
 
 	/// # Set Position.

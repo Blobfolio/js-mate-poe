@@ -17,13 +17,14 @@ impl MateFlags {
 	const IGNORE_EDGES: u16 =      0b0000_0000_0000_1000; // No edge checking needed.
 	const MAY_EXIT: u16 =          0b0000_0000_0001_0000; // Allowed to exit.
 	const PRIMARY: u16 =           0b0000_0000_0010_0000; // Primary sprite.
+	const NO_FOCUS: u16 =          0b0000_0000_0100_0000; // Disable focus/click/drag.
 
-	const CHANGED_CLASS: u16 =     0b0000_0000_0100_0000; // Class-affecting property changed.
-	const CHANGED_FRAME: u16 =     0b0000_0000_1000_0000; // Image frame changed.
-	const CHANGED_SIZE: u16 =      0b0000_0001_0000_0000; // Screen resized.
-	const CHANGED_SOUND: u16 =     0b0000_0010_0000_0000; // Need to play a sound.
-	const CHANGED_TRANS_X: u16 =   0b0000_0100_0000_0000; // X position changed.
-	const CHANGED_TRANS_Y: u16 =   0b0000_1000_0000_0000; // Y position changed.
+	const CHANGED_CLASS: u16 =     0b0000_0000_1000_0000; // Class-affecting property changed.
+	const CHANGED_FRAME: u16 =     0b0000_0001_0000_0000; // Image frame changed.
+	const CHANGED_SIZE: u16 =      0b0000_0010_0000_0000; // Screen resized.
+	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000; // Need to play a sound.
+	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000; // X position changed.
+	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000; // Y position changed.
 
 	// Transform-related changes.
 	const CHANGED_TRANSFORM: u16 =
@@ -64,6 +65,7 @@ impl MateFlags {
 	get!("Gravity Applies", GRAVITY, gravity);
 	get!("Ignore Edges", IGNORE_EDGES, ignore_edges);
 	get!("Allowed to Exit Screen", MAY_EXIT, may_exit);
+	get!("No Focus?", NO_FOCUS, no_focus);
 	get!("Primary Mate", PRIMARY, primary);
 	get!("Class Changed", CHANGED_CLASS, class_changed);
 	get!("Frame Changed", CHANGED_FRAME, frame_changed);
@@ -151,6 +153,15 @@ impl MateFlags {
 	pub(crate) fn set_may_exit(&mut self, v: bool) {
 		if v { self.0 |= Self::MAY_EXIT; }
 		else { self.0 &= ! Self::MAY_EXIT; }
+	}
+
+	/// # Set No Focus.
+	pub(crate) fn set_no_focus(&mut self, v: bool) {
+		if self.no_focus() != v {
+			if v { self.0 |= Self::NO_FOCUS; }
+			else { self.0 &= ! Self::NO_FOCUS; }
+			self.mark_class_changed();
+		}
 	}
 
 	/// # Set Scene Flags.

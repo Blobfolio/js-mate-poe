@@ -118,6 +118,15 @@ impl Poe {
 	/// Return `true` if audio playback is allowed, or `false` if not.
 	pub fn audio() -> bool { Universe::audio() }
 
+	#[wasm_bindgen(getter)]
+	#[must_use]
+	#[inline]
+	/// # Is Focus/Dragging Allowed?
+	///
+	/// Return `true` if the primary sprite can be clicked and dragged, or
+	/// `false` if not.
+	pub fn focus() -> bool { ! Universe::no_focus() }
+
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(getter)]
 	#[must_use]
@@ -156,6 +165,13 @@ impl Poe {
 	///
 	/// Enable or disable audio playback.
 	pub fn set_audio(v: bool) { Universe::set_audio(v); }
+
+	#[wasm_bindgen(setter)]
+	#[inline]
+	/// # Toggle Focus/Draggability.
+	///
+	/// Enable or disable the ability to click and drag the primary sprite.
+	pub fn set_focus(v: bool) { Universe::set_no_focus(! v); }
 
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(setter)]

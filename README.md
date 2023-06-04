@@ -42,10 +42,18 @@ To add the screen mate to your own web page, all you need to do is grab the `js-
 
 By default, that's all you need to do! Poe will automatically start running around as soon as the script has loaded.
 
-If you'd prefer to handle playback manually, or want to disable the sounds he occasionally makes, do the same thing, but add a `data-no-start` and/or `data-no-audio` attribute to the script tag, like:
+The following attributes can be added to the script tag for more granular control:
+
+| Attribute | Description |
+| --------- | ----------- |
+| `data-no-start` | Disable autostart. (You'll need to start Poe manually.) |
+| `data-no-audio` | Disable audio playback. |
+| `data-no-focus` | Disable Poe's draggability. |
+
+For example, if you wanted to launch Poe without sound support, you'd write this instead:
 
 ```html
-<script async data-no-sound data-no-start src="https://domain.com/path/to/js-mate-poe.min.js"></script>
+<script async data-no-sound src="https://domain.com/path/to/js-mate-poe.min.js"></script>
 ```
 
 The [next section](#advanced-library-usage) covers the minimal API, which you'd need to use to enable Poe programmatically.
@@ -83,6 +91,7 @@ The standalone Javascript library adds a global `Poe` class to the `window` obje
 | -------- | ----- | ------- | ------------- |
 | `active` | `bool` | Start or stop the Poe script. | `true` |
 | `audio` | `bool` | Enable or disable audio playback. | `true` |
+| `focus` | `bool` | Enable or disable the ability to click and drag Poe. | `true` |
 
 These are standard getter/setter methods, so can either give you the current value or allow you to make changes depending on how you use them. For example:
 
@@ -108,24 +117,11 @@ Short and sweet!
 
 The Internet is a good habitat for Poe, but not a _perfect_ one. There are a few quirks he has to live with, at least for the time being. Before reporting an issue, please double-check it isn't listed below.
 
-| Issue | Library | Extension |
-| ----- | ------- | --------- |
-| [Frozen/Duplicate Poe](#frozenduplicate-poe-instance) | | X |
-| [No Audio](#no-audio) | X | X |
-| [No Auto-Updates](#no-auto-updates) | | X |
-
-
-### Frozen/Duplicate Poe Instance
-
-Firefox kills any active instances of an add-on before applying an update, but does not reload the page(s) it was running on, effectively orphaning any elements — like sheep! — it may have been managing.
-
-If Poe happens to be running around your screen when such an update occurs, he may freeze in place as the old controlling script is nuked, and be joined by a second Poe shortly thereafter once the new controlling script is added to the page.
-
-A workaround has been added to `1.5.0` to fix the issue for _subsequent_ updates (`1.5.1`, etc.), but until then, it is what it is.
-
-To return to normalcy, simply reload the affected page(s).
-
-(Poe will also freeze if you disable the extension entirely while it is active. A reload will always be necessary to recover from that.)
+| Issue | Library | Extension | Fixed |
+| ----- | ------- | --------- | ----- |
+| [No Audio](#no-audio) | X | X | |
+| ~~[Frozen/Duplicate Poe](#frozenduplicate-poe-instance)~~ | | X | `1.5.0` |
+| ~~[No Auto-Updates](#no-auto-updates)~~ | | X | `1.4.3` |
 
 
 ### No Audio
@@ -135,11 +131,18 @@ Browsers automatically block autoplaying audio to protect users from disruptive 
 The only workaround for this is to click somewhere — anywhere — on the page. (Browsers aren't smart enough to recognize PLAY buttons, so have to assume that any sort of click might indicate the user's desire to play something.)
 
 
+### Frozen/Duplicate Poe Instance
+
+Firefox kills any active instances of an add-on before applying an update, but does not reload the page(s) it was running on, effectively orphaning any elements — like sheep! — it may have been managing.
+
+A workaround was added to `1.5.0` to detect and clean up any frozen old sheep resulting from such updates, but if for some reason that doesn't work, all you need to do is manually reload the affected page(s) to return to normal.
+
+
 ### No Auto-Updates
 
-The Firefox extension has supported automatic updates since version `1.4.3`, but if you are running an older version, you'll need to manually upgrade once to get back up to speed.
+The Firefox extension has supported automatic updates since version `1.4.3`, but if you were a really early adopter — thanks! — you'll need to manually upgrade _once_ to benefit.
 
-(Just click the `#.#.#.xpi` link attached to the [latest release](https://github.com/Blobfolio/js-mate-poe/releases) to upgrade to that version.)
+Thankfully that's easy to do: just click the `#.#.#.xpi` link attached to the [latest release](https://github.com/Blobfolio/js-mate-poe/releases) to update to that version.
 
 
 

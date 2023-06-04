@@ -12,9 +12,9 @@ import { getSettings, sanitizeSettings, saveSettings } from './settings.mjs';
 /**
  * Sync One Tab.
  *
- * This sends the current audio/active settings to the given tab so its content
- * script can synchronize its state accordingly, and afterwards, makes sure the
- * tab's pageIcon has the appropriate visibility, icon, and title.
+ * This sends the current audio/focus/active settings to the given tab so its
+ * content script can synchronize its state accordingly, and afterwards, makes
+ * sure the tab's pageIcon has the appropriate visibility, icon, and title.
  *
  * @param {number} tab Tab ID.
  * @param {?Object} settings Settings.

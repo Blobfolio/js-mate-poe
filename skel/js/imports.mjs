@@ -64,12 +64,13 @@ const poeGetUrl = function(path) { return browser.runtime.getURL(path); };
  * strings over the wasm/JS boundary every time a class changes.
  *
  * @param {!Element} el Element.
+ * @param {boolean} no_focus No Focus/click/drag.
  * @param {boolean} rx FlipX.
  * @param {number} frame Frame Class.
  * @param {number} scene Animation Class.
  * @return {void} Nothing.
  */
-const poeToggleWrapperClasses = function(el, rx, frame, scene) {
+const poeToggleWrapperClasses = function(el, no_focus, rx, frame, scene) {
 	// Pull the list so we have it.
 	const list = el.classList;
 
@@ -106,6 +107,8 @@ const poeToggleWrapperClasses = function(el, rx, frame, scene) {
 	}
 	// Primary-only classes.
 	else {
+		list.toggle('no-focus', no_focus);
+
 		// Special frames.
 		list.toggle('h', (38 === frame) || (39 === frame) || (40 === frame));
 		list.toggle('m024', 24 === frame);

@@ -17,31 +17,26 @@ import { getSettings, saveSettings } from './settings.mjs';
 const saveOptions = function(e) {
 	e.preventDefault();
 
-	let val = !! document.getElementById('audio').checked;
+	let audio = !! document.getElementById('audio').checked;
+	let focus = !! document.getElementById('focus').checked;
 	const btn = document.getElementById('btn');
 	getSettings().then((s) => {
-		if (s.audio !== val) {
-			s.audio = val;
-			saveSettings(s).then(async () => {
+		s.audio = audio;
+		s.focus = focus;
+		saveSettings(s).then(async (r) => {
+			// If something changed, sync the state.
+			if (r) {
 				await browser.runtime.sendMessage({action: 'poeBgSyncAll'});
+			}
 
-				// Give a visual indication that something happened.
-				btn.classList.add('saved');
-				setTimeout(function() {
-					btn.classList.remove('saved');
-				}, 1500);
-
-				return Promise.resolve(true);
-			});
-		}
-		else {
-			// Give a visual indication that something would have happened, had
-			// the settings actually needed saving. Haha.
+			// Give a visual indication that something happened.
 			btn.classList.add('saved');
 			setTimeout(function() {
 				btn.classList.remove('saved');
-			}, 500);
-		}
+			}, 1500);
+
+			return Promise.resolve(true);
+		});
 	});
 
 	return false;
@@ -57,6 +52,7 @@ const saveOptions = function(e) {
 const getOptions = function() {
 	getSettings().then((v) => {
 		document.getElementById('audio').checked = v.audio;
+		document.getElementById('focus').checked = v.focus;
 	});
 };
 

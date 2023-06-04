@@ -37,7 +37,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, rx: bool, frame: i16, scene: i8);
+	fn toggle_wrapper_classes(el: &Element, no_focus: bool, rx: bool, frame: i16, scene: i8);
 }
 
 
@@ -136,9 +136,7 @@ impl Mate {
 	pub(crate) fn set_child_animation(&self, child: &mut Self) {
 		if ! self.active() { return; }
 
-		let animation =
-			if let Some(a) = self.child() { a }
-			else { return };
+		let Some(animation) = self.child() else { return; };
 
 		// Make sure the mate has the correct geometry.
 		child.pretick_resize();
@@ -389,6 +387,10 @@ impl Mate {
 		}
 		// Tick it if we got it.
 		else if self.next_tick <= now {
+			// Maybe toggle focus.
+			if self.flags.primary() { self.flags.set_no_focus(Universe::no_focus()); }
+
+			// Make sure we have the right screen size.
 			self.pretick_resize();
 
 			// Browser override?
@@ -440,12 +442,10 @@ impl Mate {
 	///
 	/// Crunch the step changes, if any.
 	fn tick(&mut self, now: u32) {
-		let step =
-			if let Some(step) = self.tick_next_step() { step }
-			else {
-				self.stop();
-				return;
-			};
+		let Some(step) = self.tick_next_step() else {
+			self.stop();
+			return;
+		};
 
 		// Adjust the timings.
 		self.next_tick = now + u32::from(step.next_tick());
@@ -556,6 +556,7 @@ impl Mate {
 			if self.flags.class_changed() {
 				toggle_wrapper_classes(
 					&wrapper,
+					self.flags.no_focus(),
 					self.flags.flipped_x(),
 					self.frame.dba(),
 					self.animation.map_or(0, Animation::css_class),
@@ -598,10 +599,7 @@ impl Mate {
 		if Universe::dragging() { return false; }
 
 		// Some basic setup.
-		let animation =
-			if let Some(a) = self.animation { a }
-			else { return false };
-
+		let Some(animation) = self.animation else { return false; };
 		let w = i32::from(self.size.0);
 		let max_x = self.max_x();
 		let max_y = self.max_y();
