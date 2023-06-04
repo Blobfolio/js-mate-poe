@@ -42,6 +42,7 @@
 // Disable mouse clicks for disabled sprites, child sprites, and the image
 // element.
 #p.child,
+#p.no-focus,
 #p.off,
 #i { pointer-events: none; }
 

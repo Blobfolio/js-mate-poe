@@ -19,6 +19,9 @@ init(base64toUint8(wasmBase64).buffer).then(() => {
 	// Make the Poe instance public.
 	window.Poe = Poe;
 
+	// Disable focus?
+	if (currentScript.hasAttribute('data-no-focus')) { Poe.focus = false; }
+
 	// Disable audio?
 	if (currentScript.hasAttribute('data-no-audio')) { Poe.audio = false; }
 

@@ -14,12 +14,14 @@ export const sanitizeSettings = function(val) {
 	const out = {
 		active: false,
 		audio: false,
+		focus: true,
 	};
 
 	// Copy valid properties from the source, if any.
 	if (isRealObject(val)) {
 		if ('undefined' !== typeof val.active) { out.active = !! val.active; }
 		if ('undefined' !== typeof val.audio) { out.audio = !! val.audio; }
+		if ('undefined' !== typeof val.focus) { out.focus = !! val.focus; }
 	}
 
 	return out;
@@ -33,7 +35,7 @@ export const sanitizeSettings = function(val) {
  * @return {Object} Settings.
  */
 export const getSettings = async function() {
-	return browser.storage.local.get(['active', 'audio']).then(
+	return browser.storage.local.get(['active', 'audio', 'focus']).then(
 		(raw) => sanitizeSettings(raw),
 		() => sanitizeSettings(null),
 	);
@@ -50,7 +52,11 @@ export const getSettings = async function() {
 export const saveSettings = async function(val) {
 	val = sanitizeSettings(val);
 	const old = await getSettings();
-	if ((old.active === val.active) && (old.audio === val.audio)) {
+	if (
+		(old.active === val.active) &&
+		(old.audio === val.audio) &&
+		(old.focus === val.focus)
+	) {
 		return Promise.resolve(false);
 	}
 	else {

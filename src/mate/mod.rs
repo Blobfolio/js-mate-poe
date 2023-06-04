@@ -37,7 +37,7 @@ extern "C" {
 
 	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, rx: bool, frame: i16, scene: i8);
+	fn toggle_wrapper_classes(el: &Element, no_focus: bool, rx: bool, frame: i16, scene: i8);
 }
 
 
@@ -389,6 +389,10 @@ impl Mate {
 		}
 		// Tick it if we got it.
 		else if self.next_tick <= now {
+			// Maybe toggle focus.
+			if self.flags.primary() { self.flags.set_no_focus(Universe::no_focus()); }
+
+			// Make sure we have the right screen size.
 			self.pretick_resize();
 
 			// Browser override?
@@ -556,6 +560,7 @@ impl Mate {
 			if self.flags.class_changed() {
 				toggle_wrapper_classes(
 					&wrapper,
+					self.flags.no_focus(),
 					self.flags.flipped_x(),
 					self.frame.dba(),
 					self.animation.map_or(0, Animation::css_class),

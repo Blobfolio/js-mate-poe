@@ -42,10 +42,18 @@ To add the screen mate to your own web page, all you need to do is grab the `js-
 
 By default, that's all you need to do! Poe will automatically start running around as soon as the script has loaded.
 
-If you'd prefer to handle playback manually, or want to disable the sounds he occasionally makes, do the same thing, but add a `data-no-start` and/or `data-no-audio` attribute to the script tag, like:
+The following attributes can be added to the script tag for more granular control:
+
+| Attribute | Description |
+| --------- | ----------- |
+| `data-no-start` | Disable autostart. (You'll need to start Poe manually.) |
+| `data-no-audio` | Disable audio playback. |
+| `data-no-focus` | Disable Poe's draggability. |
+
+For example, if you wanted to launch Poe without sound support, you'd write this instead:
 
 ```html
-<script async data-no-sound data-no-start src="https://domain.com/path/to/js-mate-poe.min.js"></script>
+<script async data-no-sound src="https://domain.com/path/to/js-mate-poe.min.js"></script>
 ```
 
 The [next section](#advanced-library-usage) covers the minimal API, which you'd need to use to enable Poe programmatically.
@@ -83,6 +91,7 @@ The standalone Javascript library adds a global `Poe` class to the `window` obje
 | -------- | ----- | ------- | ------------- |
 | `active` | `bool` | Start or stop the Poe script. | `true` |
 | `audio` | `bool` | Enable or disable audio playback. | `true` |
+| `focus` | `bool` | Enable or disable the ability to click and drag Poe. | `true` |
 
 These are standard getter/setter methods, so can either give you the current value or allow you to make changes depending on how you use them. For example:
 

@@ -102,11 +102,13 @@ const hasLibraryPoe = function() {
  * Returns `true` if activeness changed.
  *
  * @param {boolean} audio Audio.
+ * @param {boolean} focus Focus.
  * @return {boolean} True/false.
  */
-const poeOn = function(audio) {
-	// Set the audio accordingly.
+const poeOn = function(audio, focus) {
+	// Basic settings.
 	Poe.audio = !! audio;
+	Poe.focus = !! focus;
 
 	// Turn it on if it isn't already running.
 	if (! Poe.active) {
@@ -184,7 +186,7 @@ browser.runtime.onMessage.addListener(function(m) {
 		}
 
 		// Update the state as requested!
-		if (m.active) { poeOn(m.audio); }
+		if (m.active) { poeOn(m.audio, m.focus); }
 		else { poeOff(); }
 
 		return Promise.resolve(true);
