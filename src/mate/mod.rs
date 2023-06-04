@@ -136,9 +136,7 @@ impl Mate {
 	pub(crate) fn set_child_animation(&self, child: &mut Self) {
 		if ! self.active() { return; }
 
-		let animation =
-			if let Some(a) = self.child() { a }
-			else { return };
+		let Some(animation) = self.child() else { return; };
 
 		// Make sure the mate has the correct geometry.
 		child.pretick_resize();
@@ -444,12 +442,10 @@ impl Mate {
 	///
 	/// Crunch the step changes, if any.
 	fn tick(&mut self, now: u32) {
-		let step =
-			if let Some(step) = self.tick_next_step() { step }
-			else {
-				self.stop();
-				return;
-			};
+		let Some(step) = self.tick_next_step() else {
+			self.stop();
+			return;
+		};
 
 		// Adjust the timings.
 		self.next_tick = now + u32::from(step.next_tick());
@@ -603,10 +599,7 @@ impl Mate {
 		if Universe::dragging() { return false; }
 
 		// Some basic setup.
-		let animation =
-			if let Some(a) = self.animation { a }
-			else { return false };
-
+		let Some(animation) = self.animation else { return false; };
 		let w = i32::from(self.size.0);
 		let max_x = self.max_x();
 		let max_y = self.max_y();
