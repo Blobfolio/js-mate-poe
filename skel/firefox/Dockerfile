@@ -2,7 +2,7 @@
 FROM rust:1.70-bullseye AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
-	cargo install --root /tmp/cargo --locked --version 0.2.86 wasm-bindgen-cli && \
+	cargo install --root /tmp/cargo --locked --version 0.2.87 wasm-bindgen-cli && \
 	cargo install --root /tmp/cargo --locked --version 0.112.0 wasm-opt
 
 # Stage Two.
