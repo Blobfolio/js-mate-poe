@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.6.0"
+version = "1.6.1"
 authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.70"
@@ -20,15 +20,15 @@ credits-dir = "./"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-guff_css = "=0.2.0"
+guff_css = "=0.2.4"
 imagesize = "=0.12.0"
 
 [dependencies]
-js-sys = "=0.3.63"
-wasm-bindgen = "=0.2.86"
+js-sys = "=0.3.64"
+wasm-bindgen = "=0.2.87"
 
 [dependencies.web-sys]
-version = "=0.3.63"
+version = "=0.3.64"
 features = [
 	"AddEventListenerOptions",
 	"Blob",
