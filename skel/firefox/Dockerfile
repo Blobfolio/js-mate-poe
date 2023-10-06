@@ -1,12 +1,12 @@
 # Stage One.
-FROM rust:1.71-bullseye AS stage1
+FROM rust:1.73-bookworm AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
 	cargo install --root /tmp/cargo --version 0.2.87 wasm-bindgen-cli && \
 	cargo install --root /tmp/cargo --version 0.114.1 wasm-opt
 
 # Stage Two.
-FROM rust:1.71-bullseye
+FROM rust:1.73-bookworm
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
