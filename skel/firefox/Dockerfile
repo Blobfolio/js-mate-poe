@@ -23,7 +23,6 @@ RUN set -eux; \
 	npm set cache /tmp/npm-cache && \
 	npm set package-lock false && \
 	npm set save false && \
-	npm set unsafe-perm true && \
 	npm i -g google-closure-compiler@20221102.0.1 web-ext && \
 	\
 	touch /etc/inside-docker && \
