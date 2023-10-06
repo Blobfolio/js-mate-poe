@@ -10,7 +10,6 @@ FROM rust:1.73-bookworm
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
-COPY docker/nodesource-archive-keyring.gpg /usr/share/keyrings/
 COPY docker/nodesource.sources /etc/apt/sources.list.d/
 COPY docker/entrypoint.sh /opt/
 
