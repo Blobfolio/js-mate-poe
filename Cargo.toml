@@ -24,11 +24,11 @@ guff_css = "=0.2.9"
 imagesize = "=0.12.0"
 
 [dependencies]
-js-sys = "=0.3.64"
-wasm-bindgen = "=0.2.87"
+js-sys = "=0.3.65"
+wasm-bindgen = "=0.2.88"
 
 [dependencies.web-sys]
-version = "=0.3.64"
+version = "=0.3.65"
 features = [
 	"AddEventListenerOptions",
 	"Blob",
