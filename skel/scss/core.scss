@@ -7,6 +7,9 @@
 :host {
 	display: contents;
 	image-rendering: pixelated;
+
+	// Hide when printing.
+	@media print { visibility: hidden; }
 }
 
 #p, #i {
