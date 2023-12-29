@@ -60,60 +60,30 @@ wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
 cd ..
 
 # Compile the background script.
-google-closure-compiler \
-	--env BROWSER \
-	--language_in STABLE \
-	--js "js/is_real_object.mjs" \
-	--js "js/settings.mjs" \
-	--js "js/background.mjs" \
-	--entry_point "js/background.mjs" \
-	--js_output_file "/tmp/out.js" \
-	--assume_function_wrapper \
-	--isolation_mode IIFE \
-	--browser_featureset_year 2021 \
-	--compilation_level WHITESPACE_ONLY \
-	--module_resolution BROWSER \
-	--warning_level VERBOSE
+esbuild \
+	--bundle "js/background.mjs" \
+	--log-level=warning \
+	--outfile="/tmp/out.js"
 
 # Add a header and move it into place.
 cat js/header.js /tmp/out.js > dist/background.js
 sed -i "s/* JS Mate Poe/* JS Mate Poe: Background/g" dist/background.js
 
 # Compile the options script.
-google-closure-compiler \
-	--env BROWSER \
-	--language_in STABLE \
-	--js "js/is_real_object.mjs" \
-	--js "js/settings.mjs" \
-	--js "js/options.mjs" \
-	--entry_point "js/options.mjs" \
-	--js_output_file "/tmp/out.js" \
-	--assume_function_wrapper \
-	--isolation_mode IIFE \
-	--browser_featureset_year 2021 \
-	--compilation_level WHITESPACE_ONLY \
-	--module_resolution BROWSER \
-	--warning_level VERBOSE
+esbuild \
+	--bundle "js/options.mjs" \
+	--log-level=warning \
+	--outfile="/tmp/out.js"
 
 # Add a header and move it into place.
 cat js/header.js /tmp/out.js > dist/options/options.js
 sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options/options.js
 
 # Compile the foreground script.
-google-closure-compiler \
-	--env BROWSER \
-	--language_in STABLE \
-	--js "js/is_real_object.mjs" \
-	--js "js/generated/glue.mjs" \
-	--js "js/foreground.mjs" \
-	--entry_point "js/foreground.mjs" \
-	--js_output_file "/tmp/out.js" \
-	--assume_function_wrapper \
-	--isolation_mode IIFE \
-	--browser_featureset_year 2021 \
-	--compilation_level WHITESPACE_ONLY \
-	--module_resolution BROWSER \
-	--warning_level VERBOSE
+esbuild \
+	--bundle "js/foreground.mjs" \
+	--log-level=warning \
+	--outfile="/tmp/out.js"
 
 # Add a header and move it into place.
 cat js/header.js /tmp/out.js > dist/foreground.js

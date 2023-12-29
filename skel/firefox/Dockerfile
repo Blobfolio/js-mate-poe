@@ -1,12 +1,12 @@
 # Stage One.
-FROM rust:1.74-bookworm AS stage1
+FROM rust:1.75-bookworm AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
-	cargo install --root /tmp/cargo --locked --version 0.2.88 wasm-bindgen-cli && \
+	cargo install --root /tmp/cargo --locked --version 0.2.89 wasm-bindgen-cli && \
 	cargo install --root /tmp/cargo --locked --version 0.116.0 wasm-opt
 
 # Stage Two.
-FROM rust:1.74-bookworm
+FROM rust:1.75-bookworm
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
@@ -19,11 +19,11 @@ RUN set -eux; \
 	rustup target add wasm32-unknown-unknown && \
 	\
 	apt-get update && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y esbuild nodejs && \
 	npm set cache /tmp/npm-cache && \
 	npm set package-lock false && \
 	npm set save false && \
-	npm i -g google-closure-compiler@20230802.0.0 web-ext && \
+	npm i -g web-ext && \
 	\
 	touch /etc/inside-docker && \
 	\
