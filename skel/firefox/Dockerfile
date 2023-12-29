@@ -19,11 +19,11 @@ RUN set -eux; \
 	rustup target add wasm32-unknown-unknown && \
 	\
 	apt-get update && \
-	DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs && \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y esbuild nodejs && \
 	npm set cache /tmp/npm-cache && \
 	npm set package-lock false && \
 	npm set save false && \
-	npm i -g google-closure-compiler@20230802.0.0 web-ext && \
+	npm i -g web-ext && \
 	\
 	touch /etc/inside-docker && \
 	\

@@ -32,8 +32,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 @build FEATURES="": _init
 	# Dependency checks.
 	just _require-app cargo
-	just _require-app google-closure-compiler
-	just _require-app terser
+	just _require-app esbuild
 
 	[ ! $(command -v fyi) ] || fyi task "Building JS Mate Poe…"
 
@@ -88,30 +87,16 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
 
 	# Transpile the JS to a temporary location.
-	google-closure-compiler \
-		--env BROWSER \
-		--language_in STABLE \
-		--js "{{ skel_dir }}/js/generated/glue.mjs" \
-		--js "{{ skel_dir }}/js/generated/wasm_base64.mjs" \
-		--js "{{ skel_dir }}/js/base64_to_uint8.mjs" \
-		--js "{{ skel_dir }}/js/library.mjs" \
-		--entry_point "{{ skel_dir }}/js/library.mjs" \
-		--js_output_file "/tmp/library.js" \
-		--assume_function_wrapper \
-		--browser_featureset_year 2021 \
-		--compilation_level WHITESPACE_ONLY \
-		--isolation_mode NONE \
-		--jscomp_off unknownDefines \
-		--module_resolution BROWSER \
-		--warning_level VERBOSE
+	esbuild \
+		--bundle "{{ skel_dir }}/js/library.mjs" \
+		--minify \
+		--log-level=warning \
+		--outfile="/tmp/library.min.js"
 
-	# Compress and enclose the temporary JS into _another_ temporary file.
-	cat "/tmp/library.js" | \
-		terser \
-			-c ecma=2021,passes=25 \
-			-e currentScript:document.currentScript \
-			-m \
-			-o "/tmp/library.min.js"
+	# Not sure if there's a proper way to inject an IIFE argument with esbuild;
+	# we can do it with sed instead, I guess.
+	sed -i 's#^(()=>#((currentScript)=>#g' "/tmp/library.min.js"
+	sed -i 's#();$#(document.currentScript);#g' "/tmp/library.min.js"
 
 	# Add a header to the JS and move it into place, along with the demo HTML
 	# index file.
