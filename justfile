@@ -88,26 +88,19 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 	# Transpile the JS to a temporary location.
 	esbuild \
+		--banner:js="$( cat "{{ skel_dir }}/js/header.js" )" \
 		--bundle "{{ skel_dir }}/js/library.mjs" \
 		--minify \
 		--log-level=warning \
-		--outfile="/tmp/library.min.js"
+		--outfile="{{ dist_dir }}/js-mate-poe.min.js"
 
-	# Not sure if there's a proper way to inject an IIFE argument with esbuild;
-	# we can do it with sed instead, I guess.
-	sed -i 's#^(()=>#((currentScript)=>#g' "/tmp/library.min.js"
-	sed -i 's#();$#(document.currentScript);#g' "/tmp/library.min.js"
-
-	# Add a header to the JS and move it into place, along with the demo HTML
-	# index file.
-	cat "{{ skel_dir }}/js/header.js" "/tmp/library.min.js" > "{{ dist_dir }}/js-mate-poe.min.js"
+	# Copy the demo HTML to the dist folder.
 	cp "{{ skel_dir }}/html/index.html" "{{ dist_dir }}"
 
 	# Gzip/Brotli the JS.
 	[ ! $(command -v channelz) ] || channelz "{{ dist_dir }}/js-mate-poe.min.js"
 
 	# Clean up.
-	rm /tmp/library*.js
 	just _fix-chown "{{ dist_dir }}"
 
 	[ ! $(command -v fyi) ] || fyi success "Built JS Mate Poe!"
