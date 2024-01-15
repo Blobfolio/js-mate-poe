@@ -1,5 +1,4 @@
 {
 	"rust_update": true,
-	"just_list": true,
-	"just_init": "_init"
+	"just_list": true
 }

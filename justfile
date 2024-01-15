@@ -29,12 +29,14 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 
 # Build Library!
-@build FEATURES="": _init
+@build FEATURES="":
 	# Dependency checks.
 	just _require-app cargo
 	just _require-app esbuild
+	just _require-app wasm-bindgen
+	just _require-app wasm-opt
 
-	[ ! $(command -v fyi) ] || fyi task "Building JS Mate Poe…"
+	[ -z "$(which fyi)" ] || fyi task "Building JS Mate Poe…"
 
 	# Reset the output directories.
 	[ ! -d "{{ dist_dir }}" ] || rm -rf "{{ dist_dir }}"
@@ -98,12 +100,12 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/html/index.html" "{{ dist_dir }}"
 
 	# Gzip/Brotli the JS.
-	[ ! $(command -v channelz) ] || channelz "{{ dist_dir }}/js-mate-poe.min.js"
+	[ -z "$(which channelz)" ] || channelz "{{ dist_dir }}/js-mate-poe.min.js"
 
 	# Clean up.
 	just _fix-chown "{{ dist_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi success "Built JS Mate Poe!"
+	[ -z "$(which fyi)" ] || fyi success "Built JS Mate Poe!"
 
 
 # Build Firefox Extension Build Environment.
@@ -111,7 +113,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Dependency check.
 	just _require-app cargo
 
-	[ ! $(command -v fyi) ] || fyi task "Building Firefox Extension Build Environment…"
+	[ -z "$(which fyi)" ] || fyi task "Building Firefox Extension Build Environment…"
 
 	# Make sure there's an up-to-date Cargo lock file.
 	cargo update
@@ -175,7 +177,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"
 	just _fix-chown "{{ dist_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi success "Built Firefox Extension Build Environment!"
+	[ -z "$(which fyi)" ] || fyi success "Built Firefox Extension Build Environment!"
 
 
 # Clean Cargo crap.
@@ -194,20 +196,20 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 @clippy:
 	clear
 
-	[ ! $(command -v fyi) ] || fyi task "Features: none (default)"
+	[ -z "$(which fyi)" ] || fyi task "Features: none (default)"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi task "Features: director"
+	[ -z "$(which fyi)" ] || fyi task "Features: director"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features director \
 		--target wasm32-unknown-unknown \
 		--target-dir "{{ cargo_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi task "Features: firefox"
+	[ -z "$(which fyi)" ] || fyi task "Features: firefox"
 	RUSTFLAGS="-D warnings" cargo clippy \
 		--release \
 		--features firefox \
@@ -219,7 +221,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 @demo:
 	just _require-app "guff"
 
-	[ ! $(command -v fyi) ] || fyi task "Build: Reference pages"
+	[ -z "$(which fyi)" ] || fyi task "Build: Reference pages"
 
 	[ ! -d "{{ demo_asset_dir }}" ] || rm -rf "{{ demo_asset_dir }}"
 	mkdir -p "{{ demo_asset_dir }}"
@@ -237,7 +239,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	clear
 	# Note: we have to target x86-64 because private tests can't be run
 	# under wasm yet.
-	[ ! $(command -v fyi) ] || fyi task "Features: none (default)"
+	[ -z "$(which fyi)" ] || fyi task "Features: none (default)"
 	cargo test \
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
@@ -246,7 +248,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi task "Features: director"
+	[ -z "$(which fyi)" ] || fyi task "Features: director"
 	cargo test \
 		--features director \
 		--target x86_64-unknown-linux-gnu \
@@ -257,7 +259,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--target x86_64-unknown-linux-gnu \
 		--target-dir "{{ cargo_dir }}"
 
-	[ ! $(command -v fyi) ] || fyi task "Features: firefox"
+	[ -z "$(which fyi)" ] || fyi task "Features: firefox"
 	cargo test \
 		--features firefox \
 		--target x86_64-unknown-linux-gnu \
@@ -285,7 +287,7 @@ version: _pre_version
 		exit 0
 	fi
 
-	[ ! $(command -v fyi) ] || fyi success "Setting version to $_ver2."
+	[ -z "$(which fyi)" ] || fyi success "Setting version to $_ver2."
 
 	# Set the release version!
 	just _version "{{ justfile_directory() }}" "$_ver2"
@@ -325,24 +327,20 @@ version: _pre_version
 	[ ! -e "{{ PATH }}" ] || chown -R --reference="{{ justfile() }}" "{{ PATH }}"
 
 
-# Initialization.
-@_init:
-	[ $(command -v wasm-bindgen) ] || cargo install wasm-bindgen-cli
-	[ $(command -v wasm-opt) ] || cargo install wasm-opt
-
-
 # Require Thing Exists.
+[no-exit-message]
 @_require PATH:
 	[ -e "{{ PATH }}" ] || just _error "Missing {{ PATH }}"
 
 
 # Require Program.
+[no-exit-message]
 @_require-app APP:
-	[ $(command -v "{{ APP }}") ] || just _error "Missing dependency: {{ APP }}"
+	[ -n "$(which "{{ APP }}")" ] || just _error "Missing dependency: {{ APP }}"
 
 
 # Print error and exit.
+[no-exit-message]
 @_error MSG:
-	[ ! $(command -v fyi) ] || fyi error -e 1 "{{ MSG }}"
-	[ $(command -v fyi) ] || echo "{{ MSG }}"
+	echo "\e[1;91mError:\e[0m {{ MSG }}"
 	exit 1
