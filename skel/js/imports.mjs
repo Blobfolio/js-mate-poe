@@ -1,43 +1,11 @@
 /**
  * @file Wasm Imports & Glue
  *
- * Some of these methods won't be necessary depending on the crate features
- * enabled, but they should be recognized as dead code and pruned during
- * transpilation, so won't add any overhead to the final library.
+ * This file is not used directly, but injected into wasm-bindgen as "snippets"
+ * when build.rs is run. Definitely janky, but there remain a few things that
+ * are disproportionately terrible to handle in Wasm, so for now it is what it
+ * is.
  */
-
-/**
- * Import: Console Debug (Director).
- *
- * This is just a thin wrapper around console.debug, accepting a single string
- * as input.
- *
- * @param {string} msg Message.
- * @return {void} Nothing.
- */
-const poeConsoleDebug = function(msg) { console.debug(msg); };
-
-/**
- * Import: Console Warn (Director).
- *
- * This is just a thin wrapper around console.debug, accepting a single string
- * as input.
- *
- * @param {string} msg Message.
- * @return {void} Nothing.
- */
-const poeConsoleWarn = function(msg) { console.warn(msg); };
-
-/**
- * Import: Print Library Details (Director).
- *
- * @return {void} Nothing.
- */
-const poeDetails = function() {
-	const playlist = `%PLAYLIST%`;
-	console.info(`%cJS Mate Poe: %c%VERSION%`, 'color:#ff1493;font-weight:bold;', 'color:#00abc0;font-weight:bold;');
-	console.info(`%c${playlist}`, 'color:#b2bec3;font-family:monospace;');
-};
 
 /**
  * Import: Get URL (Firefox).
@@ -48,6 +16,9 @@ const poeDetails = function() {
  *
  * This wrapper gives the wasm a way to generate URLs for them so it can do
  * what it needs to do.
+ *
+ * Note: this should be recognized as "dead code" and automaticallystripped
+ * from the non-Firefox builds.
  *
  * @param {string} path Relative Path.
  * @return {string} URL.
@@ -60,8 +31,8 @@ const poeGetUrl = function(path) { return browser.runtime.getURL(path); };
  * This toggles the various (toggleable) wrapper classes to match specific
  * states.
  *
- * The JS definition is ugly, but saves us having to pass/decode nine separate
- * strings over the wasm/JS boundary every time a class changes.
+ * The JS definition is ugly, but saves us having to pass/decode gazillions of
+ * separate strings over the wasm/JS boundary every time a class changes.
  *
  * @param {!Element} el Element.
  * @param {boolean} no_focus No Focus/click/drag.

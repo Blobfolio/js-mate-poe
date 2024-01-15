@@ -71,20 +71,24 @@ include!(concat!(env!("OUT_DIR"), "/media.rs"));
 
 
 #[cfg(feature = "director")]
-#[wasm_bindgen]
-extern "C" {
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeDetails")]
-	fn details();
-}
-
-#[cfg(feature = "director")]
 #[wasm_bindgen(start)]
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 /// # Bootstrap.
 ///
 /// Print library details after initialization.
-pub fn bootstrap() { details(); }
+pub fn bootstrap() {
+	// Print the program name and version.
+	web_sys::console::info_3(
+		&JsValue::from_str(concat!("%cJS Mate Poe: %c", env!("CARGO_PKG_VERSION"))),
+		&JsValue::from_str("color:#ff1493;font-weight:bold;"),
+		&JsValue::from_str("color:#00abc0;font-weight:bold;"),
+	);
+
+	// Print the playlist.
+	web_sys::console::info_2(
+		&JsValue::from_str(concat!("%c", include_str!("../skel/playlist.txt"))),
+		&JsValue::from_str("color:#b2bec3;font-family:monospace;"),
+	);
+}
 
 
 

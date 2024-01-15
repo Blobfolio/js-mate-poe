@@ -67,11 +67,9 @@ pub(crate) const IMAGE_WIDTH: u32 = {w};
 pub(crate) const IMAGE_HEIGHT: u32 = {h};"#
 	));
 
-	// Load the JS imports, and swap out the two dynamic bits.
+	// Load the JS imports.
 	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
-		.expect("Missing imports.mjs")
-		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").unwrap_or_default())
-		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_default());
+		.expect("Missing imports.mjs");
 	js.push('\n');
 
 	// Add the JS to the Rust in a roundabout way so wasm-bindgen can find it.

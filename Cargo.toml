@@ -58,7 +58,7 @@ firefox = ["web-sys/Node"]
 
 # The director mode exposes additional browserland methods to make it easier to
 # preview and debug animations, like Poe.play and Poe.speed.
-director = []
+director = ["web-sys/console"]
 
 [profile.release]
 lto = true
