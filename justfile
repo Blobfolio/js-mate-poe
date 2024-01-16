@@ -76,8 +76,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	# Remove the wasm-bindgen stuff.
 	rm -rf \
 		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
-		"{{ cargo_release_dir }}/snippets"
+		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
 
 	# Base64-encode the optimized wasm and throw it into a quickie JS module
 	# so we can easily access it from our entry point.
@@ -154,7 +153,6 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/playlist.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp "{{ skel_dir }}/img/poe.png" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 	cp "{{ skel_dir }}/img/poe.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
-	cp "{{ skel_dir }}/js/glue-extra.mjs" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
 	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust"
 
