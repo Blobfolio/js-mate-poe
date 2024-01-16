@@ -19,6 +19,7 @@ use crate::{
 	Universe,
 };
 use flags::MateFlags;
+use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	DomTokenList,
@@ -28,6 +29,11 @@ use web_sys::{
 	ShadowRootInit,
 	ShadowRootMode,
 };
+
+
+
+/// # Pixels!
+const UNIT_PX: [u8; 2] = *b"px";
 
 
 
@@ -794,6 +800,7 @@ fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
 	let _res = list.toggle_with_force(class, force);
 }
 
+#[allow(unsafe_code)]
 /// # Write Style Property.
 ///
 /// Update a given `--prop` pixel value.
@@ -801,12 +808,38 @@ fn write_css_property(el: &Element, key: &str, value: i32) {
 	if let Some(el) = el.dyn_ref::<HtmlElement>() {
 		let style = el.style();
 
-		// Convert to a string and toss a "px" onto the end.
-		let mut buffer = itoa::Buffer::new();
-		let mut value = buffer.format(value).to_owned();
-		value.push_str("px");
+		// First, stringify the value with `itoa`.
+		let mut buf1 = itoa::Buffer::new();
+		let value: &[u8] = buf1.format(value).as_bytes();
 
-		// Save it.
-		let _res = style.set_property(key, &value);
+		// Alas, it needs a unit and we don't have access to itoa's buffer,
+		// so have to copy it to our own so we can add the two extra bytes.
+		// Even so, this is still significantly more efficient than skipping
+		// itoa or, heaven forbid, actually using _String_! Haha.
+		let len = value.len();
+		if len <= 11 {
+			let mut buf = [MaybeUninit::<u8>::uninit(); 13];
+			let value = unsafe {
+				let ptr: *mut u8 = buf.as_mut_ptr().cast();
+				std::ptr::copy_nonoverlapping(
+					value.as_ptr(),
+					ptr,
+					len,
+				);
+				std::ptr::copy_nonoverlapping(
+					UNIT_PX.as_ptr(),
+					ptr.add(len),
+					2
+				);
+
+				// Send the initialized bytes back as a string slice.
+				std::str::from_utf8_unchecked(
+					&*(std::ptr::addr_of!(buf[..len + 2]) as *const [u8])
+				)
+			};
+
+			// Now we can finally write it!
+			let _res = style.set_property(key, value);
+		}
 	}
 }
