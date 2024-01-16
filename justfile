@@ -22,6 +22,7 @@ cargo_dir      := "/tmp/" + pkg_id + "-cargo"
 demo_dir       := justfile_directory() + "/demo"
 dist_dir       := justfile_directory() + "/dist"
 skel_dir       := justfile_directory() + "/skel"
+gen_dir        := skel_dir + "/js/generated"
 demo_asset_dir := demo_dir + "/assets"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
@@ -40,8 +41,8 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 	# Reset the output directories.
 	[ ! -d "{{ dist_dir }}" ] || rm -rf "{{ dist_dir }}"
-	[ ! -d "{{ skel_dir }}/js/generated" ] || rm -rf "{{ skel_dir }}/js/generated"
-	mkdir -p "{{ dist_dir }}" "{{ skel_dir }}/js/generated"
+	[ ! -d "{{ gen_dir }}" ] || rm -rf "{{ gen_dir }}"
+	mkdir -p "{{ dist_dir }}" "{{ gen_dir }}"
 
 	# Start with Cargo.
 	cargo build \
@@ -65,7 +66,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
 
 	# Copy the glue to somewhere more predictable.
-	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ skel_dir }}/js/generated/glue.mjs"
+	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
 
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
@@ -80,9 +81,9 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 	# Base64-encode the optimized wasm and throw it into a quickie JS module
 	# so we can easily access it from our entry point.
-	echo -n "export const wasmBase64 = '" > "{{ skel_dir }}/js/generated/wasm_base64.mjs"
-	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
-	echo "';" >> "{{ skel_dir }}/js/generated/wasm_base64.mjs"
+	echo -n "export const wasmBase64 = '" > "{{ gen_dir }}/wasm_base64.mjs"
+	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ gen_dir }}/wasm_base64.mjs"
+	echo "';" >> "{{ gen_dir }}/wasm_base64.mjs"
 
 	# Transpile the JS to a temporary location.
 	esbuild \
