@@ -54,7 +54,7 @@
 #p:not(.off) { will-change: transform; }
 
 // Half-size.
-#p.h {
+#p[data-f="h"] {
 	height: $tile_size / 2;
 	& > #i { margin-top: -2px; }
 }
@@ -66,53 +66,53 @@
 #p.rx { transform: $pos scaleX(-1); }
 
 // Masks.
-#p.m024 { clip-path: $m024; }
-#p.m083 { clip-path: $m083; }
-#p.m120 { clip-path: $m120; }
+#p[data-f="m024"] { clip-path: $m024; }
+#p[data-f="m083"] { clip-path: $m083; }
+#p[data-f="m120"] { clip-path: $m120; }
 
 // Animation: Dragging.
-#p.a1 { cursor: grabbing; }
+#p[data-a="1"] { cursor: grabbing; }
 
 // Animation: BlackSheepCatchChild(ren), SneezeShadow, and
 // ShadowShowdownChild(ren).
-#p.a2,
-#p.a9,
-#p.aa,
-#p.af { z-index: 2147483646; }
+#p[data-a="2"],
+#p[data-a="9"],
+#p[data-a="a"],
+#p[data-a="f"] { z-index: 2147483646; }
 
 // Animation: Abduction.
-#p.a3 { animation: a3 0.25s 4s 28; }
+#p[data-a="3"] { animation: a3 0.25s 4s 28; }
 
 // Animation: BigFish.
-#p.a4 { transform: $pos scale(3); }
+#p[data-a="4"] { transform: $pos scale(3); }
 
 // Animation: SplatGhost.
-#p.a5 {
+#p[data-a="5"] {
 	filter: sepia(1);
 	transition: none;
 	animation: a5 0.8s forwards;
 }
 
 // Animation: Eating/MagicFlower.
-#p.a6,
-#p.a7 { filter: hue-rotate(250deg); }
+#p[data-a="6"],
+#p[data-a="7"] { filter: hue-rotate(250deg); }
 
-#p.a6 { transition: filter 3s 0.8s ease-out; }
+#p[data-a="6"] { transition: filter 3s 0.8s ease-out; }
 
 // Animation: DigestMagicFlower1.
-#p.a8 { transition: filter 1.5s ease-out; }
+#p[data-a="8"] { transition: filter 1.5s ease-out; }
 
 // Animation: ShadowShowdownChild(ren).
-#p.a9,
-#p.aa { filter: brightness(0) blur(1px); }
+#p[data-a="9"],
+#p[data-a="a"] { filter: brightness(0) blur(1px); }
 
-#p.a9 {
+#p[data-a="9"] {
 	opacity: 0.5;
 	transform: $pos skew(-40deg);
 	&.rx { transform: $pos scaleX(-1) skew(-40deg); }
 }
 
-#p.aa {
+#p[data-a="a"] {
 	transition: none;
 	animation: a5 3s forwards;
 	transform: $pos skew(40deg);
@@ -120,22 +120,22 @@
 }
 
 // Animation: DangleRecover.
-#p.ab {
+#p[data-a="b"] {
 	transform: $pos scaleY(-1);
 	&.rx { transform: $pos scale(-1); }
 }
 
 // Animation: Yoyo.
-#p.ac { animation: ac 0.2s infinite linear; }
+#p[data-a="c"] { animation: ac 0.2s infinite linear; }
 
 // Animation: BeamIn.
-#p.ad {
+#p[data-a="d"] {
 	animation: ad 0.5s 3.5s forwards;
 	& > #i { animation: iad 2.5s 1s linear; }
 }
 
 // Animation: Glitch.
-#p.ae:after {
+#p[data-a="e"]:after {
 	content: '';
 
 	position: absolute;
@@ -148,7 +148,7 @@
 }
 
 // Animation: BlackSheepCatchExitChild.
-#p.af {
+#p[data-a="f"] {
 	opacity: 0;
 	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
 	transform: $pos scaleY(0.1);
@@ -156,7 +156,7 @@
 }
 
 // Animation: BathDiveChild.
-#p.ag { transition: opacity 0.5s 1.25s ease; }
+#p[data-a="g"] { transition: opacity 0.5s 1.25s ease; }
 
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {

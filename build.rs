@@ -12,9 +12,9 @@ use std::path::{
 /// # Main.
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
-	println!("cargo:rerun-if-changed=skel/img/poe.png");
-	println!("cargo:rerun-if-changed=skel/js/imports.mjs");
 	println!("cargo:rerun-if-changed=skel/playlist.txt");
+	println!("cargo:rerun-if-changed=skel/img/poe.png");
+	println!("cargo:rerun-if-changed=skel/js/glue-extra.mjs");
 	println!("cargo:rerun-if-changed=skel/scss");
 	println!("cargo:rerun-if-changed=skel/sound/baa.flac");
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
@@ -67,13 +67,16 @@ pub(crate) const IMAGE_WIDTH: u32 = {w};
 pub(crate) const IMAGE_HEIGHT: u32 = {h};"#
 	));
 
-	// Load the JS imports.
-	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
-		.expect("Missing imports.mjs");
-	js.push('\n');
+	#[cfg(feature = "firefox")]
+	{
+		// Load the JS imports.
+		let mut js = std::fs::read_to_string("skel/js/glue-extra.mjs")
+			.expect("Missing glue-extra.mjs");
+		js.push('\n');
 
-	// Add the JS to the Rust in a roundabout way so wasm-bindgen can find it.
-	out.push(format!("#[wasm_bindgen(inline_js = {js:?})] extern \"C\" {{}}"));
+		// Add the JS to the Rust in a roundabout way so wasm-bindgen can find it.
+		out.push(format!("#[wasm_bindgen(inline_js = {js:?})] extern \"C\" {{}}"));
+	}
 
 	// Return what we've built!
 	out.join("\n\n")

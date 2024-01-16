@@ -60,15 +60,12 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--reference-types \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
-	# Remove the unused "fetch" stuff from the glue.
+	# Remove the unused "fetch" stuff from the glue to save space (since it
+	# isn't pruned automatically).
 	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
 
-	# Merge the snippet and glue together (in that order), and copy to our
-	# local "generated" directory.
-	cat \
-		"{{ cargo_release_dir }}/snippets/"**/*.js \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.js" \
-		> "{{ skel_dir }}/js/generated/glue.mjs"
+	# Copy the glue to somewhere more predictable.
+	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ skel_dir }}/js/generated/glue.mjs"
 
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
@@ -157,7 +154,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 	cp "{{ skel_dir }}/playlist.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp "{{ skel_dir }}/img/poe.png" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 	cp "{{ skel_dir }}/img/poe.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
-	cp "{{ skel_dir }}/js/imports.mjs" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
+	cp "{{ skel_dir }}/js/glue-extra.mjs" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
 	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust"
 
