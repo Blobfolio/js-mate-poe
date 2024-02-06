@@ -2,7 +2,7 @@
 FROM rust:1.75-bookworm AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
-	cargo install --root /tmp/cargo --locked --version 0.2.90 wasm-bindgen-cli && \
+	cargo install --root /tmp/cargo --locked --version 0.2.91 wasm-bindgen-cli && \
 	cargo install --root /tmp/cargo --locked --version 0.116.0 wasm-opt
 
 # Stage Two.
