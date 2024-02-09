@@ -37,7 +37,7 @@ use web_sys::{
 #[wasm_bindgen]
 extern "C" {
 	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeGetUrl")]
+    #[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
 	fn firefox_url(path: &str) -> String;
 }
 

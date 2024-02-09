@@ -44,10 +44,7 @@ wasm-bindgen \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.wasm
 
 # Copy the glue for later.
-cat \
-	target/wasm32-unknown-unknown/release/snippets/**/*.js \
-	target/wasm32-unknown-unknown/release/rs_mate_poe.js \
-	> ../js/generated/glue.mjs
+cp target/wasm32-unknown-unknown/release/rs_mate_poe.js ../js/generated/glue.mjs
 
 # Optimize and output the wasm to the dist dir.
 wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
@@ -59,38 +56,31 @@ wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
 # top-level directory.
 cd ..
 
+# Store our generic script header in a variable so we can pass it to esbuild.
+_js_header="$( cat js/header.js )"
+
 # Compile the background script.
 esbuild \
+	--banner:js="${_js_header}" \
 	--bundle "js/background.mjs" \
 	--log-level=warning \
-	--outfile="/tmp/out.js"
-
-# Add a header and move it into place.
-cat js/header.js /tmp/out.js > dist/background.js
-sed -i "s/* JS Mate Poe/* JS Mate Poe: Background/g" dist/background.js
+	--outfile=dist/background.js
 
 # Compile the options script.
 esbuild \
+	--banner:js="${_js_header}" \
 	--bundle "js/options.mjs" \
 	--log-level=warning \
-	--outfile="/tmp/out.js"
-
-# Add a header and move it into place.
-cat js/header.js /tmp/out.js > dist/options/options.js
-sed -i "s/* JS Mate Poe/* JS Mate Poe: Options/g" dist/options/options.js
+	--outfile=dist/options/options.js
 
 # Compile the foreground script.
 esbuild \
+	--banner:js="${_js_header}" \
 	--bundle "js/foreground.mjs" \
 	--log-level=warning \
-	--outfile="/tmp/out.js"
-
-# Add a header and move it into place.
-cat js/header.js /tmp/out.js > dist/foreground.js
-sed -i "s/* JS Mate Poe/* JS Mate Poe: Foreground/g" dist/foreground.js
+	--outfile=dist/foreground.js
 
 # Clean up.
-rm /tmp/out.js
 chown -R --reference=./Dockerfile dist js/generated
 
 # Done!

@@ -406,27 +406,28 @@ impl Animation {
 
 	/// # CSS Class.
 	///
-	/// If the animation has a corresponding CSS class, this returns its number
-	/// (the classes are all named like `a1`, `a2`, etc.), otherwise `-1`.
-	pub(crate) const fn css_class(self) -> i8 {
+	/// Return the stylized animation "number", if any. As there can be only
+	/// one, the value slots into a custom `data-a` attribute on the wrapper
+	/// element.
+	pub(crate) const fn css_class(self) -> &'static str {
 		match self {
-			Self::Drag => 1,
-			Self::BlackSheepCatchChild | Self::SneezeShadow => 2,
-			Self::Abduction => 3,
-			Self::BigFishChild => 4,
-			Self::SplatGhost => 5,
-			Self::EatingMagicFlower => 6,
-			Self::MagicFlower1 | Self::MagicFlower2 => 7,
-			Self::DigestMagicFlower1 => 8,
-			Self::ShadowShowdownChild1 => 9,
-			Self::ShadowShowdownChild2 => 10,
-			Self::DangleRecover => 11,
-			Self::Yoyo => 12,
-			Self::BeamIn => 13,
-			Self::Glitch => 14,
-			Self::BlackSheepCatchExitChild => 15,
-			Self::BathDiveChild => 16,
-			_ => -1,
+			Self::Drag => "1",
+			Self::BlackSheepCatchChild | Self::SneezeShadow => "2",
+			Self::Abduction => "3",
+			Self::BigFishChild => "4",
+			Self::SplatGhost => "5",
+			Self::EatingMagicFlower => "6",
+			Self::MagicFlower1 | Self::MagicFlower2 => "7",
+			Self::DigestMagicFlower1 => "8",
+			Self::ShadowShowdownChild1 => "9",
+			Self::ShadowShowdownChild2 => "a",
+			Self::DangleRecover => "b",
+			Self::Yoyo => "c",
+			Self::BeamIn => "d",
+			Self::Glitch => "e",
+			Self::BlackSheepCatchExitChild => "f",
+			Self::BathDiveChild => "g",
+			_ => "",
 		}
 	}
 

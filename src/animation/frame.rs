@@ -174,26 +174,56 @@ impl Frame {
 	/// # Tile Size (Signed).
 	pub(crate) const SIZE_I: i32 = 40;
 
-	/// # Frame Alias.
+	/// # CSS Class.
 	///
-	/// Returns the frame alias if this is a special masked/etc. version of
-	/// another frame, or -1 if not.
-	pub(crate) const fn dba(self) -> i16 {
+	/// Return the stylized frame "class", if any. As there can be only one,
+	/// the value slots into a custom `data-a` attribute on the wrapper
+	/// element.
+	pub(crate) const fn css_class(self) -> &'static str {
 		match self {
-			Self::H038 => 38,
-			Self::H039 => 39,
-			Self::H040 => 40,
-			Self::M024 => 24,
-			Self::M083 => 83,
-			Self::M120 => 120,
-			Self::R043 => 43,
-			Self::R081 => 81,
-			Self::R082 => 82,
-			Self::R101 => 101,
-			Self::R102 => 102,
-			Self::R103 => 103,
-			_ => -1
+			Self::H038 | Self::H039 | Self::H040 => "h",
+			Self::M024 => "m024",
+			Self::M083 => "m083",
+			Self::M120 => "m120",
+			_ => "",
 		}
+	}
+
+	/// # Reversed?
+	///
+	/// Returns true if the frame requires horizontal flipping.
+	pub(crate) const fn reversed(self) -> bool {
+		matches!(
+			self,
+			Self::R043 |
+			Self::R081 |
+			Self::R082 |
+			Self::R101 |
+			Self::R102 |
+			Self::R103
+		)
+	}
+
+	/// # Styled?
+	///
+	/// Returns true if the frame has special styles, e.g. it has a CSS class
+	/// or requires flipping.
+	pub(crate) const fn styled(self) -> bool {
+		matches! (
+			self,
+			Self::H038 |
+			Self::H039 |
+			Self::H040 |
+			Self::M024 |
+			Self::M083 |
+			Self::M120 |
+			Self::R043 |
+			Self::R081 |
+			Self::R082 |
+			Self::R101 |
+			Self::R102 |
+			Self::R103
+		)
 	}
 
 	/// # Sprite Offset.
@@ -215,6 +245,29 @@ impl Frame {
 			Self::R102 => 102 * -Self::SIZE_I,
 			Self::R103 => 103 * -Self::SIZE_I,
 			_ =>  self as i32 * -Self::SIZE_I,
+		}
+	}
+}
+
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	#[allow(unsafe_code)]
+	fn t_class() {
+		for f in 0..=Frame::None as u8 {
+			// Safety: Frames start at zero and end with None, so f is always
+			// in range.
+			let f: Frame = unsafe { std::mem::transmute(f) };
+
+			// If there is a CSS class or the frame is reversed, it's stylized.
+			assert_eq!(
+				! f.css_class().is_empty() || f.reversed(),
+				f.styled()
+			);
 		}
 	}
 }

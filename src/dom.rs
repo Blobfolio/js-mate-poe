@@ -13,25 +13,31 @@ pub(crate) use web_sys::window;
 
 
 
-#[cfg(feature = "director")]
-#[wasm_bindgen]
-extern "C" {
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeConsoleDebug")]
-	pub(crate) fn console_debug(msg: &str);
-
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeConsoleWarn")]
-	pub(crate) fn console_warn(msg: &str);
-}
-
-
-
 /// # Body.
 pub(crate) fn body() -> Option<HtmlElement> {
 	web_sys::window()
 		.and_then(|w| w.document())
 		.and_then(|d| d.body())
+}
+
+#[cfg(feature = "director")]
+/// # Console Debug.
+///
+/// This is a simple wrapper for the JS `console.debug` method that accepts a
+/// single string, taking the guesswork out of trying to work with the various
+/// `web-sys` imports each and every time.
+pub(crate) fn console_debug(msg: &str) {
+	web_sys::console::debug_1(&JsValue::from_str(msg));
+}
+
+#[cfg(feature = "director")]
+/// # Console Warn.
+///
+/// This is a simple wrapper for the JS `console.warn` method that accepts a
+/// single string, taking the guesswork out of trying to work with the various
+/// `web-sys` imports each and every time.
+pub(crate) fn console_warn(msg: &str) {
+	web_sys::console::warn_1(&JsValue::from_str(msg));
 }
 
 /// # Document.

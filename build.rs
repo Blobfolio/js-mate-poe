@@ -12,9 +12,8 @@ use std::path::{
 /// # Main.
 pub fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
-	println!("cargo:rerun-if-changed=skel/img/poe.png");
-	println!("cargo:rerun-if-changed=skel/js/imports.mjs");
 	println!("cargo:rerun-if-changed=skel/playlist.txt");
+	println!("cargo:rerun-if-changed=skel/img/poe.png");
 	println!("cargo:rerun-if-changed=skel/scss");
 	println!("cargo:rerun-if-changed=skel/sound/baa.flac");
 	println!("cargo:rerun-if-changed=skel/sound/sneeze.flac");
@@ -43,42 +42,21 @@ fn build_css() -> String {
 
 /// # Import Media/Glue.
 ///
-/// This generates and returns Rust code — for lib.rs — that works around a
-/// memory issue when trying to do binary-Uin8Array-Blob-URL.createObjectURL
-/// entirely within Rust, and adds a JS "snippet" for wasm-bindgen.
-///
-/// It is worth noting we aren't actually using snippets correctly. Before
-/// transpiling the Javascript modules with Google Closure Compiler, the
-/// snippet and main glue file need to be merged together and saved to
-/// skel/generated/glue.mjs.
+/// This generates and returns Rust code — for lib.rs — with the image sprite
+/// dimensions so we don't accidentally mess them up.
 fn build_media() -> String {
-	// Code holders.
-	let mut out = Vec::new();
-
 	// Generate constants for the image dimensions so we don't screw them up.
 	let (w, h) = img_size();
 	assert_eq!(w, 5680, "Image width has changed!");
 	assert_eq!(h, 40, "Image height has changed!");
-	out.push(format!(
+	format!(
 		r#"/// # Image Width.
 pub(crate) const IMAGE_WIDTH: u32 = {w};
 
 /// # Image Height.
-pub(crate) const IMAGE_HEIGHT: u32 = {h};"#
-	));
-
-	// Load the JS imports, and swap out the two dynamic bits.
-	let mut js = std::fs::read_to_string("skel/js/imports.mjs")
-		.expect("Missing imports.mjs")
-		.replace("%PLAYLIST%", &std::fs::read_to_string("skel/playlist.txt").unwrap_or_default())
-		.replace("%VERSION%", &std::env::var("CARGO_PKG_VERSION").unwrap_or_default());
-	js.push('\n');
-
-	// Add the JS to the Rust in a roundabout way so wasm-bindgen can find it.
-	out.push(format!("#[wasm_bindgen(inline_js = {js:?})] extern \"C\" {{}}"));
-
-	// Return what we've built!
-	out.join("\n\n")
+pub(crate) const IMAGE_HEIGHT: u32 = {h};
+"#
+	)
 }
 
 /// # Default Animations w/ Weightings.

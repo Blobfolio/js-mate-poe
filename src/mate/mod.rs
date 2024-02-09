@@ -19,9 +19,12 @@ use crate::{
 	Universe,
 };
 use flags::MateFlags;
+use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
+	DomTokenList,
 	Element,
+	HtmlElement,
 	HtmlImageElement,
 	ShadowRootInit,
 	ShadowRootMode,
@@ -29,16 +32,8 @@ use web_sys::{
 
 
 
-#[wasm_bindgen]
-extern "C" {
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeWriteCssProperty")]
-	fn write_css_property(el: &Element, key: char, value: i32);
-
-	#[allow(unsafe_code)]
-	#[wasm_bindgen(js_name = "poeToggleWrapperClasses")]
-	fn toggle_wrapper_classes(el: &Element, no_focus: bool, rx: bool, frame: i16, scene: i8);
-}
+/// # Pixels!
+const UNIT_PX: [u8; 2] = *b"px";
 
 
 
@@ -195,7 +190,7 @@ impl Mate {
 		// Old animation business.
 		if let Some(o) = old {
 			// Change classes if going to or coming from a special animation.
-			if 0 < animation.css_class() || 0 < o.css_class() {
+			if ! animation.css_class().is_empty() || ! o.css_class().is_empty() {
 				self.flags.mark_class_changed();
 			}
 
@@ -320,7 +315,7 @@ impl Mate {
 		if frame as u8 != self.frame as u8 {
 			// Mark the class as having changed too if the old or new frame is
 			// a halfsie.
-			if -1 != frame.dba() || -1 != self.frame.dba() {
+			if frame.styled() || self.frame.styled() {
 				self.flags.mark_class_changed();
 			}
 
@@ -548,27 +543,38 @@ impl Mate {
 
 		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
-		// Update the wrapper div's class and/or style.
+		// Update the wrapper div's classes and/or styles.
 		if self.flags.class_changed() || self.flags.transform_changed() {
 			let wrapper = shadow.get_element_by_id("p")
 				.expect_throw("Missing mate wrapper.");
 
 			if self.flags.class_changed() {
-				toggle_wrapper_classes(
-					&wrapper,
-					self.flags.no_focus(),
-					self.flags.flipped_x(),
-					self.frame.dba(),
-					self.animation.map_or(0, Animation::css_class),
-				);
+				let list = wrapper.class_list();
+
+				// Orientation.
+				let mut rx = self.flags.flipped_x();
+				if self.frame.reversed() { rx = ! rx; }
+				toggle_class(&list, "rx", rx);
+
+				// Focus only affects the primary.
+				if self.flags.primary() {
+					toggle_class(&list, "no-focus", self.flags.no_focus());
+				}
+
+				// Special frame and animation classes.
+				let _res = wrapper.set_attribute("data-f", self.frame.css_class())
+					.and_then(|()| wrapper.set_attribute("data-a", self.animation.map_or("", Animation::css_class)));
+
+				// Disabled?
+				toggle_class(&list, "off", self.animation.is_none());
 			}
 
 			if self.flags.transform_x_changed() {
-				write_css_property(&wrapper, 'x', self.pos.x);
+				write_css_property(&wrapper, "--x", self.pos.x);
 			}
 
 			if self.flags.transform_y_changed() {
-				write_css_property(&wrapper, 'y', self.pos.y);
+				write_css_property(&wrapper, "--y", self.pos.y);
 			}
 		}
 
@@ -576,7 +582,7 @@ impl Mate {
 		if self.flags.frame_changed() {
 			let img = shadow.get_element_by_id("i")
 				.expect_throw("Missing mate image.");
-			write_css_property(&img, 'c', self.frame.offset());
+			write_css_property(&img, "--c", self.frame.offset());
 		}
 
 		// Play a sound?
@@ -785,4 +791,55 @@ fn make_element_image(src: &str) -> Result<HtmlImageElement, JsValue> {
 	el.set_id("i");
 	el.set_src(src);
 	Ok(el)
+}
+
+/// # Toggle CSS Class.
+///
+/// Turn a given class on/off, per `force`.
+fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
+	let _res = list.toggle_with_force(class, force);
+}
+
+#[allow(unsafe_code)]
+/// # Write Style Property.
+///
+/// Update a given `--prop` pixel value.
+fn write_css_property(el: &Element, key: &str, value: i32) {
+	if let Some(el) = el.dyn_ref::<HtmlElement>() {
+		let style = el.style();
+
+		// First, stringify the value with `itoa`.
+		let mut buf1 = itoa::Buffer::new();
+		let value: &[u8] = buf1.format(value).as_bytes();
+
+		// Alas, it needs a unit and we don't have access to itoa's buffer,
+		// so have to copy it to our own so we can add the two extra bytes.
+		// Even so, this is still significantly more efficient than skipping
+		// itoa or, heaven forbid, actually using _String_! Haha.
+		let len = value.len();
+		if len <= 11 {
+			let mut buf = [MaybeUninit::<u8>::uninit(); 13];
+			let value = unsafe {
+				let ptr: *mut u8 = buf.as_mut_ptr().cast();
+				std::ptr::copy_nonoverlapping(
+					value.as_ptr(),
+					ptr,
+					len,
+				);
+				std::ptr::copy_nonoverlapping(
+					UNIT_PX.as_ptr(),
+					ptr.add(len),
+					2
+				);
+
+				// Send the initialized bytes back as a string slice.
+				std::str::from_utf8_unchecked(
+					&*(std::ptr::addr_of!(buf[..len + 2]) as *const [u8])
+				)
+			};
+
+			// Now we can finally write it!
+			let _res = style.set_property(key, value);
+		}
+	}
 }
