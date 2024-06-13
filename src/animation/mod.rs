@@ -169,7 +169,7 @@ impl Animation {
 	pub(crate) fn from_u8(src: u8) -> Option<Self> {
 		// Safety: only transmute if the number is in range.
 		if (MIN_ANIMATION_ID..=MAX_ANIMATION_ID).contains(&src) {
-			Some(unsafe { std::mem::transmute(src) })
+			Some(unsafe { std::mem::transmute::<u8, Self>(src) })
 		}
 		else { None }
 	}
