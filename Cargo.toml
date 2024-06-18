@@ -21,7 +21,7 @@ crate-type = ["cdylib"]
 
 [build-dependencies]
 guff_css = "=0.3.4"
-imagesize = "=0.12.0"
+imagesize = "=0.13.0"
 
 [dependencies]
 itoa = "=1.0.11"
