@@ -89,6 +89,7 @@ const DEFAULT_ANIMATIONS: &[(usize, &str)] = &[
 	(3, "PlayDead"),
 	(3, "Scoot"),
 	(3, "Scream"),
+	(3, "SideStep"),
 
 	(1, "Abduction"),
 	(1, "Bleat"),

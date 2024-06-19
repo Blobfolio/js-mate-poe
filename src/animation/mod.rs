@@ -20,8 +20,8 @@ use std::sync::atomic::{
 
 
 
-#[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;  // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 100; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;   // The lowest Animation ID.
+#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 101; // The highest Animation ID.
 
 
 
@@ -90,6 +90,7 @@ pub(crate) enum Animation {
 	Scream,
 	ShadowShowdown,
 	Shake,
+	SideStep,
 	Skip,
 	Sleep,
 	SleepSitting,
@@ -300,6 +301,7 @@ impl Animation {
 			Self::ShadowShowdown => "Shadow Showdown",
 			Self::ShadowShowdownChild1 | Self::ShadowShowdownChild2 => "Shadow Showdown (Child)",
 			Self::Shake => "Shake",
+			Self::SideStep => "Side Step",
 			Self::Skip => "Skip",
 			Self::Sleep => "Sleep",
 			Self::SleepSitting => "Sleep (Sitting)",
@@ -373,6 +375,7 @@ impl Animation {
 			Self::Scream |
 			Self::ShadowShowdown |
 			Self::Shake |
+			Self::SideStep |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -532,6 +535,7 @@ impl Animation {
 			Self::Scream |
 			Self::ShadowShowdown |
 			Self::Shake |
+			Self::SideStep |
 			Self::Skip |
 			Self::Sleep |
 			Self::SleepSitting |
@@ -847,6 +851,7 @@ impl Animation {
 			Self::ShadowShowdownChild2 => fixed!(SHADOW_SHOWDOWN_CHILD2),
 			Self::Shake => fixed!(SHAKE),
 			Self::Skip => fixed!(SKIP),
+			Self::SideStep => fixed!(SIDE_STEP),
 			Self::Sleep => fixed!(SLEEP),
 			Self::SleepSitting => fixed!(SLEEP_SITTING),
 			Self::SleepStanding => fixed!(SLEEP_STANDING),
@@ -923,7 +928,7 @@ mod tests {
 
 	#[test]
 	fn t_default() {
-		const TOTAL: usize = 35;
+		const TOTAL: usize = 36;
 
 		let set = (0..5_000_u16).into_iter()
 			.map(|_| Animation::default_choice() as u8)

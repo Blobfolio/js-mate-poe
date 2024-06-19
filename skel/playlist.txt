@@ -39,17 +39,18 @@
 #39  Scream
 #40  Shadow Showdown
 #41  Shake
-#42  Skip
-#43  Sleep
-#44  Sleep (Sitting)
-#45  Sleep (Standing)
-#46  Slide
-#47  Slide In
-#48  Sneeze
-#49  Spin
-#50  Stargaze
-#51  Tornado
-#52  Urinate
-#53  Walk
-#54  Yawn
-#55  Yo-Yo
+#42  Side Step
+#43  Skip
+#44  Sleep
+#45  Sleep (Sitting)
+#46  Sleep (Standing)
+#47  Slide
+#48  Slide In
+#49  Sneeze
+#50  Spin
+#51  Stargaze
+#52  Tornado
+#53  Urinate
+#54  Walk
+#55  Yawn
+#56  Yo-Yo
