@@ -1086,6 +1086,30 @@ pub(super) const SHAKE: &[Scene] = &[
 		.with_flags(Scene::GRAVITY),
 ];
 
+/// # For `Animation::SideStep`.
+pub(super) const SIDE_STEP: &[Scene] = &[
+	Scene::new(150, &[Frame::F003, Frame::F081, Frame::F019])
+		.with_flags(Scene::GRAVITY),
+
+	Scene::new(60, &[Frame::F038, Frame::F038, Frame::F038])
+		.with_move_to(Position::new(-3, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[
+		Frame::F019, Frame::F087, Frame::F088, Frame::F087, Frame::F088, Frame::F019,
+	])
+		.with_flags(Scene::GRAVITY),
+	Scene::new(60, &[Frame::F038, Frame::F038, Frame::F038])
+		.with_move_to(Position::new(3, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(150, &[
+		Frame::F019, Frame::F087, Frame::F088, Frame::F087, Frame::F088, Frame::F019,
+	])
+		.with_flags(Scene::GRAVITY),
+
+	Scene::new(150, &[Frame::F019, Frame::F081, Frame::F003])
+		.with_flags(Scene::EASE_OUT | Scene::GRAVITY),
+];
+
 /// # For `Animation::Skip`.
 pub(super) const SKIP: &[Scene] = &[
 	Scene::new(60, &[Frame::F017, Frame::F017, Frame::F017])
