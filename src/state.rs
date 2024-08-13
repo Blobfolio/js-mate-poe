@@ -339,10 +339,12 @@ impl StateEvents {
 
 		macro_rules! bind {
 			($el:expr, $event:ident, $passive:literal) => (
+				let e = AddEventListenerOptions::new();
+				e.set_passive($passive);
 				$el.add_event_listener_with_callback_and_add_event_listener_options(
 					stringify!($event),
 					self.$event.as_ref().unchecked_ref(),
-					AddEventListenerOptions::new().passive($passive),
+					&e,
 				).expect_throw("!");
 			);
 		}
@@ -438,9 +440,11 @@ const fn normalize_size(size: i32) -> u16 {
 /// Thankfully, this is virtually free memory-wise because the underlying data
 /// is part of the Wasm itself.
 fn url(data: &'static [u8], mime: &str) -> String {
+	let bag = BlobPropertyBag::new();
+	bag.set_type(mime);
 	Blob::new_with_u8_array_sequence_and_options(
 		&Array::of1(&Uint8Array::from(data)),
-		BlobPropertyBag::new().type_(mime)
+		&bag
 	)
 		.and_then(|b| Url::create_object_url_with_blob(&b))
 		.expect_throw("!")

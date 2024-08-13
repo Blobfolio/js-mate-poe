@@ -1,8 +1,8 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index 6299b78..9da08de 100644
+index 86e2e24..24b3cce 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -227,33 +227,13 @@ export class Poe {
+@@ -223,33 +223,13 @@ export class Poe {
  }
  
  async function __wbg_load(module, imports) {
@@ -40,17 +40,23 @@ index 6299b78..9da08de 100644
      }
  }
  
-@@ -492,13 +472,7 @@ function initSync(module) {
- async function __wbg_init(input) {
+@@ -586,19 +566,8 @@ function initSync(module) {
+ async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
 -
-     const imports = __wbg_get_imports();
+-    if (typeof module_or_path !== 'undefined' && Object.getPrototypeOf(module_or_path) === Object.prototype)
+-    ({module_or_path} = module_or_path)
+-    else
+-    console.warn('using deprecated parameters for the initialization function; pass a single object instead')
 -
--    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
--        input = fetch(input);
+-
+     const imports = __wbg_get_imports();
+ 
+-    if (typeof module_or_path === 'string' || (typeof Request === 'function' && module_or_path instanceof Request) || (typeof URL === 'function' && module_or_path instanceof URL)) {
+-        module_or_path = fetch(module_or_path);
 -    }
 -
      __wbg_init_memory(imports);
  
-     const { instance, module } = await __wbg_load(await input, imports);
+     const { instance, module } = await __wbg_load(await module_or_path, imports);
