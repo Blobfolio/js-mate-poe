@@ -40,15 +40,34 @@ const UNIT_PX: [u8; 2] = *b"px";
 #[derive(Debug)]
 /// # Mate.
 pub(crate) struct Mate {
+	/// # Element.
 	el: Element,
+
+	/// # Size.
 	size: (u16, u16),
+
+	/// # Flags.
 	flags: MateFlags,
+
+	/// # Current Frame.
 	frame: Frame,
+
+	/// # Current Sound.
 	sound: Option<Sound>,
+
+	/// # Current Position.
 	pos: Position,
+
+	/// # Current Animation.
 	animation: Option<Animation>,
+
+	/// # Animation Scenes.
 	scenes: Option<SceneList>,
+
+	/// # Next Animation.
 	next_animation: Option<Animation>,
+
+	/// # Next Tick Time.
 	next_tick: u32,
 }
 
@@ -123,7 +142,6 @@ impl Mate {
 		}
 	}
 
-	#[allow(clippy::cast_possible_truncation)]
 	/// # Set Child Animation.
 	///
 	/// Set a specific animation for a child, with reference coordinates from
@@ -707,7 +725,11 @@ impl Mate {
 		self.size.1.saturating_sub(Frame::SIZE) as i32
 	}
 
-	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_sign_loss,
+		reason = "False positive.",
+	)]
 	/// # Random X Position.
 	///
 	/// Return a random horizontal position within the boundaries of the
@@ -800,7 +822,7 @@ fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
 	let _res = list.toggle_with_force(class, force);
 }
 
-#[allow(unsafe_code)]
+#[expect(unsafe_code, reason = "For performance.")]
 /// # Write Style Property.
 ///
 /// Update a given `--prop` pixel value.
@@ -819,6 +841,8 @@ fn write_css_property(el: &Element, key: &str, value: i32) {
 		let len = value.len();
 		if len <= 11 {
 			let mut buf = [MaybeUninit::<u8>::uninit(); 13];
+			// Safety: buf has room for 13 bytes. We checked len <= 11, and
+			// UNIX_PX is always 2, so the value will always fit.
 			let value = unsafe {
 				let ptr: *mut u8 = buf.as_mut_ptr().cast();
 				std::ptr::copy_nonoverlapping(

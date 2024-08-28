@@ -22,7 +22,6 @@ use std::sync::atomic::{
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 extern "C" {
-	#[allow(unsafe_code)]
 	#[wasm_bindgen(js_namespace = Math, js_name = "random")]
 	/// # Math.random.
 	///
@@ -93,17 +92,33 @@ static SIZE: AtomicU32 = AtomicU32::new(0);
 pub(crate) struct Universe;
 
 impl Universe {
-	const ACTIVE: u8 =        0b0000_0001; // Poe is active.
-	const AUDIO: u8 =         0b0000_0010; // Audio is enabled.
-	const DRAGGING: u8 =      0b0000_0100; // Poe is currently being dragged.
-	const ASSIGN_CHILD: u8 =  0b0000_1000; // The primary mate needs a child animation.
-	const NO_CHILD: u8 =      0b0001_0000; // Children must be stopped!
-	const NO_FOCUS: u8 =      0b0010_0000; // Disable primary mate focus support.
-	const STATE: u8 =         0b0100_0000; // State is active.
+	/// # Flag: Poe is active.
+	const ACTIVE: u8 =        0b0000_0001;
+
+	/// # Flag: Audio is enabled.
+	const AUDIO: u8 =         0b0000_0010;
+
+	/// # Flag: Poe is currently being dragged.
+	const DRAGGING: u8 =      0b0000_0100;
+
+	/// # Flag: The primary mate needs a child animation.
+	const ASSIGN_CHILD: u8 =  0b0000_1000;
+
+	/// # Flag: Children must be stopped!
+	const NO_CHILD: u8 =      0b0001_0000;
+
+	/// # Flag: Disable primary mate focus support.
+	const NO_FOCUS: u8 =      0b0010_0000;
+
+	/// # Flag: State is active.
+	const STATE: u8 =         0b0100_0000;
+
 	#[cfg(feature = "firefox")]
-	const FIX_BINDINGS: u8 =  0b1000_0000; // Body element bindings were lost.
+	/// # Flag: Body element bindings were lost.
+	const FIX_BINDINGS: u8 =  0b1000_0000;
 }
 
+/// # Helper: Flag Getter.
 macro_rules! get {
 	($title:literal, $flag:ident, $fn:ident) => (
 		#[doc = concat!("# Is ", $title, "?")]
@@ -204,7 +219,7 @@ impl Universe {
 		out
 	}
 
-	#[allow(clippy::cast_possible_truncation)]
+	#[expect(clippy::cast_possible_truncation, reason = "False positive.")]
 	/// # Random (Capped) U16.
 	///
 	/// Return a random number between `0..max`, mitigating bias the same way
@@ -225,6 +240,7 @@ impl Universe {
 	}
 }
 
+/// # Helper: Flag Setter.
 macro_rules! set {
 	($title:literal, $flag:ident, $fn:ident) => (
 		#[doc = concat!("# Set ", $title, ".")]
@@ -340,7 +356,11 @@ impl Universe {
 		else { Some(f32::from(speed) / 100.0) }
 	}
 
-	#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_sign_loss,
+		reason = "False positive.",
+	)]
 	/// # Set Speed.
 	///
 	/// Change the animation playback speed.
@@ -467,7 +487,7 @@ mod tests {
 	fn t_rand() {
 		assert_eq!(Universe::rand_mod(0), 0, "Random zero broke!");
 
-		let set = (0..5000_u16).into_iter()
+		let set = (0..5000_u16)
 			.map(|_| Universe::rand_mod(100))
 			.collect::<HashSet<u16>>();
 
