@@ -36,9 +36,11 @@ use web_sys::{
 #[cfg(feature = "firefox")]
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
-    /// # Firefox URL.
-	fn firefox_url(path: &str) -> String;
+	#[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
+	#[expect(clippy::allow_attributes, reason = "Buggy lint.")]
+	#[allow(unsafe_code, reason = "For FFI.")]
+	/// # Firefox URL.
+	pub(super) fn firefox_url(path: &str) -> String;
 }
 
 
@@ -242,15 +244,24 @@ pub(crate) struct StateAudio {
 }
 
 impl Default for StateAudio {
+	#[cfg(not(feature = "firefox"))]
 	fn default() -> Self {
-		#[cfg(not(feature = "firefox"))]
 		let sound = [
 			url(BAA, "audio/flac"),
 			url(SNEEZE, "audio/flac"),
 			url(YAWN, "audio/flac"),
 		];
 
-		#[cfg(feature = "firefox")]
+		Self {
+			el: HtmlAudioElement::new().expect_throw("!"),
+			sound,
+		}
+	}
+
+	#[cfg(feature = "firefox")]
+	#[expect(clippy::allow_attributes, reason = "Buggy lint.")]
+	#[allow(unsafe_code, reason = "For FFI.")]
+	fn default() -> Self {
 		let sound = [
 			firefox_url("sound/baa.flac"),
 			firefox_url("sound/sneeze.flac"),

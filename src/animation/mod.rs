@@ -885,13 +885,12 @@ impl Animation {
 
 
 
-#[cfg(any(test, feature = "director"))]
-#[expect(dead_code, reason = "Oh but it is.")]
+#[cfg(test)]
 #[derive(Debug, Clone, Default)]
 /// # Animations Iterator.
 pub(crate) struct Animations(u8);
 
-#[cfg(any(test, feature = "director"))]
+#[cfg(test)]
 impl Iterator for Animations {
 	type Item = Animation;
 	fn next(&mut self) -> Option<Self::Item> {
@@ -906,7 +905,7 @@ impl Iterator for Animations {
 	}
 }
 
-#[cfg(any(test, feature = "director"))]
+#[cfg(test)]
 impl ExactSizeIterator for Animations {
 	fn len(&self) -> usize {
 		usize::from(MAX_ANIMATION_ID.saturating_sub(self.0))
