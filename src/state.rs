@@ -37,8 +37,6 @@ use web_sys::{
 #[wasm_bindgen]
 extern "C" {
 	#[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
-	#[expect(clippy::allow_attributes, reason = "Buggy lint.")]
-	#[allow(unsafe_code, reason = "For FFI.")]
 	/// # Firefox URL.
 	pub(super) fn firefox_url(path: &str) -> String;
 }
