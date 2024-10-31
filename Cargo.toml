@@ -1,7 +1,7 @@
 [package]
 name = "rs_mate_poe"
 version = "1.6.7"
-authors = ["Blobfolio, LLC. <hello@blobfolio.com>"]
+authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.81"
 description = "WASM port of Screen Mate Poe."
@@ -12,9 +12,6 @@ publish = false
 
 [package.metadata.bashman]
 name = "RS Mate Poe"
-bash-dir = "./"
-man-dir = "./"
-credits-dir = "./"
 
 [lib]
 crate-type = ["cdylib"]
