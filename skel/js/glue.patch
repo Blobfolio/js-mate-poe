@@ -1,8 +1,8 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index 86e2e24..24b3cce 100644
+index 23c9bd3..e5fad53 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -223,33 +223,13 @@ export class Poe {
+@@ -227,25 +227,6 @@ export class Poe {
  }
  
  async function __wbg_load(module, imports) {
@@ -13,42 +13,41 @@ index 86e2e24..24b3cce 100644
 -
 -            } catch (e) {
 -                if (module.headers.get('Content-Type') != 'application/wasm') {
--                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
+-                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
 -
 -                } else {
 -                    throw e;
 -                }
 -            }
 -        }
-+    const instance = await WebAssembly.instantiate(module, imports);
- 
+-
 -        const bytes = await module.arrayBuffer();
 -        return await WebAssembly.instantiate(bytes, imports);
-+    if (instance instanceof WebAssembly.Instance) {
-+        return { instance, module };
+-
+-    } else {
+         const instance = await WebAssembly.instantiate(module, imports);
  
-     } else {
--        const instance = await WebAssembly.instantiate(module, imports);
--
--        if (instance instanceof WebAssembly.Instance) {
--            return { instance, module };
--
--        } else {
--            return instance;
--        }
-+        return instance;
-     }
+         if (instance instanceof WebAssembly.Instance) {
+@@ -254,7 +235,6 @@ async function __wbg_load(module, imports) {
+         } else {
+             return instance;
+         }
+-    }
  }
  
-@@ -586,19 +566,8 @@ function initSync(module) {
+ function __wbg_get_imports() {
+@@ -593,22 +573,8 @@ function initSync(module) {
  async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
 -
--    if (typeof module_or_path !== 'undefined' && Object.getPrototypeOf(module_or_path) === Object.prototype)
--    ({module_or_path} = module_or_path)
--    else
--    console.warn('using deprecated parameters for the initialization function; pass a single object instead')
+-    if (typeof module_or_path !== 'undefined') {
+-        if (Object.getPrototypeOf(module_or_path) === Object.prototype) {
+-            ({module_or_path} = module_or_path)
+-        } else {
+-            console.warn('using deprecated parameters for the initialization function; pass a single object instead')
+-        }
+-    }
 -
 -
      const imports = __wbg_get_imports();
