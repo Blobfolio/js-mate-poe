@@ -2,6 +2,7 @@
 # RS Mate Poe: Frame
 */
 
+#[expect(clippy::missing_docs_in_private_items, reason = "Self-explanatory.")]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 /// # Animation Frame.
@@ -256,7 +257,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	#[allow(unsafe_code)]
+	#[expect(unsafe_code, reason = "Needed for transmute.")]
 	fn t_class() {
 		for f in 0..=Frame::None as u8 {
 			// Safety: Frames start at zero and end with None, so f is always

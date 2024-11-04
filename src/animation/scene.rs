@@ -20,11 +20,22 @@ use std::num::NonZeroU16;
 ///
 /// (A given `Animation` might comprise several `Scene`s, i.e. a `SceneList`.)
 pub(crate) struct Scene {
+	/// # Movement.
 	move_to: Option<Position>,
+
+	/// # Frame Rate.
 	fpms: u16,
+
+	/// # Frames.
 	frames: &'static [Frame],
+
+	/// # Repeat?
 	repeat: Option<(NonZeroU16, u8)>,
+
+	/// # Play Sound?
 	sound: Option<(Sound, u8)>,
+
+	/// # Flags.
 	flags: u8,
 }
 
@@ -116,7 +127,11 @@ impl Scene {
 	pub(crate) const fn next_tick(&self) -> u16 { self.fpms }
 
 	#[cfg(feature = "director")]
-	#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_sign_loss,
+		reason = "False positive.",
+	)]
 	/// # Next Tick.
 	pub(crate) fn next_tick(&self) -> u16 {
 		crate::Universe::speed().map_or(
@@ -127,13 +142,25 @@ impl Scene {
 }
 
 impl Scene {
+	/// # Flag: End Scenelist.
 	pub(super) const END_SCENELIST: u8 = 0b0000_0001;
+
+	/// # Flag: Flip X After.
 	pub(crate) const FLIP_X_NEXT: u8 =   0b0000_0010;
+
+	/// # Flag: Gravity Applies.
 	pub(crate) const GRAVITY: u8 =       0b0000_0100;
+
+	/// # Flag: Ignore Edges.
 	pub(crate) const IGNORE_EDGES: u8 =  0b0000_1000;
+
+	/// # Flag: Ease In.
 	pub(super) const EASE_IN: u8 =       0b0001_0000;
+
+	/// # Flag: Ease Out.
 	pub(super) const EASE_OUT: u8 =      0b0010_0000;
 
+	/// # Flag: Mate Mask.
 	pub(crate) const MATE_MASK: u8 =
 		Self::FLIP_X_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
@@ -153,9 +180,16 @@ impl Scene {
 /// This works kind of like a `Cow`, allowing us to work with either static
 /// references or owned arrays depending on the list.
 pub(crate) enum SceneListKind {
+	/// # Fixed Scene.
 	Fixed(&'static [Scene]),
+
+	/// # Dynamic Scene.
 	Dynamic1([Scene; 1]),
+
+	/// # Two Dynamic Scenes.
 	Dynamic2([Scene; 2]),
+
+	/// # Three Dynamic Scenes.
 	Dynamic3([Scene; 3]),
 }
 
@@ -199,8 +233,13 @@ impl SceneListKind {
 ///
 /// An iterator of steps for a given animation, comprising one or more `Scene`s.
 pub(crate) struct SceneList {
+	/// # Scenes.
 	scenes: SceneListKind,
+
+	/// # Current Index.
 	scene_idx: usize,
+
+	/// # Step Index.
 	step_idx: usize,
 }
 
@@ -218,7 +257,11 @@ impl SceneList {
 impl Iterator for SceneList {
 	type Item = Step;
 
-	#[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_possible_wrap,
+		reason = "False positive.",
+	)]
 	fn next(&mut self) -> Option<Self::Item> {
 		loop {
 			let scene = self.scenes.get(self.scene_idx)?;
@@ -288,11 +331,22 @@ impl Iterator for SceneList {
 /// This holds all the details for a single animation step, or tick, including
 /// relative movements, the sprite frame, sound, etc.
 pub(crate) struct Step {
+	/// # Movement.
 	move_to: Option<Position>,
+
+	/// # Direction.
 	direction: Direction,
+
+	/// # Next Tick Time.
 	next_tick: u16,
+
+	/// # Current Frame.
 	frame: Frame,
+
+	/// # Current Sound.
 	sound: Option<Sound>,
+
+	/// # Scene Flags.
 	scene_flags: u8,
 }
 
@@ -330,7 +384,11 @@ impl Step {
 
 
 
-#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
+#[expect(
+	clippy::cast_precision_loss,
+	clippy::cast_possible_truncation,
+	reason = "False positive.",
+)]
 /// # Ease In/Out.
 ///
 /// This returns the cumulative eased movement for a given step, if any.
@@ -425,11 +483,11 @@ mod tests {
 			let mut done = false;
 			for s in scenes {
 				count += 1;
-				assert_eq!(done, false, "Steps shouldn't be done yet.");
+				assert!(!done, "Steps shouldn't be done yet.");
 				if s.done() { done = true; }
 			}
 
-			assert_eq!(done, true, "Steps should be done.");
+			assert!(done, "Steps should be done.");
 
 			// Make sure we wind up with the expected number of steps.
 			assert_eq!(

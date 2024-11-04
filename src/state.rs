@@ -2,6 +2,9 @@
 # RS Mate Poe: State
 */
 
+// TODO: this should get fixed in Rust 1.83.
+#![allow(unsafe_code, reason = "Lint broken.")]
+
 use crate::{
 	dom,
 	Mate,
@@ -36,9 +39,9 @@ use web_sys::{
 #[cfg(feature = "firefox")]
 #[wasm_bindgen]
 extern "C" {
-	#[allow(unsafe_code)]
-    #[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
-	fn firefox_url(path: &str) -> String;
+	#[wasm_bindgen(js_namespace = ["browser", "runtime"], js_name = "getURL")]
+	/// # Firefox URL.
+	pub(super) fn firefox_url(path: &str) -> String;
 }
 
 
@@ -60,7 +63,7 @@ static YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
 
 
 
-#[allow(clippy::type_complexity)]
+#[expect(clippy::type_complexity, reason = "It is what it is.")]
 /// # Runtime State.
 ///
 /// This holds the registered elements and events associated with an actively-
@@ -73,10 +76,19 @@ static YAWN: &[u8] = include_bytes!("../skel/sound/yawn.flac");
 /// to be dropped, at which point it will unbind all of its associated events,
 /// elements, and objects.
 pub(crate) struct State {
+	/// # Image Sprite.
 	image: String,
+
+	/// # Sound Player.
 	sound: StateAudio,
+
+	/// # Mate Elements.
 	mates: RefCell<[Mate; 2]>,
+
+	/// # `requestAnimationFrame`.
 	raf: RefCell<Option<Closure<dyn FnMut(f64)>>>,
+
+	/// # Events.
 	events: StateEvents,
 }
 
@@ -140,7 +152,11 @@ impl Drop for State {
 }
 
 impl State {
-	#[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+	#[expect(
+		clippy::cast_possible_truncation,
+		clippy::cast_sign_loss,
+		reason = "False positive.",
+	)]
 	/// # New.
 	///
 	/// Initialize a new state and throw it into a `requestAnimationFrame`
@@ -152,7 +168,7 @@ impl State {
 		// Set up the recursive requestAnimationFrame callback, using a clone
 		// for the setup and initial call. (It will be dropped when the
 		// method terminates, leaving only the original reference.)
-		let state2 = state1.clone();
+		let state2 = Rc::clone(&state1);
 		state2.raf.borrow_mut().replace(Closure::wrap(Box::new(move |e: f64| {
 			if Universe::active() {
 				// Unless we're paused, go ahead and (maybe) repaint.
@@ -221,20 +237,32 @@ impl State {
 /// Its [`StateAudio::play`] method is used by [`Mate`] to initiate playback if
 /// and when sound is required.
 pub(crate) struct StateAudio {
+	/// # Element.
 	el: HtmlAudioElement,
+
+	/// # Sounds.
 	sound: [String; 3],
 }
 
 impl Default for StateAudio {
+	#[cfg(not(feature = "firefox"))]
 	fn default() -> Self {
-		#[cfg(not(feature = "firefox"))]
 		let sound = [
 			url(BAA, "audio/flac"),
 			url(SNEEZE, "audio/flac"),
 			url(YAWN, "audio/flac"),
 		];
 
-		#[cfg(feature = "firefox")]
+		Self {
+			el: HtmlAudioElement::new().expect_throw("!"),
+			sound,
+		}
+	}
+
+	#[cfg(feature = "firefox")]
+	#[expect(clippy::allow_attributes, reason = "Buggy lint.")]
+	#[allow(unsafe_code, reason = "For FFI.")]
+	fn default() -> Self {
 		let sound = [
 			firefox_url("sound/baa.flac"),
 			firefox_url("sound/sneeze.flac"),
@@ -281,6 +309,7 @@ impl StateAudio {
 
 
 
+#[expect(clippy::missing_docs_in_private_items, reason = "Self-explanatory.")]
 /// # Event Handlers.
 ///
 /// This holds all of the event listeners required to make Poe work. They are
@@ -337,12 +366,15 @@ impl StateEvents {
 		let document_element = dom::document_element().expect_throw("Missing documentElement.");
 		let window = dom::window().expect_throw("Missing window.");
 
+		/// # Helper: Bind.
 		macro_rules! bind {
 			($el:expr, $event:ident, $passive:literal) => (
+				let e = AddEventListenerOptions::new();
+				e.set_passive($passive);
 				$el.add_event_listener_with_callback_and_add_event_listener_options(
 					stringify!($event),
 					self.$event.as_ref().unchecked_ref(),
-					AddEventListenerOptions::new().passive($passive),
+					&e,
 				).expect_throw("!");
 			);
 		}
@@ -362,6 +394,7 @@ impl StateEvents {
 	/// active references to the callbacks may persist, preventing their memory
 	/// from being properly freed.
 	fn unbind(&self, mate: &Element, audio: &Element) {
+		/// # Helper: Unbind.
 		macro_rules! unbind {
 			($el:expr, $event:ident) => (
 				let _res = $el.remove_event_listener_with_callback(
@@ -413,13 +446,18 @@ fn size_quirks() {
 	}
 }
 
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[expect(
+	clippy::cast_possible_truncation,
+	clippy::cast_sign_loss,
+	reason = "False positive.",
+)]
 /// # Normalize Size.
 ///
 /// The `clientWidth`/`clientHeight` values are returned as `i32`, but know
 /// resolutions can't be negative, so store them as `u16` instead. This merely
 /// performs a saturating cast to keep them in that range.
 const fn normalize_size(size: i32) -> u16 {
+	/// # Maximum Value.
 	const MAX: i32 = u16::MAX as i32;
 
 	if size <= 0 { 0 }
@@ -438,9 +476,11 @@ const fn normalize_size(size: i32) -> u16 {
 /// Thankfully, this is virtually free memory-wise because the underlying data
 /// is part of the Wasm itself.
 fn url(data: &'static [u8], mime: &str) -> String {
+	let bag = BlobPropertyBag::new();
+	bag.set_type(mime);
 	Blob::new_with_u8_array_sequence_and_options(
 		&Array::of1(&Uint8Array::from(data)),
-		BlobPropertyBag::new().type_(mime)
+		&bag
 	)
 		.and_then(|b| Url::create_object_url_with_blob(&b))
 		.expect_throw("!")

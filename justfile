@@ -213,6 +213,17 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 		--target-dir "{{ cargo_dir }}"
 
 
+# Credits.
+@credits:
+	[ -z "$(which cargo-bashman)" ] || just _credits
+
+
+# Credits (Actual).
+@_credits:
+	cargo bashman -t wasm32-unknown-unknown --no-bash --no-man
+	just _fix-chown "{{ justfile_directory() }}/CREDITS.md"
+
+
 # Build Demo.
 @demo:
 	just _require-app "guff"
@@ -293,6 +304,9 @@ version: _pre_version
 
 	# Set JS Header Version.
 	sd '@version [\d.]+' "@version $_ver2" "{{ skel_dir }}/js/header.js"
+
+	# Regenerate credits, maybe.
+	just credits
 
 
 # Version requirements.

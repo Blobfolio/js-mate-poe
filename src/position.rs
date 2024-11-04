@@ -2,6 +2,7 @@
 # RS Mate Poe: Position
 */
 
+#[expect(clippy::missing_docs_in_private_items, reason = "Self-explanatory.")]
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 /// # Position.
 ///
@@ -68,7 +69,6 @@ impl Position {
 
 
 
-#[allow(missing_docs)]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
 /// # Relative Direction.
@@ -86,9 +86,11 @@ pub(crate) enum Direction {
 }
 
 impl Direction {
+	/// # Left and/or Right.
 	const BOTH_X: u8 = Self::Left as u8 | Self::Right as u8;
 
 	#[cfg(test)]
+	/// # Up and/or Down.
 	const BOTH_Y: u8 = Self::Up as u8 | Self::Down as u8;
 
 	/// # From U8.
@@ -107,6 +109,7 @@ impl Direction {
 	}
 }
 
+/// # Helper: Is Direction?
 macro_rules! is {
 	($title:literal, $fn:ident, $flag:ident) => (
 		#[doc = concat!("# Is ", $title, " Movement?")]
@@ -296,16 +299,16 @@ mod tests {
 
 		// Move absolute.
 		let mut pos = Position::new(0, 0);
-		assert_eq!(pos.move_to(Position::new(0, 0)), false);
+		assert!(!pos.move_to(Position::new(0, 0)));
 		assert_eq!(pos, Position::new(0, 0));
 
-		assert_eq!(pos.move_to(Position::new(1, 1)), true);
+		assert!(pos.move_to(Position::new(1, 1)));
 		assert_eq!(pos, Position::new(1, 1));
 
-		assert_eq!(pos.move_to(Position::new(i32::MAX, 10)), true);
+		assert!(pos.move_to(Position::new(i32::MAX, 10)));
 		assert_eq!(pos, Position::new(i32::MAX, 11));
 
-		assert_eq!(pos.move_to(Position::new(0, 0)), false);
+		assert!(!pos.move_to(Position::new(0, 0)));
 		assert_eq!(pos, Position::new(i32::MAX, 11));
 	}
 }

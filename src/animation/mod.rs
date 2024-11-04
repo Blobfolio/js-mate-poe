@@ -20,8 +20,13 @@ use std::sync::atomic::{
 
 
 
-#[cfg(any(test, feature = "director"))] const MIN_ANIMATION_ID: u8 = 1;   // The lowest Animation ID.
-#[cfg(any(test, feature = "director"))] const MAX_ANIMATION_ID: u8 = 101; // The highest Animation ID.
+#[cfg(any(test, feature = "director"))]
+/// # Minimum Animation ID.
+const MIN_ANIMATION_ID: u8 = 1;
+
+#[cfg(any(test, feature = "director"))]
+/// # Maximum Animation ID.
+const MAX_ANIMATION_ID: u8 = 101;
 
 
 
@@ -39,8 +44,8 @@ static LAST_ENTRANCE: AtomicU32 = AtomicU32::new(0);
 
 
 #[repr(u8)]
+#[expect(clippy::missing_docs_in_private_items, reason = "Self-explanatory.")]
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-#[allow(missing_docs)]
 /// # Animations.
 ///
 /// This enum holds all possible sprite animations, for both primary and child
@@ -162,14 +167,14 @@ impl Animation {
 	pub(crate) const fn all() -> Animations { Animations(0) }
 
 	#[cfg(any(test, feature = "director"))]
-	#[allow(unsafe_code)]
+	#[expect(unsafe_code, reason = "For transmute.")]
 	/// # From U8.
 	///
 	/// Return the `Animation` corresponding to the given ID, or `None` if out
 	/// of range.
 	pub(crate) fn from_u8(src: u8) -> Option<Self> {
-		// Safety: only transmute if the number is in range.
 		if (MIN_ANIMATION_ID..=MAX_ANIMATION_ID).contains(&src) {
+			// Safety: only transmute if the number is in range.
 			Some(unsafe { std::mem::transmute::<u8, Self>(src) })
 		}
 		else { None }
@@ -583,7 +588,7 @@ impl Animation {
 		}
 	}
 
-	#[allow(clippy::too_many_lines)]
+	#[expect(clippy::too_many_lines, reason = "There are a lot of animations.")]
 	/// # Next Animation.
 	///
 	/// Switch to this animation when the sequence finishes. Some of these
@@ -759,7 +764,7 @@ impl Animation {
 }
 
 impl Animation {
-	#[allow(clippy::too_many_lines)]
+	#[expect(clippy::too_many_lines, reason = "There are a lot of animations.")]
 	/// # Scenes.
 	///
 	/// Return the animation's `SceneList`.
@@ -767,6 +772,7 @@ impl Animation {
 	/// Most of these are completely static, identical from run-to-run, but a
 	/// few have randomized or environmental modifiers, tweaking them slightly.
 	pub(crate) const fn scenes(self, width: u16) -> SceneList {
+		/// # Helper: Fixed Scenelist.
 		macro_rules! fixed {
 			($var:ident) => (SceneList::new(SceneListKind::Fixed(scenes::$var)));
 		}
@@ -879,12 +885,12 @@ impl Animation {
 
 
 
-#[cfg(any(test, feature = "director"))]
+#[cfg(test)]
 #[derive(Debug, Clone, Default)]
 /// # Animations Iterator.
 pub(crate) struct Animations(u8);
 
-#[cfg(any(test, feature = "director"))]
+#[cfg(test)]
 impl Iterator for Animations {
 	type Item = Animation;
 	fn next(&mut self) -> Option<Self::Item> {
@@ -899,7 +905,7 @@ impl Iterator for Animations {
 	}
 }
 
-#[cfg(any(test, feature = "director"))]
+#[cfg(test)]
 impl ExactSizeIterator for Animations {
 	fn len(&self) -> usize {
 		usize::from(MAX_ANIMATION_ID.saturating_sub(self.0))
@@ -930,7 +936,7 @@ mod tests {
 	fn t_default() {
 		const TOTAL: usize = 36;
 
-		let set = (0..5_000_u16).into_iter()
+		let set = (0..5_000_u16)
 			.map(|_| Animation::default_choice() as u8)
 			.collect::<HashSet::<u8>>();
 
@@ -948,7 +954,7 @@ mod tests {
 				assert!(
 					a.primary(),
 					"Directly playable must be primary: {}", a.as_str()
-				)
+				);
 			}
 		}
 	}

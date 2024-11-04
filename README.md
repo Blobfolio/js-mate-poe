@@ -147,29 +147,6 @@ Thankfully that's easy to do: just click the `#.#.#.xpi` link attached to the [l
 
 
 &nbsp;
-## License
-
-Copyright © 2024 [Blobfolio, LLC](https://blobfolio.com) &lt;hello@blobfolio.com&gt;
-
-This work is free. You can redistribute it and/or modify it under the terms of the Do What The Fuck You Want To Public License, Version 2.
-
-    DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-    Version 2, December 2004
-    
-    Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
-    
-    Everyone is permitted to copy and distribute verbatim or modified
-    copies of this license document, and changing it is allowed as long
-    as the name is changed.
-    
-    DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-    
-    0. You just DO WHAT THE FUCK YOU WANT TO.
-
-
-
-&nbsp;
 ## Credits
 
 The [original Screen Mate Poe](https://en-academic.com/dic.nsf/enwiki/1080158) (AKA eSheep, Screen Mate Poo, etc.) was based on Tatsutoshi Nomura's animated shorts "Stray Sheep", which aired on the Fuji Television network in Japan. Mr. Nomura has subsequently published a series of cute children's books and games featuring Poe.

@@ -11,34 +11,58 @@
 pub(crate) struct MateFlags(u16);
 
 impl MateFlags {
-	const FLIPPED_X: u16 =         0b0000_0000_0000_0001; // Flip horizontally.
-	const FLIP_X_NEXT: u16 =       0b0000_0000_0000_0010; // Flip X on _next_ tick.
-	const GRAVITY: u16 =           0b0000_0000_0000_0100; // Gravity applies.
-	const IGNORE_EDGES: u16 =      0b0000_0000_0000_1000; // No edge checking needed.
-	const MAY_EXIT: u16 =          0b0000_0000_0001_0000; // Allowed to exit.
-	const PRIMARY: u16 =           0b0000_0000_0010_0000; // Primary sprite.
-	const NO_FOCUS: u16 =          0b0000_0000_0100_0000; // Disable focus/click/drag.
+	/// # Flag: Flip horizontally.
+	const FLIPPED_X: u16 =         0b0000_0000_0000_0001;
 
-	const CHANGED_CLASS: u16 =     0b0000_0000_1000_0000; // Class-affecting property changed.
-	const CHANGED_FRAME: u16 =     0b0000_0001_0000_0000; // Image frame changed.
-	const CHANGED_SIZE: u16 =      0b0000_0010_0000_0000; // Screen resized.
-	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000; // Need to play a sound.
-	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000; // X position changed.
-	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000; // Y position changed.
+	/// # Flag: Flip X on _next_ tick.
+	const FLIP_X_NEXT: u16 =       0b0000_0000_0000_0010;
 
-	// Transform-related changes.
+	/// # Flag: Gravity applies.
+	const GRAVITY: u16 =           0b0000_0000_0000_0100;
+
+	/// # Flag: No edge checking needed.
+	const IGNORE_EDGES: u16 =      0b0000_0000_0000_1000;
+
+	/// # Flag: Allowed to exit.
+	const MAY_EXIT: u16 =          0b0000_0000_0001_0000;
+
+	/// # Flag: Primary sprite.
+	const PRIMARY: u16 =           0b0000_0000_0010_0000;
+
+	/// # Flag: Disable focus/click/drag.
+	const NO_FOCUS: u16 =          0b0000_0000_0100_0000;
+
+	/// # Flag: Class-affecting property changed.
+	const CHANGED_CLASS: u16 =     0b0000_0000_1000_0000;
+
+	/// # Flag: Image frame changed.
+	const CHANGED_FRAME: u16 =     0b0000_0001_0000_0000;
+
+	/// # Flag: Screen resized.
+	const CHANGED_SIZE: u16 =      0b0000_0010_0000_0000;
+
+	/// # Flag: Need to play a sound.
+	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000;
+
+	/// # Flag: X position changed.
+	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000;
+
+	/// # Flag: Y position changed.
+	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000;
+
+	/// # Transform-related changes.
 	const CHANGED_TRANSFORM: u16 =
 		Self::CHANGED_TRANS_X | Self::CHANGED_TRANS_Y;
 
-	// Edge-related changes.
+	/// # Edge-related changes.
 	const CHANGED_EDGES: u16 = Self::CHANGED_SIZE | Self::CHANGED_TRANSFORM;
 
-	// All change-related settings.
+	/// # All change-related settings.
 	const CHANGED: u16 =
 		Self::CHANGED_CLASS | Self::CHANGED_FRAME |
 		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM;
 
-	// Scene Mask.
+	/// # Scene Mask.
 	const SCENE_MASK: u16 =
 		Self::FLIP_X_NEXT | Self::GRAVITY | Self::IGNORE_EDGES;
 }
@@ -51,6 +75,7 @@ impl MateFlags {
 	}
 }
 
+/// # Helper: Flag Getter.
 macro_rules! get {
 	($title:literal, $flag:ident, $fn:ident) => (
 		#[doc = concat!("# Is ", $title, "?")]
@@ -195,7 +220,7 @@ mod tests {
 		flag!(IGNORE_EDGES);
 
 		assert_eq!(
-			Scene::MATE_MASK as u16,
+			u16::from(Scene::MATE_MASK),
 			MateFlags::SCENE_MASK,
 			"MATE_MASK/SCENE_MASK flags are not equivalent.",
 		);
