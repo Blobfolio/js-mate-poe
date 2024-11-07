@@ -167,7 +167,7 @@ cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
 	# Package it up!
 	cd "{{ dist_dir }}" && \
-		tar -cvzf js-mate-poe_firefox.tar.gz js-mate-poe_firefox
+		tar -I 'zstd --ultra -22' -cvf js-mate-poe_firefox.tar.zst js-mate-poe_firefox
 
 	# Clean up.
 	rm -rf "{{ dist_dir }}/js-mate-poe_firefox"

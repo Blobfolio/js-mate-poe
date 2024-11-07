@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.6.8"
+version = "1.6.9"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2021"
 rust-version = "1.81"
@@ -17,7 +17,7 @@ name = "RS Mate Poe"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-guff_css = "=0.5.1"
+guff_css = "=0.5.2"
 imagesize = "=0.13.0"
 
 [dependencies]
