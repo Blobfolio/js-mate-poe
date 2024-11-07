@@ -147,19 +147,22 @@ const poeOff = function() {
  *
  * @return {void} Nothing.
  */
-init(browser.runtime.getURL('js-mate-poe.wasm')).then(() => {
-	// Clean up old instances, if any.
-	if (cleanOrphanedMates()) {
-		console.warn('Removed orphaned JS Mate Poe element(s) from the page.');
-	}
+fetch(browser.runtime.getURL('js-mate-poe.wasm'))
+	.then(r => r.arrayBuffer())
+	.then(obj => init({module_or_path: obj}))
+	.then(() => {
+		// Clean up old instances, if any.
+		if (cleanOrphanedMates()) {
+			console.warn('Removed orphaned JS Mate Poe element(s) from the page.');
+		}
 
-	// Let the background script know we're here, but only after a slight
-	// delay to give the page time to settle.
-	setTimeout(function() {
-		loadedWasm = true;
-		browser.runtime.sendMessage({action: 'poeBgNewConnection'});
-	}, 500);
-});
+		// Let the background script know we're here, but only after a slight
+		// delay to give the page time to settle.
+		setTimeout(function() {
+			loadedWasm = true;
+			browser.runtime.sendMessage({action: 'poeBgNewConnection'});
+		}, 500);
+	});
 
 /**
  * Synchronize State.
