@@ -470,11 +470,11 @@ mod tests {
 				// If we're repeating or there's sound, make sure the idx is in
 				// range.
 				assert!(
-					s.repeat.map_or(true, |(_, r)| usize::from(r) < s.frames.len()),
+					s.repeat.is_none_or(|(_, r)| usize::from(r) < s.frames.len()),
 					"Repeat overflow {}.", a.as_str(),
 				);
 				assert!(
-					s.sound.map_or(true, |(_, r)| usize::from(r) < s.frames.len()),
+					s.sound.is_none_or(|(_, r)| usize::from(r) < s.frames.len()),
 					"Sound overflow {}.", a.as_str(),
 				);
 			}

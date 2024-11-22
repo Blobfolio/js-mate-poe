@@ -203,7 +203,7 @@ impl Mate {
 		self.next_animation.take();
 		self.next_tick = 0;
 		let old = self.animation.take();
-		let animation_changed = force || old.map_or(true, |a| a != animation);
+		let animation_changed = force || old != Some(animation);
 
 		// Old animation business.
 		if let Some(o) = old {
