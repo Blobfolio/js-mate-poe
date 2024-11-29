@@ -2,7 +2,8 @@
 # RS Mate Poe: State
 */
 
-// TODO: this should get fixed in Rust 1.83.
+// TODO: this didn't get fixed in 1.83 as expected… Retest after the next Rust
+// or web-sys update.
 #![allow(unsafe_code, reason = "Lint broken.")]
 
 use crate::{
