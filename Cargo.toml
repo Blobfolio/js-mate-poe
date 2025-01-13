@@ -22,11 +22,11 @@ imagesize = "=0.13.0"
 
 [dependencies]
 itoa = "=1.0.14"
-js-sys = "=0.3.76"
-wasm-bindgen = "=0.2.99"
+js-sys = "=0.3.77"
+wasm-bindgen = "=0.2.100"
 
 [dependencies.web-sys]
-version = "=0.3.76"
+version = "=0.3.77"
 features = [
 	"AddEventListenerOptions",
 	"Blob",
