@@ -931,8 +931,9 @@ const fn is_fresh(animation: Animation, set: [u8; 4]) -> bool {
 mod tests {
 	use super::*;
 	use std::collections::HashSet;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_default() {
 		const TOTAL: usize = 36;
 
@@ -947,7 +948,7 @@ mod tests {
 		);
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_playable() {
 		for a in Animation::all() {
 			if a.playable() {
@@ -959,7 +960,7 @@ mod tests {
 		}
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_primary_children() {
 		for a in Animation::all() {
 			if let Some(child) = a.child() {
@@ -976,7 +977,7 @@ mod tests {
 	}
 
 	#[cfg(feature = "director")]
-	#[test]
+	#[wasm_bindgen_test]
 	fn dbg_list() {
 		assert_eq!(
 			Animation::StargazeChild as u8,
@@ -995,7 +996,7 @@ mod tests {
 
 		// Make sure the fresh version matches our pre-computed original,
 		// otherwise we'll need to update it.
-		let old = std::fs::read_to_string("skel/playlist.txt").expect("Missing playlist.txt");
+		let old = include_str!("../../skel/playlist.txt");
 		assert_eq!(
 			old.trim(),
 			new.trim(),

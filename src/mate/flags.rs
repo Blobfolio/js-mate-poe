@@ -201,8 +201,9 @@ impl MateFlags {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_mate_scene_flags() {
 		use crate::Scene;
 

@@ -482,8 +482,9 @@ fn splitmix(seed: &mut u64) -> u64 {
 mod tests {
 	use super::*;
 	use std::collections::HashSet;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_rand() {
 		assert_eq!(Universe::rand_mod(0), 0, "Random zero broke!");
 

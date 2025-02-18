@@ -146,6 +146,7 @@ impl Direction {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use wasm_bindgen_test::*;
 
 	macro_rules! test_x {
 		($var:ident) => (
@@ -180,7 +181,7 @@ mod tests {
 		);
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_direction() {
 		// No direction.
 		let pos = Position::new(0, 0);
@@ -271,7 +272,7 @@ mod tests {
 		test_y!(dir, false, true);
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_direction_conv() {
 		for d in [
 			Direction::None, Direction::Left, Direction::Right, Direction::Up,
@@ -285,7 +286,7 @@ mod tests {
 		}
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_pos() {
 		// Invert X.
 		assert_eq!(Position::new(0, 0).invert_x(), Position::new(0, 0));
