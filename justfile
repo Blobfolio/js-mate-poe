@@ -39,6 +39,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	just _require-app esbuild
 	just _require-app wasm-bindgen
 	just _require-app wasm-opt
+	just _require-app xxd
 
 	[ -z "$(command -v fyi)" ] || fyi task "Building JS Mate Poe…"
 
@@ -60,7 +61,6 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 		--no-typescript \
 		--omit-default-module-path \
 		--encode-into always \
-		--reference-types \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
 	# Remove the unused "fetch" stuff from the glue to save space (since it
@@ -81,11 +81,11 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
 
-	# Base64-encode the optimized wasm and throw it into a quickie JS module
-	# so we can easily access it from our entry point.
-	echo -n "export const wasmBase64 = '" > "{{ gen_dir }}/wasm_base64.mjs"
-	cat "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | base64 -w0 >> "{{ gen_dir }}/wasm_base64.mjs"
-	echo "';" >> "{{ gen_dir }}/wasm_base64.mjs"
+	# Generate a JS module containing the wasm as a byte array so we don't have
+	# to async fetch it at runtime.
+	echo "export const wasmArray = new Uint8Array([" > "{{ gen_dir }}/wasm.mjs"
+	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
+	echo "]);" >> "{{ gen_dir }}/wasm.mjs"
 
 	# Transpile the JS to a temporary location.
 	esbuild \

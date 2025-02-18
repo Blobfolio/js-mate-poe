@@ -40,7 +40,6 @@ wasm-bindgen \
 	--no-typescript \
 	--omit-default-module-path \
 	--encode-into always \
-	--reference-types \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.wasm
 
 # Copy the glue for later.
