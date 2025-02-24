@@ -9,14 +9,11 @@
 import init, { Poe } from './generated/glue.mjs';
 
 // Pull in the wasm payload.
-import { wasmBase64 } from './generated/wasm_base64.mjs';
-
-// Our decoding helper function.
-import { base64toUint8 } from './base64_to_uint8.mjs';
+import { wasmArray } from './generated/wasm.mjs';
 
 // Let's party like it's 1996!
 const currentScript = document.currentScript;
-init(base64toUint8(wasmBase64).buffer).then(() => {
+init(wasmArray.buffer).then(() => {
 	// Make the Poe instance public.
 	window.Poe = Poe;
 

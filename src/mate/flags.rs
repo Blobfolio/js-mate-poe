@@ -168,7 +168,7 @@ impl MateFlags {
 	///
 	/// Flip/unflip horizontally, or toggle if `None`.
 	pub(crate) fn flip_x(&mut self, v: Option<bool>) {
-		if v.map_or(true, |v| v != self.flipped_x()) {
+		if v.is_none_or(|v| v != self.flipped_x()) {
 			self.0 ^= Self::FLIPPED_X;
 			self.mark_class_changed();
 		}
@@ -201,8 +201,9 @@ impl MateFlags {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_mate_scene_flags() {
 		use crate::Scene;
 

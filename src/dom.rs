@@ -57,12 +57,12 @@ pub(crate) fn document_element() -> Option<Element> {
 ///
 /// Returns `true` if the page is operating in "quirks" mode.
 pub(crate) fn is_quirks() -> bool {
-	document().map_or(true, |d| d.compat_mode() == "BackCompat")
+	document().is_none_or(|d| d.compat_mode() == "BackCompat")
 }
 
 /// # Is Visible?
 ///
 /// Returns `true` if the tab has focus.
 pub(crate) fn is_visible() -> bool {
-	document().map_or(false, |d| matches!(d.visibility_state(), VisibilityState::Visible))
+	document().is_some_and(|d| matches!(d.visibility_state(), VisibilityState::Visible))
 }

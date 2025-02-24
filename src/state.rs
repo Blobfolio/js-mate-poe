@@ -2,9 +2,6 @@
 # RS Mate Poe: State
 */
 
-// TODO: this should get fixed in Rust 1.83.
-#![allow(unsafe_code, reason = "Lint broken.")]
-
 use crate::{
 	dom,
 	Mate,

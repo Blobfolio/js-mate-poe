@@ -415,8 +415,9 @@ fn ease(e: usize, d: usize, x: i32, y: i32, ease: u8) -> Option<(i32, i32)> {
 mod tests {
 	use super::*;
 	use crate::Animation;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_builder() {
 		let expected = Scene {
 			move_to: Some(Position::new(55, 0)),
@@ -447,7 +448,7 @@ mod tests {
 		assert_eq!(expected, built);
 	}
 
-	#[test]
+	#[wasm_bindgen_test]
 	fn t_scenes() {
 		for a in Animation::all() {
 			let scenes = a.scenes(3840);
@@ -470,11 +471,11 @@ mod tests {
 				// If we're repeating or there's sound, make sure the idx is in
 				// range.
 				assert!(
-					s.repeat.map_or(true, |(_, r)| usize::from(r) < s.frames.len()),
+					s.repeat.is_none_or(|(_, r)| usize::from(r) < s.frames.len()),
 					"Repeat overflow {}.", a.as_str(),
 				);
 				assert!(
-					s.sound.map_or(true, |(_, r)| usize::from(r) < s.frames.len()),
+					s.sound.is_none_or(|(_, r)| usize::from(r) < s.frames.len()),
 					"Sound overflow {}.", a.as_str(),
 				);
 			}

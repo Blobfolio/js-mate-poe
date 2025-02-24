@@ -255,8 +255,9 @@ impl Frame {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use wasm_bindgen_test::*;
 
-	#[test]
+	#[wasm_bindgen_test]
 	#[expect(unsafe_code, reason = "Needed for transmute.")]
 	fn t_class() {
 		for f in 0..=Frame::None as u8 {
