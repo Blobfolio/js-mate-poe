@@ -2,8 +2,8 @@
 name = "rs_mate_poe"
 version = "1.6.10"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
-edition = "2021"
-rust-version = "1.83"
+edition = "2024"
+rust-version = "1.85"
 description = "WASM port of Screen Mate Poe."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/js-mate-poe"
