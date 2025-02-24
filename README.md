@@ -113,40 +113,6 @@ Short and sweet!
 
 
 &nbsp;
-## Known Issues
-
-The Internet is a good habitat for Poe, but not a _perfect_ one. There are a few quirks he has to live with, at least for the time being. Before reporting an issue, please double-check it isn't listed below.
-
-| Issue | Library | Extension | Fixed |
-| ----- | ------- | --------- | ----- |
-| [No Audio](#no-audio) | X | X | |
-| ~~[Frozen/Duplicate Poe](#frozenduplicate-poe-instance)~~ | | X | `1.5.0` |
-| ~~[No Auto-Updates](#no-auto-updates)~~ | | X | `1.4.3` |
-
-
-### No Audio
-
-Browsers automatically block autoplaying audio to protect users from disruptive advertisements and SPAM. This is a sound decision 😜, but unfortunately means that even when Poe's audio option is enabled, it might not actually be _allowed_ to make any noise.
-
-The only workaround for this is to click somewhere — anywhere — on the page. (Browsers aren't smart enough to recognize PLAY buttons, so have to assume that any sort of click might indicate the user's desire to play something.)
-
-
-### Frozen/Duplicate Poe Instance
-
-Firefox kills any active instances of an add-on before applying an update, but does not reload the page(s) it was running on, effectively orphaning any elements — like sheep! — it may have been managing.
-
-A workaround was added to `1.5.0` to detect and clean up any frozen old sheep resulting from such updates, but if for some reason that doesn't work, all you need to do is manually reload the affected page(s) to return to normal.
-
-
-### No Auto-Updates
-
-The Firefox extension has supported automatic updates since version `1.4.3`, but if you were a really early adopter — thanks! — you'll need to manually upgrade _once_ to benefit.
-
-Thankfully that's easy to do: just click the `#.#.#.xpi` link attached to the [latest release](https://github.com/Blobfolio/js-mate-poe/releases) to update to that version.
-
-
-
-&nbsp;
 ## Credits
 
 The [original Screen Mate Poe](https://en-academic.com/dic.nsf/enwiki/1080158) (AKA eSheep, Screen Mate Poo, etc.) was based on Tatsutoshi Nomura's animated shorts "Stray Sheep", which aired on the Fuji Television network in Japan. Mr. Nomura has subsequently published a series of cute children's books and games featuring Poe.
