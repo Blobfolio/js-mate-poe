@@ -57,7 +57,7 @@ impl Position {
 	///
 	/// Add `pos` to `self`, returning `true` if the coordinates changed as a
 	/// result.
-	pub(crate) fn move_to(&mut self, pos: Self) -> bool {
+	pub(crate) const fn move_to(&mut self, pos: Self) -> bool {
 		if pos.x == 0 && pos.y == 0 { false }
 		else {
 			self.x = self.x.saturating_add(pos.x);

@@ -102,7 +102,7 @@ impl MateFlags {
 	/// Note: calling this will reset the size-changed flag, so unless there's
 	/// movement (or the screen size changes again), this won't return true
 	/// twice.
-	pub(crate) fn edges_changed(&mut self) -> bool {
+	pub(crate) const fn edges_changed(&mut self) -> bool {
 		if 0 == self.0 & Self::CHANGED_EDGES { false }
 		else {
 			self.0 &= ! Self::CHANGED_SIZE;
@@ -125,39 +125,39 @@ impl MateFlags {
 	/// # Clear.
 	///
 	/// Reset all flags except `Self::PRIMARY`.
-	pub(crate) fn clear(&mut self) {
+	pub(crate) const fn clear(&mut self) {
 		if self.primary() { self.0 = Self::PRIMARY; }
 		else { self.0 = 0; }
 	}
 
 	/// # Clear All Change-Related Flags.
-	pub(crate) fn clear_changed(&mut self) { self.0 &= ! Self::CHANGED; }
+	pub(crate) const fn clear_changed(&mut self) { self.0 &= ! Self::CHANGED; }
 
 	/// # Mark Class Changed.
-	pub(crate) fn mark_class_changed(&mut self) { self.0 |= Self::CHANGED_CLASS; }
+	pub(crate) const fn mark_class_changed(&mut self) { self.0 |= Self::CHANGED_CLASS; }
 
 	/// # Mark Frame Changed.
-	pub(crate) fn mark_frame_changed(&mut self) { self.0 |= Self::CHANGED_FRAME; }
+	pub(crate) const fn mark_frame_changed(&mut self) { self.0 |= Self::CHANGED_FRAME; }
 
 	/// # Mark Size Changed.
-	pub(crate) fn mark_size_changed(&mut self) { self.0 |= Self::CHANGED_SIZE; }
+	pub(crate) const fn mark_size_changed(&mut self) { self.0 |= Self::CHANGED_SIZE; }
 
 	/// # Mark Sound Changed.
-	pub(crate) fn mark_sound_changed(&mut self) { self.0 |= Self::CHANGED_SOUND; }
+	pub(crate) const fn mark_sound_changed(&mut self) { self.0 |= Self::CHANGED_SOUND; }
 
 	/// # Mark Transform (X) Changed.
-	pub(crate) fn mark_transform_x_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_X; }
+	pub(crate) const fn mark_transform_x_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_X; }
 
 	/// # Mark Transform (Y) Changed.
-	pub(crate) fn mark_transform_y_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_Y; }
+	pub(crate) const fn mark_transform_y_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_Y; }
 
 	/// # Mark All Changed.
-	pub(crate) fn mark_changed(&mut self) { self.0 |= Self::CHANGED; }
+	pub(crate) const fn mark_changed(&mut self) { self.0 |= Self::CHANGED; }
 
 	/// # Apply Next.
 	///
 	/// Remove the next X/Y properties and flip (the current state) accordingly.
-	pub(crate) fn apply_next(&mut self) {
+	pub(crate) const fn apply_next(&mut self) {
 		if Self::FLIP_X_NEXT == self.0 & Self::FLIP_X_NEXT {
 			self.0 ^= Self::FLIPPED_X | Self::FLIP_X_NEXT;
 			self.mark_class_changed();
@@ -167,21 +167,23 @@ impl MateFlags {
 	/// # Flip (X).
 	///
 	/// Flip/unflip horizontally, or toggle if `None`.
-	pub(crate) fn flip_x(&mut self, v: Option<bool>) {
-		if v.is_none_or(|v| v != self.flipped_x()) {
-			self.0 ^= Self::FLIPPED_X;
-			self.mark_class_changed();
+	pub(crate) const fn flip_x(&mut self, v: Option<bool>) {
+		if let Some(v) = v {
+			if v == self.flipped_x() { return; }
 		}
+
+		self.0 ^= Self::FLIPPED_X;
+		self.mark_class_changed();
 	}
 
 	/// # Set May Exit.
-	pub(crate) fn set_may_exit(&mut self, v: bool) {
+	pub(crate) const fn set_may_exit(&mut self, v: bool) {
 		if v { self.0 |= Self::MAY_EXIT; }
 		else { self.0 &= ! Self::MAY_EXIT; }
 	}
 
 	/// # Set No Focus.
-	pub(crate) fn set_no_focus(&mut self, v: bool) {
+	pub(crate) const fn set_no_focus(&mut self, v: bool) {
 		if self.no_focus() != v {
 			if v { self.0 |= Self::NO_FOCUS; }
 			else { self.0 &= ! Self::NO_FOCUS; }
@@ -190,7 +192,7 @@ impl MateFlags {
 	}
 
 	/// # Set Scene Flags.
-	pub(crate) fn set_scene_flags(&mut self, flags: u16) {
+	pub(crate) const fn set_scene_flags(&mut self, flags: u16) {
 		self.0 &= ! Self::SCENE_MASK;
 		self.0 |= flags & Self::SCENE_MASK;
 	}
