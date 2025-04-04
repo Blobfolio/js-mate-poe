@@ -452,7 +452,7 @@ fn set_seeds(seeds: &[u64; 4]) {
 }
 
 /// # Update Seeds.
-fn update_seeds(seeds: &mut[u64; 4]) {
+const fn update_seeds(seeds: &mut[u64; 4]) {
 	let t = seeds[1] << 17;
 	seeds[2] ^= seeds[0];
 	seeds[3] ^= seeds[1];
@@ -466,7 +466,7 @@ fn update_seeds(seeds: &mut[u64; 4]) {
 /// # Split/Mix.
 ///
 /// This is used to generate our Xoshi256 seeds from a single source `u64`.
-fn splitmix(seed: &mut u64) -> u64 {
+const fn splitmix(seed: &mut u64) -> u64 {
 	// Update the source seed.
 	*seed = seed.overflowing_add(0x9e37_79b9_7f4a_7c15).0;
 

@@ -129,7 +129,7 @@ impl Mate {
 	/// # Stop.
 	///
 	/// Stop the animation, if any.
-	pub(crate) fn stop(&mut self) {
+	pub(crate) const fn stop(&mut self) {
 		// Clear animations and scenes, if any.
 		let a = self.animation.take();
 		let b = self.next_animation.take();
@@ -329,7 +329,7 @@ impl Mate {
 	}
 
 	/// # Set Frame.
-	pub(crate) fn set_frame(&mut self, frame: Frame) {
+	pub(crate) const fn set_frame(&mut self, frame: Frame) {
 		if frame as u8 != self.frame as u8 {
 			// Mark the class as having changed too if the old or new frame is
 			// a halfsie.
@@ -343,7 +343,7 @@ impl Mate {
 	}
 
 	/// # Set Position.
-	pub(crate) fn set_position(&mut self, pos: Position, absolute: bool) {
+	pub(crate) const fn set_position(&mut self, pos: Position, absolute: bool) {
 		if absolute {
 			if pos.x != self.pos.x {
 				self.pos.x = pos.x;
