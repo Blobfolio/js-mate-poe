@@ -32,18 +32,15 @@ jobs:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
       with:
-        targets: x86_64-unknown-linux-gnu,wasm32-unknown-unknown
+        targets: wasm32-unknown-unknown
         components: clippy
-    - uses: taiki-e/install-action@v2
-      with:
-        tool: wasm-bindgen-cli
 
     - name: Info
       run: |
         rustup --version
         cargo --version
         cargo clippy --version
-        rustup target remove --toolchain stable x86_64-unknown-linux-gnu
+        cargo install wasm-bindgen-cli --locked
 
     - name: Build (Debug)
       run: |
