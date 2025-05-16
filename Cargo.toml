@@ -18,7 +18,11 @@ crate-type = ["cdylib"]
 
 [build-dependencies]
 guff_css = "=0.7.4"
-imagesize = "=0.13.0"
+
+[build-dependencies.imagesize]
+version = "=0.14.0"
+default-features = false
+features = [ "png" ]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.*"
