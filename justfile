@@ -73,6 +73,8 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	# Run Wasm-Opt.
 	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
 		--enable-reference-types \
+		--enable-bulk-memory \
+		--all-features \
 		-O3 \
 		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
 
