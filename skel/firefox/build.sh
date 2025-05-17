@@ -42,14 +42,11 @@ wasm-bindgen \
 	--encode-into always \
 	target/wasm32-unknown-unknown/release/rs_mate_poe.wasm
 
+# Copy wasm.
+cp target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm ../dist/js-mate-poe.wasm
+
 # Copy the glue for later.
 cp target/wasm32-unknown-unknown/release/rs_mate_poe.js ../js/generated/glue.mjs
-
-# Optimize and output the wasm to the dist dir.
-wasm-opt target/wasm32-unknown-unknown/release/rs_mate_poe_bg.wasm \
-	--enable-reference-types \
-	-O3 \
-	-o ../dist/js-mate-poe.wasm
 
 # Now we can build the Javascript. For this, we should move back to the
 # top-level directory.
