@@ -10,7 +10,7 @@ use std::path::{
 
 
 /// # Main.
-pub fn main() {
+fn main() {
 	println!("cargo:rerun-if-env-changed=CARGO_PKG_VERSION");
 	println!("cargo:rerun-if-changed=skel/playlist.txt");
 	println!("cargo:rerun-if-changed=skel/img/poe.png");
