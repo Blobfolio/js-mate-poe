@@ -115,10 +115,7 @@ impl Scene {
 	///
 	/// Note: Steps start from zero for the purposes of this method.
 	pub(crate) const fn sound_at_step(&self, idx: usize) -> Option<Sound> {
-		if let Some((out, idx2)) = self.sound {
-			if idx2 as usize == idx { Some(out) }
-			else { None }
-		}
+		if let Some((out, idx2)) = self.sound && idx2 as usize == idx { Some(out) }
 		else { None }
 	}
 

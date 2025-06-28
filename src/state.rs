@@ -214,10 +214,8 @@ impl State {
 	///
 	/// Add ourselves to the next `requestAnimationFrame`.
 	fn raf(&self) {
-		if let Some(cb) = self.raf.borrow().as_ref() {
-			if let Some(w) = dom::window() {
-				let _res = w.request_animation_frame(cb.as_ref().unchecked_ref());
-			}
+		if let Some(cb) = self.raf.borrow().as_ref() && let Some(w) = dom::window() {
+			let _res = w.request_animation_frame(cb.as_ref().unchecked_ref());
 		}
 	}
 }

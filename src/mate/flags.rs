@@ -168,9 +168,7 @@ impl MateFlags {
 	///
 	/// Flip/unflip horizontally, or toggle if `None`.
 	pub(crate) const fn flip_x(&mut self, v: Option<bool>) {
-		if let Some(v) = v {
-			if v == self.flipped_x() { return; }
-		}
+		if let Some(v) = v && v == self.flipped_x() { return; }
 
 		self.0 ^= Self::FLIPPED_X;
 		self.mark_class_changed();
