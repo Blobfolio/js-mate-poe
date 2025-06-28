@@ -129,7 +129,6 @@ pub struct Poe;
 impl Poe {
 	#[wasm_bindgen(getter)]
 	#[must_use]
-	#[inline]
 	/// # Is Poe Active?
 	///
 	/// Return `true` if active, or `false` if not.
@@ -137,7 +136,6 @@ impl Poe {
 
 	#[wasm_bindgen(getter)]
 	#[must_use]
-	#[inline]
 	/// # Audio Allowed?
 	///
 	/// Return `true` if audio playback is allowed, or `false` if not.
@@ -145,7 +143,6 @@ impl Poe {
 
 	#[wasm_bindgen(getter)]
 	#[must_use]
-	#[inline]
 	/// # Is Focus/Dragging Allowed?
 	///
 	/// Return `true` if the primary sprite can be clicked and dragged, or
@@ -178,21 +175,18 @@ impl Poe {
 	pub fn fix_bindings() { Universe::set_fix_bindings(); }
 
 	#[wasm_bindgen(setter)]
-	#[inline]
 	/// # Set Active.
 	///
 	/// Enable or disable Poe.
 	pub fn set_active(v: bool) { Universe::set_active(v); }
 
 	#[wasm_bindgen(setter)]
-	#[inline]
 	/// # Toggle Audio.
 	///
 	/// Enable or disable audio playback.
 	pub fn set_audio(v: bool) { Universe::set_audio(v); }
 
 	#[wasm_bindgen(setter)]
-	#[inline]
 	/// # Toggle Focus/Draggability.
 	///
 	/// Enable or disable the ability to click and drag the primary sprite.
@@ -200,7 +194,6 @@ impl Poe {
 
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(setter)]
-	#[inline]
 	/// # Set Playback Speed.
 	///
 	/// Set the playback speed as a float percentage, e.g. `1.0` is normal,
@@ -209,7 +202,6 @@ impl Poe {
 
 	#[cfg(feature = "director")]
 	#[wasm_bindgen(setter)]
-	#[inline]
 	/// # Play Animation.
 	///
 	/// Cue up a specific animation by its ID. Invalid entries are ignored.
