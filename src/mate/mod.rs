@@ -408,12 +408,10 @@ impl Mate {
 
 			// Browser override?
 			#[cfg(feature = "director")]
-			if self.flags.primary() {
-				if let Some(n) = Universe::next_animation() {
-					Universe::set_no_child();
-					self.animation.take();
-					self.next_animation.replace(n);
-				}
+			if self.flags.primary() && let Some(n) = Universe::next_animation() {
+				Universe::set_no_child();
+				self.animation.take();
+				self.next_animation.replace(n);
 			}
 
 			// Flip if flipping is needed.
@@ -468,12 +466,9 @@ impl Mate {
 		self.set_frame(step.frame());
 
 		// Sound if enabled.
-		if let Some(sound) = step.sound() {
-			if Universe::audio() {
-				self.sound.replace(sound);
-				self.flags.mark_sound_changed();
-			}
-			else { self.sound = None; }
+		if let Some(sound) = step.sound() && Universe::audio() {
+			self.sound.replace(sound);
+			self.flags.mark_sound_changed();
 		}
 		else { self.sound = None; }
 
