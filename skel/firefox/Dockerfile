@@ -1,11 +1,11 @@
 # Stage One.
-FROM rust:1.88-bookworm AS stage1
+FROM rust:1.89-trixie AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
 	cargo install --root /tmp/cargo --locked --version 0.2.100 wasm-bindgen-cli
 
 # Stage Two.
-FROM rust:1.88-bookworm
+FROM rust:1.89-trixie
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
