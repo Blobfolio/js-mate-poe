@@ -105,6 +105,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
 	# Clean up.
 	just _fix-chown "{{ dist_dir }}"
+	just _fix-chown "{{ gen_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi success "Built JS Mate Poe!"
 

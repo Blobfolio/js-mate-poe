@@ -1,9 +1,9 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index 23c9bd3..e5fad53 100644
+index 0906b42..2b4c9f8 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -227,25 +227,6 @@ export class Poe {
- }
+@@ -266,27 +266,6 @@ export class Poe {
+ const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
  
  async function __wbg_load(module, imports) {
 -    if (typeof Response === 'function' && module instanceof Response) {
@@ -12,7 +12,9 @@ index 23c9bd3..e5fad53 100644
 -                return await WebAssembly.instantiateStreaming(module, imports);
 -
 -            } catch (e) {
--                if (module.headers.get('Content-Type') != 'application/wasm') {
+-                const validResponse = module.ok && EXPECTED_RESPONSE_TYPES.has(module.type);
+-
+-                if (validResponse && module.headers.get('Content-Type') !== 'application/wasm') {
 -                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
 -
 -                } else {
@@ -28,7 +30,7 @@ index 23c9bd3..e5fad53 100644
          const instance = await WebAssembly.instantiate(module, imports);
  
          if (instance instanceof WebAssembly.Instance) {
-@@ -254,7 +235,6 @@ async function __wbg_load(module, imports) {
+@@ -295,7 +274,6 @@ async function __wbg_load(module, imports) {
          } else {
              return instance;
          }
@@ -36,7 +38,7 @@ index 23c9bd3..e5fad53 100644
  }
  
  function __wbg_get_imports() {
-@@ -593,22 +573,8 @@ function initSync(module) {
+@@ -622,22 +600,8 @@ function initSync(module) {
  async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
