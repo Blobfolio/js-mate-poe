@@ -20,16 +20,6 @@ use std::sync::atomic::{
 
 
 
-#[cfg(any(test, feature = "director"))]
-/// # Minimum Animation ID.
-const MIN_ANIMATION_ID: u8 = 1;
-
-#[cfg(any(test, feature = "director"))]
-/// # Maximum Animation ID.
-const MAX_ANIMATION_ID: u8 = 101;
-
-
-
 /// # Special Default.
 ///
 /// Keep track of the non-Walk default animation selections so we don't repeat
@@ -43,142 +33,187 @@ static LAST_ENTRANCE: AtomicU32 = AtomicU32::new(0);
 
 
 
-#[repr(u8)]
-#[expect(clippy::missing_docs_in_private_items, reason = "Self-explanatory.")]
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-/// # Animations.
-///
-/// This enum holds all possible sprite animations, for both primary and child
-/// mates, as well as secondary (linked) sequences.
-///
-/// Each variant is equivalent to a `u8`, starting with `1`.
-pub(crate) enum Animation {
-	// Animations for the primary mate.
-	Abduction = 1_u8,
-	BathDive,
-	BeamIn,
-	Beg,
-	BigFish,
-	BlackSheepCatch,
-	BlackSheepCatchFail,
-	BlackSheepChase,
-	BlackSheepRomance,
-	Bleat,
-	Blink,
-	ChaseAMartian,
-	ClimbIn,
-	Cry,
-	Dance,
-	Eat,
-	EatMagicFlower,
-	FloatIn,
-	Glitch,
-	Gopher,
-	Handstand,
-	Hop,
-	Jump,
-	JumpIn,
-	LayDown,
-	LegLifts,
-	LookDown,
-	LookUp,
-	Nah,
-	PlayDead,
-	Popcorn,
-	Really,
-	Rest,
-	Roll,
-	Rotate,
-	Run,
-	Scoot,
-	Scratch,
-	Scream,
-	ShadowShowdown,
-	Shake,
-	SideStep,
-	Skip,
-	Sleep,
-	SleepSitting,
-	SleepStanding,
-	Slide,
-	SlideIn,
-	Sneeze,
-	Spin,
-	Stargaze,
-	Tornado,
-	Urinate,
-	Walk,
-	Yawn,
-	Yoyo,
+/// # Helper: Animations.
+macro_rules! animation {
+	(@count $odd:tt) => ( 1 );
+	(@count $odd:tt $($a:tt $b:tt)+) => ( (animation!(@count $($a)+) * 2) + 1 );
+	(@count $($a:tt $b:tt)+) =>         (  animation!(@count $($a)+) * 2      );
 
-	// Primary animations of a special/supporting nature.
-	BathCoolDown,
-	Boing,
-	Bounce,
-	ClimbDown,
-	ClimbUp,
-	DangleFall,
-	DangleRecover,
-	DigestMagicFlower1,
-	DigestMagicFlower2,
-	Drag,
-	EatingMagicFlower,
-	EndRun,
-	Fall,
-	GraspingFall,
-	Hydroplane,
-	JumpInLanding,
-	ReachCeiling,
-	ReachFloor,
-	ReachSide1,
-	ReachSide2,
-	RunDown,
-	RunUpsideDown,
-	SlideDown,
-	Splat,
-	TornadoExit,
-	WalkUpsideDown,
-	WallSlide,
+	($( $k:ident $( = $v:literal )? $vstr:literal $( @ $dynamic:ident:: )? $scene:ident, )+) => (
+		#[repr(u8)]
+		#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+		/// # Animations.
+		///
+		/// This enum holds all possible sprite animations, for both primary and child
+		/// mates, as well as secondary (linked) sequences.
+		///
+		/// Each variant is equivalent to a `u8`, starting with `1`.
+		pub(crate) enum Animation {
+			$( $k $( = $v)?, )+
+		}
 
-	// Animations for the child mates.
-	AbductionChild,
-	BathDiveChild,
-	BigFishChild,
-	BlackSheepCatchChild,
-	BlackSheepCatchExitChild,
-	BlackSheepCatchFailChild,
-	BlackSheepCatchFailExitChild,
-	BlackSheepChaseChild,
-	BlackSheepRomanceChild,
-	ChaseAMartianChild,
-	Flower,
-	MagicFlower1,
-	MagicFlower2,
-	ShadowShowdownChild1,
-	ShadowShowdownChild2,
-	SneezeShadow,
-	SplatGhost,
-	StargazeChild,
+		impl Animation {
+			#[cfg(any(test, feature = "director"))]
+			/// # Maximum Animation ID.
+			const MAX_ANIMATION_ID: u8 = animation!(@count $($k)+);
+
+			#[cfg(any(test, feature = "director"))]
+			/// # All Animations.
+			pub(crate) const ALL: [Self; Self::MAX_ANIMATION_ID as usize] = [ $( Self::$k, )+ ];
+
+			#[cfg(feature = "director")]
+			/// # From U8.
+			///
+			/// Return the `Animation` corresponding to the given ID, or `None` if out
+			/// of range.
+			pub(crate) const fn from_u8(src: u8) -> Option<Self> {
+				// Discriminants start at one instead of zero, so we need to
+				// knock off one to align it to the indices in ALL.
+				if let Some(src) = src.checked_sub(1) && src < Self::MAX_ANIMATION_ID {
+					Some(Self::ALL[src as usize])
+				}
+				else { None }
+			}
+
+			#[cfg(any(test, feature = "director"))]
+			#[must_use]
+			/// # As Str.
+			///
+			/// Return a human-readable "title" for the `Animation` as a static string
+			/// slice.
+			pub(crate) const fn as_str(self) -> &'static str {
+				match self {
+					$( Self::$k => $vstr, )+
+				}
+			}
+
+			/// # Scenes.
+			///
+			/// Return the animation's `SceneList`.
+			///
+			/// Most of these are completely static, identical from run-to-run, but a
+			/// few have randomized or environmental modifiers, tweaking them slightly.
+			pub(crate) const fn scenes(self, width: u16) -> SceneList {
+				macro_rules! scene {
+					($s:ident) => ( const { SceneList::new(SceneListKind::Fixed(scenes::$s)) } );
+					($s:path) =>  ( $s(width) );
+				}
+
+				match self {
+					$( Self::$k => scene!($($dynamic::)?$scene), )+
+				}
+			}
+		}
+	);
 }
 
-impl Animation {
-	#[cfg(test)]
-	/// # All Animations.
-	pub(crate) const fn all() -> Animations { Animations(0) }
+animation! {
+	// Animations for the primary mate.
+	Abduction = 1_u8             "Abduction"                          ABDUCTION,
+	BathDive                     "Bath Dive"                          BATH_DIVE,
+	BeamIn                       "Beam In"                            BEAM_IN,
+	Beg                          "Beg"                                BEG,
+	BigFish                      "Big Fish"                           BIG_FISH,
+	BlackSheepCatch              "Black Sheep Catch"                  BLACK_SHEEP_CATCH,
+	BlackSheepCatchFail          "Black Sheep (Almost) Catch"         BLACK_SHEEP_CATCH_FAIL,
+	BlackSheepChase              "Black Sheep Chase"                  @scenes::black_sheep_chase,
+	BlackSheepRomance            "Black Sheep Romance"                @scenes::black_sheep_romance,
+	Bleat                        "Bleat"                              BLEAT,
+	Blink                        "Blink"                              BLINK,
+	ChaseAMartian                "Chase a Martian"                    @scenes::chase_a_martian,
+	ClimbIn                      "Climb In"                           CLIMB_IN,
+	Cry                          "Cry"                                CRY,
+	Dance                        "Dance"                              DANCE,
+	Eat                          "Eat"                                EAT,
+	EatMagicFlower               "Eat (Magic Flower)"                 EAT_MAGIC_FLOWER,
+	FloatIn                      "Float In"                           FLOAT_IN,
+	Glitch                       "Glitch"                             GLITCH,
+	Gopher                       "Gopher"                             GOPHER,
+	Handstand                    "Handstand"                          HANDSTAND,
+	Hop                          "Hop"                                HOP,
+	Jump                         "Jump"                               JUMP,
+	JumpIn                       "Jump In"                            JUMP_IN,
+	LayDown                      "Lay Down"                           LAY_DOWN,
+	LegLifts                     "Leg Lifts"                          LEG_LIFTS,
+	LookDown                     "Look Down"                          LOOK_DOWN,
+	LookUp                       "Look Up"                            LOOK_UP,
+	Nah                          "Nah…"                               NAH,
+	PlayDead                     "Play Dead"                          PLAY_DEAD,
+	Popcorn                      "Popcorn"                            POPCORN,
+	Really                       "Really?!"                           REALLY,
+	Rest                         "Rest"                               REST,
+	Roll                         "Roll"                               ROLL,
+	Rotate                       "Rotate"                             ROTATE,
+	Run                          "Run"                                RUN,
+	Scoot                        "Scoot"                              SCOOT,
+	Scratch                      "Scratch"                            SCRATCH,
+	Scream                       "Scream"                             SCREAM,
+	ShadowShowdown               "Shadow Showdown"                    SHADOW_SHOWDOWN,
+	Shake                        "Shake"                              SHAKE,
+	SideStep                     "Side Step"                          SKIP,
+	Skip                         "Skip"                               SIDE_STEP,
+	Sleep                        "Sleep"                              SLEEP,
+	SleepSitting                 "Sleep (Sitting)"                    SLEEP_SITTING,
+	SleepStanding                "Sleep (Standing)"                   SLEEP_STANDING,
+	Slide                        "Slide"                              SLIDE,
+	SlideIn                      "Slide In"                           SLIDE_IN,
+	Sneeze                       "Sneeze"                             SNEEZE,
+	Spin                         "Spin"                               SPIN,
+	Stargaze                     "Stargaze"                           STARGAZE,
+	Tornado                      "Tornado"                            TORNADO,
+	Urinate                      "Urinate"                            URINATE,
+	Walk                         "Walk"                               WALK,
+	Yawn                         "Yawn"                               YAWN,
+	Yoyo                         "Yo-Yo"                              YOYO,
 
-	#[cfg(any(test, feature = "director"))]
-	#[expect(unsafe_code, reason = "For transmute.")]
-	/// # From U8.
-	///
-	/// Return the `Animation` corresponding to the given ID, or `None` if out
-	/// of range.
-	pub(crate) fn from_u8(src: u8) -> Option<Self> {
-		if (MIN_ANIMATION_ID..=MAX_ANIMATION_ID).contains(&src) {
-			// Safety: only transmute if the number is in range.
-			Some(unsafe { std::mem::transmute::<u8, Self>(src) })
-		}
-		else { None }
-	}
+	// Primary animations of a special/supporting nature.
+	BathCoolDown                 "Bath Cool Down"                     BATH_COOL_DOWN,
+	Boing                        "Boing!"                             BOING,
+	Bounce                       "Bounce"                             BOUNCE,
+	ClimbDown                    "Climb Down"                         CLIMB_DOWN,
+	ClimbUp                      "Climb Up"                           CLIMB_UP,
+	DangleFall                   "Dangle (Maybe) Fall"                DANGLE_FALL,
+	DangleRecover                "Dangle Fall Recovery"               DANGLE_RECOVER,
+	DigestMagicFlower1           "Digesting (Magic Flower)"           DIGEST_MAGIC_FLOWER1,
+	DigestMagicFlower2           "Digesting (Magic Flower)"           DIGEST_MAGIC_FLOWER2,
+	Drag                         "Drag"                               DRAG,
+	EatingMagicFlower            "Eating (Magic Flower)"              EATING_MAGIC_FLOWER,
+	EndRun                       "End Run"                            END_RUN,
+	Fall                         "Fall"                               FALL,
+	GraspingFall                 "Grasping Fall"                      GRASPING_FALL,
+	Hydroplane                   "Hydroplane"                         HYDROPLANE,
+	JumpInLanding                "Jump In (Landing)"                  JUMP_IN_LANDING,
+	ReachCeiling                 "Reach Ceiling"                      REACH_CEILING,
+	ReachFloor                   "Reach Floor"                        REACH_FLOOR,
+	ReachSide1                   "Reach Side (From Floor)"            REACH_SIDE1,
+	ReachSide2                   "Reach Side (From Ceiling)"          REACH_SIDE2,
+	RunDown                      "Run Down"                           RUN_DOWN,
+	RunUpsideDown                "Run Upside Down"                    RUN_UPSIDE_DOWN,
+	SlideDown                    "Slide Down"                         SLIDE_DOWN,
+	Splat                        "Splat"                              SPLAT,
+	TornadoExit                  "Tornado (Exit)"                     @scenes::tornado_exit,
+	WalkUpsideDown               "Walk Upside Down"                   WALK_UPSIDE_DOWN,
+	WallSlide                    "Wall Slide"                         WALL_SLIDE,
+
+	// Animations for the child mates.
+	AbductionChild               "Abduction (Child)"                  ABDUCTION_CHILD,
+	BathDiveChild                "Bathtub (Child)"                    BATH_DIVE_CHILD,
+	BigFishChild                 "Big Fish (Child)"                   BIG_FISH_CHILD,
+	BlackSheepCatchChild         "Black Sheep Catch (Child)"          BLACK_SHEEP_CATCH_CHILD,
+	BlackSheepCatchExitChild     "Black Sheep Catch (Child)"          BLACK_SHEEP_CATCH_EXIT_CHILD,
+	BlackSheepCatchFailChild     "Black Sheep (Almost) Catch (Child)" BLACK_SHEEP_CATCH_FAIL_CHILD,
+	BlackSheepCatchFailExitChild "Black Sheep (Almost) Catch (Child)" @scenes::black_sheep_catch_fail_exit_child,
+	BlackSheepChaseChild         "Black Sheep Chase (Child)"          @scenes::black_sheep_chase_child,
+	BlackSheepRomanceChild       "Black Sheep Romance (Child)"        @scenes::black_sheep_romance_child,
+	ChaseAMartianChild           "Chase a Martian (Child)"            @scenes::chase_a_martian_child,
+	Flower                       "Flower (Child)"                     FLOWER,
+	MagicFlower1                 "Magic Flower (Child)"               MAGIC_FLOWER1,
+	MagicFlower2                 "Magic Flower (Child)"               MAGIC_FLOWER2,
+	ShadowShowdownChild1         "Shadow Showdown (Child)"            SHADOW_SHOWDOWN_CHILD1,
+	ShadowShowdownChild2         "Shadow Showdown (Child)"            SHADOW_SHOWDOWN_CHILD2,
+	SneezeShadow                 "Sneeze Shadow (Child)"              SNEEZE_SHADOW,
+	SplatGhost                   "Splat (Ghost)"                      SPLAT_GHOST,
+	StargazeChild                "Stargaze (Child)"                   STARGAZE_CHILD,
 }
 
 // The Animation::default_choice method is generated by build.rs.
@@ -227,111 +262,6 @@ impl Animation {
 
 #[cfg(any(test, feature = "director"))]
 impl Animation {
-	/// # As Str.
-	///
-	/// Return a human-readable "title" for the `Animation` as a static string
-	/// slice.
-	pub(crate) const fn as_str(self) -> &'static str {
-		match self {
-			Self::Abduction => "Abduction",
-			Self::AbductionChild => "Abduction (Child)",
-			Self::BathCoolDown => "Bath Cool Down",
-			Self::BathDive => "Bath Dive",
-			Self::BathDiveChild => "Bathtub (Child)",
-			Self::BeamIn => "Beam In",
-			Self::Beg => "Beg",
-			Self::BigFish => "Big Fish",
-			Self::BigFishChild => "Big Fish (Child)",
-			Self::BlackSheepCatch => "Black Sheep Catch",
-			Self::BlackSheepCatchChild | Self::BlackSheepCatchExitChild => "Black Sheep Catch (Child)",
-			Self::BlackSheepCatchFail => "Black Sheep (Almost) Catch",
-			Self::BlackSheepCatchFailChild | Self::BlackSheepCatchFailExitChild => "Black Sheep (Almost) Catch (Child)",
-			Self::BlackSheepChase => "Black Sheep Chase",
-			Self::BlackSheepChaseChild => "Black Sheep Chase (Child)",
-			Self::BlackSheepRomance => "Black Sheep Romance",
-			Self::BlackSheepRomanceChild => "Black Sheep Romance (Child)",
-			Self::Bleat => "Bleat",
-			Self::Blink => "Blink",
-			Self::Boing => "Boing!",
-			Self::Bounce => "Bounce",
-			Self::ChaseAMartian => "Chase a Martian",
-			Self::ChaseAMartianChild => "Chase a Martian (Child)",
-			Self::ClimbDown => "Climb Down",
-			Self::ClimbIn => "Climb In",
-			Self::ClimbUp => "Climb Up",
-			Self::Cry => "Cry",
-			Self::Dance => "Dance",
-			Self::DangleFall => "Dangle (Maybe) Fall",
-			Self::DangleRecover => "Dangle Fall Recovery",
-			Self::DigestMagicFlower1 | Self::DigestMagicFlower2 => "Digesting (Magic Flower)",
-			Self::Drag => "Drag",
-			Self::Eat => "Eat",
-			Self::EatingMagicFlower => "Eating (Magic Flower)",
-			Self::EatMagicFlower => "Eat (Magic Flower)",
-			Self::EndRun => "End Run",
-			Self::Fall => "Fall",
-			Self::FloatIn => "Float In",
-			Self::Flower => "Flower (Child)",
-			Self::Glitch => "Glitch",
-			Self::Gopher => "Gopher",
-			Self::GraspingFall => "Grasping Fall",
-			Self::Handstand => "Handstand",
-			Self::Hop => "Hop",
-			Self::Hydroplane => "Hydroplane",
-			Self::Jump => "Jump",
-			Self::JumpIn => "Jump In",
-			Self::JumpInLanding => "Jump In (Landing)",
-			Self::LayDown => "Lay Down",
-			Self::LegLifts => "Leg Lifts",
-			Self::LookDown => "Look Down",
-			Self::LookUp => "Look Up",
-			Self::MagicFlower1 | Self::MagicFlower2 => "Magic Flower (Child)",
-			Self::Nah => "Nah…",
-			Self::PlayDead => "Play Dead",
-			Self::Popcorn => "Popcorn",
-			Self::ReachCeiling => "Reach Ceiling",
-			Self::ReachFloor => "Reach Floor",
-			Self::ReachSide1 => "Reach Side (From Floor)",
-			Self::ReachSide2 => "Reach Side (From Ceiling)",
-			Self::Really => "Really?!",
-			Self::Rest => "Rest",
-			Self::Roll => "Roll",
-			Self::Rotate => "Rotate",
-			Self::Run => "Run",
-			Self::RunDown => "Run Down",
-			Self::RunUpsideDown => "Run Upside Down",
-			Self::Scoot => "Scoot",
-			Self::Scratch => "Scratch",
-			Self::Scream => "Scream",
-			Self::ShadowShowdown => "Shadow Showdown",
-			Self::ShadowShowdownChild1 | Self::ShadowShowdownChild2 => "Shadow Showdown (Child)",
-			Self::Shake => "Shake",
-			Self::SideStep => "Side Step",
-			Self::Skip => "Skip",
-			Self::Sleep => "Sleep",
-			Self::SleepSitting => "Sleep (Sitting)",
-			Self::SleepStanding => "Sleep (Standing)",
-			Self::Slide => "Slide",
-			Self::SlideDown => "Slide Down",
-			Self::SlideIn => "Slide In",
-			Self::Sneeze => "Sneeze",
-			Self::SneezeShadow => "Sneeze Shadow (Child)",
-			Self::Spin => "Spin",
-			Self::Splat => "Splat",
-			Self::SplatGhost => "Splat (Ghost)",
-			Self::Stargaze => "Stargaze",
-			Self::StargazeChild => "Stargaze (Child)",
-			Self::Tornado => "Tornado",
-			Self::TornadoExit => "Tornado (Exit)",
-			Self::Urinate => "Urinate",
-			Self::Walk => "Walk",
-			Self::WalkUpsideDown => "Walk Upside Down",
-			Self::WallSlide => "Wall Slide",
-			Self::Yawn => "Yawn",
-			Self::Yoyo => "Yo-Yo",
-		}
-	}
-
 	/// # Directly Playable?
 	///
 	/// Returns `true` if the animation can be cued up via the userland setter
@@ -763,155 +693,6 @@ impl Animation {
 	}
 }
 
-impl Animation {
-	#[expect(clippy::too_many_lines, reason = "There are a lot of animations.")]
-	/// # Scenes.
-	///
-	/// Return the animation's `SceneList`.
-	///
-	/// Most of these are completely static, identical from run-to-run, but a
-	/// few have randomized or environmental modifiers, tweaking them slightly.
-	pub(crate) const fn scenes(self, width: u16) -> SceneList {
-		/// # Helper: Fixed Scenelist.
-		macro_rules! fixed {
-			($var:ident) => (SceneList::new(SceneListKind::Fixed(scenes::$var)));
-		}
-
-		match self {
-			Self::Abduction => fixed!(ABDUCTION),
-			Self::AbductionChild => fixed!(ABDUCTION_CHILD),
-			Self::BathCoolDown => fixed!(BATH_COOL_DOWN),
-			Self::BathDive => fixed!(BATH_DIVE),
-			Self::BathDiveChild => fixed!(BATH_DIVE_CHILD),
-			Self::BeamIn => fixed!(BEAM_IN),
-			Self::Beg => fixed!(BEG),
-			Self::BigFish => fixed!(BIG_FISH),
-			Self::BigFishChild => fixed!(BIG_FISH_CHILD),
-			Self::BlackSheepCatch => fixed!(BLACK_SHEEP_CATCH),
-			Self::BlackSheepCatchChild => fixed!(BLACK_SHEEP_CATCH_CHILD),
-			Self::BlackSheepCatchExitChild => fixed!(BLACK_SHEEP_CATCH_EXIT_CHILD),
-			Self::BlackSheepCatchFail => fixed!(BLACK_SHEEP_CATCH_FAIL),
-			Self::BlackSheepCatchFailChild => fixed!(BLACK_SHEEP_CATCH_FAIL_CHILD),
-			Self::BlackSheepCatchFailExitChild => scenes::black_sheep_catch_fail_exit_child(width),
-			Self::BlackSheepChase => scenes::black_sheep_chase(width),
-			Self::BlackSheepChaseChild => scenes::black_sheep_chase_child(width),
-			Self::BlackSheepRomance => scenes::black_sheep_romance(width),
-			Self::BlackSheepRomanceChild => scenes::black_sheep_romance_child(width),
-			Self::Bleat => fixed!(BLEAT),
-			Self::Blink => fixed!(BLINK),
-			Self::Boing => fixed!(BOING),
-			Self::Bounce => fixed!(BOUNCE),
-			Self::ChaseAMartian => scenes::chase_a_martian(width),
-			Self::ChaseAMartianChild => scenes::chase_a_martian_child(width),
-			Self::ClimbDown => fixed!(CLIMB_DOWN),
-			Self::ClimbIn => fixed!(CLIMB_IN),
-			Self::ClimbUp => fixed!(CLIMB_UP),
-			Self::Cry => fixed!(CRY),
-			Self::Dance => fixed!(DANCE),
-			Self::DangleFall => fixed!(DANGLE_FALL),
-			Self::DangleRecover => fixed!(DANGLE_RECOVER),
-			Self::DigestMagicFlower1 => fixed!(DIGEST_MAGIC_FLOWER1),
-			Self::DigestMagicFlower2 => fixed!(DIGEST_MAGIC_FLOWER2),
-			Self::Drag => fixed!(DRAG),
-			Self::Eat => fixed!(EAT),
-			Self::EatingMagicFlower => fixed!(EATING_MAGIC_FLOWER),
-			Self::EatMagicFlower => fixed!(EAT_MAGIC_FLOWER),
-			Self::EndRun => fixed!(END_RUN),
-			Self::Fall => fixed!(FALL),
-			Self::FloatIn => fixed!(FLOAT_IN),
-			Self::Flower => fixed!(FLOWER),
-			Self::Glitch => fixed!(GLITCH),
-			Self::Gopher => fixed!(GOPHER),
-			Self::GraspingFall => fixed!(GRASPING_FALL),
-			Self::Handstand => fixed!(HANDSTAND),
-			Self::Hop => fixed!(HOP),
-			Self::Hydroplane => fixed!(HYDROPLANE),
-			Self::Jump => fixed!(JUMP),
-			Self::JumpIn => fixed!(JUMP_IN),
-			Self::JumpInLanding => fixed!(JUMP_IN_LANDING),
-			Self::LayDown => fixed!(LAY_DOWN),
-			Self::LegLifts => fixed!(LEG_LIFTS),
-			Self::LookDown => fixed!(LOOK_DOWN),
-			Self::LookUp => fixed!(LOOK_UP),
-			Self::MagicFlower1 => fixed!(MAGIC_FLOWER1),
-			Self::MagicFlower2 => fixed!(MAGIC_FLOWER2),
-			Self::Nah => fixed!(NAH),
-			Self::PlayDead => fixed!(PLAY_DEAD),
-			Self::Popcorn => fixed!(POPCORN),
-			Self::ReachCeiling => fixed!(REACH_CEILING),
-			Self::ReachFloor => fixed!(REACH_FLOOR),
-			Self::ReachSide1 => fixed!(REACH_SIDE1),
-			Self::ReachSide2 => fixed!(REACH_SIDE2),
-			Self::Really => fixed!(REALLY),
-			Self::Rest => fixed!(REST),
-			Self::Roll => fixed!(ROLL),
-			Self::Rotate => fixed!(ROTATE),
-			Self::Run => fixed!(RUN),
-			Self::RunDown => fixed!(RUN_DOWN),
-			Self::RunUpsideDown => fixed!(RUN_UPSIDE_DOWN),
-			Self::Scoot => fixed!(SCOOT),
-			Self::Scratch => fixed!(SCRATCH),
-			Self::Scream => fixed!(SCREAM),
-			Self::ShadowShowdown => fixed!(SHADOW_SHOWDOWN),
-			Self::ShadowShowdownChild1 => fixed!(SHADOW_SHOWDOWN_CHILD1),
-			Self::ShadowShowdownChild2 => fixed!(SHADOW_SHOWDOWN_CHILD2),
-			Self::Shake => fixed!(SHAKE),
-			Self::Skip => fixed!(SKIP),
-			Self::SideStep => fixed!(SIDE_STEP),
-			Self::Sleep => fixed!(SLEEP),
-			Self::SleepSitting => fixed!(SLEEP_SITTING),
-			Self::SleepStanding => fixed!(SLEEP_STANDING),
-			Self::Slide => fixed!(SLIDE),
-			Self::SlideDown => fixed!(SLIDE_DOWN),
-			Self::SlideIn => fixed!(SLIDE_IN),
-			Self::Sneeze => fixed!(SNEEZE),
-			Self::SneezeShadow => fixed!(SNEEZE_SHADOW),
-			Self::Spin => fixed!(SPIN),
-			Self::Splat => fixed!(SPLAT),
-			Self::SplatGhost => fixed!(SPLAT_GHOST),
-			Self::Stargaze => fixed!(STARGAZE),
-			Self::StargazeChild => fixed!(STARGAZE_CHILD),
-			Self::Tornado => fixed!(TORNADO),
-			Self::TornadoExit => scenes::tornado_exit(width),
-			Self::Urinate => fixed!(URINATE),
-			Self::Walk => fixed!(WALK),
-			Self::WalkUpsideDown => fixed!(WALK_UPSIDE_DOWN),
-			Self::WallSlide => fixed!(WALL_SLIDE),
-			Self::Yawn => fixed!(YAWN),
-			Self::Yoyo => fixed!(YOYO),
-		}
-	}
-}
-
-
-
-#[cfg(test)]
-#[derive(Debug, Clone, Default)]
-/// # Animations Iterator.
-pub(crate) struct Animations(u8);
-
-#[cfg(test)]
-impl Iterator for Animations {
-	type Item = Animation;
-	fn next(&mut self) -> Option<Self::Item> {
-		self.0 += 1;
-		if self.0 <= MAX_ANIMATION_ID { Animation::from_u8(self.0) }
-		else { None }
-	}
-
-	fn size_hint(&self) -> (usize, Option<usize>) {
-		let len = self.len();
-		(len, Some(len))
-	}
-}
-
-#[cfg(test)]
-impl ExactSizeIterator for Animations {
-	fn len(&self) -> usize {
-		usize::from(MAX_ANIMATION_ID.saturating_sub(self.0))
-	}
-}
-
 
 
 /// # Animation Choice is Fresh.
@@ -950,7 +731,7 @@ mod tests {
 
 	#[wasm_bindgen_test]
 	fn t_playable() {
-		for a in Animation::all() {
+		for a in Animation::ALL {
 			if a.playable() {
 				assert!(
 					a.primary(),
@@ -962,7 +743,7 @@ mod tests {
 
 	#[wasm_bindgen_test]
 	fn t_primary_children() {
-		for a in Animation::all() {
+		for a in Animation::ALL {
 			if let Some(child) = a.child() {
 				assert!(
 					a.primary(),
@@ -981,13 +762,13 @@ mod tests {
 	fn dbg_list() {
 		assert_eq!(
 			Animation::StargazeChild as u8,
-			MAX_ANIMATION_ID,
+			Animation::MAX_ANIMATION_ID,
 			"MAX_ANIMATION_ID is wrong!"
 		);
 
 		// Manually generate the playlist outputted by Poe::list() using the
 		// current animation details as reference.
-		let new = Animation::all().filter_map(|a|
+		let new = Animation::ALL.into_iter().filter_map(|a|
 			if a.playable() { Some(format!("#{:<4}{}", a as u8, a.as_str())) }
 			else { None }
 		)

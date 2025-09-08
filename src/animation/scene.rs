@@ -447,7 +447,7 @@ mod tests {
 
 	#[wasm_bindgen_test]
 	fn t_scenes() {
-		for a in Animation::all() {
+		for a in Animation::ALL {
 			let scenes = a.scenes(3840);
 
 			let mut total_steps = 0;
