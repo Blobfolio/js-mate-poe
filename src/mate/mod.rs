@@ -19,7 +19,6 @@ use crate::{
 	Universe,
 };
 use flags::MateFlags;
-use std::mem::MaybeUninit;
 use wasm_bindgen::prelude::*;
 use web_sys::{
 	DomTokenList,
@@ -29,11 +28,6 @@ use web_sys::{
 	ShadowRootInit,
 	ShadowRootMode,
 };
-
-
-
-/// # Pixels!
-const UNIT_PX: [u8; 2] = *b"px";
 
 
 
@@ -583,11 +577,11 @@ impl Mate {
 			}
 
 			if self.flags.transform_x_changed() {
-				write_css_property(&wrapper, "--x", self.pos.x);
+				CssProperty::write(&wrapper, "--x", self.pos.x);
 			}
 
 			if self.flags.transform_y_changed() {
-				write_css_property(&wrapper, "--y", self.pos.y);
+				CssProperty::write(&wrapper, "--y", self.pos.y);
 			}
 		}
 
@@ -595,7 +589,7 @@ impl Mate {
 		if self.flags.frame_changed() {
 			let img = shadow.get_element_by_id("i")
 				.expect_throw("Missing mate image.");
-			write_css_property(&img, "--c", self.frame.offset());
+				CssProperty::write(&img, "--c", self.frame.offset());
 		}
 
 		// Play a sound?
@@ -817,48 +811,172 @@ fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
 	let _res = list.toggle_with_force(class, force);
 }
 
-#[expect(unsafe_code, reason = "For performance.")]
-/// # Write Style Property.
+
+
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+/// # CSS Property Characters.
 ///
-/// Update a given `--prop` pixel value.
-fn write_css_property(el: &Element, key: &str, value: i32) {
-	if let Some(el) = el.dyn_ref::<HtmlElement>() {
-		let style = el.style();
+/// This enum contains all of the possible characters used by `CssProperty`.
+/// While a bit verbose, it proves to both us and the compiler that we can't
+/// possibly fuck up a slice so badly it can't be represented as a string. ;)
+enum CssPropertyChar {
+	ChrDash = b'-',
+	Chr0 =    b'0',
+	Chr1 =    b'1',
+	Chr2 =    b'2',
+	Chr3 =    b'3',
+	Chr4 =    b'4',
+	Chr5 =    b'5',
+	Chr6 =    b'6',
+	Chr7 =    b'7',
+	Chr8 =    b'8',
+	Chr9 =    b'9',
+	ChrP =    b'p',
+	ChrX =    b'x',
+}
 
-		// First, stringify the value with `itoa`.
-		let mut buf1 = itoa::Buffer::new();
-		let value: &[u8] = buf1.format(value).as_bytes();
-
-		// Alas, it needs a unit and we don't have access to itoa's buffer,
-		// so have to copy it to our own so we can add the two extra bytes.
-		// Even so, this is still significantly more efficient than skipping
-		// itoa or, heaven forbid, actually using _String_! Haha.
-		let len = value.len();
-		if len <= 11 {
-			let mut buf = [MaybeUninit::<u8>::uninit(); 13];
-			// Safety: buf has room for 13 bytes. We checked len <= 11, and
-			// UNIX_PX is always 2, so the value will always fit.
-			let value = unsafe {
-				let ptr: *mut u8 = buf.as_mut_ptr().cast();
-				std::ptr::copy_nonoverlapping(
-					value.as_ptr(),
-					ptr,
-					len,
-				);
-				std::ptr::copy_nonoverlapping(
-					UNIT_PX.as_ptr(),
-					ptr.add(len),
-					2
-				);
-
-				// Send the initialized bytes back as a string slice.
-				std::str::from_utf8_unchecked(
-					&*(std::ptr::addr_of!(buf[..len + 2]) as *const [u8])
-				)
-			};
-
-			// Now we can finally write it!
-			let _res = style.set_property(key, value);
+impl CssPropertyChar {
+	#[inline]
+	/// # From `u32` Digit.
+	const fn from_digit(num: u32) -> Self {
+		match num {
+			0 => Self::Chr0,
+			1 => Self::Chr1,
+			2 => Self::Chr2,
+			3 => Self::Chr3,
+			4 => Self::Chr4,
+			5 => Self::Chr5,
+			6 => Self::Chr6,
+			7 => Self::Chr7,
+			8 => Self::Chr8,
+			_ => Self::Chr9, // We know n % 10 can't ever be out of range.
 		}
+	}
+
+	#[expect(clippy::inline_always, reason = "For performance.")]
+	#[expect(unsafe_code, reason = "For transmute.")]
+	#[inline(always)]
+	#[must_use]
+	/// # As Str.
+	///
+	/// Transmute a slice of `CssPropertyChar` into a string slice.
+	pub(super) const fn as_str(src: &[Self]) -> &str {
+		// This check is overly-paranoid, but the compiler should
+		// optimize it out.
+		const {
+			assert!(
+				align_of::<&[Self]>() == align_of::<&[u8]>() &&
+				size_of::<&[Self]>() == size_of::<&[u8]>(),
+				"BUG: CssPropertyChar and u8 have different layouts?!",
+			);
+		}
+
+		// Safety: `CssPropertyChar` is represented by `u8` so shares the
+		// same size and alignment.
+		unsafe {
+			std::str::from_utf8_unchecked(
+				std::mem::transmute::<&[Self], &[u8]>(src)
+			)
+		}
+	}
+}
+
+
+
+#[derive(Debug, Clone, Copy)]
+/// # CSS Property Buffer.
+///
+/// This struct acts like a poor man's `itoa`, saving us the trouble of
+/// allocating new strings each and every time a CSS property update needs to
+/// be sent back to the browser.
+///
+/// Note that this assumes all values require a `px` suffix.
+struct CssProperty([CssPropertyChar; 13]);
+
+impl CssProperty {
+	/// # Default Buffer.
+	///
+	/// This is equivalent to "00000000000px".
+	const DEFAULT: Self = Self([
+		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
+		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
+		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
+		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::ChrP,
+		CssPropertyChar::ChrX,
+	]);
+
+	/// # Format Value.
+	///
+	/// Stringify an `i32` pixel value into the buffer, returning a string
+	/// slice of the result.
+	const fn format(&mut self, num: i32) -> &str {
+		let neg = num.is_negative();
+		let mut num = num.unsigned_abs();
+		let mut len = 2; // The PX suffix is constant.
+
+		// Right to left, one digit at a time.
+		while 9 < num {
+			len += 1;
+			self.0[13 - len] = CssPropertyChar::from_digit(num % 10);
+			num /= 10;
+		}
+		len += 1;
+		self.0[13 - len] = CssPropertyChar::from_digit(num);
+
+		// Negative?
+		if neg {
+			len += 1;
+			self.0[13 - len] = CssPropertyChar::ChrDash;
+		}
+
+		// Split off the relevant part.
+		let (_, b) = self.0.split_at(13 - len);
+		CssPropertyChar::as_str(b)
+	}
+
+	#[inline]
+	/// # Write Style Property.
+	///
+	/// Update a given `--prop` pixel value.
+	fn write(el: &Element, key: &str, value: i32) {
+		if let Some(el) = el.dyn_ref::<HtmlElement>() {
+			let mut buf = Self::DEFAULT;
+			let _res = el.style().set_property(key, buf.format(value));
+		}
+	}
+}
+
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn t_i32_len() {
+		// The `CSSProperty` struct assumes the longest possible i32 value
+		// is eleven bytes. Let's prove it!
+		assert_eq!(
+			i32::MIN.to_string().len(),
+			11,
+		);
+
+		// Now we're getting silly, but let's also prove that u32 tops out at
+		// ten.
+		assert_eq!(
+			u32::MAX.to_string().len(),
+			10,
+		);
+	}
+
+	#[test]
+	fn t_css_property() {
+		let mut buf = CssProperty::DEFAULT;
+		assert_eq!(buf.format(0), "0px");
+		assert_eq!(buf.format(10), "10px");
+		assert_eq!(buf.format(432), "432px");
+		assert_eq!(buf.format(50_000), "50000px");
+		assert_eq!(buf.format(i32::MIN), "-2147483648px");
 	}
 }

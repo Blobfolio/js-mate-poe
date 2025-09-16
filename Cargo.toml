@@ -28,7 +28,6 @@ features = [ "png" ]
 wasm-bindgen-test = "0.3.*"
 
 [dependencies]
-itoa = "=1.0.15"
 js-sys = "=0.3.78"
 wasm-bindgen = "=0.2.101"
 
