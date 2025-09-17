@@ -68,26 +68,16 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
 
 	# Copy the glue to somewhere more predictable.
-	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
-
-	# Run Wasm-Opt.
-	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		--enable-reference-types \
-		--enable-bulk-memory \
-		--all-features \
-		-O3 \
-		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
-
-	# Remove the wasm-bindgen stuff.
-	rm -rf \
-		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
+	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
 
 	# Generate a JS module containing the wasm as a byte array so we don't have
 	# to async fetch it at runtime.
 	echo "export const wasmArray = new Uint8Array([" > "{{ gen_dir }}/wasm.mjs"
-	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
+	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
 	echo "]);" >> "{{ gen_dir }}/wasm.mjs"
+
+	# Cleanup: remove wasm.
+	rm "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm"
 
 	# Transpile the JS to a temporary location.
 	esbuild \
