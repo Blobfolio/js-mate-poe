@@ -267,23 +267,26 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 # Get/Set version.
 version: _pre_version
 	#!/usr/bin/env bash
+	set -e
 
 	# Current version.
-	_ver1="$( toml get "{{ justfile_directory() }}/Cargo.toml" package.version | \
-		sed 's/"//g' )"
+	_ver1="$( tomli query -f "{{ justfile_directory() }}/Cargo.toml" package.version | \
+		sed 's/[" ]//g' )"
 
 	# Find out if we want to bump it.
+	set +e
 	_ver2="$( whiptail --inputbox "Set {{ pkg_name }} version:" --title "Release Version" 0 0 "$_ver1" 3>&1 1>&2 2>&3 )"
 
 	exitstatus=$?
 	if [ $exitstatus != 0 ] || [ "$_ver1" = "$_ver2" ]; then
 		exit 0
 	fi
-
-	[ -z "$(command -v fyi)" ] || fyi success "Setting version to $_ver2."
+	set -e
 
 	# Set the release version!
-	just _version "{{ justfile_directory() }}" "$_ver2"
+	tomli set -f "{{ justfile_directory() }}/Cargo.toml" -i package.version "$_ver2"
+
+	[ -z "$(command -v fyi)" ] || fyi success "Setting version to $_ver2."
 
 	# Set Extension Version.
 	sd '"version": "[\d.]+"' "\"version\": \"$_ver2\"" "{{ skel_dir }}/firefox/manifest.json"
@@ -298,18 +301,8 @@ version: _pre_version
 # Version requirements.
 @_pre_version:
 	just _require-app sd
-	just _require-app toml
+	just _require-app tomli
 	just _require-app whiptail
-
-
-# Set Cargo version for real.
-@_version DIR VER:
-	just _require "{{ DIR }}/Cargo.toml"
-
-	# Set the release version!
-	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
-	just _fix-chown "/tmp/Cargo.toml"
-	mv "/tmp/Cargo.toml" "{{ DIR }}/Cargo.toml"
 
 
 # Fix file/directory permissions.
