@@ -38,7 +38,6 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	just _require-app cargo
 	just _require-app esbuild
 	just _require-app wasm-bindgen
-	just _require-app wasm-opt
 	just _require-app xxd
 
 	[ -z "$(command -v fyi)" ] || fyi task "Building JS Mate Poe…"
