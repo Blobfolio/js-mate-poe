@@ -64,7 +64,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
 	# Remove the unused "fetch" stuff from the glue to save space (since it
 	# isn't pruned automatically).
-	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
+	cd "{{ cargo_release_dir }}" && patch -p1 -i "{{ skel_dir }}/js/glue.patch"
 
 	# Copy the glue to somewhere more predictable.
 	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
