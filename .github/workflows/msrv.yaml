@@ -39,7 +39,6 @@ jobs:
       run: |
         rustup --version
         cargo --version
-        cargo clippy --version
 
     - name: MSRV
       run: |
