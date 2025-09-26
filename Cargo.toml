@@ -17,7 +17,7 @@ name = "RS Mate Poe"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-guff_css = "=0.9.0"
+guff_css = "=0.10.0"
 
 [build-dependencies.imagesize]
 version = "=0.14.0"
