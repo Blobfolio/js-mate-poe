@@ -38,7 +38,6 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	just _require-app cargo
 	just _require-app esbuild
 	just _require-app wasm-bindgen
-	just _require-app wasm-opt
 	just _require-app xxd
 
 	[ -z "$(command -v fyi)" ] || fyi task "Building JS Mate Poe…"
@@ -65,29 +64,19 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
 	# Remove the unused "fetch" stuff from the glue to save space (since it
 	# isn't pruned automatically).
-	cd "{{ cargo_release_dir }}" && patch -s -p1 -i "{{ skel_dir }}/js/glue.patch"
+	cd "{{ cargo_release_dir }}" && patch -p1 -i "{{ skel_dir }}/js/glue.patch"
 
 	# Copy the glue to somewhere more predictable.
-	cp "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
-
-	# Run Wasm-Opt.
-	wasm-opt "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		--enable-reference-types \
-		--enable-bulk-memory \
-		--all-features \
-		-O3 \
-		-o "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm"
-
-	# Remove the wasm-bindgen stuff.
-	rm -rf \
-		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
-		"{{ cargo_release_dir }}/{{ pkg_id }}.js"
+	mv "{{ cargo_release_dir }}/{{ pkg_id }}.js" "{{ gen_dir }}/glue.mjs"
 
 	# Generate a JS module containing the wasm as a byte array so we don't have
 	# to async fetch it at runtime.
 	echo "export const wasmArray = new Uint8Array([" > "{{ gen_dir }}/wasm.mjs"
-	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}.opt.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
+	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
 	echo "]);" >> "{{ gen_dir }}/wasm.mjs"
+
+	# Cleanup: remove wasm.
+	rm "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm"
 
 	# Transpile the JS to a temporary location.
 	esbuild \
@@ -105,6 +94,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
 	# Clean up.
 	just _fix-chown "{{ dist_dir }}"
+	just _fix-chown "{{ gen_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi success "Built JS Mate Poe!"
 
@@ -276,23 +266,26 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 # Get/Set version.
 version: _pre_version
 	#!/usr/bin/env bash
+	set -e
 
 	# Current version.
-	_ver1="$( toml get "{{ justfile_directory() }}/Cargo.toml" package.version | \
-		sed 's/"//g' )"
+	_ver1="$( tomli query -f "{{ justfile_directory() }}/Cargo.toml" package.version | \
+		sed 's/[" ]//g' )"
 
 	# Find out if we want to bump it.
+	set +e
 	_ver2="$( whiptail --inputbox "Set {{ pkg_name }} version:" --title "Release Version" 0 0 "$_ver1" 3>&1 1>&2 2>&3 )"
 
 	exitstatus=$?
 	if [ $exitstatus != 0 ] || [ "$_ver1" = "$_ver2" ]; then
 		exit 0
 	fi
-
-	[ -z "$(command -v fyi)" ] || fyi success "Setting version to $_ver2."
+	set -e
 
 	# Set the release version!
-	just _version "{{ justfile_directory() }}" "$_ver2"
+	tomli set -f "{{ justfile_directory() }}/Cargo.toml" -i package.version "$_ver2"
+
+	[ -z "$(command -v fyi)" ] || fyi success "Setting version to $_ver2."
 
 	# Set Extension Version.
 	sd '"version": "[\d.]+"' "\"version\": \"$_ver2\"" "{{ skel_dir }}/firefox/manifest.json"
@@ -307,18 +300,8 @@ version: _pre_version
 # Version requirements.
 @_pre_version:
 	just _require-app sd
-	just _require-app toml
+	just _require-app tomli
 	just _require-app whiptail
-
-
-# Set Cargo version for real.
-@_version DIR VER:
-	just _require "{{ DIR }}/Cargo.toml"
-
-	# Set the release version!
-	toml set "{{ DIR }}/Cargo.toml" package.version "{{ VER }}" > /tmp/Cargo.toml
-	just _fix-chown "/tmp/Cargo.toml"
-	mv "/tmp/Cargo.toml" "{{ DIR }}/Cargo.toml"
 
 
 # Fix file/directory permissions.

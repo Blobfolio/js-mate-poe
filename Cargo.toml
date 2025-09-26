@@ -1,9 +1,9 @@
 [package]
 name = "rs_mate_poe"
-version = "1.10.0"
+version = "1.11.0"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2024"
-rust-version = "1.89"
+rust-version = "1.90"
 description = "WASM port of Screen Mate Poe."
 license = "WTFPL"
 repository = "https://github.com/Blobfolio/js-mate-poe"
@@ -17,7 +17,7 @@ name = "RS Mate Poe"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-guff_css = "=0.9.0"
+guff_css = "=0.10.0"
 
 [build-dependencies.imagesize]
 version = "=0.14.0"
@@ -28,12 +28,11 @@ features = [ "png" ]
 wasm-bindgen-test = "0.3.*"
 
 [dependencies]
-itoa = "=1.0.15"
-js-sys = "=0.3.77"
-wasm-bindgen = "=0.2.100"
+js-sys = "=0.3.81"
+wasm-bindgen = "=0.2.104"
 
 [dependencies.web-sys]
-version = "=0.3.77"
+version = "=0.3.81"
 features = [
 	"AddEventListenerOptions",
 	"Blob",
