@@ -2,7 +2,7 @@
 FROM rust:1.90-trixie AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
-	cargo install --root /tmp/cargo --locked --version 0.2.104 wasm-bindgen-cli
+	cargo install --root /tmp/cargo --locked --version 0.2.105 wasm-bindgen-cli
 
 # Stage Two.
 FROM rust:1.90-trixie
