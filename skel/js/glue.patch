@@ -1,8 +1,8 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index 0906b42..2b4c9f8 100644
+index e4c7f62..21f6dbf 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -266,27 +266,6 @@ export class Poe {
+@@ -264,27 +264,6 @@ if (Symbol.dispose) Poe.prototype[Symbol.dispose] = Poe.prototype.free;
  const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
  
  async function __wbg_load(module, imports) {
@@ -30,7 +30,7 @@ index 0906b42..2b4c9f8 100644
          const instance = await WebAssembly.instantiate(module, imports);
  
          if (instance instanceof WebAssembly.Instance) {
-@@ -295,7 +274,6 @@ async function __wbg_load(module, imports) {
+@@ -293,7 +272,6 @@ async function __wbg_load(module, imports) {
          } else {
              return instance;
          }
@@ -38,7 +38,7 @@ index 0906b42..2b4c9f8 100644
  }
  
  function __wbg_get_imports() {
-@@ -622,22 +600,8 @@ function initSync(module) {
+@@ -612,22 +590,8 @@ function initSync(module) {
  async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
@@ -58,6 +58,6 @@ index 0906b42..2b4c9f8 100644
 -        module_or_path = fetch(module_or_path);
 -    }
 -
-     __wbg_init_memory(imports);
- 
      const { instance, module } = await __wbg_load(await module_or_path, imports);
+ 
+     return __wbg_finalize_init(instance, module);
