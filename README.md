@@ -7,7 +7,7 @@
 
 A compact, dependency-free ~~Javascript~~ [wasm](https://en.wikipedia.org/wiki/WebAssembly) recreation of the beloved 16-bit Screen Mate Poe Windows program, distributed as a standalone library and a Firefox browser extension.
 
-<img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.webp" width="30%" alt="Add Poe to every site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.png" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.png" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
+<img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe0.webp" width="30%" alt="Add Poe to every site using the browser extension."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe1.webp" width="30%" alt="Most of the time Poe just walks around the bottom of the screen."></img> <img src="https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/poe2.webp" width="30%" alt="Sometimes a friend shows up, doubling the fun!"></img> 
 
 
 &nbsp;
@@ -77,9 +77,13 @@ Browser extension permissions lack _nuance_, and as such, JS Mate Poe technicall
 
 To be clear, it **does not** give two bleats about your personal data or browsing history, but because DOM access is an all-or-nothing proposition, is has to ask for EVERYTHING to be able to do anything. 😕
 
-In actuality, all JS Mate Poe needs from the DOM is an ability to add and manipulate its _own_ page elements — the sheep — and query _relevant_ environmental details like the current window size.
+In actuality, all JS Mate Poe needs from the DOM is the ability to add and manipulate its _own_ page elements — the sheep — and query _relevant_ environmental details like the current window size.
 
-The alarmist phrasing is unfortunate, but is what it is.
+Firefox has, at least, finally started separating out "Data Collection" from everything else, so it's a bit clearer from the addon preference screen that nothing untoward is going on:
+
+![Firefox extension permissions and data collection screen.](https://github.com/Blobfolio/js-mate-poe/raw/master/skel/img/gallery/permissions.webp)
+
+
 
 
 &nbsp;

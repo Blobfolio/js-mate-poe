@@ -5,12 +5,15 @@
         "gecko":
         {
             "id": "js-mate-poe@blobfolio.com",
+            "data_collection_permissions": {
+                "required": ["none"]
+            },
             "strict_min_version": "109.0",
             "update_url": "https://blobfolio.com/lib/js-mate-poe.json"
         }
     },
     "name": "JS Mate Poe",
-    "version": "1.11.1",
+    "version": "1.11.2",
     "author": "Blobfolio, LLC",
     "description": "Add Screen Mate Poe to every web site for constant companionship!",
     "homepage_url": "https://github.com/Blobfolio/js-mate-poe",
