@@ -1,8 +1,8 @@
 # Project Dependencies
     Package:   rs_mate_poe
-    Version:   1.11.1
+    Version:   1.11.2
     Target:    wasm32-unknown-unknown
-    Generated: 2025-10-31 03:23:55 UTC
+    Generated: 2025-11-11 04:10:14 UTC
 
 | Package | Version | Author(s) | License |
 | ---- | ---- | ---- | ---- |
@@ -51,7 +51,7 @@
 | [phf_shared](https://github.com/rust-phf/rust-phf) ⚒️ | 0.11.3 | [Steven Fackler](mailto:sfackler@gmail.com) | MIT |
 | [precomputed-hash](https://github.com/emilio/precomputed-hash) ⚒️ | 0.1.1 | [Emilio Cobos Álvarez](mailto:emilio@crisal.io) | MIT |
 | [proc-macro2](https://github.com/dtolnay/proc-macro2) | 1.0.103 | [David Tolnay](mailto:dtolnay@gmail.com) and [Alex Crichton](mailto:alex@alexcrichton.com) | MIT OR Apache-2.0 |
-| [quote](https://github.com/dtolnay/quote) | 1.0.41 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
+| [quote](https://github.com/dtolnay/quote) | 1.0.42 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [rand](https://github.com/rust-random/rand) ⚒️ | 0.8.5 | The Rand Project Developers and The Rust Project Developers | MIT OR Apache-2.0 |
 | [rand_core](https://github.com/rust-random/rand) ⚒️ | 0.6.4 | The Rand Project Developers and The Rust Project Developers | MIT OR Apache-2.0 |
 | [rustc-hash](https://github.com/rust-lang/rustc-hash) ⚒️ | 2.1.1 | The Rust Project Developers | Apache-2.0 OR MIT |
@@ -60,7 +60,7 @@
 | [siphasher](https://github.com/jedisct1/rust-siphash) ⚒️ | 1.0.1 | [Frank Denis](mailto:github@pureftpd.org) | MIT OR Apache-2.0 |
 | [smallvec](https://github.com/servo/rust-smallvec) ⚒️ | 1.15.1 | The Servo Project Developers | MIT OR Apache-2.0 |
 | [syn](https://github.com/dtolnay/syn) ⚒️ | 1.0.109 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
-| [syn](https://github.com/dtolnay/syn) | 2.0.108 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
+| [syn](https://github.com/dtolnay/syn) | 2.0.110 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [trimothy](https://github.com/Blobfolio/trimothy) ⚒️ | 0.9.1 | [Josh Stoik](mailto:josh@blobfolio.com) | WTFPL |
 | [unicode-ident](https://github.com/dtolnay/unicode-ident) | 1.0.22 | [David Tolnay](mailto:dtolnay@gmail.com) | (MIT OR Apache-2.0) AND Unicode-3.0 |
 | [unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) ⚒️ | 1.12.0 | [kwantam](mailto:kwantam@gmail.com) and [Manish Goregaokar](mailto:manishsmail@gmail.com) | MIT OR Apache-2.0 |
