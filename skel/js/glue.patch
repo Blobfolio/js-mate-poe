@@ -1,8 +1,8 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index e4c7f62..21f6dbf 100644
+index bad0e21..5159a52 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -264,27 +264,6 @@ if (Symbol.dispose) Poe.prototype[Symbol.dispose] = Poe.prototype.free;
+@@ -257,25 +257,6 @@ if (Symbol.dispose) Poe.prototype[Symbol.dispose] = Poe.prototype.free;
  const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
  
  async function __wbg_load(module, imports) {
@@ -10,7 +10,6 @@ index e4c7f62..21f6dbf 100644
 -        if (typeof WebAssembly.instantiateStreaming === 'function') {
 -            try {
 -                return await WebAssembly.instantiateStreaming(module, imports);
--
 -            } catch (e) {
 -                const validResponse = module.ok && EXPECTED_RESPONSE_TYPES.has(module.type);
 -
@@ -25,12 +24,11 @@ index e4c7f62..21f6dbf 100644
 -
 -        const bytes = await module.arrayBuffer();
 -        return await WebAssembly.instantiate(bytes, imports);
--
 -    } else {
          const instance = await WebAssembly.instantiate(module, imports);
  
          if (instance instanceof WebAssembly.Instance) {
-@@ -293,7 +272,6 @@ async function __wbg_load(module, imports) {
+@@ -283,7 +264,6 @@ async function __wbg_load(module, imports) {
          } else {
              return instance;
          }
@@ -38,7 +36,7 @@ index e4c7f62..21f6dbf 100644
  }
  
  function __wbg_get_imports() {
-@@ -612,22 +590,8 @@ function initSync(module) {
+@@ -599,22 +579,8 @@ function initSync(module) {
  async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
