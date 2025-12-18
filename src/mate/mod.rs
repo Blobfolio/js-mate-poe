@@ -569,7 +569,7 @@ impl Mate {
 				toggle_class(&list, "rx", rx);
 
 				// Smoothing?
-				toggle_class(&list, "smooth", self.animation.map_or(false, Animation::smooth));
+				toggle_class(&list, "smooth", self.animation.is_some_and(Animation::smooth));
 
 				// Focus only affects the primary.
 				if self.flags.primary() {
