@@ -201,8 +201,13 @@ impl Mate {
 
 		// Old animation business.
 		if let Some(o) = old {
-			// Change classes if going to or coming from a special animation.
-			if ! animation.css_class().is_empty() || ! o.css_class().is_empty() {
+			// Change classes if going to or coming from a special animation,
+			// or the old/new animations have different smoothing preferences.
+			if
+				! animation.css_class().is_empty() ||
+				! o.css_class().is_empty() ||
+				animation.smooth() != o.smooth()
+			{
 				self.flags.mark_class_changed();
 			}
 
@@ -562,6 +567,9 @@ impl Mate {
 				let mut rx = self.flags.flipped_x();
 				if self.frame.reversed() { rx = ! rx; }
 				toggle_class(&list, "rx", rx);
+
+				// Smoothing?
+				toggle_class(&list, "smooth", self.animation.map_or(false, Animation::smooth));
 
 				// Focus only affects the primary.
 				if self.flags.primary() {

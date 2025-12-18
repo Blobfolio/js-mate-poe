@@ -20,6 +20,8 @@
 
 // The wrapper/window.
 #p {
+	&.smooth { --smooth: 15ms; }
+
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -33,6 +35,7 @@
 	opacity: 1;
 	transition:
 		opacity 0.5s ease,
+		transform var(--smooth, 0s) linear,
 		content-visibility 0.5s allow-discrete;
 	transform: $pos;
 
