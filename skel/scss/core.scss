@@ -20,6 +20,8 @@
 
 // The wrapper/window.
 #p {
+	&.smooth { --smooth: 15ms; }
+
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -31,8 +33,13 @@
 	overflow: clip;
 
 	opacity: 1;
-	transition: opacity 0.5s ease;
+	transition:
+		opacity 0.5s ease,
+		transform var(--smooth, 0s) linear,
+		content-visibility 0.5s allow-discrete;
 	transform: $pos;
+
+	content-visibility: auto;
 }
 
 // The image.
@@ -49,7 +56,7 @@
 #p.off,
 #i { pointer-events: none; }
 
-// This property is iffy, but we're doing to be pushing shit all over the
+// This property is iffy, but we're going to be pushing shit all over the
 // screen, so it's probably worth it.
 #p:not(.off) { will-change: transform; }
 
@@ -60,7 +67,10 @@
 }
 
 // Disabled/invisible sprites.
-#p.off { opacity: 0; }
+#p.off {
+	opacity: 0;
+	content-visibility: hidden;
+}
 
 // Reverse the image across one or both planes.
 #p.rx { transform: $pos scaleX(-1); }
@@ -150,13 +160,20 @@
 // Animation: BlackSheepCatchExitChild.
 #p[data-a="f"] {
 	opacity: 0;
-	transition: transform 0.1s linear, opacity 0.5s 2.25s ease;
+	transition:
+		transform 0.1s linear,
+		opacity 0.5s 2.25s ease,
+		content-visibility 0.5s 2.25s allow-discrete;;
 	transform: $pos scaleY(0.1);
 	transform-origin: bottom;
 }
 
 // Animation: BathDiveChild.
-#p[data-a="g"] { transition: opacity 0.5s 1.25s ease; }
+#p[data-a="g"] {
+	transition:
+		opacity 0.5s 1.25s ease,
+		content-visibility 0.5s 1.25s allow-discrete;
+}
 
 // Color-shift the sprite to make the abduction more dramatic.
 @keyframes a3 {

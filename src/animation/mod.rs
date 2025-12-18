@@ -150,8 +150,8 @@ animation! {
 	Scream                       "Scream"                             SCREAM,
 	ShadowShowdown               "Shadow Showdown"                    SHADOW_SHOWDOWN,
 	Shake                        "Shake"                              SHAKE,
-	SideStep                     "Side Step"                          SKIP,
-	Skip                         "Skip"                               SIDE_STEP,
+	SideStep                     "Side Step"                          SIDE_STEP,
+	Skip                         "Skip"                               SKIP,
 	Sleep                        "Sleep"                              SLEEP,
 	SleepSitting                 "Sleep (Sitting)"                    SLEEP_SITTING,
 	SleepStanding                "Sleep (Standing)"                   SLEEP_STANDING,
@@ -490,6 +490,36 @@ impl Animation {
 			Self::WallSlide |
 			Self::Yawn |
 			Self::Yoyo
+		)
+	}
+
+	/// # Smooth?
+	///
+	/// Some of the faster animations can benefit from a little "transform"
+	/// smoothing.
+	pub(crate) const fn smooth(self) -> bool {
+		matches!(
+			self,
+			Self::AbductionChild |
+			Self::BathDive |
+			Self::BigFish |
+			Self::BigFishChild |
+			Self::BlackSheepCatchFailExitChild |
+			Self::BlackSheepChase |
+			Self::BlackSheepRomance |
+			Self::BlackSheepRomanceChild |
+			Self::ChaseAMartianChild |
+			Self::Fall |
+			Self::GraspingFall |
+			Self::Jump |
+			Self::JumpIn |
+			Self::Run |
+			Self::RunDown |
+			Self::RunUpsideDown |
+			Self::Skip |
+			Self::SlideDown |
+			Self::SlideIn |
+			Self::WallSlide
 		)
 	}
 }
