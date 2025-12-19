@@ -505,12 +505,39 @@ pub(super) const EATING_MAGIC_FLOWER: &[Scene] = &[
 
 /// # For `Animation::EndRun`.
 pub(super) const END_RUN: &[Scene] = &[
-	Scene::new(75, &[
-		Frame::F017, Frame::F002, Frame::F003,
-		Frame::F017, Frame::F002, Frame::F003,
-		Frame::F002, Frame::F003,
+	Scene::new(30, &[
+		Frame::F017, Frame::F017, Frame::F017, Frame::F002,
+		Frame::F002, Frame::F016, Frame::F016, Frame::F016,
 	])
 		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(35, &[
+		Frame::F017, Frame::F017, Frame::F017, Frame::F002,
+		Frame::F002, Frame::F016, Frame::F016, Frame::F016,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(40, &[
+		Frame::F017, Frame::F017, Frame::F017, Frame::F002,
+		Frame::F002, Frame::F016, Frame::F016, Frame::F016,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(45, &[
+		Frame::F017, Frame::F017, Frame::F017, Frame::F002,
+		Frame::F002, Frame::F016, Frame::F016, Frame::F016,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(50, &[
+		Frame::F017, Frame::F017, Frame::F002, Frame::F002,
+		Frame::F003, Frame::F003, Frame::F016, Frame::F016,
+	])
+		.with_move_to(Position::new(-4, 0))
+		.with_flags(Scene::GRAVITY),
+	Scene::new(60, &[Frame::F002, Frame::F003])
+		.with_move_to(Position::new(-2, 0))
+		.with_repeat(1, 0)
 		.with_flags(Scene::GRAVITY),
 ];
 
