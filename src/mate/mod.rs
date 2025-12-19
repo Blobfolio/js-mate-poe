@@ -201,12 +201,10 @@ impl Mate {
 
 		// Old animation business.
 		if let Some(o) = old {
-			// Change classes if going to or coming from a special animation,
-			// or the old/new animations have different smoothing preferences.
+			// Change classes if going to or coming from a special animation.
 			if
 				! animation.css_class().is_empty() ||
-				! o.css_class().is_empty() ||
-				animation.smooth() != o.smooth()
+				! o.css_class().is_empty()
 			{
 				self.flags.mark_class_changed();
 			}
@@ -220,7 +218,10 @@ impl Mate {
 		}
 
 		// Miscellaneous animation-specific adjustments (if we changed).
-		if animation_changed { self.set_starting_position(animation, old.is_none()); }
+		if animation_changed {
+			self.set_starting_position(animation, old.is_none());
+			self.flags.mark_first();
+		}
 
 		// Exiting off-screen has a 1/15 probability for animations that allow
 		// it.
@@ -556,7 +557,11 @@ impl Mate {
 		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
 
 		// Update the wrapper div's classes and/or styles.
-		if self.flags.class_changed() || self.flags.transform_changed() {
+		if
+			self.flags.class_changed() ||
+			self.flags.transform_changed() ||
+			self.flags.first()
+		{
 			let wrapper = shadow.get_element_by_id("p")
 				.expect_throw("Missing mate wrapper.");
 
@@ -569,7 +574,11 @@ impl Mate {
 				toggle_class(&list, "rx", rx);
 
 				// Smoothing?
-				toggle_class(&list, "smooth", self.animation.is_some_and(Animation::smooth));
+				toggle_class(
+					&list,
+					"smooth",
+					! self.flags.first() && self.animation.is_some_and(Animation::smooth)
+				);
 
 				// Focus only affects the primary.
 				if self.flags.primary() {

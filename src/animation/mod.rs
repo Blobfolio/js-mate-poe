@@ -504,21 +504,32 @@ impl Animation {
 			Self::BathDive |
 			Self::BigFish |
 			Self::BigFishChild |
+			Self::BlackSheepCatchFail |
+			Self::BlackSheepCatchFailChild |
 			Self::BlackSheepCatchFailExitChild |
 			Self::BlackSheepChase |
+			Self::BlackSheepChaseChild |
 			Self::BlackSheepRomance |
 			Self::BlackSheepRomanceChild |
+			Self::ChaseAMartian |
 			Self::ChaseAMartianChild |
+			Self::ClimbDown |
+			Self::ClimbUp |
+			Self::EndRun |
 			Self::Fall |
 			Self::GraspingFall |
+			Self::Hop |
 			Self::Jump |
 			Self::JumpIn |
 			Self::Run |
 			Self::RunDown |
 			Self::RunUpsideDown |
 			Self::Skip |
+			Self::Slide |
 			Self::SlideDown |
-			Self::SlideIn |
+			Self::Stargaze |
+			Self::Walk |
+			Self::WalkUpsideDown |
 			Self::WallSlide
 		)
 	}

@@ -50,6 +50,9 @@ impl MateFlags {
 	/// # Flag: Y position changed.
 	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000;
 
+	/// # Flag: First animation frame.
+	const FIRST: u16 =             0b0010_0000_0000_0000;
+
 	/// # Transform-related changes.
 	const CHANGED_TRANSFORM: u16 =
 		Self::CHANGED_TRANS_X | Self::CHANGED_TRANS_Y;
@@ -60,7 +63,8 @@ impl MateFlags {
 	/// # All change-related settings.
 	const CHANGED: u16 =
 		Self::CHANGED_CLASS | Self::CHANGED_FRAME |
-		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM;
+		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM |
+		Self::FIRST;
 
 	/// # Scene Mask.
 	const SCENE_MASK: u16 =
@@ -119,6 +123,13 @@ impl MateFlags {
 	pub(crate) const fn changed(self) -> bool {
 		0 != self.0 & Self::CHANGED
 	}
+
+	/// # First?
+	///
+	/// Returns `true` if we just switched animations.
+	pub(crate) const fn first(&mut self) -> bool {
+		Self::FIRST == self.0 & Self::FIRST
+	}
 }
 
 impl MateFlags {
@@ -131,10 +142,20 @@ impl MateFlags {
 	}
 
 	/// # Clear All Change-Related Flags.
-	pub(crate) const fn clear_changed(&mut self) { self.0 &= ! Self::CHANGED; }
+	pub(crate) const fn clear_changed(&mut self) {
+		let first = self.first();
+		self.0 &= ! Self::CHANGED;
+
+		// If we cleared the first flag, we need to re-set the class-change
+		// flag for the next tick.
+		if first { self.mark_class_changed(); }
+	}
 
 	/// # Mark Class Changed.
 	pub(crate) const fn mark_class_changed(&mut self) { self.0 |= Self::CHANGED_CLASS; }
+
+	/// # Mark First.
+	pub(crate) const fn mark_first(&mut self) { self.0 |= Self::FIRST | Self::CHANGED_CLASS; }
 
 	/// # Mark Frame Changed.
 	pub(crate) const fn mark_frame_changed(&mut self) { self.0 |= Self::CHANGED_FRAME; }
