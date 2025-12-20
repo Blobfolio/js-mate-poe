@@ -12,30 +12,6 @@
 	@media print { visibility: hidden; }
 }
 
-// Only applies to #p.
-@property --smooth {
-	syntax: "<time>";
-	inherits: false;
-	initial-value: 0s;
-}
-@property --x {
-	syntax: "<length>";
-	inherits: false;
-	initial-value: 0px;
-}
-@property --y {
-	syntax: "<length>";
-	inherits: false;
-	initial-value: 0px;
-}
-
-// Only applies to #i.
-@property --c {
-	syntax: "<length>";
-	inherits: false;
-	initial-value: 0px;
-}
-
 #p, #i {
 	display: block;
 	margin: 0;
@@ -44,9 +20,6 @@
 
 // The wrapper/window.
 #p {
-	// Subtle X/Y translation smoothing.
-	&.smooth { --smooth: 15ms; }
-
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -60,15 +33,26 @@
 	opacity: 1;
 	transition:
 		opacity 0.5s ease,
-		transform var(--smooth, 0s) linear,
 		content-visibility 0.5s allow-discrete;
 	transform: $pos;
 
 	content-visibility: auto;
+
+	// Subtle X/Y translation smoothing.
+	&.smooth {
+		transition:
+			opacity 0.5s ease,
+			transform 15ms linear,
+			content-visibility 0.5s allow-discrete;
+	}
 }
 
 // The image.
 #i {
+	// TODO: declare @property if/when shadow DOM supports it.
+	--x: initial;
+	--y: initial;
+
 	width: $width;
 	height: $tile_size;
 	transform: translateX(var(--c, 0px));

@@ -127,7 +127,7 @@ impl MateFlags {
 	/// # First?
 	///
 	/// Returns `true` if we just switched animations.
-	pub(crate) const fn first(&mut self) -> bool {
+	pub(crate) const fn first(self) -> bool {
 		Self::FIRST == self.0 & Self::FIRST
 	}
 }
