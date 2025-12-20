@@ -12,6 +12,7 @@
 	@media print { visibility: hidden; }
 }
 
+// Only applies to #p.
 @property --smooth {
 	syntax: "<time>";
 	inherits: false;
@@ -27,6 +28,8 @@
 	inherits: false;
 	initial-value: 0px;
 }
+
+// Only applies to #i.
 @property --c {
 	syntax: "<length>";
 	inherits: false;
@@ -41,6 +44,7 @@
 
 // The wrapper/window.
 #p {
+	// Subtle X/Y translation smoothing.
 	&.smooth { --smooth: 15ms; }
 
 	position: fixed;
