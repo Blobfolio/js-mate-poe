@@ -29,6 +29,7 @@
 	cursor: grab;
 	z-index: 2147483647; // i32::MAX
 	overflow: clip;
+	user-select: none;
 
 	opacity: 1;
 	transition:
