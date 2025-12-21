@@ -114,11 +114,6 @@ impl MateFlags {
 		}
 	}
 
-	/// # Any Transform Changed?
-	pub(crate) const fn transform_changed(self) -> bool {
-		0 != self.0 & Self::CHANGED_TRANSFORM
-	}
-
 	/// # Anything Changed?
 	pub(crate) const fn changed(self) -> bool {
 		0 != self.0 & Self::CHANGED

@@ -37,6 +37,12 @@ pub(crate) struct Mate {
 	/// # Element.
 	el: Element,
 
+	/// # Inner Wrapper.
+	el_inner: HtmlElement,
+
+	/// # Image.
+	el_image: HtmlElement,
+
 	/// # Size.
 	size: (u16, u16),
 
@@ -70,9 +76,11 @@ impl Mate {
 	///
 	/// Create a new instance (and supporting DOM elements).
 	pub(crate) fn new(primary: bool, image: &str) -> Self {
-		let el = make_element(primary, image);
+		let (el, el_inner, el_image) = make_elements(primary, image);
 		Self {
 			el,
+			el_inner,
+			el_image,
 			size: Universe::size(),
 			flags: MateFlags::new(primary),
 			frame: Frame::None,
@@ -554,59 +562,48 @@ impl Mate {
 	fn render(&mut self, audio: &StateAudio) {
 		if ! self.flags.changed() { return; }
 
-		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
-
 		// Update the wrapper div's classes and/or styles.
-		if
-			self.flags.class_changed() ||
-			self.flags.transform_changed() ||
-			self.flags.first()
-		{
-			let wrapper = shadow.get_element_by_id("p")
-				.expect_throw("Missing mate wrapper.");
+		if self.flags.class_changed() {
+			let list = self.el_inner.class_list();
 
-			if self.flags.class_changed() {
-				let list = wrapper.class_list();
+			// Orientation.
+			let mut rx = self.flags.flipped_x();
+			if self.frame.reversed() { rx = ! rx; }
+			toggle_class(&list, "rx", rx);
 
-				// Orientation.
-				let mut rx = self.flags.flipped_x();
-				if self.frame.reversed() { rx = ! rx; }
-				toggle_class(&list, "rx", rx);
+			// Smoothing?
+			toggle_class(
+				&list,
+				"smooth",
+				! self.flags.first() && self.animation.is_some_and(Animation::smooth)
+			);
 
-				// Smoothing?
-				toggle_class(
-					&list,
-					"smooth",
-					! self.flags.first() && self.animation.is_some_and(Animation::smooth)
-				);
-
-				// Focus only affects the primary.
-				if self.flags.primary() {
-					toggle_class(&list, "no-focus", self.flags.no_focus());
-				}
-
-				// Special frame and animation classes.
-				let _res = wrapper.set_attribute("data-f", self.frame.css_class())
-					.and_then(|()| wrapper.set_attribute("data-a", self.animation.map_or("", Animation::css_class)));
-
-				// Disabled?
-				toggle_class(&list, "off", self.animation.is_none());
+			// Focus only affects the primary.
+			if self.flags.primary() {
+				toggle_class(&list, "no-focus", self.flags.no_focus());
 			}
 
-			if self.flags.transform_x_changed() {
-				CssProperty::write(&wrapper, "--x", self.pos.x);
-			}
+			// Special frame and animation classes.
+			let _res = self.el_inner.set_attribute("data-f", self.frame.css_class())
+				.and_then(|()| self.el_inner.set_attribute("data-a", self.animation.map_or("", Animation::css_class)));
 
-			if self.flags.transform_y_changed() {
-				CssProperty::write(&wrapper, "--y", self.pos.y);
-			}
+			// Disabled?
+			toggle_class(&list, "off", self.animation.is_none());
+		}
+
+		// Move X?
+		if self.flags.transform_x_changed() {
+			CssProperty::write(&self.el_inner, "--x", self.pos.x);
+		}
+
+		// Move Y?
+		if self.flags.transform_y_changed() {
+			CssProperty::write(&self.el_inner, "--y", self.pos.y);
 		}
 
 		// Update the image frame class.
 		if self.flags.frame_changed() {
-			let img = shadow.get_element_by_id("i")
-				.expect_throw("Missing mate image.");
-				CssProperty::write(&img, "--c", self.frame.offset());
+			CssProperty::write(&self.el_image, "--c", self.frame.offset());
 		}
 
 		// Play a sound?
@@ -779,7 +776,7 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and return the "mate" DOM elements.
-fn make_element(primary: bool, image: &str) -> Element {
+fn make_elements(primary: bool, image: &str) -> (Element, HtmlElement, HtmlElement) {
 	let document = dom::document().expect_throw("Missing document.");
 
 	// Create the main element, its shadow DOM, and its shadow elements.
@@ -795,22 +792,27 @@ fn make_element(primary: bool, image: &str) -> Element {
 	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
 	// And the wrapper div.
-	let wrapper = document.create_element("div").expect_throw("!");
+	let wrapper: HtmlElement = document.create_element("div")
+		.ok()
+		.and_then(|w| w.dyn_into().ok())
+		.expect_throw("!");
 	wrapper.set_id("p");
 	if primary { wrapper.set_class_name("off"); }
 	else { wrapper.set_class_name("child off"); }
 
 	// Create the image and append it to the wrapper.
-	make_element_image(image)
-		.and_then(|i| wrapper.append_child(&i))
+	let img: HtmlElement = make_element_image(image)
+		.ok()
+		.and_then(|i| i.dyn_into().ok())
 		.expect_throw("!");
+	wrapper.append_child(&img).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.and_then(|s| s.append_with_node_2(&style, &wrapper))
 		.expect_throw("!");
 
-	el
+	(el, wrapper, img)
 }
 
 /// # Make Image Element.
@@ -956,11 +958,9 @@ impl CssProperty {
 	/// # Write Style Property.
 	///
 	/// Update a given `--prop` pixel value.
-	fn write(el: &Element, key: &str, value: i32) {
-		if let Some(el) = el.dyn_ref::<HtmlElement>() {
-			let mut buf = Self::DEFAULT;
-			let _res = el.style().set_property(key, buf.format(value));
-		}
+	fn write(el: &HtmlElement, key: &str, value: i32) {
+		let mut buf = Self::DEFAULT;
+		let _res = el.style().set_property(key, buf.format(value));
 	}
 }
 
