@@ -197,11 +197,13 @@ impl MateFlags {
 	}
 
 	/// # Set No Focus.
-	pub(crate) const fn set_no_focus(&mut self, v: bool) {
-		if self.no_focus() != v {
-			if v { self.0 |= Self::NO_FOCUS; }
-			else { self.0 &= ! Self::NO_FOCUS; }
-			self.mark_class_changed();
+	///
+	/// Returns `true` if changed.
+	pub(crate) const fn set_no_focus(&mut self, v: bool) -> bool {
+		if self.no_focus() == v { false }
+		else {
+			self.0 ^= Self::NO_FOCUS;
+			true
 		}
 	}
 

@@ -409,7 +409,12 @@ impl Mate {
 		// Tick it if we got it.
 		else if self.next_tick <= now {
 			// Maybe toggle focus.
-			if self.flags.primary() { self.flags.set_no_focus(Universe::no_focus()); }
+			if self.flags.primary() {
+				let focus = Universe::no_focus();
+				if self.flags.set_no_focus(focus) {
+					self.el_inner.set_inert(focus);
+				}
+			}
 
 			// Make sure we have the right screen size.
 			self.pretick_resize();
@@ -577,11 +582,6 @@ impl Mate {
 				"smooth",
 				! self.flags.first() && self.animation.is_some_and(Animation::smooth)
 			);
-
-			// Focus only affects the primary.
-			if self.flags.primary() {
-				toggle_class(&list, "no-focus", self.flags.no_focus());
-			}
 
 			// Special frame and animation classes.
 			let _res = self.el_inner.set_attribute("data-f", self.frame.css_class())
@@ -797,14 +797,15 @@ fn make_elements(primary: bool, image: &str) -> (Element, HtmlElement, HtmlEleme
 		.and_then(|w| w.dyn_into().ok())
 		.expect_throw("!");
 	wrapper.set_id("p");
-	if primary { wrapper.set_class_name("off"); }
-	else { wrapper.set_class_name("child off"); }
+	wrapper.set_class_name("off");
+	if ! primary { wrapper.set_inert(true); }
 
 	// Create the image and append it to the wrapper.
 	let img: HtmlElement = make_element_image(image)
 		.ok()
 		.and_then(|i| i.dyn_into().ok())
 		.expect_throw("!");
+	img.set_inert(true);
 	wrapper.append_child(&img).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.

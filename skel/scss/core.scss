@@ -59,13 +59,6 @@
 	transform: translateX(var(--c, 0px));
 }
 
-// Disable mouse clicks for disabled sprites, child sprites, and the image
-// element.
-#p.child,
-#p.no-focus,
-#p.off,
-#i { pointer-events: none; }
-
 // This property is iffy, but we're going to be pushing shit all over the
 // screen, so it's probably worth it.
 #p:not(.off) { will-change: transform; }
@@ -80,6 +73,7 @@
 #p.off {
 	opacity: 0;
 	content-visibility: hidden;
+	pointer-events: none;
 }
 
 // Reverse the image across one or both planes.
