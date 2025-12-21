@@ -13,6 +13,9 @@
 }
 
 #p, #i {
+	// TODO: declare @property if/when shadow DOM supports it.
+	--pos: initial;
+
 	display: block;
 	margin: 0;
 	padding: 0;
@@ -50,10 +53,6 @@
 
 // The image.
 #i {
-	// TODO: declare @property if/when shadow DOM supports it.
-	--x: initial;
-	--y: initial;
-
 	width: $width;
 	height: $tile_size;
 	transform: translateX(var(--c, 0px));
