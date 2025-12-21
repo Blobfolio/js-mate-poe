@@ -6,6 +6,7 @@ mod flags;
 
 use crate::{
 	Animation,
+	CssPropertyBuffer,
 	Direction,
 	dom,
 	Frame,
@@ -69,6 +70,9 @@ pub(crate) struct Mate {
 
 	/// # Next Tick Time.
 	next_tick: u32,
+
+	/// # CSS Property Buffer.
+	buf: CssPropertyBuffer,
 }
 
 impl Mate {
@@ -90,6 +94,7 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
+			buf: CssPropertyBuffer::DEFAULT,
 		}
 	}
 }
@@ -585,12 +590,18 @@ impl Mate {
 
 		// Move X?
 		if self.flags.transform_changed() {
-			CssMateOffset::write(&self.el_inner, self.pos.x, self.pos.y);
+			let _res = self.el_inner.style().set_property(
+				"--pos",
+				self.buf.format_xy(self.pos.x, self.pos.y)
+			);
 		}
 
 		// Update the image frame class.
 		if self.flags.frame_changed() {
-			CssImageOffset::write(&self.el_image, self.frame.offset());
+			let _res = self.el_image.style().set_property(
+				"--c",
+				self.buf.format_x(self.frame.offset())
+			);
 		}
 
 		// Play a sound?
@@ -816,261 +827,4 @@ fn make_element_image(src: &str) -> Result<HtmlImageElement, JsValue> {
 /// Turn a given class on/off, per `force`.
 fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
 	let _res = list.toggle_with_force(class, force);
-}
-
-
-
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-/// # CSS Property Characters.
-///
-/// This enum contains all of the possible characters used by `CssProperty`.
-/// While a bit verbose, it proves to both us and the compiler that we can't
-/// possibly fuck up a slice so badly it can't be represented as a string. ;)
-enum CssPropertyChar {
-	ChrComma = b',',
-	ChrDash =  b'-',
-	Chr0 =     b'0',
-	Chr1 =     b'1',
-	Chr2 =     b'2',
-	Chr3 =     b'3',
-	Chr4 =     b'4',
-	Chr5 =     b'5',
-	Chr6 =     b'6',
-	Chr7 =     b'7',
-	Chr8 =     b'8',
-	Chr9 =     b'9',
-	ChrP =     b'p',
-	ChrX =     b'x',
-}
-
-impl CssPropertyChar {
-	#[inline]
-	/// # From `u32` Digit.
-	const fn from_digit(num: u32) -> Self {
-		match num {
-			0 => Self::Chr0,
-			1 => Self::Chr1,
-			2 => Self::Chr2,
-			3 => Self::Chr3,
-			4 => Self::Chr4,
-			5 => Self::Chr5,
-			6 => Self::Chr6,
-			7 => Self::Chr7,
-			8 => Self::Chr8,
-			_ => Self::Chr9, // We know n % 10 can't ever be out of range.
-		}
-	}
-
-	/// # Write `i32` Value.
-	///
-	/// Returns the length written.
-	const fn write_px(buf: &mut [Self; 13], value: i32) -> usize {
-		const MAX: usize = 13;
-
-		// Suffix.
-		buf[MAX - 1] = Self::ChrX;
-		buf[MAX - 2] = Self::ChrP;
-
-		// Right to left, one digit at a time.
-		let mut len = 2;
-		let mut num = value.unsigned_abs();
-		while 9 < num {
-			len += 1;
-			buf[MAX - len] = Self::from_digit(num % 10);
-			num /= 10;
-		}
-		len += 1;
-		buf[MAX - len] = Self::from_digit(num);
-
-		// Negative?
-		if value.is_negative() {
-			len += 1;
-			buf[MAX - len] = Self::ChrDash;
-		}
-
-		// Done!
-		len
-	}
-
-	#[expect(clippy::inline_always, reason = "For performance.")]
-	#[expect(unsafe_code, reason = "For transmute.")]
-	#[inline(always)]
-	#[must_use]
-	/// # As Str.
-	///
-	/// Transmute a slice of `CssPropertyChar` into a string slice.
-	pub(super) const fn as_str(src: &[Self]) -> &str {
-		// This check is overly-paranoid, but the compiler should
-		// optimize it out.
-		const {
-			assert!(
-				align_of::<&[Self]>() == align_of::<&[u8]>() &&
-				size_of::<&[Self]>() == size_of::<&[u8]>(),
-				"BUG: CssPropertyChar and u8 have different layouts?!",
-			);
-		}
-
-		// Safety: `CssPropertyChar` is represented by `u8` so shares the
-		// same size and alignment.
-		unsafe {
-			std::str::from_utf8_unchecked(
-				std::mem::transmute::<&[Self], &[u8]>(src)
-			)
-		}
-	}
-}
-
-
-
-#[derive(Debug, Clone, Copy)]
-/// # CSS Property Buffer.
-///
-/// This struct acts like a poor man's `itoa`, saving us the trouble of
-/// allocating new strings each and every time a CSS property update needs to
-/// be sent back to the browser.
-///
-/// Note that this assumes all values require a `px` suffix.
-struct CssProperty<const N: usize>([CssPropertyChar; N]);
-
-/// # Mate Offset.
-type CssMateOffset = CssProperty<29>;
-
-impl CssMateOffset {
-	/// # Default Buffer.
-	///
-	/// This is equivalent to "000000000000000000000px,0px,0".
-	const DEFAULT: Self = Self([
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::ChrP, CssPropertyChar::ChrX,
-		CssPropertyChar::ChrComma,
-		CssPropertyChar::Chr0, CssPropertyChar::ChrP, CssPropertyChar::ChrX,
-		CssPropertyChar::ChrComma,
-		CssPropertyChar::Chr0,
-	]);
-
-	/// # Format Value.
-	///
-	/// Stringify an `i32` pixel value into the buffer, returning a string
-	/// slice of the result.
-	const fn format(&mut self, x: i32, y: i32) -> &str {
-		// Wish we could capture N from the impl itself!
-		const MAX: usize = 29;
-		assert!(self.0.len() == MAX, "BUG: wrong CssMateOffset size!");
-
-		let mut len = 2; // We'll always end ",0".
-
-		// Y first, right to left.
-		let (buf, _) = self.0.split_at_mut(MAX - len);
-		let (_, next) = buf.split_last_chunk_mut::<13>().unwrap();
-		len += CssPropertyChar::write_px(next, y);
-
-		// Comma.
-		len += 1;
-		self.0[MAX - len] = CssPropertyChar::ChrComma;
-
-		// Now the X.
-		let (buf, _) = self.0.split_at_mut(MAX - len);
-		let (_, next) = buf.split_last_chunk_mut::<13>().unwrap();
-		len += CssPropertyChar::write_px(next, x);
-
-		// Split off the relevant part.
-		let (_, b) = self.0.split_at(MAX - len);
-		CssPropertyChar::as_str(b)
-	}
-
-	#[inline]
-	/// # Write Style Property.
-	///
-	/// Write the mate offset to the element.
-	fn write(el: &HtmlElement, x: i32, y: i32) {
-		let mut buf = Self::DEFAULT;
-		let _res = el.style().set_property("--pos", buf.format(x, y));
-	}
-}
-
-/// # Image Offset.
-type CssImageOffset = CssProperty<13>;
-
-impl CssImageOffset {
-	/// # Default Buffer.
-	///
-	/// This is equivalent to "00000000000px".
-	const DEFAULT: Self = Self([
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::ChrP,
-		CssPropertyChar::ChrX,
-	]);
-
-	/// # Format Value.
-	///
-	/// Stringify an `i32` pixel value into the buffer, returning a string
-	/// slice of the result.
-	const fn format(&mut self, value: i32) -> &str {
-		let len = CssPropertyChar::write_px(&mut self.0, value);
-		let (_, b) = self.0.split_at(self.0.len() - len);
-		CssPropertyChar::as_str(b)
-	}
-
-	#[inline]
-	/// # Write Style Property.
-	///
-	/// Write the frame offset to the image element.
-	fn write(el: &HtmlElement, value: i32) {
-		let mut buf = Self::DEFAULT;
-		let _res = el.style().set_property("--c", buf.format(value));
-	}
-}
-
-
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-	use wasm_bindgen_test::*;
-
-	#[wasm_bindgen_test]
-	fn t_i32_len() {
-		// The `CSSProperty` struct assumes the longest possible i32 value
-		// is eleven bytes. Let's prove it!
-		assert_eq!(
-			i32::MIN.to_string().len(),
-			11,
-		);
-
-		// Now we're getting silly, but let's also prove that u32 tops out at
-		// ten.
-		assert_eq!(
-			u32::MAX.to_string().len(),
-			10,
-		);
-	}
-
-	#[wasm_bindgen_test]
-	fn t_css_image_offset() {
-		let mut buf = CssImageOffset::DEFAULT;
-		assert_eq!(buf.format(0), "0px");
-		assert_eq!(buf.format(10), "10px");
-		assert_eq!(buf.format(432), "432px");
-		assert_eq!(buf.format(50_000), "50000px");
-		assert_eq!(buf.format(i32::MIN), "-2147483648px");
-	}
-
-	#[wasm_bindgen_test]
-	fn t_css_mate_offset() {
-		let mut buf = CssMateOffset::DEFAULT;
-		assert_eq!(buf.format(0, 0), "0px,0px,0");
-		assert_eq!(buf.format(10, i32::MIN), "10px,-2147483648px,0");
-		assert_eq!(buf.format(i32::MIN, 432), "-2147483648px,432px,0");
-		assert_eq!(buf.format(50_000, 50_000), "50000px,50000px,0");
-		assert_eq!(buf.format(i32::MIN, i32::MIN), "-2147483648px,-2147483648px,0");
-	}
 }

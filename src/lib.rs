@@ -53,6 +53,7 @@
 #![expect(clippy::redundant_pub_crate, reason = "Unresolvable.")]
 
 mod animation;
+mod css;
 pub(crate) mod dom;
 mod mate;
 mod position;
@@ -61,7 +62,7 @@ mod universe;
 
 
 
-pub(crate) use animation::{
+use animation::{
 	Animation,
 	frame::Frame,
 	scene::{
@@ -71,16 +72,17 @@ pub(crate) use animation::{
 	},
 	sound::Sound,
 };
-pub(crate) use mate::Mate;
-pub(crate) use position::{
+use css::CssPropertyBuffer;
+use mate::Mate;
+use position::{
 	Direction,
 	Position,
 };
-pub(crate) use state::{
+use state::{
 	State,
 	StateAudio,
 };
-pub(crate) use universe::Universe;
+use universe::Universe;
 
 use wasm_bindgen::prelude::*;
 
