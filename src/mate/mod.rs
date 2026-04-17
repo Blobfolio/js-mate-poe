@@ -6,6 +6,7 @@ mod flags;
 
 use crate::{
 	Animation,
+	CssPropertyBuffer,
 	Direction,
 	dom,
 	Frame,
@@ -37,6 +38,12 @@ pub(crate) struct Mate {
 	/// # Element.
 	el: Element,
 
+	/// # Inner Wrapper.
+	el_inner: HtmlElement,
+
+	/// # Image.
+	el_image: HtmlElement,
+
 	/// # Size.
 	size: (u16, u16),
 
@@ -63,6 +70,9 @@ pub(crate) struct Mate {
 
 	/// # Next Tick Time.
 	next_tick: u32,
+
+	/// # CSS Property Buffer.
+	buf: CssPropertyBuffer,
 }
 
 impl Mate {
@@ -70,9 +80,11 @@ impl Mate {
 	///
 	/// Create a new instance (and supporting DOM elements).
 	pub(crate) fn new(primary: bool, image: &str) -> Self {
-		let el = make_element(primary, image);
+		let (el, el_inner, el_image) = make_elements(primary, image);
 		Self {
 			el,
+			el_inner,
+			el_image,
 			size: Universe::size(),
 			flags: MateFlags::new(primary),
 			frame: Frame::None,
@@ -82,6 +94,7 @@ impl Mate {
 			scenes: None,
 			next_animation: None,
 			next_tick: 0,
+			buf: CssPropertyBuffer::DEFAULT,
 		}
 	}
 }
@@ -201,12 +214,10 @@ impl Mate {
 
 		// Old animation business.
 		if let Some(o) = old {
-			// Change classes if going to or coming from a special animation,
-			// or the old/new animations have different smoothing preferences.
+			// Change classes if going to or coming from a special animation.
 			if
 				! animation.css_class().is_empty() ||
-				! o.css_class().is_empty() ||
-				animation.smooth() != o.smooth()
+				! o.css_class().is_empty()
 			{
 				self.flags.mark_class_changed();
 			}
@@ -220,7 +231,10 @@ impl Mate {
 		}
 
 		// Miscellaneous animation-specific adjustments (if we changed).
-		if animation_changed { self.set_starting_position(animation, old.is_none()); }
+		if animation_changed {
+			self.set_starting_position(animation, old.is_none());
+			self.flags.mark_first();
+		}
 
 		// Exiting off-screen has a 1/15 probability for animations that allow
 		// it.
@@ -344,23 +358,15 @@ impl Mate {
 	/// # Set Position.
 	pub(crate) const fn set_position(&mut self, pos: Position, absolute: bool) {
 		if absolute {
-			if pos.x != self.pos.x {
+			if pos.x != self.pos.x || pos.y != self.pos.y {
 				self.pos.x = pos.x;
-				self.flags.mark_transform_x_changed();
-			}
-			if pos.y != self.pos.y {
 				self.pos.y = pos.y;
-				self.flags.mark_transform_y_changed();
+				self.flags.mark_transform_changed();
 			}
 		}
 		else if pos.x != 0 || pos.y != 0 {
 			self.pos.move_to(pos);
-			if pos.x != 0 {
-				self.flags.mark_transform_x_changed();
-			}
-			if pos.y != 0 {
-				self.flags.mark_transform_y_changed();
-			}
+			self.flags.mark_transform_changed();
 		}
 	}
 }
@@ -400,7 +406,12 @@ impl Mate {
 		// Tick it if we got it.
 		else if self.next_tick <= now {
 			// Maybe toggle focus.
-			if self.flags.primary() { self.flags.set_no_focus(Universe::no_focus()); }
+			if self.flags.primary() {
+				let focus = Universe::no_focus();
+				if self.flags.set_no_focus(focus) {
+					self.el_inner.set_inert(focus);
+				}
+			}
 
 			// Make sure we have the right screen size.
 			self.pretick_resize();
@@ -553,51 +564,44 @@ impl Mate {
 	fn render(&mut self, audio: &StateAudio) {
 		if ! self.flags.changed() { return; }
 
-		let shadow = self.el.shadow_root().expect_throw("Missing mate shadow.");
-
 		// Update the wrapper div's classes and/or styles.
-		if self.flags.class_changed() || self.flags.transform_changed() {
-			let wrapper = shadow.get_element_by_id("p")
-				.expect_throw("Missing mate wrapper.");
+		if self.flags.class_changed() {
+			let list = self.el_inner.class_list();
 
-			if self.flags.class_changed() {
-				let list = wrapper.class_list();
+			// Orientation.
+			let mut rx = self.flags.flipped_x();
+			if self.frame.reversed() { rx = ! rx; }
+			toggle_class(&list, "rx", rx);
 
-				// Orientation.
-				let mut rx = self.flags.flipped_x();
-				if self.frame.reversed() { rx = ! rx; }
-				toggle_class(&list, "rx", rx);
+			// Smoothing?
+			toggle_class(
+				&list,
+				"smooth",
+				! self.flags.first() && self.animation.is_some_and(Animation::smooth)
+			);
 
-				// Smoothing?
-				toggle_class(&list, "smooth", self.animation.is_some_and(Animation::smooth));
+			// Special frame and animation classes.
+			let _res = self.el_inner.set_attribute("data-f", self.frame.css_class())
+				.and_then(|()| self.el_inner.set_attribute("data-a", self.animation.map_or("", Animation::css_class)));
 
-				// Focus only affects the primary.
-				if self.flags.primary() {
-					toggle_class(&list, "no-focus", self.flags.no_focus());
-				}
+			// Disabled?
+			toggle_class(&list, "off", self.animation.is_none());
+		}
 
-				// Special frame and animation classes.
-				let _res = wrapper.set_attribute("data-f", self.frame.css_class())
-					.and_then(|()| wrapper.set_attribute("data-a", self.animation.map_or("", Animation::css_class)));
-
-				// Disabled?
-				toggle_class(&list, "off", self.animation.is_none());
-			}
-
-			if self.flags.transform_x_changed() {
-				CssProperty::write(&wrapper, "--x", self.pos.x);
-			}
-
-			if self.flags.transform_y_changed() {
-				CssProperty::write(&wrapper, "--y", self.pos.y);
-			}
+		// Move X?
+		if self.flags.transform_changed() {
+			let _res = self.el_inner.style().set_property(
+				"--pos",
+				self.buf.format_xy(self.pos.x, self.pos.y)
+			);
 		}
 
 		// Update the image frame class.
 		if self.flags.frame_changed() {
-			let img = shadow.get_element_by_id("i")
-				.expect_throw("Missing mate image.");
-				CssProperty::write(&img, "--c", self.frame.offset());
+			let _res = self.el_image.style().set_property(
+				"--c",
+				self.buf.format_x(self.frame.offset())
+			);
 		}
 
 		// Play a sound?
@@ -770,7 +774,7 @@ impl Mate {
 /// # Make Element.
 ///
 /// Create and return the "mate" DOM elements.
-fn make_element(primary: bool, image: &str) -> Element {
+fn make_elements(primary: bool, image: &str) -> (Element, HtmlElement, HtmlElement) {
 	let document = dom::document().expect_throw("Missing document.");
 
 	// Create the main element, its shadow DOM, and its shadow elements.
@@ -786,22 +790,28 @@ fn make_element(primary: bool, image: &str) -> Element {
 	style.set_text_content(Some(include_str!(concat!(env!("OUT_DIR"), "/poe.css"))));
 
 	// And the wrapper div.
-	let wrapper = document.create_element("div").expect_throw("!");
+	let wrapper: HtmlElement = document.create_element("div")
+		.ok()
+		.and_then(|w| w.dyn_into().ok())
+		.expect_throw("!");
 	wrapper.set_id("p");
-	if primary { wrapper.set_class_name("off"); }
-	else { wrapper.set_class_name("child off"); }
+	wrapper.set_class_name("off");
+	if ! primary { wrapper.set_inert(true); }
 
 	// Create the image and append it to the wrapper.
-	make_element_image(image)
-		.and_then(|i| wrapper.append_child(&i))
+	let img: HtmlElement = make_element_image(image)
+		.ok()
+		.and_then(|i| i.dyn_into().ok())
 		.expect_throw("!");
+	img.set_inert(true);
+	wrapper.append_child(&img).expect_throw("!");
 
 	// Create a shadow and move the inner elements into it.
 	el.attach_shadow(&ShadowRootInit::new(ShadowRootMode::Open))
 		.and_then(|s| s.append_with_node_2(&style, &wrapper))
 		.expect_throw("!");
 
-	el
+	(el, wrapper, img)
 }
 
 /// # Make Image Element.
@@ -817,174 +827,4 @@ fn make_element_image(src: &str) -> Result<HtmlImageElement, JsValue> {
 /// Turn a given class on/off, per `force`.
 fn toggle_class(list: &DomTokenList, class: &str, force: bool) {
 	let _res = list.toggle_with_force(class, force);
-}
-
-
-
-#[repr(u8)]
-#[derive(Debug, Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-/// # CSS Property Characters.
-///
-/// This enum contains all of the possible characters used by `CssProperty`.
-/// While a bit verbose, it proves to both us and the compiler that we can't
-/// possibly fuck up a slice so badly it can't be represented as a string. ;)
-enum CssPropertyChar {
-	ChrDash = b'-',
-	Chr0 =    b'0',
-	Chr1 =    b'1',
-	Chr2 =    b'2',
-	Chr3 =    b'3',
-	Chr4 =    b'4',
-	Chr5 =    b'5',
-	Chr6 =    b'6',
-	Chr7 =    b'7',
-	Chr8 =    b'8',
-	Chr9 =    b'9',
-	ChrP =    b'p',
-	ChrX =    b'x',
-}
-
-impl CssPropertyChar {
-	#[inline]
-	/// # From `u32` Digit.
-	const fn from_digit(num: u32) -> Self {
-		match num {
-			0 => Self::Chr0,
-			1 => Self::Chr1,
-			2 => Self::Chr2,
-			3 => Self::Chr3,
-			4 => Self::Chr4,
-			5 => Self::Chr5,
-			6 => Self::Chr6,
-			7 => Self::Chr7,
-			8 => Self::Chr8,
-			_ => Self::Chr9, // We know n % 10 can't ever be out of range.
-		}
-	}
-
-	#[expect(clippy::inline_always, reason = "For performance.")]
-	#[expect(unsafe_code, reason = "For transmute.")]
-	#[inline(always)]
-	#[must_use]
-	/// # As Str.
-	///
-	/// Transmute a slice of `CssPropertyChar` into a string slice.
-	pub(super) const fn as_str(src: &[Self]) -> &str {
-		// This check is overly-paranoid, but the compiler should
-		// optimize it out.
-		const {
-			assert!(
-				align_of::<&[Self]>() == align_of::<&[u8]>() &&
-				size_of::<&[Self]>() == size_of::<&[u8]>(),
-				"BUG: CssPropertyChar and u8 have different layouts?!",
-			);
-		}
-
-		// Safety: `CssPropertyChar` is represented by `u8` so shares the
-		// same size and alignment.
-		unsafe {
-			std::str::from_utf8_unchecked(
-				std::mem::transmute::<&[Self], &[u8]>(src)
-			)
-		}
-	}
-}
-
-
-
-#[derive(Debug, Clone, Copy)]
-/// # CSS Property Buffer.
-///
-/// This struct acts like a poor man's `itoa`, saving us the trouble of
-/// allocating new strings each and every time a CSS property update needs to
-/// be sent back to the browser.
-///
-/// Note that this assumes all values require a `px` suffix.
-struct CssProperty([CssPropertyChar; 13]);
-
-impl CssProperty {
-	/// # Default Buffer.
-	///
-	/// This is equivalent to "00000000000px".
-	const DEFAULT: Self = Self([
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::Chr0,
-		CssPropertyChar::Chr0, CssPropertyChar::Chr0, CssPropertyChar::ChrP,
-		CssPropertyChar::ChrX,
-	]);
-
-	/// # Format Value.
-	///
-	/// Stringify an `i32` pixel value into the buffer, returning a string
-	/// slice of the result.
-	const fn format(&mut self, num: i32) -> &str {
-		let neg = num.is_negative();
-		let mut num = num.unsigned_abs();
-		let mut len = 2; // The PX suffix is constant.
-
-		// Right to left, one digit at a time.
-		while 9 < num {
-			len += 1;
-			self.0[13 - len] = CssPropertyChar::from_digit(num % 10);
-			num /= 10;
-		}
-		len += 1;
-		self.0[13 - len] = CssPropertyChar::from_digit(num);
-
-		// Negative?
-		if neg {
-			len += 1;
-			self.0[13 - len] = CssPropertyChar::ChrDash;
-		}
-
-		// Split off the relevant part.
-		let (_, b) = self.0.split_at(13 - len);
-		CssPropertyChar::as_str(b)
-	}
-
-	#[inline]
-	/// # Write Style Property.
-	///
-	/// Update a given `--prop` pixel value.
-	fn write(el: &Element, key: &str, value: i32) {
-		if let Some(el) = el.dyn_ref::<HtmlElement>() {
-			let mut buf = Self::DEFAULT;
-			let _res = el.style().set_property(key, buf.format(value));
-		}
-	}
-}
-
-
-
-#[cfg(test)]
-mod tests {
-	use super::*;
-
-	#[test]
-	fn t_i32_len() {
-		// The `CSSProperty` struct assumes the longest possible i32 value
-		// is eleven bytes. Let's prove it!
-		assert_eq!(
-			i32::MIN.to_string().len(),
-			11,
-		);
-
-		// Now we're getting silly, but let's also prove that u32 tops out at
-		// ten.
-		assert_eq!(
-			u32::MAX.to_string().len(),
-			10,
-		);
-	}
-
-	#[test]
-	fn t_css_property() {
-		let mut buf = CssProperty::DEFAULT;
-		assert_eq!(buf.format(0), "0px");
-		assert_eq!(buf.format(10), "10px");
-		assert_eq!(buf.format(432), "432px");
-		assert_eq!(buf.format(50_000), "50000px");
-		assert_eq!(buf.format(i32::MIN), "-2147483648px");
-	}
 }

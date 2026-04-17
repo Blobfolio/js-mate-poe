@@ -45,14 +45,10 @@ impl MateFlags {
 	const CHANGED_SOUND: u16 =     0b0000_0100_0000_0000;
 
 	/// # Flag: X position changed.
-	const CHANGED_TRANS_X: u16 =   0b0000_1000_0000_0000;
+	const CHANGED_TRANSFORM: u16 = 0b0000_1000_0000_0000;
 
-	/// # Flag: Y position changed.
-	const CHANGED_TRANS_Y: u16 =   0b0001_0000_0000_0000;
-
-	/// # Transform-related changes.
-	const CHANGED_TRANSFORM: u16 =
-		Self::CHANGED_TRANS_X | Self::CHANGED_TRANS_Y;
+	/// # Flag: First animation frame.
+	const FIRST: u16 =             0b0001_0000_0000_0000;
 
 	/// # Edge-related changes.
 	const CHANGED_EDGES: u16 = Self::CHANGED_SIZE | Self::CHANGED_TRANSFORM;
@@ -60,7 +56,8 @@ impl MateFlags {
 	/// # All change-related settings.
 	const CHANGED: u16 =
 		Self::CHANGED_CLASS | Self::CHANGED_FRAME |
-		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM;
+		Self::CHANGED_SOUND | Self::CHANGED_TRANSFORM |
+		Self::FIRST;
 
 	/// # Scene Mask.
 	const SCENE_MASK: u16 =
@@ -94,8 +91,7 @@ impl MateFlags {
 	get!("Primary Mate", PRIMARY, primary);
 	get!("Class Changed", CHANGED_CLASS, class_changed);
 	get!("Frame Changed", CHANGED_FRAME, frame_changed);
-	get!("Transform (X) Changed", CHANGED_TRANS_X, transform_x_changed);
-	get!("Transform (Y) Changed", CHANGED_TRANS_Y, transform_y_changed);
+	get!("Transform (Position) Changed", CHANGED_TRANSFORM, transform_changed);
 
 	/// # Any Edge-related Changes?
 	///
@@ -110,14 +106,16 @@ impl MateFlags {
 		}
 	}
 
-	/// # Any Transform Changed?
-	pub(crate) const fn transform_changed(self) -> bool {
-		0 != self.0 & Self::CHANGED_TRANSFORM
-	}
-
 	/// # Anything Changed?
 	pub(crate) const fn changed(self) -> bool {
 		0 != self.0 & Self::CHANGED
+	}
+
+	/// # First?
+	///
+	/// Returns `true` if we just switched animations.
+	pub(crate) const fn first(self) -> bool {
+		Self::FIRST == self.0 & Self::FIRST
 	}
 }
 
@@ -131,10 +129,20 @@ impl MateFlags {
 	}
 
 	/// # Clear All Change-Related Flags.
-	pub(crate) const fn clear_changed(&mut self) { self.0 &= ! Self::CHANGED; }
+	pub(crate) const fn clear_changed(&mut self) {
+		let first = self.first();
+		self.0 &= ! Self::CHANGED;
+
+		// If we cleared the first flag, we need to re-set the class-change
+		// flag for the next tick.
+		if first { self.mark_class_changed(); }
+	}
 
 	/// # Mark Class Changed.
 	pub(crate) const fn mark_class_changed(&mut self) { self.0 |= Self::CHANGED_CLASS; }
+
+	/// # Mark First.
+	pub(crate) const fn mark_first(&mut self) { self.0 |= Self::FIRST | Self::CHANGED_CLASS; }
 
 	/// # Mark Frame Changed.
 	pub(crate) const fn mark_frame_changed(&mut self) { self.0 |= Self::CHANGED_FRAME; }
@@ -145,11 +153,8 @@ impl MateFlags {
 	/// # Mark Sound Changed.
 	pub(crate) const fn mark_sound_changed(&mut self) { self.0 |= Self::CHANGED_SOUND; }
 
-	/// # Mark Transform (X) Changed.
-	pub(crate) const fn mark_transform_x_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_X; }
-
-	/// # Mark Transform (Y) Changed.
-	pub(crate) const fn mark_transform_y_changed(&mut self) { self.0 |= Self::CHANGED_TRANS_Y; }
+	/// # Mark Transform (Position) Changed.
+	pub(crate) const fn mark_transform_changed(&mut self) { self.0 |= Self::CHANGED_TRANSFORM; }
 
 	/// # Mark All Changed.
 	pub(crate) const fn mark_changed(&mut self) { self.0 |= Self::CHANGED; }
@@ -181,11 +186,13 @@ impl MateFlags {
 	}
 
 	/// # Set No Focus.
-	pub(crate) const fn set_no_focus(&mut self, v: bool) {
-		if self.no_focus() != v {
-			if v { self.0 |= Self::NO_FOCUS; }
-			else { self.0 &= ! Self::NO_FOCUS; }
-			self.mark_class_changed();
+	///
+	/// Returns `true` if changed.
+	pub(crate) const fn set_no_focus(&mut self, v: bool) -> bool {
+		if self.no_focus() == v { false }
+		else {
+			self.0 ^= Self::NO_FOCUS;
+			true
 		}
 	}
 

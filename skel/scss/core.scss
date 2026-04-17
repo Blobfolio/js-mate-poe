@@ -13,6 +13,9 @@
 }
 
 #p, #i {
+	// TODO: declare @property if/when shadow DOM supports it.
+	--pos: initial;
+
 	display: block;
 	margin: 0;
 	padding: 0;
@@ -20,8 +23,6 @@
 
 // The wrapper/window.
 #p {
-	&.smooth { --smooth: 15ms; }
-
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -31,30 +32,31 @@
 	cursor: grab;
 	z-index: 2147483647; // i32::MAX
 	overflow: clip;
+	user-select: none;
 
 	opacity: 1;
 	transition:
 		opacity 0.5s ease,
-		transform var(--smooth, 0s) linear,
 		content-visibility 0.5s allow-discrete;
 	transform: $pos;
 
 	content-visibility: auto;
+
+	// Subtle X/Y translation smoothing.
+	&.smooth {
+		transition:
+			opacity 0.5s ease,
+			transform 15ms linear,
+			content-visibility 0.5s allow-discrete;
+	}
 }
 
 // The image.
 #i {
 	width: $width;
 	height: $tile_size;
-	transform: translateX(var(--c, 0));
+	transform: translateX(var(--c, 0px));
 }
-
-// Disable mouse clicks for disabled sprites, child sprites, and the image
-// element.
-#p.child,
-#p.no-focus,
-#p.off,
-#i { pointer-events: none; }
 
 // This property is iffy, but we're going to be pushing shit all over the
 // screen, so it's probably worth it.
@@ -70,6 +72,7 @@
 #p.off {
 	opacity: 0;
 	content-visibility: hidden;
+	pointer-events: none;
 }
 
 // Reverse the image across one or both planes.

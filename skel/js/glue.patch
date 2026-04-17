@@ -1,9 +1,9 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index bad0e21..5159a52 100644
+index c33ad44..5166024 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -257,25 +257,6 @@ if (Symbol.dispose) Poe.prototype[Symbol.dispose] = Poe.prototype.free;
- const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
+@@ -536,23 +536,6 @@ function __wbg_finalize_init(instance, module) {
+ }
  
  async function __wbg_load(module, imports) {
 -    if (typeof Response === 'function' && module instanceof Response) {
@@ -11,14 +11,12 @@ index bad0e21..5159a52 100644
 -            try {
 -                return await WebAssembly.instantiateStreaming(module, imports);
 -            } catch (e) {
--                const validResponse = module.ok && EXPECTED_RESPONSE_TYPES.has(module.type);
+-                const validResponse = module.ok && expectedResponseType(module.type);
 -
 -                if (validResponse && module.headers.get('Content-Type') !== 'application/wasm') {
 -                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
 -
--                } else {
--                    throw e;
--                }
+-                } else { throw e; }
 -            }
 -        }
 -
@@ -28,20 +26,45 @@ index bad0e21..5159a52 100644
          const instance = await WebAssembly.instantiate(module, imports);
  
          if (instance instanceof WebAssembly.Instance) {
-@@ -283,7 +264,6 @@ async function __wbg_load(module, imports) {
+@@ -560,58 +543,16 @@ async function __wbg_load(module, imports) {
          } else {
              return instance;
          }
 -    }
+-
+-    function expectedResponseType(type) {
+-        switch (type) {
+-            case 'basic': case 'cors': case 'default': return true;
+-        }
+-        return false;
+-    }
+-}
+-
+-function initSync(module) {
+-    if (wasm !== undefined) return wasm;
+-
+-
+-    if (module !== undefined) {
+-        if (Object.getPrototypeOf(module) === Object.prototype) {
+-            ({module} = module)
+-        } else {
+-            console.warn('using deprecated parameters for `initSync()`; pass a single object instead')
+-        }
+-    }
+-
+-    const imports = __wbg_get_imports();
+-    if (!(module instanceof WebAssembly.Module)) {
+-        module = new WebAssembly.Module(module);
+-    }
+-    const instance = new WebAssembly.Instance(module, imports);
+-    return __wbg_finalize_init(instance, module);
  }
  
- function __wbg_get_imports() {
-@@ -599,22 +579,8 @@ function initSync(module) {
  async function __wbg_init(module_or_path) {
      if (wasm !== undefined) return wasm;
  
 -
--    if (typeof module_or_path !== 'undefined') {
+-    if (module_or_path !== undefined) {
 -        if (Object.getPrototypeOf(module_or_path) === Object.prototype) {
 -            ({module_or_path} = module_or_path)
 -        } else {
@@ -59,3 +82,7 @@ index bad0e21..5159a52 100644
      const { instance, module } = await __wbg_load(await module_or_path, imports);
  
      return __wbg_finalize_init(instance, module);
+ }
+ 
+-export { initSync, __wbg_init as default };
++export { __wbg_init as default };

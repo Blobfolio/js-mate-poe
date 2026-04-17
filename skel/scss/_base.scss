@@ -15,7 +15,7 @@ $max_unused_frame: 163;
 $width: 5680px;
 
 // Position transform.
-$pos: translate3d(var(--x, 0), var(--y, 0), 0);
+$pos: translate3d(var(--pos));
 
 // Masks.
 $m024: path("M0 40V0h40v33H29v7z");
