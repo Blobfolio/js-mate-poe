@@ -147,6 +147,7 @@ impl Direction {
 mod tests {
 	use super::*;
 	use wasm_bindgen_test::*;
+	use std::assert_matches;
 
 	macro_rules! test_x {
 		($var:ident) => (
@@ -186,9 +187,9 @@ mod tests {
 		// No direction.
 		let pos = Position::new(0, 0);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::None));
-		assert!(matches!(dir.invert_x(), Direction::None));
-		assert!(matches!(dir.invert_y(), Direction::None));
+		assert_matches!(dir, Direction::None);
+		assert_matches!(dir.invert_x(), Direction::None);
+		assert_matches!(dir.invert_y(), Direction::None);
 		test_x!(dir);
 		test_y!(dir);
 
@@ -202,72 +203,72 @@ mod tests {
 		// Left.
 		let pos = Position::new(-10, 0);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::Left));
-		assert!(matches!(dir.invert_x(), Direction::Right));
-		assert!(matches!(dir.invert_y(), Direction::Left));
+		assert_matches!(dir, Direction::Left);
+		assert_matches!(dir.invert_x(), Direction::Right);
+		assert_matches!(dir.invert_y(), Direction::Left);
 		test_x!(dir, true, false);
 		test_y!(dir);
 
 		// Left/Up.
 		let pos = Position::new(-10, -10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::LeftUp));
-		assert!(matches!(dir.invert_x(), Direction::RightUp));
-		assert!(matches!(dir.invert_y(), Direction::LeftDown));
+		assert_matches!(dir, Direction::LeftUp);
+		assert_matches!(dir.invert_x(), Direction::RightUp);
+		assert_matches!(dir.invert_y(), Direction::LeftDown);
 		test_x!(dir, true, false);
 		test_y!(dir, true, false);
 
 		// Left/Down.
 		let pos = Position::new(-10, 10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::LeftDown));
-		assert!(matches!(dir.invert_x(), Direction::RightDown));
-		assert!(matches!(dir.invert_y(), Direction::LeftUp));
+		assert_matches!(dir, Direction::LeftDown);
+		assert_matches!(dir.invert_x(), Direction::RightDown);
+		assert_matches!(dir.invert_y(), Direction::LeftUp);
 		test_x!(dir, true, false);
 		test_y!(dir, false, true);
 
 		// Right.
 		let pos = Position::new(10, 0);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::Right));
-		assert!(matches!(dir.invert_x(), Direction::Left));
-		assert!(matches!(dir.invert_y(), Direction::Right));
+		assert_matches!(dir, Direction::Right);
+		assert_matches!(dir.invert_x(), Direction::Left);
+		assert_matches!(dir.invert_y(), Direction::Right);
 		test_x!(dir, false, true);
 		test_y!(dir);
 
 		// Right/Up.
 		let pos = Position::new(10, -10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::RightUp));
-		assert!(matches!(dir.invert_x(), Direction::LeftUp));
-		assert!(matches!(dir.invert_y(), Direction::RightDown));
+		assert_matches!(dir, Direction::RightUp);
+		assert_matches!(dir.invert_x(), Direction::LeftUp);
+		assert_matches!(dir.invert_y(), Direction::RightDown);
 		test_x!(dir, false, true);
 		test_y!(dir, true, false);
 
 		// Right/Down.
 		let pos = Position::new(10, 10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::RightDown));
-		assert!(matches!(dir.invert_x(), Direction::LeftDown));
-		assert!(matches!(dir.invert_y(), Direction::RightUp));
+		assert_matches!(dir, Direction::RightDown);
+		assert_matches!(dir.invert_x(), Direction::LeftDown);
+		assert_matches!(dir.invert_y(), Direction::RightUp);
 		test_x!(dir, false, true);
 		test_y!(dir, false, true);
 
 		// Up.
 		let pos = Position::new(0, -10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::Up));
-		assert!(matches!(dir.invert_x(), Direction::Up));
-		assert!(matches!(dir.invert_y(), Direction::Down));
+		assert_matches!(dir, Direction::Up);
+		assert_matches!(dir.invert_x(), Direction::Up);
+		assert_matches!(dir.invert_y(), Direction::Down);
 		test_x!(dir);
 		test_y!(dir, true, false);
 
 		// Down.
 		let pos = Position::new(0, 10);
 		let dir = pos.direction();
-		assert!(matches!(dir, Direction::Down));
-		assert!(matches!(dir.invert_x(), Direction::Down));
-		assert!(matches!(dir.invert_y(), Direction::Up));
+		assert_matches!(dir, Direction::Down);
+		assert_matches!(dir.invert_x(), Direction::Down);
+		assert_matches!(dir.invert_y(), Direction::Up);
 		test_x!(dir);
 		test_y!(dir, false, true);
 	}
