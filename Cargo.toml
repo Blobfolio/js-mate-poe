@@ -1,6 +1,6 @@
 [package]
 name = "rs_mate_poe"
-version = "1.11.4"
+version = "1.11.5"
 authors = ["Josh Stoik <josh@blobfolio.com>"]
 edition = "2024"
 rust-version = "1.96"
