@@ -20,7 +20,7 @@ crate-type = ["cdylib"]
 guff_css = "=0.11.5"
 
 [build-dependencies.imagesize]
-version = "=0.14.0"
+version = "=0.15.0"
 default-features = false
 features = [ "png" ]
 
