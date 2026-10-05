@@ -116,6 +116,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 		"{{ dist_dir }}/js-mate-poe_firefox/static/options" \
 		"{{ dist_dir }}/js-mate-poe_firefox/static/sound" \
 		"{{ dist_dir }}/js-mate-poe_firefox/js/generated" \
+		"{{ dist_dir }}/js-mate-poe_firefox/rust/.cargo" \
 		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img" \
 		"{{ dist_dir }}/js-mate-poe_firefox/rust/skel/js"
 
@@ -150,6 +151,11 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	cp "{{ skel_dir }}/img/poe.txt" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel/img"
 	cp -aR "{{ skel_dir }}/scss" "{{ dist_dir }}/js-mate-poe_firefox/rust/skel"
 	cp -aR "{{ justfile_directory() }}/src" "{{ dist_dir }}/js-mate-poe_firefox/rust"
+
+	# Copy vendored third-party sources too.
+	cargo vendor --locked
+	mv vendor "{{ dist_dir }}/js-mate-poe_firefox/rust"
+	cp "{{ skel_dir }}/firefox/config.toml" "{{ dist_dir }}/js-mate-poe_firefox/rust/.cargo"
 
 	# Fix the permissions and ownership.
 	just _fix-chown "{{ dist_dir }}/js-mate-poe_firefox"
