@@ -22,6 +22,8 @@ cd rust
 
 # Basic cargo build pass.
 cargo build \
+	--offline \
+	--locked \
 	--release \
 	--features firefox \
 	--target wasm32-unknown-unknown
