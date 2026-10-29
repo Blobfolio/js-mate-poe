@@ -27,6 +27,7 @@ demo_asset_dir := demo_dir + "/assets"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
+export RUSTFLAGS := "-Dwarnings"
 export CARGO_BUILD_TARGET := "wasm32-unknown-unknown"
 export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
@@ -193,18 +194,18 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	clear
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: none (default)"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--target-dir "{{ cargo_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: director"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--features director \
 		--target-dir "{{ cargo_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: firefox"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--features firefox \
 		--target-dir "{{ cargo_dir }}"
