@@ -27,6 +27,7 @@ demo_asset_dir := demo_dir + "/assets"
 
 cargo_release_dir := cargo_dir + "/wasm32-unknown-unknown/release"
 
+export RUSTFLAGS := "-Dwarnings"
 export CARGO_BUILD_TARGET := "wasm32-unknown-unknown"
 export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 
@@ -38,6 +39,7 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	just _require-app cargo
 	just _require-app esbuild
 	just _require-app wasm-bindgen
+	just _require-app wasm-opt
 	just _require-app xxd
 
 	[ -z "$(command -v fyi)" ] || fyi task "Building JS Mate Poe…"
@@ -62,6 +64,12 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 		--encode-into always \
 		"{{ cargo_release_dir }}/{{ pkg_id }}.wasm"
 
+	# Wasm-Opt.
+	wasm-opt \
+		"{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" \
+		-O3 \
+		-o "{{ cargo_release_dir }}/{{ pkg_id }}_opt.wasm"
+
 	# Remove the unused "fetch" stuff from the glue to save space (since it
 	# isn't pruned automatically).
 	cd "{{ cargo_release_dir }}" && patch -p1 -i "{{ skel_dir }}/js/glue.patch"
@@ -72,11 +80,11 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	# Generate a JS module containing the wasm as a byte array so we don't have
 	# to async fetch it at runtime.
 	echo "export const wasmArray = new Uint8Array([" > "{{ gen_dir }}/wasm.mjs"
-	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
+	xxd -i "{{ cargo_release_dir }}/{{ pkg_id }}_opt.wasm" | grep '^  0x' >> "{{ gen_dir }}/wasm.mjs"
 	echo "]);" >> "{{ gen_dir }}/wasm.mjs"
 
 	# Cleanup: remove wasm.
-	rm "{{ cargo_release_dir }}/{{ pkg_id }}_bg.wasm"
+	rm "{{ cargo_release_dir }}/{{ pkg_id }}"*".wasm"
 
 	# Transpile the JS to a temporary location.
 	esbuild \
@@ -193,18 +201,18 @@ export CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER := "wasm-bindgen-test-runner"
 	clear
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: none (default)"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--target-dir "{{ cargo_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: director"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--features director \
 		--target-dir "{{ cargo_dir }}"
 
 	[ -z "$(command -v fyi)" ] || fyi task "Features: firefox"
-	RUSTFLAGS="-D warnings" cargo clippy \
+	cargo clippy \
 		--release \
 		--features firefox \
 		--target-dir "{{ cargo_dir }}"

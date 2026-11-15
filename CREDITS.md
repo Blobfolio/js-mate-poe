@@ -1,15 +1,15 @@
 # Project Dependencies
     Package:   rs_mate_poe
-    Version:   1.11.8
+    Version:   1.11.9
     Target:    wasm32-unknown-unknown
-    Generated: 2026-10-05 06:50:08 UTC
+    Generated: 2026-11-15 06:32:51 UTC
 
 | Package | Version | Author(s) | License |
 | ---- | ---- | ---- | ---- |
 | [ahash](https://github.com/tkaitchuck/ahash) ⚒️ | 0.8.12 | [Tom Kaitchuck](mailto:tom.kaitchuck@gmail.com) | MIT OR Apache-2.0 |
 | [allocator-api2](https://github.com/zakarumych/allocator-api2) ⚒️ | 0.2.21 | [Zakarum](mailto:zaq.dev@icloud.com) | MIT OR Apache-2.0 |
 | [bitflags](https://github.com/bitflags/bitflags) ⚒️ | 2.13.2 | The Rust Project Developers | MIT OR Apache-2.0 |
-| [bumpalo](https://github.com/fitzgen/bumpalo) | 3.20.3 | [Nick Fitzgerald](mailto:fitzgen@gmail.com) | MIT OR Apache-2.0 |
+| [bumpalo](https://github.com/fitzgen/bumpalo) | 3.20.4 | [Nick Fitzgerald](mailto:fitzgen@gmail.com) | MIT OR Apache-2.0 |
 | [cfg-if](https://github.com/rust-lang/cfg-if) | 1.0.5 | [Alex Crichton](mailto:alex@alexcrichton.com) | MIT OR Apache-2.0 |
 | [codemap](https://github.com/kevinmehall/codemap) ⚒️ | 0.1.3 | [Kevin Mehall](mailto:km@kevinmehall.net) | MIT OR Apache-2.0 |
 | [const-str](https://github.com/Nugine/const-str) ⚒️ | 1.1.0 | [Nugine](mailto:nugine@foxmail.com) | MIT |
@@ -20,8 +20,8 @@
 | [data-encoding](https://github.com/ia0/data-encoding) ⚒️ | 2.11.1 |  | MIT |
 | [dtoa](https://github.com/dtolnay/dtoa) ⚒️ | 1.0.11 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [dtoa-short](https://github.com/upsuper/dtoa-short) ⚒️ | 0.3.5 | [Xidorn Quan](mailto:me@upsuper.org) | MPL-2.0 |
-| [either](https://github.com/rayon-rs/either) ⚒️ | 1.18.0 |  | MIT OR Apache-2.0 |
-| [equivalent](https://github.com/indexmap-rs/equivalent) ⚒️ | 1.0.2 |  | Apache-2.0 OR MIT |
+| [either](https://github.com/rayon-rs/either) ⚒️ | 1.19.0 |  | MIT OR Apache-2.0 |
+| [equivalent](https://github.com/indexmap-rs/equivalent) ⚒️ | 1.0.3 |  | Apache-2.0 OR MIT |
 | [fastrand](https://github.com/smol-rs/fastrand) ⚒️ | 2.5.0 | [Stjepan Glavina](mailto:stjepang@gmail.com) | Apache-2.0 OR MIT |
 | [futures-core](https://github.com/rust-lang/futures-rs) | 0.3.34 |  | MIT OR Apache-2.0 |
 | [futures-task](https://github.com/rust-lang/futures-rs) | 0.3.34 |  | MIT OR Apache-2.0 |
@@ -36,14 +36,14 @@
 | [**imagesize**](https://github.com/Roughsketch/imagesize) ⚒️ | 0.15.0 | [Maid Dog](mailto:maiddogsrl@gmail.com) | MIT |
 | [indexmap](https://github.com/indexmap-rs/indexmap) ⚒️ | 2.14.2 |  | Apache-2.0 OR MIT |
 | [itertools](https://github.com/rust-itertools/itertools) ⚒️ | 0.10.5 | bluss | MIT OR Apache-2.0 |
-| [itoa](https://github.com/dtolnay/itoa) ⚒️ | 1.0.18 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
-| [**js-sys**](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys) | 0.3.106 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [itoa](https://github.com/dtolnay/itoa) ⚒️ | 1.0.19 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
+| [**js-sys**](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys) | 0.3.107 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
 | [lasso](https://github.com/Kixiron/lasso) ⚒️ | 0.7.3 | [Chase Wilson](mailto:contact@chasewilson.dev) | MIT OR Apache-2.0 |
 | [lazy_static](https://github.com/rust-lang-nursery/lazy-static.rs) ⚒️ | 1.5.1 | [Marvin Löbel](mailto:loebel.marvin@gmail.com) | MIT OR Apache-2.0 |
 | [lightningcss](https://github.com/parcel-bundler/lightningcss) ⚒️ | 1.0.0-alpha.72 | [Devon Govett](mailto:devongovett@gmail.com) | MPL-2.0 |
 | [lightningcss-derive](https://github.com/parcel-bundler/lightningcss) ⚒️ | 1.0.0-alpha.43 | [Devon Govett](mailto:devongovett@gmail.com) | MPL-2.0 |
-| [log](https://github.com/rust-lang/log) ⚒️ | 0.4.34 | The Rust Project Developers | MIT OR Apache-2.0 |
-| [once_cell](https://github.com/matklad/once_cell) | 1.21.4 | [Aleksey Kladov](mailto:aleksey.kladov@gmail.com) | MIT OR Apache-2.0 |
+| [log](https://github.com/rust-lang/log) ⚒️ | 0.4.35 | The Rust Project Developers | MIT OR Apache-2.0 |
+| [once_cell](https://github.com/matklad/once_cell) ⚒️ | 1.21.4 | [Aleksey Kladov](mailto:aleksey.kladov@gmail.com) | MIT OR Apache-2.0 |
 | [parcel_selectors](https://github.com/parcel-bundler/lightningcss) ⚒️ | 0.28.3 | The Servo Project Developers | MPL-2.0 |
 | [pastey](https://github.com/as1100k/pastey) ⚒️ | 0.1.1 | [Aditya Kumar](mailto:git@adityais.dev) and [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [pathdiff](https://github.com/Manishearth/pathdiff) ⚒️ | 0.2.3 | [Manish Goregaokar](mailto:manishsmail@gmail.com) | MIT OR Apache-2.0 |
@@ -67,20 +67,20 @@
 | [serde_core](https://github.com/serde-rs/serde) ⚒️ | 1.0.229 | [Erick Tryzelaar](mailto:erick.tryzelaar@gmail.com) and [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [siphasher](https://github.com/jedisct1/rust-siphash) ⚒️ | 1.0.4 | [Frank Denis](mailto:github@pureftpd.org) | MIT OR Apache-2.0 |
 | [slab](https://github.com/tokio-rs/slab) | 0.4.12 | [Carl Lerche](mailto:me@carllerche.com) | MIT |
-| [smallvec](https://github.com/servo/rust-smallvec) ⚒️ | 1.16.2 | The Servo Project Developers | MIT OR Apache-2.0 |
+| [smallvec](https://github.com/servo/rust-smallvec) ⚒️ | 1.16.5 | The Servo Project Developers | MIT OR Apache-2.0 |
 | [syn](https://github.com/dtolnay/syn) ⚒️ | 1.0.109 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [syn](https://github.com/dtolnay/syn) ⚒️ | 2.0.119 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
-| [syn](https://github.com/dtolnay/syn) | 3.0.6 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
+| [syn](https://github.com/dtolnay/syn) | 3.0.10 | [David Tolnay](mailto:dtolnay@gmail.com) | MIT OR Apache-2.0 |
 | [trimothy](https://github.com/Blobfolio/trimothy) ⚒️ | 0.10.0 | [Josh Stoik](mailto:josh@blobfolio.com) | WTFPL |
-| [unicode-ident](https://github.com/dtolnay/unicode-ident) | 1.0.26 | [David Tolnay](mailto:dtolnay@gmail.com) | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| [unicode-ident](https://github.com/dtolnay/unicode-ident) | 1.0.27 | [David Tolnay](mailto:dtolnay@gmail.com) | (MIT OR Apache-2.0) AND Unicode-3.0 |
 | [unicode-segmentation](https://github.com/unicode-rs/unicode-segmentation) ⚒️ | 1.13.3 | [kwantam](mailto:kwantam@gmail.com) and [Manish Goregaokar](mailto:manishsmail@gmail.com) | MIT OR Apache-2.0 |
 | [version_check](https://github.com/SergioBenitez/version_check) ⚒️ | 0.9.5 | [Sergio Benitez](mailto:sb@sergio.bz) | MIT OR Apache-2.0 |
-| [**wasm-bindgen**](https://github.com/wasm-bindgen/wasm-bindgen) | 0.2.129 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
-| [wasm-bindgen-macro](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro) | 0.2.129 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
-| [wasm-bindgen-macro-support](https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support) | 0.2.129 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
-| [wasm-bindgen-shared](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared) | 0.2.129 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
-| [**web-sys**](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys) | 0.3.106 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
-| [zerocopy](https://github.com/google/zerocopy) ⚒️ | 0.8.59 |  | BSD-2-Clause OR Apache-2.0 OR MIT |
+| [**wasm-bindgen**](https://github.com/wasm-bindgen/wasm-bindgen) | 0.2.130 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [wasm-bindgen-macro](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro) | 0.2.130 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [wasm-bindgen-macro-support](https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support) | 0.2.130 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [wasm-bindgen-shared](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared) | 0.2.130 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [**web-sys**](https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys) | 0.3.107 | The wasm-bindgen Developers | MIT OR Apache-2.0 |
+| [zerocopy](https://github.com/google/zerocopy) ⚒️ | 0.8.63 |  | BSD-2-Clause OR Apache-2.0 OR MIT |
 
 ### Legend
 

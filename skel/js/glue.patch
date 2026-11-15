@@ -1,8 +1,8 @@
 diff --git a/rs_mate_poe.js b/rs_mate_poe.js
-index b6bec26..e54a6a6 100644
+index da4411e..d3a54e1 100644
 --- a/rs_mate_poe.js
 +++ b/rs_mate_poe.js
-@@ -535,27 +535,6 @@ function __wbg_finalize_init(instance, module) {
+@@ -517,27 +517,6 @@ function __wbg_finalize_init(instance, module) {
  }
  
  async function __wbg_load(module, imports) {
@@ -30,7 +30,7 @@ index b6bec26..e54a6a6 100644
          const instance = await WebAssembly.instantiate(module, imports);
  
          if (instance instanceof WebAssembly.Instance) {
-@@ -563,58 +542,15 @@ async function __wbg_load(module, imports) {
+@@ -545,34 +524,6 @@ async function __wbg_load(module, imports) {
          } else {
              return instance;
          }
@@ -64,9 +64,11 @@ index b6bec26..e54a6a6 100644
 -    return __wbg_finalize_init(instance, module);
  }
  
- async function __wbg_init(module_or_path) {
-     if (wasm !== undefined) return wasm;
+ let __wbg_init_promise;
+@@ -586,25 +537,10 @@ async function __wbg_init(module_or_path) {
+ }
  
+ async function __wbg_init_once(module_or_path) {
 -
 -    if (module_or_path !== undefined) {
 -        if (Object.getPrototypeOf(module_or_path) === Object.prototype) {

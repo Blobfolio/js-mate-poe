@@ -1,11 +1,11 @@
 # Stage One.
-FROM rust:1.99-trixie AS stage1
+FROM rust:1.100-trixie AS stage1
 RUN set -eux; \
 	mkdir /tmp/cargo && \
-	cargo install --root /tmp/cargo --locked --version 0.2.129 wasm-bindgen-cli
+	cargo install --root /tmp/cargo --locked --version 0.2.130 wasm-bindgen-cli
 
 # Stage Two.
-FROM rust:1.99-trixie
+FROM rust:1.100-trixie
 
 LABEL Name="JS Mate Poe Firefox Extension Build Environment"
 
