@@ -15,6 +15,8 @@ env:
 
 jobs:
   all:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
     name: All
 
     strategy:
@@ -71,3 +73,10 @@ jobs:
         cargo test --release --no-default-features
         cargo test --release --no-default-features --features director
         cargo test --release --no-default-features --features firefox
+
+    - name: Build (Vendored)
+      run: |
+        cargo clean
+        mkdir .cargo
+        cargo vendor --locked > .cargo/config.toml
+        cargo build --locked --offline --target ${{ matrix.target }}
